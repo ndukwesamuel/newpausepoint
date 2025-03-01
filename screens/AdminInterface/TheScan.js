@@ -13,11 +13,20 @@ import {
 } from "@react-navigation/native";
 import { formatDateandTime } from "../../utils/DateTime";
 import { CenterReuseModals } from "../../components/shared/ReuseModals";
+import { useDispatch, useSelector } from "react-redux";
+import { Admin_Get_All_Clan_Memeber_Fun } from "../../Redux/UserSide/ClanSlice";
 
 export default function TheScan() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [maindata, setMaindata] = useState(null);
+  const dispatch = useDispatch();
+  const {
+    get_user_clan_data,
+    get_all_clan_adminIN_data,
+    get_Single_clan_data,
+    admin_get_all_clan_memeber_data,
+  } = useSelector((state) => state?.ClanSlice);
 
   useEffect(() => {
     const getBarCodeScannerPermissions = async () => {
@@ -26,6 +35,7 @@ export default function TheScan() {
     };
 
     getBarCodeScannerPermissions();
+    dispatch(Admin_Get_All_Clan_Memeber_Fun());
   }, []);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -90,11 +100,13 @@ export default function TheScan() {
                 >
                   <TouchableOpacity
                     style={{
-                      backgroundColor: "white",
-                      padding: 20,
-                      borderRadius: 10,
-                      elevation: 5,
-                      width: "80%",
+                      // backgroundColor: "white",
+                      // padding: 20,
+                      // borderRadius: 10,
+                      // elevation: 5,
+                      // width: "80%",
+                      justifyContent: "flex-end",
+                      alignItems: "flex-end",
                     }}
                     onPress={() => {
                       setModalVisible(false);
@@ -123,13 +135,32 @@ const styles = StyleSheet.create({
 
 const COnveter = ({ data }) => {
   const navigation = useNavigation();
+  const {
+    get_user_clan_data,
+    get_all_clan_adminIN_data,
+    get_Single_clan_data,
+    admin_get_all_clan_memeber_data,
+  } = useSelector((state) => state?.ClanSlice);
 
   // const itemdata = JSON.parse(data);
 
   let itemdata;
 
+  let usercode = data;
+  const findmemberwithcode = admin_get_all_clan_memeber_data?.data?.find(
+    (item) => item?.memberCode === usercode
+  );
+
+  console.log({
+    jaja: usercode,
+  });
+
+  console.log({
+    iiii: findmemberwithcode,
+  });
+
   try {
-    itemdata = JSON.parse(data);
+    itemdata = {}; // JSON.parse(data);
   } catch (error) {
     console.error("JSON Parse error:", error);
     // You can customize the error message as needed
@@ -141,9 +172,6 @@ const COnveter = ({ data }) => {
   });
 
   return (
-    // <View>
-    //   <Text>Sam</Text>
-    // </View>
     <View>
       <View style={{ marginBottom: 10 }}>
         <Text
@@ -174,7 +202,7 @@ const COnveter = ({ data }) => {
               fontWeight: "600",
             }}
           >
-            {itemdata?.user?.name}
+            {findmemberwithcode?.user?.name}
           </Text>
         </View>
 
@@ -196,7 +224,7 @@ const COnveter = ({ data }) => {
               fontWeight: "600",
             }}
           >
-            {itemdata?.user?.email}
+            {findmemberwithcode?.user?.email}
           </Text>
         </View>
 
@@ -208,7 +236,7 @@ const COnveter = ({ data }) => {
               fontWeight: "600",
             }}
           >
-            phone Number:
+            Estate Status:
           </Text>
 
           <Text
@@ -218,7 +246,7 @@ const COnveter = ({ data }) => {
               fontWeight: "600",
             }}
           >
-            {itemdata?.phoneNumber}
+            {findmemberwithcode?.status}
           </Text>
         </View>
       </View>
@@ -234,7 +262,7 @@ const COnveter = ({ data }) => {
           borderRadius: 9,
         }}
         onPress={() =>
-          navigation.navigate("adminUserDetails", { item: itemdata })
+          navigation.navigate("adminUserDetails", { item: findmemberwithcode })
         }
       >
         <Text>Verify</Text>

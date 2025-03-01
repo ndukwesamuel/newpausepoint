@@ -68,6 +68,10 @@ export const Admin_Get_All_Clan_Memeber_Fun = createAsyncThunk(
 
       return response.data;
     } catch (error) {
+      console.log({
+        opo: error?.response?.data,
+      });
+
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
     }

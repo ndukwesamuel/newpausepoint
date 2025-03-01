@@ -330,7 +330,7 @@ export default function UserDetails({ navigation }) {
               paddingBottom: 10,
             }}
           >
-            <SemiBoldFontText data="User Info" textstyle={{ fontSize: 18 }} />
+            <SemiBoldFontText data="User Info " textstyle={{ fontSize: 18 }} />
           </View>
 
           {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
