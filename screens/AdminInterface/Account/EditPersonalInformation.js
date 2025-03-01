@@ -44,19 +44,19 @@ const EditPersonalInformation = () => {
     user_isSuccess,
     user_isLoading,
     user_message,
-  } = useSelector((state) => state.AuthSlice);
+  } = useSelector((state) => state?.AuthSlice);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+    let result = await ImagePicker?.launchImageLibraryAsync({
+      mediaTypes: ImagePicker?.MediaTypeOptions?.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+    if (!result?.canceled) {
+      setProfileImage(result?.assets[0]?.uri);
     }
   };
 
@@ -69,20 +69,20 @@ const EditPersonalInformation = () => {
     // Handle the saving of user data here (e.g., make API calls).
     const formData = new FormData();
 
-    formData.append("name", name);
+    formData?.append("name", name);
     // formData.append("photo", description);
-    formData.append("phoneNumber", phone);
-    formData.append("street", street);
-    formData.append("city", city);
-    formData.append("state", "Lagos");
+    formData?.append("phoneNumber", phone);
+    formData?.append("street", street);
+    formData?.append("city", city);
+    formData?.append("state", "Lagos");
     if (profileImage) {
       const uri = profileImage;
       const type = "image/jpeg"; // Adjust the type based on the file type
       const name = "photo.jpg"; // Adjust the name as needed
-      formData.append("photo", { uri, type, name });
+      formData?.append("photo", { uri, type, name });
     }
 
-    Update_Mutation.mutate(formData);
+    Update_Mutation?.mutate(formData);
   };
 
   const Update_Mutation = useMutation(
@@ -116,11 +116,11 @@ const EditPersonalInformation = () => {
     }
   );
   return (
-
-
-      <View style={{
-        paddingBottom:30,
-      }}>
+    <View
+      style={{
+        paddingBottom: 30,
+      }}
+    >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <TouchableOpacity
           onPress={pickImage}
@@ -206,13 +206,11 @@ const EditPersonalInformation = () => {
             }}
             data="Submit"
             onPress={handleSave}
-            isLoading={Update_Mutation.isLoading}
+            isLoading={Update_Mutation?.isLoading}
           />
         </View>
-
-        </ScrollView>
-      </View>
-   
+      </ScrollView>
+    </View>
   );
 };
 

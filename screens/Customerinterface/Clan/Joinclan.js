@@ -45,9 +45,16 @@ const Joinclan = () => {
   const dispatch = useDispatch();
   const [inputValue, setInputValue] = useState("");
 
-  const filteredData = get_all_clan_data?.data?.filter((clanitem) =>
-    clanitem.name.toLowerCase().includes(inputValue.toLowerCase())
-  );
+  // const filteredData = get_all_clan_data?.data?.filter((clanitem) =>
+  //   clanitem.name.toLowerCase().includes(inputValue.toLowerCase())
+  // );
+
+  const filteredData =
+    inputValue.trim().length > 0
+      ? get_all_clan_data?.data?.filter((clanitem) =>
+          clanitem.name.toLowerCase().includes(inputValue.toLowerCase())
+        )
+      : [];
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalVisibility, setModalVisibility] = useState({});
@@ -184,6 +191,13 @@ const Joinclan = () => {
         <FlatList
           data={filteredData}
           keyExtractor={(item) => item?._id}
+          ListEmptyComponent={() =>
+            inputValue.trim().length > 0 ? (
+              <Text style={{ textAlign: "center", marginTop: 20 }}>
+                No clans found
+              </Text>
+            ) : null
+          }
           renderItem={({ item }) => (
             <View
               style={{

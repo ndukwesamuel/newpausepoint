@@ -1,6 +1,12 @@
 import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Onboading from "./components/Onboard/Onboading ";
 import AppNavigation, { RootStackParamList } from "./navigation/AppNavigation";
 import { useFonts } from "expo-font";
@@ -39,6 +45,8 @@ import { notificationservicecode } from "./utils/notificationservice";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { setOnlineUser, setSocketConnection } from "./Redux/socketSlice";
+import { Linking } from "react-native";
+import { reset_login } from "./Redux/AuthSlice";
 
 const queryClient = new QueryClient();
 
@@ -251,9 +259,7 @@ export const NavigationScreen = () => {
   } = useSelector((state) => state.AuthSlice);
   const dispatch = useDispatch();
 
-  console.log({
-    ffggg: user_data,
-  });
+  // dispatch(reset_login());
 
   useEffect(() => {
     // dispatch(UserProfile_data_Fun());
@@ -319,12 +325,156 @@ export const NavigationScreen = () => {
   }, []);
 
   // console.log({ user_data });
+  // return (
+  //   <NavigationContainer>
+  //     <StartScreen />
+  //     {/* {user_data?.token && <MainScreen />}
+  //     {!user_data?.token && <StartScreen />} */}
+  //     <Toast />
+  //   </NavigationContainer>
+  // );
+
+  const { updateInfo } = useUpdateChecker();
+
+  // if (forceUpdate) {
+  //   return <UpdateScreen message={updateInfo?.message} />;
+  // }
+
+  console.log({
+    oppp: updateInfo,
+  });
+
+  let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
+
+  console.log({
+    uiui: forceUpdate,
+  });
+
   return (
     <NavigationContainer>
-      {/* <StartScreen /> */}
-      {user_data?.token && <MainScreen />}
-      {!user_data?.token && <StartScreen />}
+      {forceUpdate ? (
+        <UpdateScreen message={updateInfo?.message} />
+      ) : (
+        <>
+          {user_data?.token && <MainScreen />}
+          {!user_data?.token && <StartScreen />}
+        </>
+      )}
+
       <Toast />
     </NavigationContainer>
   );
+};
+
+export const UpdateScreen = ({ message }) => {
+  // const handleUpdate = () => {
+
+  //   if (Platform.OS ) {
+
+  //   }
+  //   Linking.openURL(
+  //     `https://play.google.com/store/apps/details?id=com.pause_point.PausePoint&hl=en`
+  //   );
+  // };
+
+  const handleUpdate = () => {
+    const url =
+      Platform.OS === "ios"
+        ? "https://apps.apple.com/ng/app/pausepoint/id6739864683"
+        : "https://play.google.com/store/apps/details?id=com.pause_point.PausePoint&hl=en";
+
+    Linking.openURL(url).catch((err) =>
+      console.error("An error occurred while opening the store link", err)
+    );
+  };
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+        backgroundColor: "#fff",
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 24,
+          fontWeight: "bold",
+          marginBottom: 20,
+        }}
+      >
+        Update Required
+      </Text>
+      <Text style={styles.message}>
+        {message ||
+          "A new version of the app is available. Please update to continue."}
+      </Text>
+      <TouchableOpacity
+        style={{
+          backgroundColor: "#007AFF",
+          paddingHorizontal: 30,
+          paddingVertical: 15,
+          borderRadius: 8,
+        }}
+        onPress={handleUpdate}
+      >
+        <Text
+          style={{
+            color: "#fff",
+            fontSize: 16,
+            fontWeight: "bold",
+          }}
+        >
+          Update Now
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+export const useUpdateChecker = (checkInterval = 60000) => {
+  // Check every minute
+  const [forceUpdate, setForceUpdate] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState(null);
+
+  const version = Constants.expoConfig?.version;
+
+  let url = `${API_BASEURL}checkversion?version=${version}`;
+
+  // Constants.manifest.version}`
+
+  const checkForUpdates = async () => {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      console.log({
+        yyy: data,
+      });
+
+      // if (data.forceUpdate) {
+      // setForceUpdate(true);
+      setUpdateInfo(data);
+      // }
+    } catch (error) {
+      console.error("Error checking for updates:", error);
+    }
+  };
+
+  useEffect(() => {
+    checkForUpdates();
+    const interval = setInterval(checkForUpdates, checkInterval);
+    return () => clearInterval(interval);
+  }, [checkInterval]);
+
+  console.log({
+    ememk: version,
+    lod: url,
+    forceUpdate,
+    updateInfo,
+  });
+
+  return { updateInfo };
 };

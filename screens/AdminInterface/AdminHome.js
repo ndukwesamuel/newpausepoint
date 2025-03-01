@@ -107,9 +107,19 @@ export default function AdminHome() {
   const dpi = 160;
   const screeninchis = screenHeight / dpi;
 
-  const approvedPercentage = (approvedCount / totalUsers) * 100;
-  const suspendPercentage = (suspendCount / totalUsers) * 100;
-  const pendingPercentage = (pendingCount / totalUsers) * 100;
+  // const approvedPercentage = (approvedCount / totalUsers) * 100;
+  // const suspendPercentage = (suspendCount / totalUsers) * 100;
+  // const pendingPercentage = (pendingCount / totalUsers) * 100;
+
+  const approvedPercentage = parseFloat(
+    ((approvedCount / totalUsers) * 100).toFixed(2)
+  );
+  const suspendPercentage = parseFloat(
+    ((suspendCount / totalUsers) * 100).toFixed(2)
+  );
+  const pendingPercentage = parseFloat(
+    ((pendingCount / totalUsers) * 100).toFixed(2)
+  );
 
   const offsetValue = useRef(new Animated.Value(0)).current;
   // Scale Intially must be One...
