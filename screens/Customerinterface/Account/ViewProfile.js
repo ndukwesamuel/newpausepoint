@@ -53,6 +53,9 @@ export default function ViewProfile({ navigation }) {
   // const { item } = route.params as { item: any };
 
   //   const { item } = route.params;
+  console.log({
+    jgjg: userProfile_data?.currentClanMeeting?.uniqueClanID,
+  });
 
   const { get_user_profile_data } = useSelector(
     (state) => state?.UserProfileSlice
@@ -160,6 +163,22 @@ export default function ViewProfile({ navigation }) {
 
   const jsonString = JSON.stringify(userProfile_data);
 
+  const mainuserId = userProfile_data?.user?._id;
+  const mainmembers = userProfile_data?.currentClanMeeting?.members;
+  const foundermember = mainmembers?.find(
+    (member) => member.user === mainuserId
+  );
+
+  console.log({
+    hghg: userProfile_data?.currentClanMeeting?.members,
+  });
+  console.log({
+    one: userProfile_data?.user?._id,
+  });
+
+  console.log({
+    meme: foundermember,
+  });
   return (
     <ScrollView>
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
@@ -187,9 +206,6 @@ export default function ViewProfile({ navigation }) {
               data={userProfile_data?.user?.email}
               textstyle={{ fontSize: 11 }}
             />
-            {/* <View style={{ width: "40%" }}>
-            <Stattus_fuc />
-          </View> */}
           </View>
         </View>
 
@@ -292,7 +308,7 @@ export default function ViewProfile({ navigation }) {
                 }}
               >
                 <QRCode
-                  value={jsonString}
+                  value={foundermember?.memberCode}
                   size={200}
                   color="black"
                   backgroundColor="white"
