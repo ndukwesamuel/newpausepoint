@@ -179,6 +179,7 @@ export default function ViewProfile({ navigation }) {
   console.log({
     meme: foundermember,
   });
+
   return (
     <ScrollView>
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
@@ -227,7 +228,7 @@ export default function ViewProfile({ navigation }) {
               paddingBottom: 10,
             }}
           >
-            <SemiBoldFontText data="User Info  " textstyle={{ fontSize: 18 }} />
+            <SemiBoldFontText data="User Info" textstyle={{ fontSize: 18 }} />
           </View>
 
           {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
@@ -240,7 +241,7 @@ export default function ViewProfile({ navigation }) {
 
           <View style={{ marginBottom: 5, paddingBottom: 10 }}>
             <RegularFontText
-              data="Home Address"
+              data="Home Address "
               textstyle={{ fontSize: 13, color: "#696969" }}
             />
             <MediumFontText
@@ -307,6 +308,9 @@ export default function ViewProfile({ navigation }) {
                   alignItems: "center",
                 }}
               >
+                {console.log({
+                  ddd: foundermember?.memberCode,
+                })}
                 <QRCode
                   value={foundermember?.memberCode}
                   size={200}

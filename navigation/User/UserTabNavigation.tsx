@@ -58,12 +58,6 @@ const UserTabNavigation = () => {
           ),
         }}
       />
-      {/* {props => (
-                    <ClanRequiredScreen {...props}>
-                        <Guests {...props} />
-                    </ClanRequiredScreen>
-                )}
-            </Tab.Screen> */}
 
       <Tab.Screen
         component={Neigborhood}
@@ -88,12 +82,6 @@ const UserTabNavigation = () => {
           ),
         }}
       />
-      {/* {props => (
-                    <ClanRequiredScreen {...props}>
-                        <Neigborhood {...props} />
-                    </ClanRequiredScreen>cha
-                )}
-            </Tab.Screen> */}
 
       <Tab.Screen
         name="Home"
@@ -137,12 +125,6 @@ const UserTabNavigation = () => {
           ),
         }}
       />
-      {/* {props => (
-                    <ClanRequiredScreen {...props}>
-                        <Emergency {...props} />
-                    </ClanRequiredScreen>
-                )}
-            </Tab.Screen> */}
 
       <Tab.Screen
         name="Account"

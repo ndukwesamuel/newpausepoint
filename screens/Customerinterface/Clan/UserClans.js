@@ -109,6 +109,9 @@ const UserClans = () => {
       },
 
       onError: (error) => {
+        console.log({
+          ppp: error?.response?.data,
+        });
         Toast.show({
           type: "error",
           text1: `${error?.response?.data?.message}`,

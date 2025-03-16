@@ -47,6 +47,9 @@ import DomesticStaff from "../../screens/Customerinterface/DomesticStaff/Domesti
 import CreateDomesticStaff from "../../screens/Customerinterface/DomesticStaff/CreateDomesticStaff";
 import DomesticDetail from "../../screens/Customerinterface/DomesticStaff/DomesticDetail";
 import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
+import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
+import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
+import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
 const Stack = createNativeStackNavigator();
 
 const SingleScreenWithBackButton = (screenName, component, title) => {
@@ -92,6 +95,24 @@ export const Usernaviagetion = () => {
       name: "CreateMainEvent",
       component: CreateMainEvent,
       title: "Create Main Event",
+    },
+
+    {
+      name: "FundWallet",
+      component: FundWalletScreen,
+      title: "FundWallet",
+    },
+
+    {
+      name: "payment",
+      component: WalletScreen,
+      title: "Payment",
+    },
+
+    {
+      name: "duedetails",
+      component: DueDetails,
+      title: "Due Details",
     },
 
     {

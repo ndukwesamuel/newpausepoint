@@ -46,6 +46,9 @@ import DomesticDetail from "../../screens/AdminInterface/Domestic/DomesticDetail
 import Amenities from "../../screens/AdminInterface/Amentities/Amenities";
 import VendorListDetails from "../../screens/AdminInterface/Service/VendorListDetails";
 import VendortDetailsReview from "../../screens/AdminInterface/Service/VendortDetailsReview";
+import WalletScreen from "../../screens/AdminInterface/Wallet/WalletScreen";
+import DueDetails from "../../screens/AdminInterface/Wallet/DueDetails";
+import CreateDueScreen from "../../screens/AdminInterface/Wallet/CreateDueScreen";
 
 const Stack = createStackNavigator();
 
@@ -105,6 +108,22 @@ const Adminnaviagetion = () => {
           "vendorServiceDetails",
           VendorListDetails,
           "Details"
+        )}
+      />
+
+      <Stack.Screen
+        {...SingleScreenWithBackButton("payment", WalletScreen, "Payment")}
+      />
+
+      <Stack.Screen
+        {...SingleScreenWithBackButton("duedetails", DueDetails, "duedetails")}
+      />
+
+      <Stack.Screen
+        {...SingleScreenWithBackButton(
+          "createdue",
+          CreateDueScreen,
+          "Create Due"
         )}
       />
 

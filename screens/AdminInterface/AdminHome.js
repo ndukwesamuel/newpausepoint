@@ -238,9 +238,9 @@ export default function AdminHome() {
             {TabButton(
               currentTab,
               setCurrentTab,
-              "Events",
+              "Payment",
               calendar,
-              "AdminEvent"
+              "payment"
             )}
 
             {TabButton(

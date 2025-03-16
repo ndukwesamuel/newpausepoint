@@ -135,12 +135,21 @@ export default function App({ navigation }) {
                 "userpolls",
                 user_clan_info
               )}
-              {TabButton(
+              {/* {TabButton(
                 currentTab,
                 setCurrentTab,
                 "Event",
                 Calendar_light,
                 "userevents",
+                user_clan_info
+              )} */}
+
+              {TabButton(
+                currentTab,
+                setCurrentTab,
+                "Payment",
+                Calendar_light,
+                "payment",
                 user_clan_info
               )}
 
@@ -225,6 +234,16 @@ export default function App({ navigation }) {
 
                 "aboutus"
               )}
+
+              {/* {TabButton(
+                currentTab,
+                setCurrentTab,
+                "About Us",
+                // color_swatch,
+                aboutusicon,
+
+                "aboutus"
+              )} */}
             </View>
           </View>
 
