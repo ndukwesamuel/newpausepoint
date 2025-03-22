@@ -25,6 +25,10 @@ const WalletScreen = ({ navigation }) => {
   if (isLoading) return <ActivityIndicator size="large" color="#0000ff" />;
   if (error) return <Text>Error: {error.message}</Text>;
 
+  console.log({
+    ooo: clandue,
+  });
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Wallet</Text>

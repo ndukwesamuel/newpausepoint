@@ -54,13 +54,18 @@ const FundWalletScreen = ({ navigation }) => {
   return (
     <>
       {webviewstart ? (
-        <WebView
-          style={{
-            flex: 1,
-            marginTop: Constants.statusBarHeight,
-          }}
-          source={{ uri: webviewdata?.authorization_url }}
-        />
+        <>
+          {console.log({
+            jdjdjd: webviewdata?.authorization_url,
+          })}
+          <WebView
+            style={{
+              flex: 1,
+              marginTop: Constants.statusBarHeight,
+            }}
+            source={{ uri: webviewdata?.authorization_url }}
+          />
+        </>
       ) : (
         <View style={styles.container}>
           <Text style={styles.title}>Fund Wallet</Text>
