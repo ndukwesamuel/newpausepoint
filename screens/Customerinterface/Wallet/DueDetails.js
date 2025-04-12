@@ -236,10 +236,6 @@ import { useSelector } from "react-redux";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-console.log({
-  kkkk: apiUrl,
-});
-
 const DueDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();

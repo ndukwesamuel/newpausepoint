@@ -34,7 +34,7 @@ const VendorProfile = ({ navigation }) => {
     { label: "Sub-Category 3", value: "subcategory3" },
   ]);
   const [profileImage, setProfileImage] = useState(
-    "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTDS-NN32oWj6jIoj_Yo-XDbjXAgkh7fLKNsrdYhuxxQgdCkpxn"
+    "https://deleoye.ng/wp-content/uploads/2016/11/Dummy-image.jpg"
   ); // Replace with the user's actual data
 
   const { get_all_admin_Service_data, categoryes_data } = useSelector(

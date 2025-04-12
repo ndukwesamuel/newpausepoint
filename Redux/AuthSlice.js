@@ -9,10 +9,6 @@ const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 import { AnyIfEmpty } from "react-redux";
 import Toast from "react-native-toast-message";
 
-// import { Alert } from "react-native";
-
-// let userAPi = process.env.APIBASEURL + "user/login";
-
 const initialState = {
   user_data: null,
   user_isError: false,
@@ -24,14 +20,14 @@ const initialState = {
 const Login_Fun_Service = async (data) => {
   let url = `${API_BASEURL}login`;
 
-  console.log({ dd: url });
-
   try {
     const response = await axios.post(url, data);
 
     return response.data;
   } catch (error) {
-    // console.log({ error: error?.response });
+    console.log({
+      iii: error,
+    });
 
     throw error;
   }
@@ -43,11 +39,6 @@ export const Login_Fun = createAsyncThunk(
     try {
       return await Login_Fun_Service(data);
     } catch (error) {
-      console.log({
-        fff: error?.response?.data,
-      });
-      // const errorMessage = error?.response?.data;
-
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
     }

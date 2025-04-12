@@ -342,6 +342,10 @@ export const NavigationScreen = () => {
 
   let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
 
+  console.log({
+    uiui: forceUpdate,
+  });
+
   return (
     <NavigationContainer>
       {forceUpdate ? (
@@ -441,6 +445,10 @@ export const useUpdateChecker = (checkInterval = 60000) => {
     try {
       const response = await fetch(url);
       const data = await response.json();
+
+      console.log({
+        yyy: data,
+      });
 
       // if (data.forceUpdate) {
       // setForceUpdate(true);

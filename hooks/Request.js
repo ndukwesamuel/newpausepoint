@@ -6,10 +6,6 @@ import { useMutation, useQueryClient } from "react-query";
 // const apiUrl = "http://localhost:8070/api/v1";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-console.log({
-  kkkk: apiUrl,
-});
-
 // Function to fetch data
 const fetchData = async ({ queryKey }) => {
   const [, url, token] = queryKey;

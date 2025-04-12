@@ -63,7 +63,7 @@ const FundWalletScreen = ({ navigation }) => {
         />
       ) : (
         <View style={styles.container}>
-          <Text style={styles.title}>Fund Wallet</Text>
+          <Text style={styles.title}>Fund Wallet </Text>
           <TextInput
             style={styles.input}
             placeholder="Enter amount"

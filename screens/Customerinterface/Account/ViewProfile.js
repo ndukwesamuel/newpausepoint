@@ -37,6 +37,8 @@ import { Admin_Get_Single_User_Fun } from "../../../Redux/Admin/UserSlice";
 import { HalfScreenModal } from "../../../components/shared/ReuseableModal";
 import { Get_Single_clan } from "../../../Redux/UserSide/ClanSlice";
 import QRCode from "react-native-qrcode-svg";
+import { useFetchData } from "../../../hooks/Request";
+import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 export default function ViewProfile({ navigation }) {
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -47,6 +49,8 @@ export default function ViewProfile({ navigation }) {
 
   let item = {};
 
+  // localhost:5050/clan/getuserclans
+
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
   //   console.log(userProfile_data);
   //   const route = useRoute();
@@ -54,7 +58,20 @@ export default function ViewProfile({ navigation }) {
 
   //   const { item } = route.params;
   console.log({
-    jgjg: userProfile_data?.currentClanMeeting?.uniqueClanID,
+    jgjg: userProfile_data?.currentClanMeeting?._id,
+  });
+
+  const {
+    data: getuserclanInfo,
+    isLoading: isloadinggetuserclanInfo,
+    error: iserrorgetuserclanInfo,
+  } = useFetchData(
+    `clan/${userProfile_data?.currentClanMeeting?._id}`,
+    "getuserclans"
+  );
+
+  console.log({
+    oiii: getuserclanInfo?.data?.members,
   });
 
   const { get_user_profile_data } = useSelector(
@@ -63,6 +80,8 @@ export default function ViewProfile({ navigation }) {
 
   useEffect(() => {
     // dispatch(Admin_Get_Single_User_Fun(item));
+    dispatch(UserProfile_data_Fun());
+
     return () => {};
   }, []);
 
@@ -170,15 +189,19 @@ export default function ViewProfile({ navigation }) {
   );
 
   console.log({
-    hghg: userProfile_data?.currentClanMeeting?.members,
+    hghg: foundermember,
   });
   console.log({
     one: userProfile_data?.user?._id,
   });
 
-  console.log({
-    meme: foundermember,
-  });
+  // const memberinfo = getuserclanInfo?.data?.members.find(
+  //   (member) => member.user._id === userProfile_data?.user?._id
+  // );
+
+  // console.log({
+  //   meme: memberinfo,
+  // });
 
   return (
     <ScrollView>
@@ -245,7 +268,7 @@ export default function ViewProfile({ navigation }) {
               textstyle={{ fontSize: 13, color: "#696969" }}
             />
             <MediumFontText
-              data={`${userProfile_data?.address?.street}, ${userProfile_data?.address?.city} `}
+              data={foundermember?.homeAddress}
               textstyle={{ fontSize: 19 }}
             />
           </View>
@@ -256,7 +279,18 @@ export default function ViewProfile({ navigation }) {
               textstyle={{ fontSize: 13, color: "#696969" }}
             />
             <MediumFontText
-              data={userProfile_data?.phoneNumber}
+              data={foundermember?.phonenumber}
+              textstyle={{ fontSize: 19 }}
+            />
+          </View>
+
+          <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+            <RegularFontText
+              data="Member Code"
+              textstyle={{ fontSize: 13, color: "#696969" }}
+            />
+            <MediumFontText
+              data={foundermember?.memberCode}
               textstyle={{ fontSize: 19 }}
             />
           </View>

@@ -442,6 +442,10 @@ export const useUpdateChecker = (checkInterval = 60000) => {
       const response = await fetch(url);
       const data = await response.json();
 
+      console.log({
+        yyy: data,
+      });
+
       // if (data.forceUpdate) {
       // setForceUpdate(true);
       setUpdateInfo(data);
