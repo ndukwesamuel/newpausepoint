@@ -3,7 +3,7 @@
     "name": "PausePoint",
     "slug": "PausePoint",
     "orientation": "default",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "plugins": [
       [
         "expo-barcode-scanner",
@@ -26,24 +28,31 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
-        "UIBackgroundModes": []
+        "UIBackgroundModes": [],
+        "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "10"
+      "buildNumber": "11"
     },
     "android": {
-      "versionCode": 17,
+      "versionCode": 18,
       "targetSdkVersion": 34,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.pause_point.PausePoint",
-      "permissions": ["android.permission.CAMERA"]
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {}
+    "extra": {
+      "eas": {
+        "projectId": "e012faf4-1814-4ba6-986a-167a537c8ea3"
+      }
+    }
   }
 }
