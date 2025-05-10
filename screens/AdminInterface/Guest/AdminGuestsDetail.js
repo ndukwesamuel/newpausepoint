@@ -46,9 +46,6 @@ const AdminGuestsDetail = () => {
 
   const route = useRoute();
   const { itemdata } = route.params;
-  console.log({
-    fire: itemdata,
-  });
 
   const animation = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,13 +77,12 @@ const AdminGuestsDetail = () => {
         },
       };
 
-      let url = `${API_BASEURL}visitor/verify/${itemdata?.clan}`;
+      let url = `${API_BASEURL}api/v1/clan/adminGuest/verify-code`;
 
-      return axios.post(
+      return axios.patch(
         url,
         {
           accessCode: itemdata?.access_code,
-          clan: itemdata?.clan,
         },
         config
       );
@@ -95,7 +91,7 @@ const AdminGuestsDetail = () => {
       onSuccess: (success) => {
         Toast.show({
           type: "success",
-          text1: " successfully ",
+          text1: `${success?.data?.message}`,
         });
 
         // dispatch(Get_All_User_Guest_Fun());
@@ -144,6 +140,27 @@ const AdminGuestsDetail = () => {
             <Text style={styles.text}>{itemdata?.location}</Text>
             <Text style={styles.label}>Access Code:</Text>
             <Text style={styles.text}>{itemdata?.access_code}</Text>
+
+            <View>
+              <Text style={styles.label}>Status:</Text>
+              <Text style={styles.text}>{itemdata?.status}</Text>
+            </View>
+
+            <View>
+              <Text style={styles.label}>Arrived Date:</Text>
+              <Text style={styles.text}>
+                {formatDateandTime(itemdata?.arrived_at)}
+                {/* {get_user_guest_detail_data?.invitation?.expires} */}
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.label}>Departure Date:</Text>
+              <Text style={styles.text}>
+                {formatDateandTime(itemdata?.departed_at)}
+                {/* {get_user_guest_detail_data?.invitation?.expires} */}
+              </Text>
+            </View>
 
             <Text style={styles.label}>Expires Date:</Text>
             <Text style={styles.text}>

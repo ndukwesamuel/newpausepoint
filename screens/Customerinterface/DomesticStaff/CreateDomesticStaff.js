@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
 
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 
@@ -33,6 +34,7 @@ import {
   Get_All_User_Guest_Fun,
   Get__User_Guest_detail_Fun,
 } from "../../../Redux/UserSide/GuestSlice";
+import { Image } from "react-native";
 
 const CreateDomesticStaff = () => {
   const route = useRoute();
@@ -60,9 +62,23 @@ const CreateDomesticStaff = () => {
     Role: "",
     workingHours: "",
   });
+  const [images, setImages] = useState(""); // Changed from profileImage to images array
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImages(result.assets[0].uri);
+    }
+  };
   const handleInputChange = (field, value) => {
     setFormData({
       ...formData,
@@ -93,28 +109,70 @@ const CreateDomesticStaff = () => {
   };
 
   const handleSubmit = () => {
-    Guests_Mutation.mutate({
-      staffName: formData.staffName,
-      gender: formData.gender,
-      phone: formData.phone,
-      dateOfBirth: formData.dateOfBirth,
-      homeAddress: formData.homeAddress,
-      Role: formData.Role,
-      workingHours: formData.workingHours,
-    });
+    // console.log({
+    //   vvv: formData,
+    // });
+
+    // const formData = new FormData();
+    // formData.append("staffName", formData?.staffName);
+    // formData.append("gender", formData?.gender);
+    // formData.append("phone", formData?.phone);
+    // formData.append("dateOfBirth", formData?.dateOfBirth);
+    // formData.append("homeAddress", formData?.homeAddress);
+    // formData.append("Role", formData.Role);
+    // formData.append("workingHours", formData?.workingHours);
+
+    // if (images) {
+    //   const uri = images;
+    //   const type = "image/jpeg"; // Adjust the type based on the file type
+    //   const name = "photo.jpg"; // Adjust the name as needed
+    //   formData.append("photo", { uri, type, name });
+    // }
+
+    // Guests_Mutation.mutate(formData);
+
+    const data = new FormData();
+    data.append("staffName", formData.staffName);
+    data.append("gender", formData.gender);
+    data.append("phone", formData.phone);
+    data.append(
+      "dateOfBirth",
+      formData.dateOfBirth.toISOString().split("T")[0]
+    );
+    data.append("homeAddress", formData.homeAddress);
+    data.append("Role", formData.Role);
+    data.append("workingHours", formData.workingHours);
+
+    // if (images) {
+    //   const uriParts = images.split(".");
+    //   const fileType = uriParts[uriParts.length - 1];
+    //   data.append("photo", {
+    //     uri: images,
+    //     name: `photo.${fileType}`,
+    //     type: `image/${fileType}`,
+    //   });
+    // }
+
+    if (images) {
+      const uri = images;
+      const type = "image/jpeg"; // Adjust the type based on the file type
+      const name = "photo.jpg"; // Adjust the name as needed
+      data.append("images", { uri, type, name });
+    }
+
+    Guests_Mutation.mutate(data);
   };
 
   const Guests_Mutation = useMutation(
     (data_info) => {
       const config = {
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
-      let url = `${API_BASEURL}domesticstaff`;
+      let url = `${API_BASEURL}api/v1/domestic`;
 
       return axios.post(url, data_info, config);
     },
@@ -131,6 +189,10 @@ const CreateDomesticStaff = () => {
       },
 
       onError: (error) => {
+        console.log({
+          nnn: error?.response?.data,
+        });
+
         Toast.show({
           type: "error",
           text1: `${error?.response?.data?.message} `,
@@ -145,6 +207,21 @@ const CreateDomesticStaff = () => {
         behavior={Platform.OS === "ios" ? "padding" : "10"}
         style={{ flex: 1 }}
       >
+        <TouchableOpacity
+          onPress={pickImage}
+          style={{ alignItems: "center", justifyContent: "center" }}
+        >
+          <Image
+            source={{
+              uri:
+                images ||
+                "https://t4.ftcdn.net/jpg/02/44/43/69/360_F_244436923_vkMe10KKKiw5bjhZeRDT05moxWcPpdmb.jpg",
+            }}
+            style={{ width: 100, height: 100, borderRadius: 50 }}
+          />
+
+          {/* <Text>{userProfile_data?.user?.email}</Text> */}
+        </TouchableOpacity>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View style={{ paddingHorizontal: 20 }}>
             <View style={{ marginBottom: 15 }}>

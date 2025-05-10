@@ -30,6 +30,9 @@ export const formatDate = (inputDateString) => {
 };
 
 export function formatDateandTime(timestamp) {
+  if (!timestamp || isNaN(new Date(timestamp).getTime())) {
+    return "N/A";
+  }
   const createdAt = new Date(timestamp);
 
   const year = createdAt.getFullYear();

@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React from "react";
+import React, { useRef, useState } from "react";
 
 import {
   View,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Linking,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -23,18 +24,16 @@ import {
   Market_data_Fun,
   myProductFun,
 } from "../../../Redux/UserSide/MarketSLice";
+import Carousel from "react-native-snap-carousel";
 
 const MarketReview = () => {
   const navigation = useNavigation();
   const { item, productType } = useRoute().params;
   const dispatch = useDispatch();
-  console.log({
-    ddd: productType,
-  });
 
-  // console.log({
-  //   item: item,
-  // });
+  console.log({
+    oo: item?.images[0],
+  });
 
   const {
     user_data,
@@ -119,10 +118,25 @@ const MarketReview = () => {
     }
   );
 
+  const [activeIndex, setActiveIndex] = useState(0);
+  const carouselRef = useRef(null);
+  const screenWidth = Dimensions.get("window").width;
+  const renderItem = ({ item }) => {
+    return (
+      <View style={styles.slide}>
+        <Image
+          source={{ uri: item?.url }}
+          style={styles.carouselImage}
+          resizeMode="cover"
+        />
+      </View>
+    );
+  };
+
   return (
     <>
       <View>
-        <Image
+        {/* <Image
           source={{
             uri: item?.images[0]?.url, // "https://res.cloudinary.com/dho7vgusw/image/upload/v1717066205/olyzcdftqbon10c958gb.png", //item?.images[0]?.url,
           }}
@@ -130,7 +144,31 @@ const MarketReview = () => {
             width: "100%",
             height: 250,
           }}
-        />
+        /> */}
+
+        <View style={styles.carouselContainer}>
+          <Carousel
+            layout="default"
+            ref={carouselRef}
+            data={item?.images}
+            renderItem={renderItem}
+            sliderWidth={screenWidth}
+            itemWidth={screenWidth}
+            onSnapToItem={(index) => setActiveIndex(index)}
+          />
+          <View style={styles.pagination}>
+            {item?.images?.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.paginationDot,
+                  activeIndex === index ? styles.paginationDotActive : null,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
+
         <View style={styles.contentContainer}>
           <View style={styles.headerContainer}>
             <View
@@ -284,6 +322,39 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+
+  carouselContainer: {
+    position: "relative",
+  },
+  slide: {
+    width: "100%",
+    height: 250,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  carouselImage: {
+    width: "100%",
+    height: "100%",
+  },
+  pagination: {
+    position: "absolute",
+    bottom: 10,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.5)",
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: "white",
+    width: 12,
   },
 });
 

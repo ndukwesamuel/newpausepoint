@@ -73,9 +73,9 @@ const EditPersonalInformation = () => {
     formData.append("name", name);
     // formData.append("photo", description);
     formData.append("phoneNumber", phone);
-    formData.append("street", street);
-    formData.append("city", city);
-    formData.append("state", "Lagos");
+    // formData.append("street", street);
+    // formData.append("city", city);
+    // formData.append("state", "Lagos");
     if (profileImage) {
       const uri = profileImage;
       const type = "image/jpeg"; // Adjust the type based on the file type
@@ -109,6 +109,10 @@ const EditPersonalInformation = () => {
       },
 
       onError: (error) => {
+        console.log({
+          nnn: error?.response,
+        });
+
         Toast.show({
           type: "error",
           text1: `${error?.response?.data?.error}`,
@@ -154,33 +158,6 @@ const EditPersonalInformation = () => {
               placeholder="Phone Number"
               onChangeText={setPhone}
               value={phone}
-            />
-          </View>
-
-          <View>
-            <FormLabel data="Street" />
-            <Forminput
-              placeholder="your Street"
-              onChangeText={setStreet}
-              value={street}
-            />
-          </View>
-
-          <View>
-            <FormLabel data="City" />
-            <Forminput
-              placeholder="your City"
-              onChangeText={setCity}
-              value={city}
-            />
-          </View>
-
-          <View>
-            <FormLabel data="State" />
-            <Forminput
-              placeholder="your State"
-              onChangeText={setAddressSatate}
-              value={addressSatate}
             />
           </View>
 

@@ -3,7 +3,7 @@
     "name": "PausePoint",
     "slug": "PausePoint",
     "orientation": "default",
-    "version": "1.2.2",
+    "version": "1.2.4",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "plugins": [
       [
         "expo-barcode-scanner",
@@ -32,19 +30,21 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "11"
+      "buildNumber": "12",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
-      "versionCode": 18,
+      "versionCode": 20,
       "targetSdkVersion": 34,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.pause_point.PausePoint",
-      "permissions": [
-        "android.permission.CAMERA"
-      ]
+      "permissions": ["android.permission.CAMERA", "android.permission.CAMERA"],
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -53,6 +53,9 @@
       "eas": {
         "projectId": "e012faf4-1814-4ba6-986a-167a537c8ea3"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e012faf4-1814-4ba6-986a-167a537c8ea3"
     }
   }
 }

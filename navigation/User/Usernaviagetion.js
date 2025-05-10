@@ -50,6 +50,7 @@ import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
 import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
 import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
 import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
+import Errand from "../../screens/Customerinterface/Errands/Errand";
 const Stack = createNativeStackNavigator();
 
 const SingleScreenWithBackButton = (screenName, component, title) => {
@@ -85,6 +86,11 @@ const createScreen = (name, component, title) => {
 };
 export const Usernaviagetion = () => {
   const screens = [
+    {
+      name: "errands",
+      component: Errand,
+      title: "Errands",
+    },
     {
       name: "CreatePrivateEvent",
       component: CreatePrivateEvent,
@@ -404,7 +410,7 @@ export const Usernaviagetion = () => {
 
       <Stack.Screen
         options={({ navigation }) => ({
-          title: "Myclan",
+          title: "My Communities",
           headerStyle: {
             backgroundColor: "white",
           },

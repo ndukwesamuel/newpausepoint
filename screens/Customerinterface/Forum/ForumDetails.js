@@ -49,9 +49,12 @@ const ForumDetails = () => {
   );
 
   console.log({
+    cccc: maindata,
+  });
+  console.log({
     jhhhh: maindata?.forumid?._id,
   });
-  let forumid = maindata?.forumid?._id;
+  let forumid = maindata?._id;
   // const {gggggg} = useRoute()?.params?.forumid;
   console.log({
     bbb: maindata?.user,
@@ -288,17 +291,20 @@ const ForumDetails = () => {
             gap: 10,
           }}
         >
+          {console.log({
+            mmm: forumid,
+          })}
+
           <Image
             source={{
-              uri:
-                forumid?.user?.photo,
+              uri: maindata?.user?.photo,
             }}
             style={{ width: 40, height: 40, borderRadius: 50 }}
           />
 
           <View>
             <MediumFontText
-              data={forumid?.user?.name}
+              data={maindata?.user?.name}
               textstyle={{ fontSize: 16, fontWeight: "500" }}
             />
 
@@ -380,7 +386,7 @@ const ForumDetails = () => {
           onPress={toggleComments} // Step 2
         >
           <AntDesign name="message1" size={24} color="black" />
-          <Text>Comment</Text>
+          <Text>Comment </Text>
         </TouchableOpacity>
         {/* <View
           style={{
@@ -442,6 +448,14 @@ const ForumDetails = () => {
                   borderRadius: 10,
                 }}
               >
+                <Text
+                  style={{
+                    fontSize: 17,
+                  }}
+                >
+                  {comment?.user?.name}
+                </Text>
+
                 <Text>{comment?.content}</Text>
                 {/* You can map through the comments array and render each comment */}
               </View>

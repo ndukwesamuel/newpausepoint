@@ -1,395 +1,3 @@
-// // // Enhanced WalletScreen.js
-// // import React from "react";
-// // import {
-// //   View,
-// //   Text,
-// //   StyleSheet,
-// //   TouchableOpacity,
-// //   RefreshControl,
-// // } from "react-native";
-// // import Icon from "react-native-vector-icons/MaterialIcons";
-// // import { useFetchData } from "../../../hooks/Request";
-// // import { FlatList } from "react-native";
-// // // import { useFetchData } from "../../../hooks/Request";
-
-// // const WalletScreen = ({ navigation }) => {
-// //   //   const { data: weeklyincomeData } = useFetchData(
-// //   //     "/BusinessAdvisorySBU/weekly-income",
-// //   //     "weekly-income"
-// //   //   );
-// //   const { data, isLoading, error } = useFetchData("wallet", "wallet");
-// //   const {
-// //     data: allmydues,
-// //     isLoading: ispending,
-// //     error: isError,
-// //   } = useFetchData("wallet/pay-due", "pay-due");
-
-// //   console.log({
-// //     cccc: allmydues?.dues,
-// //   });
-
-// //   const handleCreateUser = () => {
-// //     createUser({ name: "John Doe", email: "john@example.com" });
-// //   };
-
-// //   if (isLoading) return <Text>Loading...</Text>;
-// //   if (error) {
-// //     console.error("Fetch Error:", error.message);
-// //     return <Text>Error: {error.message}</Text>;
-// //   }
-
-// //   console.log({
-// //     fg: data,
-// //   });
-// //   const [refreshing, setRefreshing] = useState(false);
-
-// //   const onRefresh = () => {
-// //     // Set the refreshing state to true
-// //     setRefreshing(true);
-// //     // dispatch(Get_My_Clan_Forum_Fun());
-
-// //     // Wait for 2 seconds
-// //     setRefreshing(false);
-// //   };
-// //   return (
-// //     <View style={styles.container}>
-// //       <Text style={styles.title}>Wallet</Text>
-// //       <View style={styles.balanceContainer}>
-// //         <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
-// //         <Text style={styles.balance}>
-// //           {data?.balance} {data?.currency}
-// //         </Text>
-// //       </View>
-// //       <TouchableOpacity
-// //         style={styles.button}
-// //         onPress={() => navigation.navigate("FundWallet")}
-// //       >
-// //         <Icon name="add" size={20} color="#FFF" />
-// //         <Text style={styles.buttonText}>Fund Wallet</Text>
-// //       </TouchableOpacity>
-// //       <Text style={styles.subTitle}>Invoices due</Text>
-
-// //       <FlatList
-// //         data={allmydues?.dues}
-// //         renderItem={({ item }) => <Item item={item} navigation={navigation} />}
-// //         keyExtractor={(item) => item._id}
-// //         refreshControl={
-// //           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-// //         }
-// //       />
-// //       {/* <TouchableOpacity
-// //         style={styles.invoiceItem}
-// //         onPress={() =>
-// //           navigation.navigate("InvoiceDetail", { type: "Electricity" })
-// //         }
-// //       >
-// //         <Icon name="flash-on" size={20} color="#FFA000" />
-// //         <Text style={styles.invoiceText}>Electricity</Text>
-// //       </TouchableOpacity>
-// //       <TouchableOpacity
-// //         style={styles.invoiceItem}
-// //         onPress={() =>
-// //           navigation.navigate("InvoiceDetail", { type: "Security Levy" })
-// //         }
-// //       >
-// //         <Icon name="security" size={20} color="#2196F3" />
-// //         <Text style={styles.invoiceText}>Security Levy</Text>
-// //       </TouchableOpacity> */}
-// //     </View>
-// //   );
-// // };
-
-// // const Item = ({ item, navigation }) => (
-// //   <TouchableOpacity
-// //     onPress={() => navigation.navigate("duedetails", { data: item })}
-// //     style={styles.item}
-// //   >
-// //     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-// //       <Icon name="security" size={20} color="#2196F3" />
-// //       <View>
-// //         <Text
-// //           style={{
-// //             fontSize: 18,
-// //           }}
-// //         >
-// //           {item?.serviceName}
-// //         </Text>
-// //         <Text style={styles.description}>{item?.serviceDetails}</Text>
-// //         <Text style={styles.description}>Amount: {item?.amount} NGN</Text>
-// //         <DueDateChecker dueDate={item?.dueDate} />
-// //       </View>
-// //     </View>
-// //   </TouchableOpacity>
-// // );
-
-// // const DueDateChecker = ({ dueDate }) => {
-// //   const dueDateObj = new Date(dueDate);
-// //   const currentDate = new Date();
-// //   const timeDifference = dueDateObj - currentDate;
-
-// //   let statusMessage;
-// //   if (timeDifference > 0) {
-// //     const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-// //     statusMessage = `Due in ${daysDifference} days.`;
-// //   } else if (timeDifference === 0) {
-// //     statusMessage = "Due today!";
-// //   } else {
-// //     statusMessage = "Due date has passed.";
-// //   }
-
-// //   return <Text>{statusMessage}</Text>;
-// // };
-
-// // const styles = StyleSheet.create({
-// //   container: {
-// //     flex: 1,
-// //     padding: 20,
-// //     backgroundColor: "#F5F5F5",
-// //   },
-// //   title: {
-// //     fontSize: 24,
-// //     fontWeight: "bold",
-// //     marginBottom: 20,
-// //   },
-// //   balanceContainer: {
-// //     flexDirection: "row",
-// //     alignItems: "center",
-// //     marginBottom: 20,
-// //   },
-// //   balance: {
-// //     fontSize: 18,
-// //     marginLeft: 10,
-// //   },
-// //   button: {
-// //     flexDirection: "row",
-// //     backgroundColor: "#007BFF",
-// //     padding: 15,
-// //     borderRadius: 5,
-// //     alignItems: "center",
-// //     justifyContent: "center",
-// //     marginBottom: 20,
-// //   },
-// //   buttonText: {
-// //     color: "#FFF",
-// //     fontSize: 16,
-// //     marginLeft: 10,
-// //   },
-// //   subTitle: {
-// //     fontSize: 20,
-// //     fontWeight: "bold",
-// //     marginBottom: 10,
-// //   },
-// //   invoiceItem: {
-// //     flexDirection: "row",
-// //     alignItems: "center",
-// //     backgroundColor: "#FFF",
-// //     padding: 15,
-// //     borderRadius: 5,
-// //     marginBottom: 10,
-// //     elevation: 2,
-// //   },
-// //   invoiceText: {
-// //     marginLeft: 10,
-// //   },
-// //   item: {
-// //     backgroundColor: "#FFF",
-// //     padding: 20,
-// //     marginVertical: 8,
-// //     borderRadius: 8,
-// //     elevation: 2,
-// //   },
-// //   description: { fontSize: 14, color: "#666", marginTop: 5 },
-// // });
-
-// // export default WalletScreen;
-
-// import React, { useState } from "react";
-// import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   TouchableOpacity,
-//   RefreshControl,
-//   FlatList,
-// } from "react-native";
-// import Icon from "react-native-vector-icons/MaterialIcons";
-// import { useFetchData } from "../../../hooks/Request";
-
-// const WalletScreen = ({ navigation }) => {
-//   const {
-//     data,
-//     isLoading,
-//     error,
-//     refetch: refetchWallet,
-//   } = useFetchData("wallet", "wallet");
-//   const {
-//     data: allmydues,
-//     isLoading: ispending,
-//     error: isError,
-//     refetch: refetchDues, // Add refetch function for dues
-//   } = useFetchData("wallet/pay-due", "pay-due");
-
-//   const [refreshing, setRefreshing] = useState(false);
-
-//   // Handle refresh action
-//   const onRefresh = async () => {
-//     setRefreshing(true);
-//     try {
-//       // Refetch both wallet and dues data
-//       await refetchWallet();
-//       await refetchDues();
-//     } catch (error) {
-//       console.error("Error refreshing data:", error);
-//     } finally {
-//       setRefreshing(false);
-//     }
-//   };
-
-//   if (isLoading || ispending) return <Text>Loading...</Text>;
-//   if (error || isError) {
-//     console.error("Fetch Error:", error?.message || isError?.message);
-//     return <Text>Error: {error?.message || isError?.message}</Text>;
-//   }
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Wallet</Text>
-//       <View style={styles.balanceContainer}>
-//         <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
-//         <Text style={styles.balance}>
-//           {data?.balance} {data?.currency}
-//         </Text>
-//       </View>
-
-//       <View
-//         style={{
-//           flexDirection: "row",
-//           justifyContent: "space-between",
-//           alignItems: "center",
-//         }}
-//       >
-//         <TouchableOpacity
-//           style={styles.button}
-//           onPress={() => navigation.navigate("FundWallet")}
-//         >
-//           <Icon name="add" size={20} color="#FFF" />
-//           <Text style={styles.buttonText}>Fund Wallet</Text>
-//         </TouchableOpacity>
-
-//         <TouchableOpacity
-//           style={styles.button}
-//           onPress={() => navigation.navigate("FundWallet")}
-//         >
-//           <Text style={styles.buttonText}>Pay utility </Text>
-//         </TouchableOpacity>
-//       </View>
-
-//       <Text style={styles.subTitle}>Invoices due</Text>
-
-//       <FlatList
-//         data={allmydues?.dues}
-//         renderItem={({ item }) => <Item item={item} navigation={navigation} />}
-//         keyExtractor={(item) => item._id}
-//         refreshControl={
-//           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-//         }
-//       />
-//     </View>
-//   );
-// };
-
-// const Item = ({ item, navigation }) => (
-//   <TouchableOpacity
-//     onPress={() => navigation.navigate("duedetails", { data: item })}
-//     style={styles.item}
-//   >
-//     {console.log({
-//       fdf: item?.membersToPay[0],
-//     })}
-//     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-//       <Icon name="security" size={20} color="#2196F3" />
-//       <View>
-//         <Text style={{ fontSize: 18 }}>{item?.serviceName}</Text>
-//         <Text style={styles.description}>{item?.serviceDetails}</Text>
-//         <Text style={styles.description}>Amount: {item?.amount} </Text>
-//         <Text style={styles.description}>
-//           My Status: {item?.membersToPay[0].status} NGN
-//         </Text>
-//         <DueDateChecker dueDate={item?.dueDate} />
-//       </View>
-//     </View>
-//   </TouchableOpacity>
-// );
-
-// const DueDateChecker = ({ dueDate }) => {
-//   const dueDateObj = new Date(dueDate);
-//   const currentDate = new Date();
-//   const timeDifference = dueDateObj - currentDate;
-
-//   let statusMessage;
-//   if (timeDifference > 0) {
-//     const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-//     statusMessage = `Due in ${daysDifference} days.`;
-//   } else if (timeDifference === 0) {
-//     statusMessage = "Due today!";
-//   } else {
-//     statusMessage = "Due date has passed.";
-//   }
-
-//   return <Text>{statusMessage}</Text>;
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 20,
-//     backgroundColor: "#F5F5F5",
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     marginBottom: 20,
-//   },
-//   balanceContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     marginBottom: 20,
-//   },
-//   balance: {
-//     fontSize: 18,
-//     marginLeft: 10,
-//   },
-//   button: {
-//     flexDirection: "row",
-//     backgroundColor: "#007BFF",
-//     padding: 15,
-//     borderRadius: 5,
-//     alignItems: "center",
-//     justifyContent: "center",
-//     marginBottom: 20,
-//   },
-//   buttonText: {
-//     color: "#FFF",
-//     fontSize: 16,
-//     marginLeft: 10,
-//   },
-//   subTitle: {
-//     fontSize: 20,
-//     fontWeight: "bold",
-//     marginBottom: 10,
-//   },
-//   item: {
-//     backgroundColor: "#FFF",
-//     padding: 20,
-//     marginVertical: 8,
-//     borderRadius: 8,
-//     elevation: 2,
-//   },
-//   description: { fontSize: 14, color: "#666", marginTop: 5 },
-// });
-
-// export default WalletScreen;
-
 import React, { useState } from "react";
 import {
   View,
@@ -404,6 +12,14 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useFetchData } from "../../../hooks/Request";
+import {
+  MaterialCommunityIcons,
+  FontAwesome5,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+
+// ... inside your component
 
 const WalletScreen = ({ navigation }) => {
   const {
@@ -572,7 +188,7 @@ const WalletScreen = ({ navigation }) => {
       />
 
       {/* Utilities Modal */}
-      <Modal
+      {/* <Modal
         visible={showUtilitiesModal}
         animationType="slide"
         transparent={true}
@@ -616,6 +232,174 @@ const WalletScreen = ({ navigation }) => {
               onPress={() => setShowUtilitiesModal(false)}
             >
               <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal> */}
+
+      {/*  */}
+      <Modal
+        visible={showUtilitiesModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowUtilitiesModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              width: "90%",
+              borderRadius: 20,
+              padding: 20,
+              maxHeight: "80%",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 22,
+                fontWeight: "bold",
+                textAlign: "center",
+                marginBottom: 20,
+                color: "#2c3e50",
+              }}
+            >
+              Select Utility Bill
+            </Text>
+
+            <ScrollView
+              contentContainerStyle={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                paddingBottom: 20,
+              }}
+            >
+              {[
+                {
+                  id: 1,
+                  name: "Electricity",
+                  icon: "flash",
+                  iconSet: MaterialCommunityIcons,
+                  color: "#f39c12",
+                },
+                {
+                  id: 2,
+                  name: "Water",
+                  icon: "water",
+                  iconSet: FontAwesome5,
+                  color: "#3498db",
+                },
+                {
+                  id: 3,
+                  name: "Internet",
+                  icon: "wifi",
+                  iconSet: Ionicons,
+                  color: "#9b59b6",
+                },
+                {
+                  id: 4,
+                  name: "Cable TV",
+                  icon: "tv",
+                  iconSet: Ionicons,
+                  color: "#e74c3c",
+                },
+                {
+                  id: 5,
+                  name: "Gas",
+                  icon: "fire",
+                  iconSet: FontAwesome5,
+                  color: "#e67e22",
+                },
+                {
+                  id: 6,
+                  name: "Waste",
+                  icon: "delete",
+                  iconSet: MaterialIcons,
+                  color: "#2ecc71",
+                },
+              ].map((utility) => (
+                <TouchableOpacity
+                  key={utility.id}
+                  style={{
+                    width: "48%",
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: 12,
+                    padding: 15,
+                    marginBottom: 15,
+                    alignItems: "center",
+                    borderWidth: 1,
+                    borderColor: "#ecf0f1",
+                  }}
+                  disabled={true} // Disabled for "Coming Soon"
+                >
+                  <utility.iconSet
+                    name={utility.icon}
+                    size={40}
+                    color={utility.color}
+                    style={{ marginBottom: 10 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: "#34495e",
+                      textAlign: "center",
+                    }}
+                  >
+                    {utility.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <View
+              style={{
+                backgroundColor: "#fff9e6",
+                padding: 15,
+                borderRadius: 10,
+                marginBottom: 15,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Ionicons name="time-outline" size={24} color="#f39c12" />
+              <Text
+                style={{
+                  color: "#e67e22",
+                  fontSize: 16,
+                  marginLeft: 10,
+                  flex: 1,
+                }}
+              >
+                Utility bill payments coming soon!
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#3498db",
+                padding: 15,
+                borderRadius: 10,
+                alignItems: "center",
+              }}
+              onPress={() => setShowUtilitiesModal(false)}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 18,
+                  fontWeight: "bold",
+                }}
+              >
+                Close
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

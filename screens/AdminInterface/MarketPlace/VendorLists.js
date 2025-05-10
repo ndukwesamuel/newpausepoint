@@ -65,7 +65,7 @@ const VendorLists = () => {
           onPress={() => setforumlist(false)}
         >
           <MediumFontText
-            data="Pending Goods"
+            data="Banned Goods"
             textstyle={{
               fontSize: 20,
               fontWeight: "500",

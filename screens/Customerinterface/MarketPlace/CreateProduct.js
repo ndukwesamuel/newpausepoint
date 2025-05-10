@@ -9,9 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
   FlatList,
-  Modal,
 } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
 import * as ImagePicker from "expo-image-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { useMutation } from "react-query";
@@ -25,11 +23,7 @@ import { CustomTextArea } from "../../../components/shared/InputForm";
 const CreateProduct = ({ navigation }) => {
   const dispatch = useDispatch();
   const { marketcategory__data } = useSelector((state) => state.MarketSLice);
-  const [categoryOpen, setCategoryOpen] = useState(false);
-  const [categoryValue, setCategoryValue] = useState(null);
-  const [subCategoryOpen, setSubCategoryOpen] = useState(false);
-  const [subCategoryValue, setSubCategoryValue] = useState(null);
-  const [profileImage, setProfileImage] = useState("");
+  const [images, setImages] = useState([]); // Changed from profileImage to images array
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -41,54 +35,28 @@ const CreateProduct = ({ navigation }) => {
   }, [dispatch]);
 
   const { user_data } = useSelector((state) => state.AuthSlice);
-
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
-  const formattedCategories = marketcategory__data?.map((category) => ({
-    label: category?.name,
-    value: category._id,
-  }));
-
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  const categories = [
-    { label: "Category 1", value: "cat1" },
-    { label: "Category 2", value: "cat2" },
-    { label: "Category 3", value: "cat3" },
-  ];
-
-  console.log({
-    formattedCategories: selectedCategory,
-  });
-  const pickImage = async () => {
+  const pickImages = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
       aspect: [4, 3],
       quality: 1,
+      allowsMultipleSelection: true, // Enable multiple selection
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+      // Add new images to existing ones
+      setImages([...images, ...result.assets]);
     }
   };
 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: "Apple", value: "apple" },
-    { label: "Banana", value: "banana" },
-    { label: "Orange", value: "orange" },
-  ]);
-
-  console.log({
-    name: name,
-    price: price,
-    quantity: quantity,
-    category: value,
-    description: description,
-    id: userProfile_data?.currentClanMeeting?._id,
-  });
+  const removeImage = (index) => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+  };
 
   const handleSave = () => {
     const formData = new FormData();
@@ -99,19 +67,17 @@ const CreateProduct = ({ navigation }) => {
     formData.append("contact", contact);
     formData.append("clanId", userProfile_data?.currentClanMeeting?._id);
 
-    if (profileImage) {
-      const uri = profileImage;
-      const type = "image/jpeg";
-      const name = "photo.jpg";
-      formData.append("images", { uri, type, name });
-    }
+    // Append each image to the formData
+    images.forEach((image, index) => {
+      formData.append("images", {
+        uri: image.uri,
+        type: image.mimeType || "image/jpeg",
+        name: `image_${index}.jpg`,
+      });
+    });
 
     CreateVendor_Mutation.mutate(formData);
   };
-
-  console.log({
-    rr: user_data?.token,
-  });
 
   const CreateVendor_Mutation = useMutation(
     (data_info) => {
@@ -130,25 +96,18 @@ const CreateProduct = ({ navigation }) => {
       onSuccess: () => {
         Toast.show({
           type: "success",
-          text1: "Event created successfully!",
+          text1: "Product created successfully!",
         });
         navigation.goBack();
       },
       onError: (error) => {
-        console.log({
-          error: error?.response?.data,
-        });
         Toast.show({
           type: "error",
-          text1: `${error?.response?.data?.error}`,
+          text1: `${error?.response?.data?.error || "An error occurred"}`,
         });
       },
     }
   );
-
-  console.log({
-    value: value,
-  });
 
   return (
     <ScrollView style={styles.container}>
@@ -187,7 +146,6 @@ const CreateProduct = ({ navigation }) => {
           </View>
           <View style={styles.column}>
             <Text style={styles.label}>Phone Number</Text>
-
             <TextInput
               style={styles.smallInput}
               placeholder="Enter Phone Number"
@@ -198,56 +156,61 @@ const CreateProduct = ({ navigation }) => {
           </View>
         </View>
 
-        <View style={{ marginTop: 10, zIndex: -10000 }}>
+        <View style={{ marginTop: 10 }}>
           <Text style={styles.label}>Description</Text>
-
           <CustomTextArea
             placeholder="Write description..."
             value={description}
             onChangeText={setDescription}
             style={styles.largeInput}
             inputStyle={{
-              textAlignVertical: "top", // Ensures text starts from the top
-              paddingTop: 10, // Add paddingTop to control vertical padding
-              paddingBottom: 10, // Add paddingBottom to balance padding
+              textAlignVertical: "top",
+              paddingTop: 10,
+              paddingBottom: 10,
               backgroundColor: "#F6F8FAE5",
               paddingHorizontal: 10,
-              paddingTop: 10, // Add paddingTop to control the vertical padding
-              paddingBottom: 10, // Add paddingBottom to balance the padding
               height: 100,
               borderRadius: 6,
               fontSize: 16,
             }}
           />
         </View>
-        <TouchableOpacity
-          onPress={pickImage}
-          style={{
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: "gray",
-            borderRadius: 10,
-            padding: 10,
-            marginTop: 10,
-            marginBottom: 20,
-          }}
-        >
-          {profileImage ? (
-            <Image
-              source={{ uri: profileImage }}
-              style={{ width: 100, height: 100 }}
-            />
-          ) : (
-            <Text>Input Product Image</Text>
-          )}
-        </TouchableOpacity>
+
+        {/* Image Upload Section */}
+        <View style={styles.imageUploadContainer}>
+          <Text style={styles.label}>Product Images</Text>
+          <TouchableOpacity
+            onPress={pickImages}
+            style={styles.imageUploadButton}
+          >
+            <Text>Select Images</Text>
+          </TouchableOpacity>
+
+          {/* Display selected images */}
+          <FlatList
+            horizontal
+            data={images}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <View style={styles.imagePreviewContainer}>
+                <Image source={{ uri: item.uri }} style={styles.imagePreview} />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={() => removeImage(index)}
+                >
+                  <Text style={styles.removeImageText}>×</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+        </View>
       </View>
+
       <TouchableOpacity style={styles.buttonContainer} onPress={handleSave}>
         {CreateVendor_Mutation.isLoading ? (
           <ActivityIndicator color="white" />
         ) : (
-          <Text style={styles.buttonText}>Create Vendor Profile</Text>
+          <Text style={styles.buttonText}>Create Product</Text>
         )}
       </TouchableOpacity>
     </ScrollView>
@@ -260,13 +223,6 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingHorizontal: 20,
-  },
-  dropdown: {
-    backgroundColor: "#eee",
-    borderRadius: 5,
-    marginBottom: 15,
-    borderColor: "transparent",
-    zIndex: 100,
   },
   label: {
     fontSize: 16,
@@ -301,84 +257,50 @@ const styles = StyleSheet.create({
     padding: 15,
     alignItems: "center",
     borderRadius: 5,
+    marginBottom: 20,
   },
   buttonText: {
     fontSize: 16,
     color: "white",
   },
+  imageUploadContainer: {
+    marginTop: 15,
+  },
+  imageUploadButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 15,
+  },
+  imagePreviewContainer: {
+    position: "relative",
+    marginRight: 10,
+    marginTop: 10,
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 5,
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    backgroundColor: "red",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  removeImageText: {
+    color: "white",
+    fontWeight: "bold",
+  },
 });
 
 export default CreateProduct;
-
-const CustomDropdown = ({ items, selectedValue, onValueChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useState(selectedValue);
-
-  const handleSelect = (item) => {
-    setValue(item);
-    onValueChange(item);
-    setIsOpen(false);
-  };
-
-  return (
-    <View>
-      <TouchableOpacity
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 5,
-          padding: 10,
-          backgroundColor: "#fff",
-        }}
-        onPress={() => setIsOpen(!isOpen)}
-      >
-        <Text style={{ fontSize: 16 }}>
-          {value ? value.label : "Select an option"}
-        </Text>
-      </TouchableOpacity>
-      {isOpen && (
-        <Modal
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setIsOpen(false)}
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                width: "80%",
-                maxHeight: "50%",
-                padding: 10,
-              }}
-            >
-              <FlatList
-                data={items}
-                keyExtractor={(item) => item.value.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={{
-                      padding: 10,
-                      borderBottomWidth: 1,
-                      borderBottomColor: "#eee",
-                    }}
-                    onPress={() => handleSelect(item)}
-                  >
-                    <Text>{item.label}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
-    </View>
-  );
-};

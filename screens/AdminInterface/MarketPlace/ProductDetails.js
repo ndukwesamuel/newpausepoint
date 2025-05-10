@@ -1,5 +1,5 @@
 import { useRoute } from "@react-navigation/native";
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,13 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LottieView from "lottie-react-native";
 import { useMutation } from "react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import Carousel from "react-native-snap-carousel";
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -21,6 +23,10 @@ import { AdminMarket_data_Fun } from "../../../Redux/Admin/AdminMarketSLice";
 const ProductDetails = ({ navigation }) => {
   const { item } = useRoute().params;
   const dispatch = useDispatch();
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const carouselRef = useRef(null);
+  const screenWidth = Dimensions.get("window").width;
 
   const { user_data } = useSelector((state) => state?.AuthSlice);
 
@@ -73,18 +79,44 @@ const ProductDetails = ({ navigation }) => {
       },
     }
   );
+
+  const renderItem = ({ item }) => {
+    return (
+      <View style={styles.slide}>
+        <Image
+          source={{ uri: item?.url }}
+          style={styles.carouselImage}
+          resizeMode="cover"
+        />
+      </View>
+    );
+  };
   return (
     <>
       <ScrollView style={{ paddingVertical: 20 }}>
-        <Image
-          source={{
-            uri: item.images[0]?.url,
-          }}
-          style={{
-            width: "100%",
-            height: 250,
-          }}
-        />
+        <View style={styles.carouselContainer}>
+          <Carousel
+            layout="default"
+            ref={carouselRef}
+            data={item?.images}
+            renderItem={renderItem}
+            sliderWidth={screenWidth}
+            itemWidth={screenWidth}
+            onSnapToItem={(index) => setActiveIndex(index)}
+          />
+          <View style={styles.pagination}>
+            {item?.images?.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.paginationDot,
+                  activeIndex === index ? styles.paginationDotActive : null,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
+
         <View style={styles.contentContainer}>
           <View style={styles.headerContainer}>
             <View>
@@ -109,10 +141,6 @@ const ProductDetails = ({ navigation }) => {
               {item?.seller?.name}
             </Text>
           </Text>
-          <Text style={styles.sellerInfo}>
-            {/* <Icon name="home" size={20} color="black" /> */}
-            {/* <Text> House 24, Tinubu estate</Text> */}
-          </Text>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -120,7 +148,7 @@ const ProductDetails = ({ navigation }) => {
             <ActivityIndicator size="large" color="white" />
           ) : (
             <>
-              {item?.status === "Pending" ? (
+              {item?.status === "Decline" ? (
                 <TouchableOpacity
                   style={styles.approveButton}
                   onPress={() => {
@@ -136,7 +164,7 @@ const ProductDetails = ({ navigation }) => {
                   style={styles.declineButton}
                   onPress={() => {
                     Aprove_Mutation.mutate({
-                      status: "Pending",
+                      status: "Decline",
                     });
                   }}
                 >
@@ -145,6 +173,10 @@ const ProductDetails = ({ navigation }) => {
               )}
             </>
           )}
+
+          {console.log({
+            ccc: item?.status,
+          })}
         </View>
       </ScrollView>
     </>
@@ -224,6 +256,39 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+
+  carouselContainer: {
+    position: "relative",
+  },
+  slide: {
+    width: "100%",
+    height: 250,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  carouselImage: {
+    width: "100%",
+    height: "100%",
+  },
+  pagination: {
+    position: "absolute",
+    bottom: 10,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.5)",
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: "white",
+    width: 12,
   },
 });
 

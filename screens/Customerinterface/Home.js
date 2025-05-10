@@ -27,6 +27,7 @@ import qrcode from "../../assets/qrcode.png";
 import service from "../../assets/settings.png";
 import market from "../../assets/mdi_marketplace-outline.png";
 import aboutusicon from "../../assets/Info_alt_light.png";
+import bikeIcon from "../../assets/fastbike.png";
 
 import search from "../../assets/search.png";
 import color_swatch from "../../assets/color-swatch.png";
@@ -127,6 +128,13 @@ export default function App({ navigation }) {
           <View>
             <ScrollView style={{ flexGrow: 1, marginTop: 5 }}>
               {TabButton(currentTab, setCurrentTab, "My Clans", clan, "myclan")}
+              {TabButton(
+                currentTab,
+                setCurrentTab,
+                "Errands",
+                bikeIcon,
+                "errands"
+              )}
               {TabButton(
                 currentTab,
                 setCurrentTab,

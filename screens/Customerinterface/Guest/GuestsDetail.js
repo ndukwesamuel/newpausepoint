@@ -29,6 +29,7 @@ import {
   AntDesign,
   MaterialIcons,
   FontAwesome,
+  FontAwesome5,
 } from "@expo/vector-icons";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -52,6 +53,7 @@ import QRCode from "react-native-qrcode-svg";
 import ViewShot from "react-native-view-shot";
 // import Share from "react-nat
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
+import { useMutateData } from "../../../hooks/Request";
 
 const GuestsDetail = () => {
   const dispatch = useDispatch();
@@ -67,6 +69,16 @@ const GuestsDetail = () => {
   const { get_all_user_guest_data, get_user_guest_detail_data } = useSelector(
     (state) => state?.GuestSlice
   );
+
+  console.log({
+    kklk: get_user_guest_detail_data,
+  });
+
+  const {
+    mutate: setdepature,
+    isLoading: ispendingsetdepature,
+    error,
+  } = useMutateData("api/v1/guest/modify", "PATCH", "guest");
 
   const [qrCodeValue, setQRCodeValue] = useState("");
   const viewShotRef = useRef();
@@ -229,6 +241,34 @@ const GuestsDetail = () => {
     }
   };
 
+  const handleDeparture = () => {
+    data = {
+      invitationId: get_user_guest_detail_data?.invitation?._id,
+      status: "departed",
+    };
+
+    console.log(data);
+    setdepature(
+      data,
+      {
+        onSuccess: (response) => {
+          console.log({
+            ddd: response?.data?.data,
+          });
+          navigation.goBack();
+        },
+      },
+
+      {
+        onError: (error) => {
+          console.error("Mutation Error:", error.message);
+        },
+      }
+    );
+    // Handle fund wallet logic here
+    // navigation.goBack();
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -310,6 +350,66 @@ const GuestsDetail = () => {
             </Text>
           </TouchableOpacity>
 
+          <View>
+            <Text style={styles.label}>Status:</Text>
+            <Text style={styles.text}>
+              {get_user_guest_detail_data?.invitation?.status}
+            </Text>
+          </View>
+
+          <View>
+            <Text style={styles.label}>Arrived Date:</Text>
+            <Text style={styles.text}>
+              {formatDateandTime(
+                get_user_guest_detail_data?.invitation?.arrived_at
+              )}
+              {/* {get_user_guest_detail_data?.invitation?.expires} */}
+            </Text>
+          </View>
+
+          {ispendingsetdepature ? (
+            <ActivityIndicator size="large" color="green" />
+          ) : (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <View>
+                <Text style={styles.label}>Departure Date:</Text>
+                <Text style={styles.text}>
+                  {formatDateandTime(
+                    get_user_guest_detail_data?.invitation?.departed_at
+                  )}
+                  {/* {get_user_guest_detail_data?.invitation?.expires} */}
+                </Text>
+              </View>
+
+              {!get_user_guest_detail_data?.invitation?.departed_at && (
+                <TouchableOpacity
+                  style={
+                    {
+                      // backgroundColor: "blue",
+                      // padding: 10,
+                      // borderRadius: 5,
+                      // marginTop: 10,
+                    }
+                  }
+                  onPress={handleDeparture}
+                >
+                  {/* <FontAwesome name="copy" size={24} color="black" /> */}
+                  <FontAwesome5
+                    name="plane-departure"
+                    size={24}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
           <Text style={styles.label}>Expires Date:</Text>
           <Text style={styles.text}>
             {formatDateandTime(get_user_guest_detail_data?.invitation?.expires)}
@@ -387,7 +487,7 @@ const GuestsDetail = () => {
         </View>
       </View>
 
-      <View style={{ position: "absolute", right: 20, top: 320, zIndex: 1 }}>
+      <View style={{ position: "absolute", right: 20, top: 50, zIndex: 1 }}>
         <TouchableOpacity
           style={{
             backgroundColor: "green",
