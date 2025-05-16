@@ -14,7 +14,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import LottieView from "lottie-react-native";
 import { useMutation } from "react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-import Carousel from "react-native-snap-carousel";
+// import Carousel from "react-native-snap-carousel";
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -95,7 +95,7 @@ const ProductDetails = ({ navigation }) => {
     <>
       <ScrollView style={{ paddingVertical: 20 }}>
         <View style={styles.carouselContainer}>
-          <Carousel
+          {/* <Carousel
             layout="default"
             ref={carouselRef}
             data={item?.images}
@@ -103,7 +103,7 @@ const ProductDetails = ({ navigation }) => {
             sliderWidth={screenWidth}
             itemWidth={screenWidth}
             onSnapToItem={(index) => setActiveIndex(index)}
-          />
+          /> */}
           <View style={styles.pagination}>
             {item?.images?.map((_, index) => (
               <View

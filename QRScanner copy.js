@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
-import { Camera } from "expo-camera";
+import { BarCodeScanner } from "expo-barcode-scanner";
 import axios from "axios";
 
 export default function QRScanner() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState(null);
-  const cameraRef = useRef(null);
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === "granted");
     })();
   }, []);
@@ -33,7 +32,6 @@ export default function QRScanner() {
 
       // Reset scanned data
       setScannedData(null);
-      setScanned(false); // Allow scanning again
     } catch (error) {
       console.error("Error sending data to server:", error);
     }
@@ -48,28 +46,13 @@ export default function QRScanner() {
 
   return (
     <View style={styles.container}>
-      <Camera
-        ref={cameraRef}
+      <BarCodeScanner
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
         style={StyleSheet.absoluteFillObject}
-        barCodeScannerSettings={{
-          barCodeTypes: ["qr", "pdf417", "code128", "ean13", "ean8", "upc_e"],
-        }}
       />
-      {scanned && scannedData && (
-        <View style={styles.resultsContainer}>
-          <Text style={styles.scannedText}>Scanned: {scannedData}</Text>
-          <View style={styles.buttonContainer}>
-            <Button title="Send Data" onPress={sendDataToServer} />
-            <Button
-              title="Scan Again"
-              onPress={() => {
-                setScanned(false);
-                setScannedData(null);
-              }}
-              color="#841584"
-            />
-          </View>
+      {scanned && (
+        <View style={styles.buttonContainer}>
+          <Button title={"Send Data"} onPress={sendDataToServer} />
         </View>
       )}
     </View>
@@ -83,24 +66,12 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center",
   },
-  resultsContainer: {
+  buttonContainer: {
     position: "absolute",
-    bottom: 0,
+    bottom: 20,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    padding: 20,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  scannedText: {
-    fontSize: 16,
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

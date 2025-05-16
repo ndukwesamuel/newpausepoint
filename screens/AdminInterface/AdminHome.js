@@ -139,7 +139,7 @@ export default function AdminHome() {
     <SafeAreaView
       style={{
         // flex: 1,
-        backgroundColor: "transparent",
+        backgroundColor: "white",
         marginTop: Platform.OS === "android" ? 20 : 0,
         flex: 1,
         // backgroundColor: "white",
