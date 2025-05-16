@@ -2,7 +2,6 @@
   "expo": {
     "name": "PausePoint",
     "slug": "PausePoint",
-    "newArchEnabled": true,
     "orientation": "default",
     "version": "1.2.4",
     "icon": "./assets/icon.png",
@@ -12,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "plugins": [
       [
         "expo-barcode-scanner",
@@ -33,7 +34,9 @@
       },
       "bundleIdentifier": "com.pause.point",
       "buildNumber": "12",
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "versionCode": 20,
@@ -43,7 +46,10 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pause_point.PausePoint",
-      "permissions": ["android.permission.CAMERA", "android.permission.CAMERA"],
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.CAMERA"
+      ],
       "runtimeVersion": "1.0.0"
     },
     "web": {
