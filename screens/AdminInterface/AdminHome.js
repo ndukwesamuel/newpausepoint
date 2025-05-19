@@ -11,6 +11,7 @@ import {
   FlatList,
   ScrollView,
   Dimensions,
+  Platform,
 } from "react-native";
 import profile from "../../assets/profile.png";
 // Tab ICons...

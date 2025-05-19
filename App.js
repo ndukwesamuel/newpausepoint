@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   View,
   Button,
+  AppState,
+  Alert,
 } from "react-native";
 import Onboading from "./components/Onboard/Onboading ";
 import AppNavigation, { RootStackParamList } from "./navigation/AppNavigation";
@@ -48,7 +50,7 @@ const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { setOnlineUser, setSocketConnection } from "./Redux/socketSlice";
 import { Linking } from "react-native";
-import { reset_login } from "./Redux/AuthSlice";
+import { pushtokendata, reset_login } from "./Redux/AuthSlice";
 
 const queryClient = new QueryClient();
 
@@ -474,84 +476,118 @@ import * as Device from "expo-device";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldPlaySound: false,
-    shouldSetBadge: false,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
     shouldShowBanner: true,
     shouldShowList: true,
   }),
 });
 
 export function AppNotification() {
+  const dispatch = useDispatch();
   const [expoPushToken, setExpoPushToken] = useState("");
   const [channels, setChannels] = useState([]);
   const [notification, setNotification] = useState(undefined);
   const notificationListener = useRef();
   const responseListener = useRef();
 
+  const appState = useRef(AppState.currentState);
+
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync().then(
+  //     (token) => token && setExpoPushToken(token)
+  //   );
+
+  //   if (Platform.OS === "android") {
+  //     Notifications.getNotificationChannelsAsync().then((value) =>
+  //       setChannels(value || [])
+  //     );
+  //   }
+  //   notificationListener.current =
+  //     Notifications.addNotificationReceivedListener((notification) => {
+  //       setNotification(notification);
+  //     });
+
+  //   responseListener.current =
+  //     Notifications.addNotificationResponseReceivedListener((response) => {
+  //       console.log(response);
+  //     });
+
+  //   return () => {
+  //     notificationListener.current &&
+  //       Notifications.removeNotificationSubscription(
+  //         notificationListener.current
+  //       );
+  //     responseListener.current &&
+  //       Notifications.removeNotificationSubscription(responseListener.current);
+  //   };
+  // }, []);
+
   useEffect(() => {
-    registerForPushNotificationsAsync().then(
-      (token) => token && setExpoPushToken(token)
+    // 1. Register for push notifications and get token
+    const registerPushNotifications = async () => {
+      const token = await registerForPushNotificationsAsync();
+      if (token) {
+        setExpoPushToken(token);
+        dispatch(pushtokendata(token));
+      }
+    };
+
+    registerPushNotifications();
+
+    // 2. Listen for app state changes
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      (nextAppState) => {
+        appState.current = nextAppState;
+      }
     );
 
-    if (Platform.OS === "android") {
-      Notifications.getNotificationChannelsAsync().then((value) =>
-        setChannels(value || [])
-      );
-    }
+    // 3. Listen for notifications received while app is foregrounded
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         setNotification(notification);
+
+        if (appState.current === "active") {
+          Alert.alert(
+            notification.request.content.title,
+            notification.request.content.body,
+            [
+              {
+                text: "OK",
+                onPress: () => console.log("Notification pressed"),
+              },
+            ],
+            { cancelable: false }
+          );
+        }
       });
 
+    // 4. Listen for user responses to notifications
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+        console.log("User interacted with notification:", response);
+        // Handle navigation or other actions here
       });
 
+    // Cleanup function
     return () => {
-      notificationListener.current &&
+      // Remove all listeners
+      if (notificationListener.current) {
         Notifications.removeNotificationSubscription(
           notificationListener.current
         );
-      responseListener.current &&
+      }
+      if (responseListener.current) {
         Notifications.removeNotificationSubscription(responseListener.current);
+      }
+      if (appStateSubscription) {
+        appStateSubscription.remove();
+      }
     };
-  }, []);
+  }, [dispatch]);
 
   return;
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "space-around",
-      }}
-    >
-      <Text>Your expo push token: {expoPushToken}</Text>
-      <Text>{`Channels: ${JSON.stringify(
-        channels.map((c) => c.id),
-        null,
-        2
-      )}`}</Text>
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Text>
-          Title: {notification && notification.request.content.title}{" "}
-        </Text>
-        <Text>Body: {notification && notification.request.content.body}</Text>
-        <Text>
-          Data:{" "}
-          {notification && JSON.stringify(notification.request.content.data)}
-        </Text>
-      </View>
-      <Button
-        title="Press to schedule a notification"
-        onPress={async () => {
-          await schedulePushNotification();
-        }}
-      />
-    </View>
-  );
 }
 
 async function schedulePushNotification() {
@@ -607,7 +643,7 @@ async function registerForPushNotificationsAsync() {
           projectId,
         })
       ).data;
-      console.log(token);
+      console.log({ mana: token });
     } catch (e) {
       token = `${e}`;
     }
