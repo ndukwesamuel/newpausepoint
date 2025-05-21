@@ -56,10 +56,6 @@ const ForumDetails = () => {
   });
   let forumid = maindata?._id;
   // const {gggggg} = useRoute()?.params?.forumid;
-  console.log({
-    bbb: maindata?.user,
-    aaa: get_user_profile_data?.user?._id,
-  });
 
   const deleteDate = () => {
     Delete_Mutation.mutate();

@@ -89,7 +89,7 @@ const LoginScreen = ({}) => {
       // tokenNotification: value,
       // mobile,
 
-      pushToken: pushtokendata,
+      pushToken: value,
     };
 
     if (remember) {
