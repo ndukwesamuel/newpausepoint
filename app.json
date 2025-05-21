@@ -51,6 +51,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pause_point.PausePoint",
+      "googleServicesFile": "./android/app/google-services.json",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
