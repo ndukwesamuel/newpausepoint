@@ -43,10 +43,6 @@ export const useFetchData = (url, queryKey, options = {}) => {
 
   const token = user_data?.token;
 
-  console.log({
-    kk: token,
-  });
-
   return useQuery([queryKey, url, token], fetchData, {
     enabled: !!token, // Prevent query from running without a token
     retry: false, // Prevent endless retries if there's an error

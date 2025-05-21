@@ -52,6 +52,8 @@ import { setOnlineUser, setSocketConnection } from "./Redux/socketSlice";
 import { Linking } from "react-native";
 import { pushtokendata, reset_login } from "./Redux/AuthSlice";
 
+import * as Device from "expo-device";
+
 const queryClient = new QueryClient();
 
 const Stack = createNativeStackNavigator();
@@ -291,6 +293,10 @@ export const NavigationScreen = () => {
       //   })
       // ).data;
 
+      console.log({
+        jajacccc: token,
+      });
+
       // console.log({ first_token: token });
       // Permission granted, handle accordingly
       await AsyncStorage.setItem("PushToken", token);
@@ -472,8 +478,6 @@ export const useUpdateChecker = (checkInterval = 60000) => {
   return { updateInfo };
 };
 
-import * as Device from "expo-device";
-
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: true,
@@ -483,59 +487,999 @@ Notifications.setNotificationHandler({
   }),
 });
 
+// export function AppNotification() {
+//   const dispatch = useDispatch();
+//   const [expoPushToken, setExpoPushToken] = useState("");
+//   const [channels, setChannels] = useState([]);
+//   const [notification, setNotification] = useState(undefined);
+//   const notificationListener = useRef();
+//   const responseListener = useRef();
+
+//   const appState = useRef(AppState.currentState);
+
+//   useEffect(() => {
+//     // 1. Register for push notifications and get token
+//     const registerPushNotifications = async () => {
+//       const token = await registerForPushNotificationsAsync();
+//       if (token) {
+//         setExpoPushToken(token);
+//         dispatch(pushtokendata(token));
+//       }
+//       console.log({
+//         vvv: token,
+//       });
+//     };
+
+//     registerPushNotifications();
+
+//     // 2. Listen for app state changes
+//     const appStateSubscription = AppState.addEventListener(
+//       "change",
+//       (nextAppState) => {
+//         appState.current = nextAppState;
+//       }
+//     );
+
+//     // 3. Listen for notifications received while app is foregrounded
+//     notificationListener.current =
+//       Notifications.addNotificationReceivedListener((notification) => {
+//         setNotification(notification);
+
+//         if (appState.current === "active") {
+//           Alert.alert(
+//             notification.request.content.title,
+//             notification.request.content.body,
+//             [
+//               {
+//                 text: "OK",
+//                 onPress: () => console.log("Notification pressed"),
+//               },
+//             ],
+//             { cancelable: false }
+//           );
+//         }
+//       });
+
+//     // 4. Listen for user responses to notifications
+//     responseListener.current =
+//       Notifications.addNotificationResponseReceivedListener((response) => {
+//         console.log("User interacted with notification:", response);
+//         // Handle navigation or other actions here
+//       });
+
+//     // Cleanup function
+//     return () => {
+//       // Remove all listeners
+//       if (notificationListener.current) {
+//         Notifications.removeNotificationSubscription(
+//           notificationListener.current
+//         );
+//       }
+//       if (responseListener.current) {
+//         Notifications.removeNotificationSubscription(responseListener.current);
+//       }
+//       if (appStateSubscription) {
+//         appStateSubscription.remove();
+//       }
+//     };
+//   }, [dispatch]);
+
+//   return;
+// }
+
+// async function schedulePushNotification() {
+//   await Notifications.scheduleNotificationAsync({
+//     content: {
+//       title: "You've got mail! 📬",
+//       body: "Here is the notification body",
+//       data: { data: "goes here", test: { test1: "more data" } },
+//     },
+//     trigger: {
+//       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+//       seconds: 2,
+//     },
+//   });
+// }
+
+// async function registerForPushNotificationsAsync() {
+//   let token;
+
+//   if (Platform.OS === "android") {
+//     await Notifications.setNotificationChannelAsync("myNotificationChannel", {
+//       name: "A channel is needed for the permissions prompt to appear",
+//       importance: Notifications.AndroidImportance.MAX,
+//       vibrationPattern: [0, 250, 250, 250],
+//       lightColor: "#FF231F7C",
+//     });
+//   }
+
+//   if (Device.isDevice) {
+//     const { status: existingStatus } =
+//       await Notifications.getPermissionsAsync();
+//     let finalStatus = existingStatus;
+//     if (existingStatus !== "granted") {
+//       const { status } = await Notifications.requestPermissionsAsync();
+//       finalStatus = status;
+//     }
+//     if (finalStatus !== "granted") {
+//       alert("Failed to get push token for push notification!");
+//       return;
+//     }
+//     // Learn more about projectId:
+//     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+//     // EAS projectId is used here.
+//     try {
+//       const projectId =
+//         Constants?.expoConfig?.extra?.eas?.projectId ??
+//         Constants?.easConfig?.projectId;
+//       if (!projectId) {
+//         throw new Error("Project ID not found");
+//       }
+//       token = (
+//         await Notifications.getExpoPushTokenAsync({
+//           projectId,
+//         })
+//       ).data;
+//       console.log({ mana: token });
+//     } catch (e) {
+//       token = `${e}`;
+//     }
+//   } else {
+//     alert("Must use physical device for Push Notifications");
+//   }
+
+//   return token;
+// }
+
+// export function AppNotification() {
+//   const dispatch = useDispatch();
+//   const [expoPushToken, setExpoPushToken] = useState("");
+//   const [notification, setNotification] = useState(undefined);
+//   const notificationListener = useRef();
+//   const responseListener = useRef();
+
+//   const appState = useRef(AppState.currentState);
+
+//   useEffect(() => {
+//     // 1. Register for push notifications and get token
+//     const registerPushNotifications = async () => {
+//       const token = await registerForPushNotificationsAsync();
+//       if (token) {
+//         setExpoPushToken(token);
+//         dispatch(pushtokendata(token));
+//       }
+//       console.log({
+//         vvv: token,
+//       });
+//     };
+
+//     registerPushNotifications();
+
+//     // 2. Configure foreground notification presentation options
+//     Notifications.setNotificationHandler({
+//       handleNotification: async () => ({
+//         shouldShowAlert: true, // This is the key setting - show alerts in foreground
+//         shouldPlaySound: true,
+//         shouldSetBadge: true,
+//       }),
+//     });
+
+//     // 3. Listen for app state changes
+//     const appStateSubscription = AppState.addEventListener(
+//       "change",
+//       (nextAppState) => {
+//         appState.current = nextAppState;
+//       }
+//     );
+
+//     // 4. Listen for notifications received while app is foregrounded
+//     notificationListener.current =
+//       Notifications.addNotificationReceivedListener((notification) => {
+//         setNotification(notification);
+//         // No need for Alert here - the notification handler will show it
+//       });
+
+//     // 5. Listen for user responses to notifications
+//     responseListener.current =
+//       Notifications.addNotificationResponseReceivedListener((response) => {
+//         console.log("User interacted with notification:", response);
+//         // Handle navigation or other actions here
+//       });
+
+//     // Cleanup function
+//     return () => {
+//       // Remove all listeners
+//       if (notificationListener.current) {
+//         Notifications.removeNotificationSubscription(
+//           notificationListener.current
+//         );
+//       }
+//       if (responseListener.current) {
+//         Notifications.removeNotificationSubscription(responseListener.current);
+//       }
+//       if (appStateSubscription) {
+//         appStateSubscription.remove();
+//       }
+//     };
+//   }, [dispatch]);
+
+//   return null;
+// }
+
+// async function schedulePushNotification() {
+//   await Notifications.scheduleNotificationAsync({
+//     content: {
+//       title: "You've got mail! 📬",
+//       body: "Here is the notification body",
+//       data: { data: "goes here", test: { test1: "more data" } },
+//     },
+//     trigger: {
+//       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+//       seconds: 2,
+//     },
+//   });
+// }
+
+// async function registerForPushNotificationsAsync() {
+//   let token;
+
+//   if (Platform.OS === "android") {
+//     await Notifications.setNotificationChannelAsync("myNotificationChannel", {
+//       name: "A channel is needed for the permissions prompt to appear",
+//       importance: Notifications.AndroidImportance.MAX,
+//       vibrationPattern: [0, 250, 250, 250],
+//       lightColor: "#FF231F7C",
+//     });
+//   }
+
+//   if (Device.isDevice) {
+//     const { status: existingStatus } =
+//       await Notifications.getPermissionsAsync();
+//     let finalStatus = existingStatus;
+//     if (existingStatus !== "granted") {
+//       const { status } = await Notifications.requestPermissionsAsync();
+//       finalStatus = status;
+//     }
+//     if (finalStatus !== "granted") {
+//       alert("Failed to get push token for push notification!");
+//       return;
+//     }
+//     // Learn more about projectId:
+//     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+//     // EAS projectId is used here.
+//     try {
+//       const projectId =
+//         Constants?.expoConfig?.extra?.eas?.projectId ??
+//         Constants?.easConfig?.projectId;
+//       if (!projectId) {
+//         throw new Error("Project ID not found");
+//       }
+//       token = (
+//         await Notifications.getExpoPushTokenAsync({
+//           projectId,
+//         })
+//       ).data;
+//       console.log({ mana: token });
+//     } catch (e) {
+//       token = `${e}`;
+//     }
+//   } else {
+//     alert("Must use physical device for Push Notifications");
+//   }
+
+//   return token;
+// }
+
+// export function AppNotification() {
+//   const dispatch = useDispatch();
+//   const [expoPushToken, setExpoPushToken] = useState("");
+//   const [notification, setNotification] = useState(undefined);
+//   const notificationListener = useRef();
+//   const responseListener = useRef();
+//   const [visible, setVisible] = useState(false);
+//   const [notificationContent, setNotificationContent] = useState({
+//     title: "",
+//     body: "",
+//   });
+
+//   const appState = useRef(AppState.currentState);
+
+//   // Create a custom foreground notification component
+//   const CustomNotification = ({ title, body, onDismiss }) => {
+//     return (
+//       <View
+//         style={{
+//           position: "absolute",
+//           top: 0,
+//           left: 0,
+//           right: 0,
+//           backgroundColor: "#333",
+//           padding: 16,
+//           margin: 10,
+//           borderRadius: 8,
+//           zIndex: 1000,
+//           elevation: 5,
+//           shadowColor: "#000",
+//           shadowOffset: { width: 0, height: 2 },
+//           shadowOpacity: 0.25,
+//           shadowRadius: 3.84,
+//         }}
+//       >
+//         <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
+//           {title}
+//         </Text>
+//         <Text style={{ color: "white", marginTop: 5 }}>{body}</Text>
+//         <TouchableOpacity
+//           style={{ alignSelf: "flex-end", marginTop: 8 }}
+//           onPress={onDismiss}
+//         >
+//           <Text style={{ color: "#3498db" }}>Dismiss</Text>
+//         </TouchableOpacity>
+//       </View>
+//     );
+//   };
+
+//   useEffect(() => {
+//     // 1. Register for push notifications and get token
+//     const registerPushNotifications = async () => {
+//       const token = await registerForPushNotificationsAsync();
+//       if (token) {
+//         setExpoPushToken(token);
+//         dispatch(pushtokendata(token));
+//       }
+//       console.log({
+//         vvv: token,
+//       });
+//     };
+
+//     registerPushNotifications();
+
+//     // 2. Configure foreground notification presentation options
+//     // Set this to FALSE for foreground so we can handle it ourselves
+//     Notifications.setNotificationHandler({
+//       handleNotification: async () => ({
+//         shouldShowAlert: false,
+//         shouldPlaySound: true,
+//         shouldSetBadge: true,
+//       }),
+//     });
+
+//     // 3. Listen for app state changes
+//     const appStateSubscription = AppState.addEventListener(
+//       "change",
+//       (nextAppState) => {
+//         appState.current = nextAppState;
+//       }
+//     );
+
+//     // 4. Listen for notifications received while app is foregrounded
+//     notificationListener.current =
+//       Notifications.addNotificationReceivedListener((notification) => {
+//         setNotification(notification);
+
+//         // Show our custom notification UI if app is in foreground
+//         if (appState.current === "active") {
+//           setNotificationContent({
+//             title: notification.request.content.title || "Notification",
+//             body: notification.request.content.body || "",
+//           });
+//           setVisible(true);
+
+//           // Auto-hide after 5 seconds
+//           setTimeout(() => {
+//             setVisible(false);
+//           }, 5000);
+//         }
+//       });
+
+//     // 5. Listen for user responses to notifications
+//     responseListener.current =
+//       Notifications.addNotificationResponseReceivedListener((response) => {
+//         console.log("User interacted with notification:", response);
+//         // Handle navigation or other actions here
+//       });
+
+//     // Cleanup function
+//     return () => {
+//       // Remove all listeners
+//       if (notificationListener.current) {
+//         Notifications.removeNotificationSubscription(
+//           notificationListener.current
+//         );
+//       }
+//       if (responseListener.current) {
+//         Notifications.removeNotificationSubscription(responseListener.current);
+//       }
+//       if (appStateSubscription) {
+//         appStateSubscription.remove();
+//       }
+//     };
+//   }, [dispatch]);
+
+//   // Render our custom notification when visible
+//   return (
+//     <>
+//       {visible && (
+//         <CustomNotification
+//           title={notificationContent.title}
+//           body={notificationContent.body}
+//           onDismiss={() => setVisible(false)}
+//         />
+//       )}
+//     </>
+//   );
+// }
+
+// async function schedulePushNotification() {
+//   await Notifications.scheduleNotificationAsync({
+//     content: {
+//       title: "You've got mail! 📬",
+//       body: "Here is the notification body",
+//       data: { data: "goes here", test: { test1: "more data" } },
+//     },
+//     trigger: {
+//       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+//       seconds: 2,
+//     },
+//   });
+// }
+
+// async function registerForPushNotificationsAsync() {
+//   let token;
+
+//   if (Platform.OS === "android") {
+//     await Notifications.setNotificationChannelAsync("myNotificationChannel", {
+//       name: "A channel is needed for the permissions prompt to appear",
+//       importance: Notifications.AndroidImportance.MAX,
+//       vibrationPattern: [0, 250, 250, 250],
+//       lightColor: "#FF231F7C",
+//     });
+//   }
+
+//   if (Device.isDevice) {
+//     const { status: existingStatus } =
+//       await Notifications.getPermissionsAsync();
+//     let finalStatus = existingStatus;
+//     if (existingStatus !== "granted") {
+//       const { status } = await Notifications.requestPermissionsAsync();
+//       finalStatus = status;
+//     }
+//     if (finalStatus !== "granted") {
+//       alert("Failed to get push token for push notification!");
+//       return;
+//     }
+//     // Learn more about projectId:
+//     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+//     // EAS projectId is used here.
+//     try {
+//       const projectId =
+//         Constants?.expoConfig?.extra?.eas?.projectId ??
+//         Constants?.easConfig?.projectId;
+//       if (!projectId) {
+//         throw new Error("Project ID not found");
+//       }
+//       token = (
+//         await Notifications.getExpoPushTokenAsync({
+//           projectId,
+//         })
+//       ).data;
+//       console.log({ mana: token });
+//     } catch (e) {
+//       token = `${e}`;
+//     }
+//   } else {
+//     alert("Must use physical device for Push Notifications");
+//   }
+
+//   return token;
+// }
+
+// export function AppNotification() {
+//   const dispatch = useDispatch();
+//   const [expoPushToken, setExpoPushToken] = useState("");
+//   const [notification, setNotification] = useState(undefined);
+//   const notificationListener = useRef();
+//   const responseListener = useRef();
+//   const [visible, setVisible] = useState(false);
+//   const [notificationContent, setNotificationContent] = useState({
+//     title: "",
+//     body: "",
+//   });
+
+//   const appState = useRef(AppState.currentState);
+
+//   // Create a custom foreground notification component
+//   const CustomNotification = ({ title, body, onDismiss }) => {
+//     return (
+//       <View
+//         style={{
+//           position: "absolute",
+//           top: 0,
+//           left: 0,
+//           right: 0,
+//           backgroundColor: "#333",
+//           padding: 16,
+//           margin: 10,
+//           borderRadius: 8,
+//           zIndex: 1000,
+//           elevation: 5,
+//           shadowColor: "#000",
+//           shadowOffset: { width: 0, height: 2 },
+//           shadowOpacity: 0.25,
+//           shadowRadius: 3.84,
+//         }}
+//       >
+//         <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
+//           {title}
+//         </Text>
+//         <Text style={{ color: "white", marginTop: 5 }}>{body}</Text>
+//         <TouchableOpacity
+//           style={{ alignSelf: "flex-end", marginTop: 8 }}
+//           onPress={onDismiss}
+//         >
+//           <Text style={{ color: "#3498db" }}>Dismiss</Text>
+//         </TouchableOpacity>
+//       </View>
+//     );
+//   };
+
+//   useEffect(() => {
+//     // 1. Register for push notifications and get token
+//     const registerPushNotifications = async () => {
+//       const token = await registerForPushNotificationsAsync();
+//       if (token) {
+//         setExpoPushToken(token);
+//         dispatch(pushtokendata(token));
+//       }
+//       console.log({
+//         vvv: token,
+//       });
+//     };
+
+//     registerPushNotifications();
+
+//     // 2. Configure foreground notification presentation options
+//     // For iOS, we need to show the real notification
+//     Notifications.setNotificationHandler({
+//       handleNotification: async () => ({
+//         shouldShowAlert: true,
+//         shouldPlaySound: true,
+//         shouldSetBadge: true,
+//         shouldRequestOpenURL: true,
+//       }),
+//     });
+
+//     // iOS-specific: Set presentation options for received notifications
+//     if (Platform.OS === "ios") {
+//       // This is important for iOS
+//       Notifications.setNotificationCategoryAsync("default", [
+//         {
+//           identifier: "default",
+//           buttonTitle: "View",
+//           options: {
+//             isDestructive: false,
+//             isAuthenticationRequired: false,
+//           },
+//         },
+//       ]);
+//     }
+
+//     // 3. Listen for app state changes
+//     const appStateSubscription = AppState.addEventListener(
+//       "change",
+//       (nextAppState) => {
+//         appState.current = nextAppState;
+//       }
+//     );
+
+//     // 4. Listen for notifications received while app is foregrounded
+//     notificationListener.current =
+//       Notifications.addNotificationReceivedListener((notification) => {
+//         setNotification(notification);
+
+//         // Show our custom notification UI if app is in foreground
+//         // and if we're on Android (since iOS will show native notifications)
+//         if (appState.current === "active" && Platform.OS === "android") {
+//           setNotificationContent({
+//             title: notification.request.content.title || "Notification",
+//             body: notification.request.content.body || "",
+//           });
+//           setVisible(true);
+
+//           // Auto-hide after 5 seconds
+//           setTimeout(() => {
+//             setVisible(false);
+//           }, 5000);
+//         }
+//       });
+
+//     // 5. Listen for user responses to notifications
+//     responseListener.current =
+//       Notifications.addNotificationResponseReceivedListener((response) => {
+//         console.log("User interacted with notification:", response);
+//         // Handle navigation or other actions here
+//       });
+
+//     // Cleanup function
+//     return () => {
+//       // Remove all listeners
+//       if (notificationListener.current) {
+//         Notifications.removeNotificationSubscription(
+//           notificationListener.current
+//         );
+//       }
+//       if (responseListener.current) {
+//         Notifications.removeNotificationSubscription(responseListener.current);
+//       }
+//       if (appStateSubscription) {
+//         appStateSubscription.remove();
+//       }
+//     };
+//   }, [dispatch]);
+
+//   // Render our custom notification when visible
+//   return (
+//     <>
+//       {visible && (
+//         <CustomNotification
+//           title={notificationContent.title}
+//           body={notificationContent.body}
+//           onDismiss={() => setVisible(false)}
+//         />
+//       )}
+//     </>
+//   );
+// }
+
+// async function schedulePushNotification() {
+//   await Notifications.scheduleNotificationAsync({
+//     content: {
+//       title: "You've got mail! 📬",
+//       body: "Here is the notification body",
+//       data: { data: "goes here", test: { test1: "more data" } },
+//     },
+//     trigger: {
+//       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+//       seconds: 2,
+//     },
+//   });
+// }
+
+// async function registerForPushNotificationsAsync() {
+//   let token;
+
+//   if (Platform.OS === "android") {
+//     await Notifications.setNotificationChannelAsync("myNotificationChannel", {
+//       name: "A channel is needed for the permissions prompt to appear",
+//       importance: Notifications.AndroidImportance.MAX,
+//       vibrationPattern: [0, 250, 250, 250],
+//       lightColor: "#FF231F7C",
+//     });
+//   }
+
+//   if (Device.isDevice) {
+//     const { status: existingStatus } =
+//       await Notifications.getPermissionsAsync();
+//     let finalStatus = existingStatus;
+//     if (existingStatus !== "granted") {
+//       const { status } = await Notifications.requestPermissionsAsync({
+//         ios: {
+//           allowAlert: true,
+//           allowBadge: true,
+//           allowSound: true,
+//           allowDisplayInCarPlay: true,
+//           allowCriticalAlerts: true,
+//           provideAppNotificationSettings: true,
+//           allowProvisional: true,
+//           allowAnnouncements: true,
+//         },
+//       });
+//       finalStatus = status;
+//     }
+//     if (finalStatus !== "granted") {
+//       alert("Failed to get push token for push notification!");
+//       return;
+//     }
+//     // Learn more about projectId:
+//     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+//     // EAS projectId is used here.
+//     try {
+//       const projectId =
+//         Constants?.expoConfig?.extra?.eas?.projectId ??
+//         Constants?.easConfig?.projectId;
+//       if (!projectId) {
+//         throw new Error("Project ID not found");
+//       }
+//       token = (
+//         await Notifications.getExpoPushTokenAsync({
+//           projectId,
+//         })
+//       ).data;
+//       console.log({ mana: token });
+//     } catch (e) {
+//       token = `${e}`;
+//     }
+//   } else {
+//     alert("Must use physical device for Push Notifications");
+//   }
+
+//   return token;
+// }
+
+// export function AppNotification() {
+//   const dispatch = useDispatch();
+//   const [expoPushToken, setExpoPushToken] = useState("");
+//   const [notification, setNotification] = useState(undefined);
+//   const notificationListener = useRef();
+//   const responseListener = useRef();
+//   const [visible, setVisible] = useState(false);
+//   const [notificationContent, setNotificationContent] = useState({
+//     title: "",
+//     body: "",
+//   });
+
+//   const appState = useRef(AppState.currentState);
+
+//   // Create a custom foreground notification component
+//   const CustomNotification = ({ title, body, onDismiss }) => {
+//     return (
+//       <View
+//         style={{
+//           position: "absolute",
+//           top: 0,
+//           left: 0,
+//           right: 0,
+//           backgroundColor: "#333",
+//           padding: 16,
+//           margin: 10,
+//           borderRadius: 8,
+//           zIndex: 1000,
+//           elevation: 5,
+//           shadowColor: "#000",
+//           shadowOffset: { width: 0, height: 2 },
+//           shadowOpacity: 0.25,
+//           shadowRadius: 3.84,
+//         }}
+//       >
+//         <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
+//           {title}
+//         </Text>
+//         <Text style={{ color: "white", marginTop: 5 }}>{body}</Text>
+//         <TouchableOpacity
+//           style={{ alignSelf: "flex-end", marginTop: 8 }}
+//           onPress={onDismiss}
+//         >
+//           <Text style={{ color: "#3498db" }}>Dismiss</Text>
+//         </TouchableOpacity>
+//       </View>
+//     );
+//   };
+
+//   useEffect(() => {
+//     // 1. Register for push notifications and get token
+//     const registerPushNotifications = async () => {
+//       const token = await registerForPushNotificationsAsync();
+//       if (token) {
+//         setExpoPushToken(token);
+//         dispatch(pushtokendata(token));
+//       }
+//       console.log({
+//         vvv: token,
+//       });
+//     };
+
+//     registerPushNotifications();
+
+//     // 2. Configure foreground notification presentation options
+//     // For iOS, we need to show the real notification
+//     Notifications.setNotificationHandler({
+//       handleNotification: async () => ({
+//         shouldShowAlert: true,
+//         shouldPlaySound: true,
+//         shouldSetBadge: true,
+//         shouldRequestOpenURL: true,
+//       }),
+//     });
+
+//     // iOS-specific: Set presentation options for received notifications
+//     if (Platform.OS === "ios") {
+//       // This is important for iOS
+//       Notifications.setNotificationCategoryAsync("default", [
+//         {
+//           identifier: "default",
+//           buttonTitle: "View",
+//           options: {
+//             isDestructive: false,
+//             isAuthenticationRequired: false,
+//           },
+//         },
+//       ]);
+//     }
+
+//     // 3. Listen for app state changes
+//     const appStateSubscription = AppState.addEventListener(
+//       "change",
+//       (nextAppState) => {
+//         appState.current = nextAppState;
+//       }
+//     );
+
+//     // 4. Listen for notifications received while app is foregrounded
+//     notificationListener.current =
+//       Notifications.addNotificationReceivedListener((notification) => {
+//         setNotification(notification);
+
+//         // Show our custom notification UI if app is in foreground
+//         // and if we're on Android (since iOS will show native notifications)
+//         if (appState.current === "active" && Platform.OS === "android") {
+//           setNotificationContent({
+//             title: notification.request.content.title || "Notification",
+//             body: notification.request.content.body || "",
+//           });
+//           setVisible(true);
+
+//           // Auto-hide after 5 seconds
+//           setTimeout(() => {
+//             setVisible(false);
+//           }, 5000);
+//         }
+//       });
+
+//     // 5. Listen for user responses to notifications
+//     responseListener.current =
+//       Notifications.addNotificationResponseReceivedListener((response) => {
+//         console.log("User interacted with notification:", response);
+//         // Handle navigation or other actions here
+//       });
+
+//     // Cleanup function
+//     return () => {
+//       // Remove all listeners
+//       if (notificationListener.current) {
+//         Notifications.removeNotificationSubscription(
+//           notificationListener.current
+//         );
+//       }
+//       if (responseListener.current) {
+//         Notifications.removeNotificationSubscription(responseListener.current);
+//       }
+//       if (appStateSubscription) {
+//         appStateSubscription.remove();
+//       }
+//     };
+//   }, [dispatch]);
+
+//   // Render our custom notification when visible
+//   return (
+//     <>
+//       {visible && (
+//         <CustomNotification
+//           title={notificationContent.title}
+//           body={notificationContent.body}
+//           onDismiss={() => setVisible(false)}
+//         />
+//       )}
+//     </>
+//   );
+// }
+
+// async function schedulePushNotification() {
+//   await Notifications.scheduleNotificationAsync({
+//     content: {
+//       title: "You've got mail! 📬",
+//       body: "Here is the notification body",
+//       data: { data: "goes here", test: { test1: "more data" } },
+//     },
+//     trigger: {
+//       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+//       seconds: 2,
+//     },
+//   });
+// }
+
+// async function registerForPushNotificationsAsync() {
+//   let token;
+
+//   if (Platform.OS === "android") {
+//     await Notifications.setNotificationChannelAsync("myNotificationChannel", {
+//       name: "A channel is needed for the permissions prompt to appear",
+//       importance: Notifications.AndroidImportance.MAX,
+//       vibrationPattern: [0, 250, 250, 250],
+//       lightColor: "#FF231F7C",
+//     });
+//   }
+
+//   if (Device.isDevice) {
+//     const { status: existingStatus } =
+//       await Notifications.getPermissionsAsync();
+//     let finalStatus = existingStatus;
+//     if (existingStatus !== "granted") {
+//       const { status } = await Notifications.requestPermissionsAsync({
+//         ios: {
+//           allowAlert: true,
+//           allowBadge: true,
+//           allowSound: true,
+//           allowDisplayInCarPlay: true,
+//           allowCriticalAlerts: true,
+//           provideAppNotificationSettings: true,
+//           allowProvisional: true,
+//           allowAnnouncements: true,
+//         },
+//       });
+//       finalStatus = status;
+//     }
+//     if (finalStatus !== "granted") {
+//       alert("Failed to get push token for push notification!");
+//       return;
+//     }
+//     // Learn more about projectId:
+//     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+//     // EAS projectId is used here.
+//     try {
+//       const projectId =
+//         Constants?.expoConfig?.extra?.eas?.projectId ??
+//         Constants?.easConfig?.projectId;
+//       if (!projectId) {
+//         throw new Error("Project ID not found");
+//       }
+//       token = (
+//         await Notifications.getExpoPushTokenAsync({
+//           projectId,
+//         })
+//       ).data;
+//       console.log({ mana: token });
+//     } catch (e) {
+//       token = `${e}`;
+//     }
+//   } else {
+//     alert("Must use physical device for Push Notifications");
+//   }
+
+//   return token;
+// }
+
 export function AppNotification() {
   const dispatch = useDispatch();
   const [expoPushToken, setExpoPushToken] = useState("");
-  const [channels, setChannels] = useState([]);
   const [notification, setNotification] = useState(undefined);
   const notificationListener = useRef();
   const responseListener = useRef();
-
   const appState = useRef(AppState.currentState);
 
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync().then(
-  //     (token) => token && setExpoPushToken(token)
-  //   );
-
-  //   if (Platform.OS === "android") {
-  //     Notifications.getNotificationChannelsAsync().then((value) =>
-  //       setChannels(value || [])
-  //     );
-  //   }
-  //   notificationListener.current =
-  //     Notifications.addNotificationReceivedListener((notification) => {
-  //       setNotification(notification);
-  //     });
-
-  //   responseListener.current =
-  //     Notifications.addNotificationResponseReceivedListener((response) => {
-  //       console.log(response);
-  //     });
-
-  //   return () => {
-  //     notificationListener.current &&
-  //       Notifications.removeNotificationSubscription(
-  //         notificationListener.current
-  //       );
-  //     responseListener.current &&
-  //       Notifications.removeNotificationSubscription(responseListener.current);
-  //   };
-  // }, []);
+  const storePushToken = async (token) => {
+    try {
+      await AsyncStorage.setItem("PushToken", token);
+      console.log("Push token saved");
+    } catch (error) {
+      console.error("Error saving push token:", error);
+    }
+  };
 
   useEffect(() => {
     // 1. Register for push notifications and get token
     const registerPushNotifications = async () => {
       const token = await registerForPushNotificationsAsync();
+
       if (token) {
+        storePushToken(token);
         setExpoPushToken(token);
         dispatch(pushtokendata(token));
       }
+      console.log("Push token:", token);
     };
 
     registerPushNotifications();
 
-    // 2. Listen for app state changes
+    // 2. Configure foreground notification presentation options - THIS IS THE KEY PART
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true, // Set to TRUE to show notification in foreground
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+
+    // 3. Listen for app state changes
     const appStateSubscription = AppState.addEventListener(
       "change",
       (nextAppState) => {
@@ -543,27 +1487,17 @@ export function AppNotification() {
       }
     );
 
-    // 3. Listen for notifications received while app is foregrounded
+    // 4. Listen for notifications received while app is foregrounded
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
+        console.log("Notification received:", notification);
         setNotification(notification);
+        console.log("this is me");
 
-        if (appState.current === "active") {
-          Alert.alert(
-            notification.request.content.title,
-            notification.request.content.body,
-            [
-              {
-                text: "OK",
-                onPress: () => console.log("Notification pressed"),
-              },
-            ],
-            { cancelable: false }
-          );
-        }
+        // No custom handling needed - the notification handler will show the notification
       });
 
-    // 4. Listen for user responses to notifications
+    // 5. Listen for user responses to notifications
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("User interacted with notification:", response);
@@ -587,7 +1521,7 @@ export function AppNotification() {
     };
   }, [dispatch]);
 
-  return;
+  return null;
 }
 
 async function schedulePushNotification() {
@@ -595,12 +1529,9 @@ async function schedulePushNotification() {
     content: {
       title: "You've got mail! 📬",
       body: "Here is the notification body",
-      data: { data: "goes here", test: { test1: "more data" } },
+      data: { data: "goes here" },
     },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 2,
-    },
+    trigger: { seconds: 2 },
   });
 }
 
@@ -608,8 +1539,9 @@ async function registerForPushNotificationsAsync() {
   let token;
 
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("myNotificationChannel", {
-      name: "A channel is needed for the permissions prompt to appear",
+    // For Android, create a notification channel with high importance
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "Default Channel",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: "#FF231F7C",
@@ -621,16 +1553,21 @@ async function registerForPushNotificationsAsync() {
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowBadge: true,
+          allowSound: true,
+          allowAnnouncements: true,
+        },
+      });
       finalStatus = status;
     }
     if (finalStatus !== "granted") {
       alert("Failed to get push token for push notification!");
       return;
     }
-    // Learn more about projectId:
-    // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
-    // EAS projectId is used here.
+
     try {
       const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ??
@@ -643,8 +1580,9 @@ async function registerForPushNotificationsAsync() {
           projectId,
         })
       ).data;
-      console.log({ mana: token });
+      console.log("Expo push token:", token);
     } catch (e) {
+      console.error("Error getting push token:", e);
       token = `${e}`;
     }
   } else {
