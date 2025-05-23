@@ -86,13 +86,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.pausepoint"
+    namespace 'com.pause_point.PausePoint'
     defaultConfig {
-        applicationId "com.pausepoint"
+        applicationId 'com.pause_point.PausePoint'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 20
+        versionName "1.2.4"
     }
     signingConfigs {
         debug {
