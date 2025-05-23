@@ -28,11 +28,6 @@
   "submit": {
     "production": {
       "ios": {
-        // "ascApiKeyPath": "./AuthKey_QC8GH7A94Y.p8",
-        // "appleId": "ndukwesamuel23@yahoo.com",
-        // "ascAppId": "6737306595",
-        // "appleTeamId": "CJVCVZA4KV"
-
         "ascApiKeyPath": "./AuthKey_QC8GH7A94Y.p8",
         "ascApiKeyIssuerId": "78a19426-c064-4c1d-a192-ae1849eb23c9",
         "ascApiKeyId": "XV88B8A6V5",
