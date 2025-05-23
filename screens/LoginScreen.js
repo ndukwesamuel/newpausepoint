@@ -46,7 +46,12 @@ const LoginScreen = ({}) => {
     user_isSuccess,
     user_isLoading,
     user_message,
+    pushtokendata,
   } = useSelector((state) => state.AuthSlice);
+
+  console.log({
+    james: pushtokendata,
+  });
 
   const [inputValue, setInputValue] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -81,8 +86,10 @@ const LoginScreen = ({}) => {
     let data = {
       email: email,
       password: passwords.mainPassword,
-      tokenNotification: value,
-      mobile,
+      // tokenNotification: value,
+      // mobile,
+
+      pushToken: value,
     };
 
     if (remember) {
@@ -96,6 +103,10 @@ const LoginScreen = ({}) => {
     }
 
     dispatch(setOtpEmail(email));
+
+    console.log({
+      ccc: data,
+    });
 
     dispatch(Login_Fun(data));
     // fetchData();

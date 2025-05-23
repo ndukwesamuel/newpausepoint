@@ -70,10 +70,6 @@ const GuestsDetail = () => {
     (state) => state?.GuestSlice
   );
 
-  console.log({
-    kklk: get_user_guest_detail_data,
-  });
-
   const {
     mutate: setdepature,
     isLoading: ispendingsetdepature,

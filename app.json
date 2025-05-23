@@ -2,8 +2,9 @@
   "expo": {
     "name": "PausePoint",
     "slug": "PausePoint",
+    "newArchEnabled": true,
     "orientation": "default",
-    "version": "1.2.4",
+    "version": "1.2.6",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -12,28 +13,35 @@
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": ["**/*"],
+
     "plugins": [
       [
-        "expo-barcode-scanner",
+        "expo-camera",
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
         }
       ],
-      "expo-build-properties"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#ffffff"
+        }
+      ],
+      "expo-build-properties",
+      "expo-font"
     ],
     "ios": {
       "supportsTablet": false,
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
-        "UIBackgroundModes": [],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "12",
-      "runtimeVersion": {
-        "policy": "appVersion"
-      }
+      "buildNumber": "14",
+      "runtimeVersion": "1.0.0"
     },
     "android": {
       "versionCode": 20,
@@ -43,7 +51,11 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pause_point.PausePoint",
-      "permissions": ["android.permission.CAMERA", "android.permission.CAMERA"],
+      "googleServicesFile": "./android/app/google-services.json",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
       "runtimeVersion": "1.0.0"
     },
     "web": {

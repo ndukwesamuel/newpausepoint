@@ -11,6 +11,7 @@ import {
   FlatList,
   ScrollView,
   Dimensions,
+  Platform,
 } from "react-native";
 import profile from "../../assets/profile.png";
 // Tab ICons...
@@ -139,7 +140,7 @@ export default function AdminHome() {
     <SafeAreaView
       style={{
         // flex: 1,
-        backgroundColor: "transparent",
+        backgroundColor: "white",
         marginTop: Platform.OS === "android" ? 20 : 0,
         flex: 1,
         // backgroundColor: "white",

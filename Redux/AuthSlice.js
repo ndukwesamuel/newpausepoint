@@ -15,10 +15,13 @@ const initialState = {
   user_isSuccess: false,
   user_isLoading: false,
   user_message: null,
+
+  pushtokendata: null,
 };
 
 const Login_Fun_Service = async (data) => {
-  let url = `${API_BASEURL}login`;
+  let url = `${API_BASEURL}api/v1/user/login`;
+  // let url = `${API_BASEURL}login`;
 
   try {
     const response = await axios.post(url, data);
@@ -26,7 +29,7 @@ const Login_Fun_Service = async (data) => {
     return response.data;
   } catch (error) {
     console.log({
-      iii: error,
+      iii: error?.mes,
     });
 
     throw error;
@@ -56,6 +59,10 @@ export const AuthSlice = createSlice({
         (state.user_isSuccess = false),
         (state.user_message = null);
     },
+
+    pushtokendata: (state, action) => {
+      state.pushtokendata = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -79,6 +86,7 @@ export const AuthSlice = createSlice({
   },
 });
 
-export const { reset_login, reset_other_login } = AuthSlice.actions;
+export const { reset_login, reset_other_login, pushtokendata } =
+  AuthSlice.actions;
 
 export default AuthSlice.reducer;

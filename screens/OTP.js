@@ -208,7 +208,7 @@ const OTP = ({}) => {
             {otpValue.length === 4 && (
               <Formbutton
                 buttonStyle={{
-                  backgroundColor: "transparent",
+                  backgroundColor: "white",
                   paddingVertical: 14,
                   alignItems: "center",
                   borderRadius: 5,
@@ -245,7 +245,7 @@ const OTP = ({}) => {
 
             <Formbutton
               buttonStyle={{
-                backgroundColor: "transparent",
+                backgroundColor: "white",
                 paddingVertical: 14,
                 alignItems: "center",
                 borderRadius: 5,

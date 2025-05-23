@@ -176,10 +176,6 @@ const Forum = () => {
                   marginBottom: 10,
                 }}
               >
-                {console.log({
-                  mnnbn: item,
-                })}
-
                 <View
                   style={{
                     flexDirection: "row",

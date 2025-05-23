@@ -92,7 +92,7 @@ export default function App({ navigation }) {
 
       style={{
         // flex: 1,
-        backgroundColor: "transparent",
+        backgroundColor: "white",
         marginTop: Platform.OS === "android" ? 25 : 0,
         flex: 1,
         // backgroundColor: "white",

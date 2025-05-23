@@ -24,7 +24,7 @@ import {
   Market_data_Fun,
   myProductFun,
 } from "../../../Redux/UserSide/MarketSLice";
-import Carousel from "react-native-snap-carousel";
+// import Carousel from "react-native-snap-carousel";
 
 const MarketReview = () => {
   const navigation = useNavigation();

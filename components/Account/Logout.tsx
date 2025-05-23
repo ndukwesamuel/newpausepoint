@@ -35,10 +35,6 @@ import { reset_isOnboarding } from "../../Redux/OnboardingSlice";
 
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
-console.log({
-  kk: API_BASEURL,
-});
-
 type GeneralData = {
   id: number;
   icon: string;

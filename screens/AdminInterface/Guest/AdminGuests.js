@@ -51,10 +51,6 @@ const AdminGuests = () => {
     return () => {};
   }, [dispatch]);
 
-  console.log({
-    kkkaa: Admin_get_all_user_guest_data?.clanInvites[0]?.access_code,
-  });
-
   const filteredData = Admin_get_all_user_guest_data?.clanInvites?.filter(
     (item) =>
       item.access_code?.toLowerCase().includes(searchQuery?.toLowerCase())

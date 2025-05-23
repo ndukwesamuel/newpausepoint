@@ -323,9 +323,6 @@ const UserClans = () => {
         alignItems: "center",
       }}
     >
-      {console.log({
-        kk: item,
-      })}
       <View style={{ width: "75%" }}>
         <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item?.name}</Text>
         <Text>{item?.description}</Text>
