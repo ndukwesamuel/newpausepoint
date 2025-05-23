@@ -228,22 +228,6 @@ export const MainScreen = ({}) => {
       initialRouteName="UserNavigation"
       screenOptions={{ headerShown: false }}
     >
-      {/* <Stack.Screen name="Welcome" component={Onboarding} />
-                <Stack.Screen name="Registraion" component={Registraion} />
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Forgotten" component={ForgottenPasswod} />
-                <Stack.Screen name="OTP" component={OTP} />
-                <Stack.Screen name="CreatePassword" component={CreatePassword} /> */}
-      {/* <Stack.Screen name="usertab" component={UserTabNavigation} />
-                <Stack.Screen name="PersonalInfo" component={EditPersonalInformation} />
-                <Stack.Screen name="notificationsettings" component={NotificatioSettings} />
-                <Stack.Screen name="ChangePassowrd" component={ChangePassowrd} />
-                <Stack.Screen name="DeleteAccount" component={DeleteAccount} /> */}
-      {/*
-      {isAdmin ?
-        <Stack.Screen name="usertab" component={AdminTabNavigation} />
-        : <Stack.Screen name="usertab" component={UserTabNavigation} />
-      } */}
       {userProfile_data?.AdmincurrentClanMeeting && (
         <Stack.Screen name="AdminTab" component={Adminnaviagetion} />
       )}
