@@ -3,7 +3,6 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 
 import { useMutation, useQueryClient } from "react-query";
-// const apiUrl = "http://localhost:8070/api/v1";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 // Function to fetch data
