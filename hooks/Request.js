@@ -8,7 +8,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 // Function to fetch data
 const fetchData = async ({ queryKey }) => {
   const [, url, token] = queryKey;
-  if (!token) throw new Error("Token is missing");
+  // if (!token) throw new Error("Token is missing");
 
   try {
     console.log({
@@ -20,7 +20,7 @@ const fetchData = async ({ queryKey }) => {
       },
     });
 
-    console.log("API Response:", response.data); // 🔥 Debugging Log
+    // console.log("API Response:", response); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
     console.error("API Fetch Error:", error.response?.data || error.message);
@@ -41,6 +41,11 @@ export const useFetchData = (url, queryKey, options = {}) => {
   } = useSelector((state) => state.AuthSlice);
 
   const token = user_data?.token;
+
+  console.log({
+    token,
+    url,
+  });
 
   return useQuery([queryKey, url, token], fetchData, {
     enabled: !!token, // Prevent query from running without a token
