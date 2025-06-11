@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
@@ -16,7 +17,6 @@ import { useMutateData } from "../../hooks/Request";
 
 const CreateErrandScreen = () => {
   const navigation = useNavigation();
-  
 
   // Form state
   const [formData, setFormData] = useState({
@@ -33,6 +33,7 @@ const CreateErrandScreen = () => {
             name: "",
             description: "",
             quantity: "",
+            price: "",
             images: [],
           },
         ],
@@ -40,31 +41,55 @@ const CreateErrandScreen = () => {
     ],
   });
 
-  // Handle text input changes
-  const handleChange = (field, value, locationIndex = 0, itemIndex = 0) => {
-    if (field.includes("pickupLocations")) {
-      const [_, locIdx, subField, itemIdx] =
-        field.match(/pickupLocations\[(\d+)\]\.(items\[(\d+)\]\.)?(\w+)/) || [];
+  // Helper function to calculate total for a list of items
+  const calculateItemsTotal = (items) => {
+    return items.reduce((sum, item) => {
+      const quantity = parseFloat(item.quantity) || 0;
+      const price = parseFloat(item.price) || 0;
+      return sum + quantity * price;
+    }, 0);
+  };
 
-      if (subField) {
-        // Item field changed
-        setFormData((prev) => {
-          const newPickupLocations = [...prev.pickupLocations];
-          newPickupLocations[locIdx].items[itemIdx][subField] = value;
-          return { ...prev, pickupLocations: newPickupLocations };
-        });
+  // Calculate the grand total for all locations combined
+  const grandTotal = formData.pickupLocations.reduce((sum, location) => {
+    return sum + calculateItemsTotal(location.items);
+  }, 0);
+
+  // Handle text input changes
+  const handleChange = (field, value) => {
+    // Regex for top-level fields or the structure for pickupLocations and items
+    const locationMatch = field.match(/pickupLocations\[(\d+)\]\.(\w+)/);
+    const itemMatch = field.match(
+      /pickupLocations\[(\d+)\]\.items\[(\d+)\]\.(\w+)/
+    );
+
+    setFormData((prev) => {
+      if (itemMatch) {
+        const locIdx = parseInt(itemMatch[1]);
+        const itemIdx = parseInt(itemMatch[2]);
+        const subField = itemMatch[3];
+
+        const newPickupLocations = [...prev.pickupLocations];
+        newPickupLocations[locIdx].items[itemIdx] = {
+          ...newPickupLocations[locIdx].items[itemIdx],
+          [subField]: value,
+        };
+        return { ...prev, pickupLocations: newPickupLocations };
+      } else if (locationMatch) {
+        const locIdx = parseInt(locationMatch[1]);
+        const subField = locationMatch[2];
+
+        const newPickupLocations = [...prev.pickupLocations];
+        newPickupLocations[locIdx] = {
+          ...newPickupLocations[locIdx],
+          [subField]: value,
+        };
+        return { ...prev, pickupLocations: newPickupLocations };
       } else {
-        // Location field changed
-        setFormData((prev) => {
-          const newPickupLocations = [...prev.pickupLocations];
-          newPickupLocations[locIdx][field.split(".")[1]] = value;
-          return { ...prev, pickupLocations: newPickupLocations };
-        });
+        // Top level field changed
+        return { ...prev, [field]: value };
       }
-    } else {
-      // Top level field changed
-      setFormData((prev) => ({ ...prev, [field]: value }));
-    }
+    });
   };
 
   // Add a new pickup location
@@ -81,6 +106,7 @@ const CreateErrandScreen = () => {
               name: "",
               description: "",
               quantity: "",
+              price: "",
               images: [],
             },
           ],
@@ -111,6 +137,7 @@ const CreateErrandScreen = () => {
         name: "",
         description: "",
         quantity: "",
+        price: "",
         images: [],
       });
       return { ...prev, pickupLocations: newPickupLocations };
@@ -141,13 +168,17 @@ const CreateErrandScreen = () => {
     });
 
     if (!result.canceled) {
-      handleChange(
-        `pickupLocations[${locationIndex}].items[${itemIndex}].images`,
-        [
-          ...formData.pickupLocations[locationIndex].items[itemIndex].images,
-          result.uri,
-        ]
-      );
+      setFormData((prev) => {
+        const newPickupLocations = [...prev.pickupLocations];
+        newPickupLocations[locationIndex].items[itemIndex] = {
+          ...newPickupLocations[locationIndex].items[itemIndex],
+          images: [
+            ...newPickupLocations[locationIndex].items[itemIndex].images,
+            result.assets[0].uri,
+          ],
+        };
+        return { ...prev, pickupLocations: newPickupLocations };
+      });
     }
   };
 
@@ -158,84 +189,8 @@ const CreateErrandScreen = () => {
   } = useMutateData("errands", "POST", "errands-list");
 
   // Handle form submission
-  //   const handleSubmit = () => {
-  //     // Validate form
-  //     if (!formData.title || !formData.deliveryAddress || !formData.clanId) {
-  //       Alert.alert("Error", "Please fill in all required fields");
-  //       return;
-  //     }
-
-  //     for (let location of formData.pickupLocations) {
-  //       if (!location.name || !location.address) {
-  //         Alert.alert("Error", "Please fill in all pickup location fields");
-  //         return;
-  //       }
-
-  //       for (let item of location.items) {
-  //         if (!item.name || !item.quantity) {
-  //           Alert.alert("Error", "Please fill in all item fields");
-  //           return;
-  //         }
-  //       }
-  //     }
-
-  //     // Prepare form data for submission
-  //     const formDataToSend = new FormData();
-  //     formDataToSend.append("title", formData.title);
-  //     formDataToSend.append("deliveryAddress", formData.deliveryAddress);
-  //     formDataToSend.append("description", formData.description);
-  //     formDataToSend.append("clanId", formData.clanId);
-
-  //     // Add pickup locations and items
-  //     formData.pickupLocations.forEach((location, locIndex) => {
-  //       formDataToSend.append(
-  //         `pickupLocations[${locIndex}][name]`,
-  //         location.name
-  //       );
-  //       formDataToSend.append(
-  //         `pickupLocations[${locIndex}][address]`,
-  //         location.address
-  //       );
-
-  //       location.items.forEach((item, itemIndex) => {
-  //         formDataToSend.append(
-  //           `pickupLocations[${locIndex}][items][${itemIndex}][name]`,
-  //           item.name
-  //         );
-  //         formDataToSend.append(
-  //           `pickupLocations[${locIndex}][items][${itemIndex}][description]`,
-  //           item.description
-  //         );
-  //         formDataToSend.append(
-  //           `pickupLocations[${locIndex}][items][${itemIndex}][quantity]`,
-  //           item.quantity
-  //         );
-
-  //         // Add images if they exist
-  //         item.images.forEach((imageUri, imgIndex) => {
-  //           formDataToSend.append(
-  //             `pickupLocations[${locIndex}][items][${itemIndex}][images][${imgIndex}]`,
-  //             {
-  //               uri: imageUri,
-  //               type: "image/jpeg",
-  //               name: `image_${locIndex}_${itemIndex}_${imgIndex}.jpg`,
-  //             }
-  //           );
-  //         });
-  //       });
-  //     });
-
-  //     // Here you would typically send the formDataToSend to your API
-  //     console.log("Form data to send:", formDataToSend);
-
-  //     // For demo purposes, we'll just log it and navigate back
-  //     Alert.alert("Success", "Errand created successfully!");
-  //     navigation.goBack();
-  //   };
-
-  // Modified handleSubmit function to use the mutation
   const handleSubmit = () => {
-    // Validate form (same as before)
+    // Validate form
     if (!formData.title || !formData.deliveryAddress || !formData.clanId) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
@@ -248,8 +203,29 @@ const CreateErrandScreen = () => {
       }
 
       for (let item of location.items) {
-        if (!item.name || !item.quantity) {
-          Alert.alert("Error", "Please fill in all item fields");
+        if (!item.name || !item.quantity || !item.price) {
+          Alert.alert(
+            "Error",
+            "Please fill in all item fields including price"
+          );
+          return;
+        }
+        // Basic validation for quantity and price to be numbers
+        if (
+          isNaN(parseFloat(item.quantity)) ||
+          parseFloat(item.quantity) <= 0
+        ) {
+          Alert.alert(
+            "Error",
+            `Quantity for item '${item.name}' must be a positive number.`
+          );
+          return;
+        }
+        if (isNaN(parseFloat(item.price)) || parseFloat(item.price) < 0) {
+          Alert.alert(
+            "Error",
+            `Price for item '${item.name}' must be a non-negative number.`
+          );
           return;
         }
       }
@@ -267,23 +243,33 @@ const CreateErrandScreen = () => {
         items: location.items.map((item) => ({
           name: item.name,
           description: item.description,
-          quantity: item.quantity,
-          // If you need to handle image uploads separately, you might need additional logic here
+          quantity: parseFloat(item.quantity), // Convert to number
+          price: parseFloat(item.price), // Convert to number
           images: item.images,
         })),
       })),
     };
 
-    // Call the mutation
-    createErrand(submissionData, {
-      onSuccess: (data) => {
-        Alert.alert("Success", "Errand created successfully!");
-        navigation.goBack();
-      },
-      onError: (error) => {
-        Alert.alert("Error", error.message || "Failed to create errand");
-      },
+    console.log({
+      vvv: submissionData,
     });
+
+    // Call the mutation
+    // createErrand(submissionData, {
+    //   onSuccess: (data) => {
+    //     Alert.alert("Success", "Errand created successfully!");
+    //     navigation.goBack();
+    //   },
+    //   onError: (error) => {
+    //     console.error("Creation Error:", error); // Log the full error for debugging
+    //     Alert.alert(
+    //       "Error",
+    //       error.message ||
+    //         error.response?.data?.message ||
+    //         "Failed to create errand"
+    //     );
+    //   },
+    // });
   };
 
   return (
@@ -404,7 +390,7 @@ const CreateErrandScreen = () => {
                   style={styles.input}
                   placeholder="Quantity"
                   keyboardType="numeric"
-                  value={item.quantity}
+                  value={String(item.quantity)}
                   onChangeText={(text) =>
                     handleChange(
                       `pickupLocations[${locationIndex}].items[${itemIndex}].quantity`,
@@ -413,12 +399,35 @@ const CreateErrandScreen = () => {
                   }
                 />
 
-                {/* <TouchableOpacity
+                <TextInput
+                  style={styles.input}
+                  placeholder="Price per unit (e.g., 10.50)"
+                  keyboardType="numeric"
+                  value={String(item.price)}
+                  onChangeText={(text) =>
+                    handleChange(
+                      `pickupLocations[${locationIndex}].items[${itemIndex}].price`,
+                      text
+                    )
+                  }
+                />
+
+                {/* Display total price for the item */}
+                {item.quantity && item.price ? (
+                  <Text style={styles.itemTotalPrice}>
+                    Item Total: $
+                    {(
+                      parseFloat(item.quantity) * parseFloat(item.price)
+                    ).toFixed(2)}
+                  </Text>
+                ) : null}
+
+                <TouchableOpacity
                   style={styles.imageButton}
                   onPress={() => pickImage(locationIndex, itemIndex)}
                 >
                   <Text style={styles.imageButtonText}>Add Image</Text>
-                </TouchableOpacity> */}
+                </TouchableOpacity>
 
                 {item.images.length > 0 && (
                   <View style={styles.imagePreviewContainer}>
@@ -440,6 +449,11 @@ const CreateErrandScreen = () => {
             >
               <Text style={styles.addButtonText}>+ Add Item</Text>
             </TouchableOpacity>
+
+            {/* Total price for this location */}
+            <Text style={styles.locationTotal}>
+              Location Total: ${calculateItemsTotal(location.items).toFixed(2)}
+            </Text>
           </View>
         ))}
 
@@ -453,9 +467,22 @@ const CreateErrandScreen = () => {
         </TouchableOpacity>
       </View>
 
+      {/* Grand Total for all locations */}
+      <View style={styles.grandTotalContainer}>
+        <Text style={styles.grandTotalText}>
+          Grand Total for Errand: ${grandTotal.toFixed(2)}
+        </Text>
+      </View>
+
       {/* Submit Button */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Create Errand</Text>
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleSubmit}
+        disabled={isCreating}
+      >
+        <Text style={styles.submitButtonText}>
+          {isCreating ? "Creating Errand..." : "Create Errand"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -531,6 +558,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#666",
+  },
+  itemTotalPrice: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#007BFF",
+    marginTop: -5,
+    marginBottom: 10,
+    textAlign: "right",
+    paddingRight: 5,
+  },
+  locationTotal: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#28A745", // Green color for location total
+    marginTop: 15,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#EEE",
+    textAlign: "right",
+  },
+  grandTotalContainer: {
+    backgroundColor: "#E0F7FA", // Light blue background
+    padding: 20,
+    borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: "#B3E5FC",
+    alignItems: "center",
+  },
+  grandTotalText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#00796B", // Teal color for grand total
   },
   imageButton: {
     backgroundColor: "#E3F2FD",

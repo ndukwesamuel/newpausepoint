@@ -4,5 +4,5 @@ import ErrandsScreen from "../../../components/Errand/ErrandsScreen";
 import CreateErrandScreen from "../../../components/Errand/CreateErrandScreen";
 
 export default function Errand() {
-  return <CreateErrandScreen />;
+  return <ErrandsScreen />;
 }
