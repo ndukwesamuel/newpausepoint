@@ -22,17 +22,8 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 
-const EditPersonalInformation = ({ navigation }) => {
+const EditPersonalInformation = () => {
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-
-  const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
-  const foundMember = userProfile_data?.currentClanMeeting?.members.find(
-    (member) => member.user.toString() === userIdToFind.toString()
-  );
-
-  console.log({
-    xxx: foundMember?.houseNumber,
-  });
 
   const canEditProfile =
     userProfile_data?.currentClanMeeting?.settings?.allowMembersToEditProfile;
@@ -40,23 +31,21 @@ const EditPersonalInformation = ({ navigation }) => {
   const [name, setName] = useState(userProfile_data?.user?.name);
   const [gender, setGender] = useState("Male");
   const [profileImage, setProfileImage] = useState(userProfile_data?.photo);
-  const [hasImageChanged, setHasImageChanged] = useState(false);
 
   // Address fields
-  const [street, setStreet] = useState(foundMember?.street);
+  const [street, setStreet] = useState(userProfile_data?.address?.street);
   const [city, setCity] = useState(userProfile_data?.address?.city);
   const [state, setState] = useState(userProfile_data?.address?.state);
-  const [houseNumber, sethouseNumber] = useState(foundMember?.houseNumber);
-  const [typeOfApartment, setTypeOfApartment] = useState(
-    foundMember?.apartmentType
+  const [flatNumber, setFlatNumber] = useState(
+    userProfile_data?.address?.flatNumber
   );
-
-  console.log({
-    vbvb: typeOfApartment,
-  });
-
+  const [typeOfApartment, setTypeOfApartment] = useState(
+    userProfile_data?.address?.typeOfApartment
+  );
   const [selfcon, setSelfcon] = useState(userProfile_data?.address?.selfcon);
-  const [unitNumber, setUnitNumber] = useState(foundMember?.unitNumber);
+  const [unitNumber, setUnitNumber] = useState(
+    userProfile_data?.address?.unitNumber
+  );
 
   const [phone, setPhone] = useState(userProfile_data?.phoneNumber);
   const dispatch = useDispatch();
@@ -89,7 +78,6 @@ const EditPersonalInformation = ({ navigation }) => {
 
     if (!result.canceled) {
       setProfileImage(result.assets[0].uri);
-      setHasImageChanged(true);
     }
   };
 
@@ -98,93 +86,33 @@ const EditPersonalInformation = ({ navigation }) => {
     return () => {};
   }, [dispatch]);
 
-  // Handle text data update (JSON)
-  const handleTextUpdate = () => {
-    const textData = {
-      name,
-      phoneNumber: phone,
-      gender,
-    };
+  const handleSave = () => {
+    const formData = new FormData();
+
+    formData.append("name", name);
+    formData.append("phoneNumber", phone);
 
     // Only include address fields if allowed to edit profile
     if (canEditProfile) {
-      textData.street = street;
-      textData.typeOfApartment = typeOfApartment;
-      textData.unitNumber = unitNumber;
-      textData.houseNumber = houseNumber;
-      textData.city = city;
-      textData.state = state;
-      textData.selfcon = selfcon;
+      formData.append("street", street);
+      formData.append("typeOfApartment", typeOfApartment);
+      formData.append("unitNumber", unitNumber);
+      formData.append("flatNumber", flatNumber);
     }
 
-    console.log({
-      cc: textData,
-    });
+    if (profileImage) {
+      const uri = profileImage;
+      const type = "image/jpeg";
+      const name = "photo.jpg";
+      formData.append("photo", { uri, type, name });
+    }
 
-    UpdateText_Mutation.mutate(textData);
+    Update_Mutation.mutate(formData);
   };
 
-  // Handle image upload (FormData)
-  const handleImageUpdate = () => {
-    if (!hasImageChanged || !profileImage) {
-      Toast.show({
-        type: "error",
-        text1: "Please select an image to upload",
-      });
-      return;
-    }
-
-    const formData = new FormData();
-    const uri = profileImage;
-    const type = "image/jpeg";
-    const name = "photo.jpg";
-    formData.append("photo", { uri, type, name });
-
-    UpdateImage_Mutation.mutate(formData);
-  };
-
-  // Text update mutation (JSON)
-  const UpdateText_Mutation = useMutation(
+  const Update_Mutation = useMutation(
     (data_info) => {
-      let url = `${API_BASEURL}api/v1/user/update-profile`;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      return axios.patch(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Profile information updated successfully!",
-        });
-        dispatch(UserProfile_data_Fun());
-        navigation.goBack(); // Navigate back after successful update
-      },
-      onError: (error) => {
-        console.log({
-          vvvbL: error?.response?.data,
-        });
-
-        Toast.show({
-          type: "error",
-          text1: `${
-            error?.response?.data?.error ||
-            "Failed to update profile information"
-          }`,
-        });
-      },
-    }
-  );
-
-  // Image update mutation (FormData)
-  const UpdateImage_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}profile/update-image`;
+      let url = `${API_BASEURL}profile/update`;
 
       const config = {
         headers: {
@@ -199,17 +127,14 @@ const EditPersonalInformation = ({ navigation }) => {
       onSuccess: (success) => {
         Toast.show({
           type: "success",
-          text1: "Profile image updated successfully!",
+          text1: "User Profile Updated successfully!",
         });
-        setHasImageChanged(false);
         dispatch(UserProfile_data_Fun());
       },
       onError: (error) => {
         Toast.show({
           type: "error",
-          text1: `${
-            error?.response?.data?.error || "Failed to update profile image"
-          }`,
+          text1: `${error?.response?.data?.error}`,
         });
       },
     }
@@ -262,65 +187,18 @@ const EditPersonalInformation = ({ navigation }) => {
   return (
     <View style={{ paddingBottom: 30 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Profile Image Section */}
-        <Text
-          style={[
-            styles.sectionTitle,
-            {
-              textAlign: "center",
-            },
-          ]}
+        <TouchableOpacity
+          onPress={pickImage}
+          style={{ alignItems: "center", justifyContent: "center" }}
         >
-          Personal Information
-        </Text>
+          <Image
+            source={{ uri: profileImage }}
+            style={{ width: 100, height: 100, borderRadius: 50 }}
+          />
+          <Text>{userProfile_data?.user?.email}</Text>
+        </TouchableOpacity>
 
-        <View
-          style={{
-            alignItems: "center",
-            paddingVertical: 20,
-            borderBottomWidth: 1,
-            borderBottomColor: "#eee",
-            marginHorizontal: 20,
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 20,
-          }}
-        >
-          <TouchableOpacity
-            onPress={pickImage}
-            style={{ alignItems: "center", justifyContent: "center" }}
-          >
-            <Image
-              source={{ uri: profileImage }}
-              style={{ width: 100, height: 100, borderRadius: 50 }}
-            />
-            <Text style={styles.changeImageText}>Tap to change image</Text>
-            <Text>{userProfile_data?.user?.email}</Text>
-          </TouchableOpacity>
-
-          {/* Only show update button if image has changed */}
-          <View>
-            {hasImageChanged && (
-              <Formbutton
-                buttonStyle={[
-                  styles.submitButton,
-                  {
-                    backgroundColor: "green",
-                    marginTop: 15,
-                    paddingHorizontal: 20,
-                  },
-                ]}
-                textStyle={styles.submitButtonText}
-                data="Update Image"
-                onPress={handleImageUpdate}
-                isLoading={UpdateImage_Mutation.isLoading}
-              />
-            )}
-          </View>
-        </View>
-        {/* Text Information Section */}
-        <View style={{ paddingHorizontal: 20, gap: 10, marginTop: 20 }}>
+        <View style={{ paddingHorizontal: 20, gap: 10 }}>
           <View>
             <FormLabel data="Name" />
             <Forminput
@@ -351,8 +229,6 @@ const EditPersonalInformation = ({ navigation }) => {
           {/* Only show address fields if canEditProfile is true */}
           {canEditProfile && (
             <>
-              <Text style={styles.sectionTitle}>Address Information</Text>
-
               <View>
                 <FormLabel data="Street Name" />
                 <TouchableOpacity
@@ -376,8 +252,8 @@ const EditPersonalInformation = ({ navigation }) => {
                 <FormLabel data="House Number" />
                 <Forminput
                   placeholder="House Number"
-                  onChangeText={sethouseNumber}
-                  value={houseNumber}
+                  onChangeText={setFlatNumber}
+                  value={flatNumber}
                 />
               </View>
 
@@ -411,13 +287,22 @@ const EditPersonalInformation = ({ navigation }) => {
             </>
           )}
 
-          {/* Text Update Button */}
           <Formbutton
-            buttonStyle={[styles.submitButton, { backgroundColor: "#04973C" }]}
-            textStyle={styles.submitButtonText}
-            data="Update Information"
-            onPress={handleTextUpdate}
-            isLoading={UpdateText_Mutation.isLoading}
+            buttonStyle={{
+              backgroundColor: "#04973C",
+              paddingVertical: 14,
+              alignItems: "center",
+              borderRadius: 5,
+            }}
+            textStyle={{
+              color: "white",
+              fontWeight: "500",
+              fontSize: 14,
+              fontFamily: "RobotoSlab-Medium",
+            }}
+            data="Submit"
+            onPress={handleSave}
+            isLoading={Update_Mutation.isLoading}
           />
         </View>
       </ScrollView>
@@ -426,36 +311,6 @@ const EditPersonalInformation = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  imageSection: {
-    alignItems: "center",
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    marginHorizontal: 20,
-  },
-  changeImageText: {
-    color: "#666",
-    fontSize: 12,
-    marginTop: 5,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 10,
-    color: "#333",
-  },
-  submitButton: {
-    paddingVertical: 14,
-    alignItems: "center",
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  submitButtonText: {
-    color: "white",
-    fontWeight: "500",
-    fontSize: 14,
-    fontFamily: "RobotoSlab-Medium",
-  },
   dropdownTrigger: {
     backgroundColor: "#f5f5f5",
     padding: 15,

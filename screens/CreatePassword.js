@@ -110,7 +110,7 @@ const CreatePassword = ({ navigation }) => {
           text1: `${success?.data?.message}`,
         });
 
-        dispatch(authScreenChange("CREATEPASSWORD"));
+        dispatch(authScreenChange("LOGIN"));
       },
 
       onError: (error) => {
@@ -119,8 +119,9 @@ const CreatePassword = ({ navigation }) => {
         });
         Toast.show({
           type: "error",
-          text1: `${error?.response?.data?.error} `,
+          text1: `${error?.response?.data?.message} `,
         });
+        // dispatch(authScreenChange("LOGIN"));
       },
     }
   );

@@ -128,13 +128,13 @@ export default function App({ navigation }) {
           <View>
             <ScrollView style={{ flexGrow: 1, marginTop: 5 }}>
               {TabButton(currentTab, setCurrentTab, "My Clans", clan, "myclan")}
-              {TabButton(
+              {/* {TabButton(
                 currentTab,
                 setCurrentTab,
                 "Errands",
                 bikeIcon,
                 "errands"
-              )}
+              )} */}
               {TabButton(
                 currentTab,
                 setCurrentTab,
@@ -143,19 +143,11 @@ export default function App({ navigation }) {
                 "userpolls",
                 user_clan_info
               )}
-              {/* {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Event",
-                Calendar_light,
-                "userevents",
-                user_clan_info
-              )} */}
 
               {TabButton(
                 currentTab,
                 setCurrentTab,
-                "Payment",
+                "Wallet",
                 Calendar_light,
                 "payment",
                 user_clan_info
