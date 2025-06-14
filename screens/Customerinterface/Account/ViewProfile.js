@@ -49,16 +49,15 @@ export default function ViewProfile({ navigation }) {
 
   let item = {};
 
-  // localhost:5050/clan/getuserclans
-
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
-  //   console.log(userProfile_data);
-  //   const route = useRoute();
-  // const { item } = route.params as { item: any };
 
-  //   const { item } = route.params;
+  const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
+  const foundMember = userProfile_data?.currentClanMeeting?.members.find(
+    (member) => member.user.toString() === userIdToFind.toString()
+  );
+
   console.log({
-    jgjg: userProfile_data?.currentClanMeeting?._id,
+    jaja: foundMember,
   });
 
   const {
@@ -71,7 +70,7 @@ export default function ViewProfile({ navigation }) {
   );
 
   console.log({
-    oiii: getuserclanInfo?.data?.members,
+    vv: getuserclanInfo?.data?.settings?.allowMembersToEditProfile,
   });
 
   const { get_user_profile_data } = useSelector(
@@ -145,11 +144,6 @@ export default function ViewProfile({ navigation }) {
         },
       };
 
-      console.log({
-        data_info,
-        url,
-      });
-
       return axios.post(url, data_info, config);
     },
     {
@@ -187,21 +181,6 @@ export default function ViewProfile({ navigation }) {
   const foundermember = mainmembers?.find(
     (member) => member.user === mainuserId
   );
-
-  console.log({
-    hghg: foundermember,
-  });
-  console.log({
-    one: userProfile_data?.user?._id,
-  });
-
-  // const memberinfo = getuserclanInfo?.data?.members.find(
-  //   (member) => member.user._id === userProfile_data?.user?._id
-  // );
-
-  // console.log({
-  //   meme: memberinfo,
-  // });
 
   return (
     <ScrollView>
@@ -253,7 +232,60 @@ export default function ViewProfile({ navigation }) {
           >
             <SemiBoldFontText data="User Info" textstyle={{ fontSize: 18 }} />
           </View>
+          <View>
+            {/* New fields added here */}
+            {foundermember?.apartmentType && (
+              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                <RegularFontText
+                  data="Apartment Type"
+                  textstyle={{ fontSize: 13, color: "#696969" }}
+                />
+                <MediumFontText
+                  data={foundermember?.apartmentType}
+                  textstyle={{ fontSize: 19 }}
+                />
+              </View>
+            )}
 
+            {foundermember?.houseNumber && (
+              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                <RegularFontText
+                  data="House Number"
+                  textstyle={{ fontSize: 13, color: "#696969" }}
+                />
+                <MediumFontText
+                  data={foundermember?.houseNumber}
+                  textstyle={{ fontSize: 19 }}
+                />
+              </View>
+            )}
+
+            {foundermember?.street && (
+              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                <RegularFontText
+                  data="Street"
+                  textstyle={{ fontSize: 13, color: "#696969" }}
+                />
+                <MediumFontText
+                  data={foundermember?.street}
+                  textstyle={{ fontSize: 19 }}
+                />
+              </View>
+            )}
+
+            {foundermember?.unitNumber && (
+              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                <RegularFontText
+                  data="Unit Number"
+                  textstyle={{ fontSize: 13, color: "#696969" }}
+                />
+                <MediumFontText
+                  data={foundermember?.unitNumber}
+                  textstyle={{ fontSize: 19 }}
+                />
+              </View>
+            )}
+          </View>
           {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
           <RegularFontText
             data="Resident ID"
@@ -262,16 +294,18 @@ export default function ViewProfile({ navigation }) {
           <MediumFontText data="2340OPL56" textstyle={{ fontSize: 19 }} />
         </View> */}
 
-          <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Home Address "
-              textstyle={{ fontSize: 13, color: "#696969" }}
-            />
-            <MediumFontText
-              data={foundermember?.homeAddress}
-              textstyle={{ fontSize: 19 }}
-            />
-          </View>
+          {!getuserclanInfo?.data?.settings?.allowMembersToEditProfile && (
+            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+              <RegularFontText
+                data="Home Address "
+                textstyle={{ fontSize: 13, color: "#696969" }}
+              />
+              <MediumFontText
+                data={foundermember?.homeAddress}
+                textstyle={{ fontSize: 19 }}
+              />
+            </View>
+          )}
 
           <View style={{ marginBottom: 5, paddingBottom: 10 }}>
             <RegularFontText
@@ -283,7 +317,6 @@ export default function ViewProfile({ navigation }) {
               textstyle={{ fontSize: 19 }}
             />
           </View>
-
           <View style={{ marginBottom: 5, paddingBottom: 10 }}>
             <RegularFontText
               data="Member Code"
@@ -342,9 +375,6 @@ export default function ViewProfile({ navigation }) {
                   alignItems: "center",
                 }}
               >
-                {console.log({
-                  ddd: foundermember?.memberCode,
-                })}
                 <QRCode
                   value={foundermember?.memberCode}
                   size={200}

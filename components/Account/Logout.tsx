@@ -67,6 +67,43 @@ export const Logout = ({ item }: { item: GeneralData }) => {
       <TouchableOpacity
         onPress={toggleModal}
         style={{
+          justifyContent: "center", // centers vertically
+          alignItems: "center", // centers horizontally
+          backgroundColor: "lightgray",
+          // position: "relative",
+          width: 50,
+          height: 50,
+          borderRadius: 25, // half of width/height
+          // top: 10,
+        }}
+      >
+        <Ionicons name="log-out-outline" size={24} color="black" />
+      </TouchableOpacity>
+
+      <LogoutModal visible={isModalVisible} onClose={toggleModal} />
+    </>
+  );
+};
+
+export const Logoutv2 = ({ item }: { item: GeneralData }) => {
+  console.log({ item });
+  // const navigation = useNavigation()
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigateToPersonalInfo = () => {
+    console.log("this is to logout");
+  };
+
+  return (
+    <>
+      <TouchableOpacity
+        onPress={toggleModal}
+        style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
