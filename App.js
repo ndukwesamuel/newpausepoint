@@ -340,6 +340,10 @@ export const NavigationScreen = () => {
   const isRunner =
     user_data?.token && user_data?.user?.roles.includes("runner");
 
+  console.log({
+    fff: isRunner,
+  });
+
   return (
     <NavigationContainer>
       <AppNotification />
