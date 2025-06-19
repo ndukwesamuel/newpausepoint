@@ -4,6 +4,9 @@ import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import RunnerTabNavigation from "./RunnerTabNavigation";
+import ErrandDetailsScreen from "./Screen/ErrandDetailsScreen";
+import { TouchableOpacity } from "react-native";
+import TaskScreen from "./Screen/TaskScreen";
 const Stack = createNativeStackNavigator();
 
 const SingleScreenWithBackButton = (screenName, component, title) => {
@@ -38,6 +41,20 @@ const createScreen = (name, component, title) => {
   );
 };
 
+const screens = [
+  {
+    name: "ErrandDetailsScreen",
+    component: ErrandDetailsScreen,
+    title: "Errand Details",
+  },
+
+  {
+    name: "TaskScreen",
+    component: TaskScreen,
+    title: "Task ",
+  },
+];
+
 export default function RunnerNavigation() {
   return (
     <Stack.Navigator initialRouteName="RunnerTabNavigation">
@@ -48,6 +65,10 @@ export default function RunnerNavigation() {
         name="RunnerTabNavigation"
         component={RunnerTabNavigation}
       />
+
+      {screens.map((screen) =>
+        createScreen(screen.name, screen.component, screen.title)
+      )}
     </Stack.Navigator>
   );
 }
