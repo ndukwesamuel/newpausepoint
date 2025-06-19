@@ -78,7 +78,10 @@ const CreatePassword = ({ navigation }: { navigation: any }) => {
         style={{ flex: 1 }}
       >
         <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
-          <RegistraionHeadersText data="Create New Password" textStyle={{}} />
+          <RegistraionHeadersText
+            data="Create New Password  kaka"
+            textStyle={{}}
+          />
 
           <RegistraionParagraphText
             data="Please enter your new password, and ensure to keep it safe."

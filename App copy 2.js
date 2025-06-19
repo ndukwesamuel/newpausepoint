@@ -60,7 +60,6 @@ const queryClient = new QueryClient();
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync();
-
 export default function App() {
   const [fontsLoaded] = useFonts({
     "RobotoSlab-SemiBold": require("./assets/font/RobotoSlab-SemiBold.ttf"),
@@ -80,23 +79,21 @@ export default function App() {
   if (!fontsLoaded) {
     return null;
   }
-
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-          <PersistGate persistor={persistor}>
-            <SafeAreaProvider style={styles.container}>
-              <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-                <NavigationScreen />
-              </View>
-            </SafeAreaProvider>
-          </PersistGate>
-        </Provider>
-      </QueryClientProvider>
-      {/* CRITICAL FIX: Toast must be OUTSIDE all providers and containers */}
-      <Toast />
-    </>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <PersistGate persistor={persistor}>
+          <SafeAreaProvider style={styles.container}>
+            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+              <NavigationScreen />
+              {/* FIXED: Toast should be at the ROOT level, outside NavigationContainer */}
+            </View>
+            {/* Move Toast HERE - outside NavigationContainer but inside SafeAreaProvider */}
+            <Toast />
+          </SafeAreaProvider>
+        </PersistGate>
+      </Provider>
+    </QueryClientProvider>
   );
 }
 
@@ -142,18 +139,64 @@ export const MainScreen = ({}) => {
   useEffect(() => {
     dispatch(UserProfile_data_Fun());
     dispatch(Get_User_Profle_Fun());
+
+    // async function getNotificationPermission() {
+    //   const { status } = await Notifications.getPermissionsAsync();
+    //   if (status !== "granted") {
+    //     const { status } = await Notifications.requestPermissionsAsync();
+    //   }
+    //   if (status !== "granted") {
+    //     // Handle the case where the user declines permission
+    //     console.log("Failed to get push token for push notification!");
+    //     return;
+    //   }
+    //   let token;
+    //   token = (
+    //     await Notifications.getExpoPushTokenAsync({
+    //       projectId: Constants.expoConfig.extra.eas.projectId,
+    //     })
+    //   ).data;
+
+    //   console.log({ first_token: token });
+    //   // Permission granted, handle accordingly
+    //   await AsyncStorage.setItem("PushToken", token);
+    //   const value = await AsyncStorage.getItem("PushToken");
+
+    //   console.log({ value });
+    //   // setPushToken(value);
+    // }
+
+    // getNotificationPermission();
+    // getNotificationPermission();
   }, [dispatch]);
 
   useEffect(() => {
     const backgroundSubscription =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log({ response });
+
         const data = response.notification.request.content.data;
+        // dispatch(NotificationDataModalFunC(true));
+
+        // dispatch(NotificationDataFunC(response));
       });
 
     const foregroundSubscription =
       Notifications.addNotificationReceivedListener(async (notification) => {
+        // console.log({ notification });
+        // console.log({ yyynotification2: notification?.request });
+
+        // console.log({ zzznotification2: notification?.request?.content?.data });
+
+        // if (Platform.OS === "android") {
+        //   console.log({ andriod: notification });
+        //   emargencysong();
+        // }
+
         notificationservicecode(notification?.request?.content?.data);
+
+        // dispatch(NotificationDataModalFunC(true));
+        // dispatch(NotificationDataFunC(notification));
       });
 
     return () => {
@@ -206,13 +249,20 @@ export const NavigationScreen = () => {
   } = useSelector((state) => state.AuthSlice);
   const dispatch = useDispatch();
 
+  // dispatch(reset_login());
+
   useEffect(() => {
+    // dispatch(UserProfile_data_Fun());
+    // dispatch(Get_User_Profle_Fun());
+
     async function getNotificationPermission() {
       const { status } = await Notifications.getPermissionsAsync();
       if (status !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
       }
       if (status !== "granted") {
+        // Handle the case where the user declines permission
+        // console.log("Failed to get push token for push notification!");
         return;
       }
       let token;
@@ -221,27 +271,45 @@ export const NavigationScreen = () => {
           projectId: Constants.expoConfig.extra.eas.projectId,
         })
       ).data;
+      // token = (
+      //   await Notifications.getExpoPushTokenAsync({
+      //     projectId: Constants.expoConfig.extra.eas.projectId,
+      //   })
+      // ).data;
 
       console.log({
         jajacccc: token,
       });
 
+      // console.log({ first_token: token });
+      // Permission granted, handle accordingly
       await AsyncStorage.setItem("PushToken", token);
       const value = await AsyncStorage.getItem("PushToken");
+
+      // console.log({ value });
+      // setPushToken(value);
     }
 
     getNotificationPermission();
+    // getNotificationPermission();
   }, [dispatch]);
 
   useEffect(() => {
     const backgroundSubscription =
       Notifications.addNotificationResponseReceivedListener((response) => {
+        // console.log({ response });
+
         const data = response.notification.request.content.data;
+        // dispatch(NotificationDataModalFunC(true));
+
+        // dispatch(NotificationDataFunC(response));
       });
 
     const foregroundSubscription =
       Notifications.addNotificationReceivedListener((notification) => {
-        // Handle notification
+        // console.log({ notification });
+        // dispatch(NotificationDataModalFunC(true));
+        // dispatch(NotificationDataFunC(notification));
       });
 
     return () => {
@@ -250,15 +318,30 @@ export const NavigationScreen = () => {
     };
   }, []);
 
+  // console.log({ user_data });
+  // return (
+  //   <NavigationContainer>
+  //     <StartScreen />
+  //     {/* {user_data?.token && <MainScreen />}
+  //     {!user_data?.token && <StartScreen />} */}
+  //     <Toast />
+  //   </NavigationContainer>
+  // );
+
   const { updateInfo } = useUpdateChecker();
+
+  // if (forceUpdate) {
+  //   return <UpdateScreen message={updateInfo?.message} />;
+  // }
+
   let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
 
   console.log({
-    xxx: user_data?.user?.roles?.includes("runner"),
+    xxx: user_data?.user?.roles.includes("runner"),
   });
 
   const isRunner =
-    user_data?.token && user_data?.user?.roles?.includes("runner");
+    user_data?.token && user_data?.user?.roles.includes("runner");
 
   console.log({
     fff: isRunner,
@@ -272,11 +355,11 @@ export const NavigationScreen = () => {
       ) : (
         <>
           {isRunner ? (
-            <RunnerNavigation />
+            <RunnerNavigation /> // Navigate to Runner-specific component
           ) : user_data?.token ? (
-            <MainScreen />
+            <MainScreen /> // Logged in but not a runner, or a general user
           ) : (
-            <StartScreen />
+            <StartScreen /> // Not logged in
           )}
         </>
       )}
@@ -343,17 +426,25 @@ export const UpdateScreen = ({ message }) => {
 };
 
 export const useUpdateChecker = (checkInterval = 60000) => {
+  // Check every minute
   const [forceUpdate, setForceUpdate] = useState(false);
   const [updateInfo, setUpdateInfo] = useState(null);
 
   const version = Constants.expoConfig?.version;
+
   let url = `${API_BASEURL}checkversion?version=${version}`;
+
+  // Constants.manifest.version}`
 
   const checkForUpdates = async () => {
     try {
       const response = await fetch(url);
       const data = await response.json();
+
+      // if (data.forceUpdate) {
+      // setForceUpdate(true);
       setUpdateInfo(data);
+      // }
     } catch (error) {
       console.error("Error checking for updates:", error);
     }
@@ -368,12 +459,12 @@ export const useUpdateChecker = (checkInterval = 60000) => {
   return { updateInfo };
 };
 
-// MOVED: Notification handler to the top level to avoid conflicts
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -395,6 +486,7 @@ export function AppNotification() {
   };
 
   useEffect(() => {
+    // 1. Register for push notifications and get token
     const registerPushNotifications = async () => {
       const token = await registerForPushNotificationsAsync();
 
@@ -408,6 +500,16 @@ export function AppNotification() {
 
     registerPushNotifications();
 
+    // 2. Configure foreground notification presentation options - THIS IS THE KEY PART
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true, // Set to TRUE to show notification in foreground
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+
+    // 3. Listen for app state changes
     const appStateSubscription = AppState.addEventListener(
       "change",
       (nextAppState) => {
@@ -415,19 +517,26 @@ export function AppNotification() {
       }
     );
 
+    // 4. Listen for notifications received while app is foregrounded
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log("Notification received:", notification);
         setNotification(notification);
         console.log("this is me");
+
+        // No custom handling needed - the notification handler will show the notification
       });
 
+    // 5. Listen for user responses to notifications
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("User interacted with notification:", response);
+        // Handle navigation or other actions here
       });
 
+    // Cleanup function
     return () => {
+      // Remove all listeners
       if (notificationListener.current) {
         Notifications.removeNotificationSubscription(
           notificationListener.current
@@ -460,6 +569,7 @@ async function registerForPushNotificationsAsync() {
   let token;
 
   if (Platform.OS === "android") {
+    // For Android, create a notification channel with high importance
     await Notifications.setNotificationChannelAsync("default", {
       name: "Default Channel",
       importance: Notifications.AndroidImportance.MAX,
