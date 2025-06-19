@@ -84,12 +84,21 @@ interface Advertisement {
 const sampleAnnouncements: Announcement[] = [
   {
     id: "1",
-    title: "New Feature: Resident Chat!",
+    title: "Community Guidelines Refreshed",
     content:
-      "Connect with your neighbors instantly. We've rolled out a brand new chat feature within your estate's section.",
-    date: "2025-06-10",
-    link: "app://features/chat", // Example deep link or internal screen link
+      "We've updated our community guidelines to foster a more positive and respectful environment for everyone.",
+    // Please review them.",
+    date: "2025-01-01",
+    link: "https://yourplatform.com/guidelines",
   },
+  // {
+  //   id: "1",
+  //   title: "New Feature: Resident Chat!",
+  //   content:
+  //     "Connect with your neighbors instantly. We've rolled out a brand new chat feature within your estate's section.",
+  //   date: "2025-06-10",
+  //   link: "app://features/chat", // Example deep link or internal screen link
+  // },
   {
     id: "2",
     title: "Scheduled Maintenance",
@@ -110,7 +119,7 @@ const sampleAnnouncements: Announcement[] = [
     title: "Community Guidelines Refreshed",
     content:
       "We've updated our community guidelines to foster a more positive and respectful environment for everyone. Please review them.",
-    date: "2025-06-01",
+    date: "2025-01-01",
     link: "https://yourplatform.com/guidelines",
   },
   {
@@ -373,7 +382,7 @@ const Account: React.FC = () => {
             <View style={styles.divider} />
           </View>
           <View style={styles.announcementsContainer}>
-            {sampleAnnouncements.length > 0 ? (
+            {/* {sampleAnnouncements.length > 0 ? (
               <>
                 {console.log({
                   ccccvv: sampleAnnouncements[0],
@@ -407,7 +416,7 @@ const Account: React.FC = () => {
                 data="No announcements at this time."
                 textstyle={styles.noAnnouncementsText}
               />
-            )}
+            )} */}
           </View>
         </View>
 

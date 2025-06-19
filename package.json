@@ -52,7 +52,7 @@
     "react-native-share": "^10.1.0",
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "15.8.0",
-    "react-native-toast-message": "^2.1.7",
+    "react-native-toast-message": "^2.3.0",
     "react-native-view-shot": "~4.0.3",
     "react-native-webview": "13.12.5",
     "react-query": "^3.39.3",
