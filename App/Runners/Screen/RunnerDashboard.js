@@ -10,59 +10,31 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-const RunnerDashboard = () => {
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useFetchData } from "../../../hooks/Request";
+import { useNavigation } from "@react-navigation/native";
+
+const RunnerDashboard = ({}) => {
+  const navigation = useNavigation();
   const [isOnline, setIsOnline] = useState(false);
   const [availableErrands, setAvailableErrands] = useState([]);
   const [activeErrand, setActiveErrand] = useState(null);
   const [earnings, setEarnings] = useState({ today: 0, week: 0, total: 0 });
   const [refreshing, setRefreshing] = useState(false);
 
-  // Mock data - replace with actual API calls
-  const mockErrands = [
-    {
-      id: "1",
-      title: "Grocery Shopping",
-      description: "Buy groceries from Shoprite, Victoria Island",
-      payment: 2500,
-      distance: "2.3 km",
-      estimatedTime: "45 min",
-      priority: "high",
-      customer: "Sarah Johnson",
-    },
-    {
-      id: "2",
-      title: "Document Pickup",
-      description: "Pick up documents from Bank, Ikoyi",
-      payment: 1800,
-      distance: "1.5 km",
-      estimatedTime: "30 min",
-      priority: "medium",
-      customer: "Michael Adebayo",
-    },
-    {
-      id: "3",
-      title: "Food Delivery",
-      description: "Deliver lunch from KFC to office building",
-      payment: 1200,
-      distance: "3.1 km",
-      estimatedTime: "25 min",
-      priority: "urgent",
-      customer: "Company Ltd",
-    },
-  ];
+  const {
+    data: errandsData,
+    isLoading: isErrandsLoading,
+    error: errandsError,
+    refetch: refetchErrands,
+  } = useFetchData(`api/v1/runner/errands`, "geterrandinfo");
 
   useEffect(() => {
-    loadErrands();
+    if (errandsData?.data) {
+      setAvailableErrands(errandsData.data);
+    }
     loadEarnings();
-  }, []);
-
-  const loadErrands = () => {
-    // Simulate API call
-    setTimeout(() => {
-      setAvailableErrands(mockErrands);
-    }, 500);
-  };
+  }, [errandsData]);
 
   const loadEarnings = () => {
     // Simulate API call
@@ -88,7 +60,7 @@ const RunnerDashboard = () => {
   const acceptErrand = (errand) => {
     Alert.alert(
       "Accept Errand",
-      `Accept "${errand.title}" for ₦${errand.payment}?`,
+      `Accept "${errand.title}" for ₦${errand.totalAmount}?`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -96,7 +68,7 @@ const RunnerDashboard = () => {
           onPress: () => {
             setActiveErrand(errand);
             setAvailableErrands((prev) =>
-              prev.filter((e) => e.id !== errand.id)
+              prev.filter((e) => e._id !== errand._id)
             );
             Alert.alert("Errand Accepted", "Navigate to pickup location");
           },
@@ -114,12 +86,12 @@ const RunnerDashboard = () => {
           onPress: () => {
             setEarnings((prev) => ({
               ...prev,
-              today: prev.today + activeErrand.payment,
+              today: prev.today + activeErrand.totalAmount,
             }));
             setActiveErrand(null);
             Alert.alert(
               "Errand Completed",
-              `₦${activeErrand.payment} added to your earnings`
+              `₦${activeErrand.totalAmount} added to your earnings`
             );
           },
         },
@@ -129,13 +101,11 @@ const RunnerDashboard = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadErrands();
-    loadEarnings();
-    setTimeout(() => setRefreshing(false), 1000);
+    refetchErrands().finally(() => setRefreshing(false));
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
+  const getPriorityColor = (status) => {
+    switch (status) {
       case "urgent":
         return "#FF4444";
       case "high":
@@ -145,6 +115,11 @@ const RunnerDashboard = () => {
       default:
         return "#666";
     }
+  };
+
+  const formatAddress = (address) => {
+    if (!address) return "Address not specified";
+    return address.length > 30 ? `${address.substring(0, 30)}...` : address;
   };
 
   return (
@@ -205,7 +180,7 @@ const RunnerDashboard = () => {
               <View style={styles.errandHeader}>
                 <Text style={styles.errandTitle}>{activeErrand.title}</Text>
                 <Text style={styles.errandPayment}>
-                  ₦{activeErrand.payment}
+                  ₦{activeErrand?.totalAmount?.toFixed(2)}
                 </Text>
               </View>
               <Text style={styles.errandDescription}>
@@ -213,13 +188,21 @@ const RunnerDashboard = () => {
               </Text>
               <View style={styles.errandDetails}>
                 <Text style={styles.errandDetail}>
-                  👤 {activeErrand.customer}
+                  👤 {activeErrand.user?.name || "Customer"}
                 </Text>
                 <Text style={styles.errandDetail}>
-                  📍 {activeErrand.distance}
+                  📍 {formatAddress(activeErrand.deliveryAddress)}
                 </Text>
                 <Text style={styles.errandDetail}>
-                  ⏱️ {activeErrand.estimatedTime}
+                  🏷️ {activeErrand.clan?.name || "No clan"}
+                </Text>
+              </View>
+              <View style={styles.errandDetails}>
+                <Text style={styles.errandDetail}>
+                  🛒 {activeErrand.pickupLocations?.length || 0} stores
+                </Text>
+                <Text style={styles.errandDetail}>
+                  ⏱️ {new Date(activeErrand.createdAt).toLocaleTimeString()}
                 </Text>
               </View>
               <TouchableOpacity
@@ -234,9 +217,29 @@ const RunnerDashboard = () => {
 
         {/* Available Errands */}
         <View style={styles.availableErrandsCard}>
-          <Text style={styles.cardTitle}>
-            Available Errands ({availableErrands.length})
-          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.cardTitle}>
+              Available Errands ({availableErrands?.length || 0})
+            </Text>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: "green",
+                padding: 5,
+                borderRadius: 5,
+              }}
+              onPress={() => navigation.navigate("TaskScreen")}
+            >
+              <Text style={{ color: "white" }}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
           {!isOnline && (
             <View style={styles.offlineMessage}>
               <Text style={styles.offlineText}>
@@ -254,29 +257,51 @@ const RunnerDashboard = () => {
           )}
           {isOnline &&
             availableErrands.map((errand) => (
-              <View key={errand.id} style={styles.errandItem}>
-                <View style={styles.errandHeader}>
-                  <Text style={styles.errandTitle}>{errand.title}</Text>
-                  <View style={styles.paymentContainer}>
-                    <View
-                      style={[
-                        styles.priorityDot,
-                        { backgroundColor: getPriorityColor(errand.priority) },
-                      ]}
-                    />
-                    <Text style={styles.errandPayment}>₦{errand.payment}</Text>
+              <View key={errand._id} style={styles.errandItem}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("ErrandDetailsScreen", {
+                      errand,
+                    })
+                  }
+                >
+                  <View style={styles.errandHeader}>
+                    <Text style={styles.errandTitle}>{errand.title}</Text>
+                    <View style={styles.paymentContainer}>
+                      <View
+                        style={[
+                          styles.priorityDot,
+                          { backgroundColor: getPriorityColor(errand.status) },
+                        ]}
+                      />
+                      <Text style={styles.errandPayment}>
+                        ₦{errand.totalAmount?.toFixed(2)}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-                <Text style={styles.errandDescription}>
-                  {errand.description}
-                </Text>
-                <View style={styles.errandDetails}>
-                  <Text style={styles.errandDetail}>👤 {errand.customer}</Text>
-                  <Text style={styles.errandDetail}>📍 {errand.distance}</Text>
-                  <Text style={styles.errandDetail}>
-                    ⏱️ {errand.estimatedTime}
+                  <Text style={styles.errandDescription}>
+                    {errand.description}
                   </Text>
-                </View>
+                  <View style={styles.errandDetails}>
+                    <Text style={styles.errandDetail}>
+                      👤 {errand.user?.name || "Customer"}
+                    </Text>
+                    <Text style={styles.errandDetail}>
+                      📍 {formatAddress(errand.deliveryAddress)}
+                    </Text>
+                    <Text style={styles.errandDetail}>
+                      🏷️ {errand.clan?.name || "No clan"}
+                    </Text>
+                  </View>
+                  <View style={styles.errandDetails}>
+                    <Text style={styles.errandDetail}>
+                      🛒 {errand.pickupLocations?.length || 0} stores
+                    </Text>
+                    <Text style={styles.errandDetail}>
+                      ⏱️ {new Date(errand.createdAt).toLocaleTimeString()}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.acceptButton}
                   onPress={() => acceptErrand(errand)}
@@ -431,17 +456,20 @@ const styles = StyleSheet.create({
   errandDetails: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 8,
+    flexWrap: "wrap",
   },
   errandDetail: {
     fontSize: 12,
     color: "#888",
+    marginRight: 10,
   },
   acceptButton: {
     backgroundColor: "#4CAF50",
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: "center",
+    marginTop: 10,
   },
   acceptButtonText: {
     color: "white",
@@ -453,6 +481,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: "center",
+    marginTop: 10,
   },
   completeButtonText: {
     color: "white",

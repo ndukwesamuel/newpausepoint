@@ -12,6 +12,7 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Logout } from "../../../components/Account/Logout";
 
 const RunnerProfileScreen = () => {
   const [profile, setProfile] = useState({
@@ -74,6 +75,7 @@ const RunnerProfileScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Profile Header */}
+
         <View style={styles.profileHeader}>
           <View style={styles.profileImageContainer}>
             <Image source={profile.profileImage} style={styles.profileImage} />
@@ -93,6 +95,34 @@ const RunnerProfileScreen = () => {
               <Text style={styles.verifiedText}>✓ Verified Runner</Text>
             </View>
           )}
+        </View>
+        <View
+          style={{
+            position: "relative",
+            top: 0,
+            zIndex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Logout
+            item={{
+              // Re-using GeneralData for consistency
+              id: 4,
+              icon: "logout-outline",
+              label: "Logout",
+              icon_type: "Ionicons",
+              link: "Logout",
+            }}
+          />
+
+          <Text
+            style={{
+              fontSize: 16,
+            }}
+          >
+            Logout
+          </Text>
         </View>
 
         {/* Profile Information */}

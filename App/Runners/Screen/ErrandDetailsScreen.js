@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,20 +8,26 @@ import {
   Alert,
   Linking,
   Image,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ErrandDetailsScreen = ({ route, navigation }) => {
   const { errand } = route.params || {};
-  const [errandStatus, setErrandStatus] = useState("accepted"); // accepted, in_progress, completed
+
+  console.log({
+    vvb: errand,
+  });
+
+  const [errandStatus, setErrandStatus] = useState(errand?.status || "pending"); // pending, accepted, in_progress, completed
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    { id: 1, title: "Errand Accepted", completed: true },
+    { id: 1, title: "Errand Accepted", completed: errandStatus !== "pending" },
     {
       id: 2,
       title: "Heading to Pickup",
-      completed: errandStatus !== "accepted",
+      completed: ["in_progress", "completed"].includes(errandStatus),
     },
     {
       id: 3,
@@ -40,81 +46,37 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
     },
   ];
 
-  const mockErrand = {
-    id: "1",
-    title: "Grocery Shopping",
-    description:
-      "Buy groceries from Shoprite, Victoria Island. List includes rice, beans, tomatoes, and cooking oil.",
-    payment: 2500,
-    distance: "2.3 km",
-    estimatedTime: "45 min",
-    priority: "high",
-    customer: {
-      name: "Sarah Johnson",
-      phone: "+234 801 234 5678",
-      rating: 4.9,
-      avatar: null,
-    },
-    pickup: {
-      address: "Shoprite, Victoria Island, Lagos",
-      coordinates: { lat: 6.4281, lng: 3.4219 },
-      instructions:
-        "Enter through the main entrance, grocery section is on the ground floor",
-    },
-    delivery: {
-      address: "15 Ademola Street, Victoria Island, Lagos",
-      coordinates: { lat: 6.4301, lng: 3.4289 },
-      instructions: "Apartment 4B, use the elevator. Call when you arrive.",
-    },
-    items: [
-      { name: "Rice (5kg)", quantity: 1, notes: "Uncle Ben's preferred" },
-      { name: "Beans (2kg)", quantity: 1, notes: "Brown beans" },
-      { name: "Tomatoes", quantity: "1kg", notes: "Fresh, not too ripe" },
-      {
-        name: "Cooking Oil",
-        quantity: "1 bottle",
-        notes: "Vegetable oil, 1 liter",
-      },
-    ],
-    specialInstructions:
-      "Please check expiry dates carefully. Customer prefers organic products when available.",
-    timeConstraints: "Delivery needed before 6 PM",
-  };
-
-  const currentErrand = errand || mockErrand;
-
   const handleCallCustomer = () => {
-    Alert.alert("Call Customer", `Call ${currentErrand.customer.name}?`, [
+    Alert.alert("Call Customer", `Call ${errand?.user?.name}?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Call",
-        onPress: () => Linking.openURL(`tel:${currentErrand.customer.phone}`),
+        onPress: () =>
+          Linking.openURL(`tel:${errand?.user?.phone || "+2340000000000"}`),
       },
     ]);
   };
 
-  const handleNavigateToLocation = (location) => {
-    const { lat, lng } = location.coordinates;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const handleNavigateToLocation = (address) => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      address
+    )}`;
     Linking.openURL(url);
   };
 
   const handleUpdateStatus = (newStatus) => {
     setErrandStatus(newStatus);
     switch (newStatus) {
+      case "accepted":
+        Alert.alert("Status Updated", "You've accepted this errand");
+        break;
       case "in_progress":
         Alert.alert("Status Updated", "Heading to pickup location");
-        break;
-      case "at_pickup":
-        Alert.alert("Status Updated", "Arrived at pickup location");
-        break;
-      case "heading_to_delivery":
-        Alert.alert("Status Updated", "Heading to delivery location");
         break;
       case "completed":
         Alert.alert(
           "Errand Completed",
-          "Great job! Payment will be processed."
+          `Great job! ₦${errand?.totalAmount} will be processed.`
         );
         break;
     }
@@ -131,53 +93,71 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
     ]);
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "urgent":
-        return "#FF4444";
-      case "high":
-        return "#FF8800";
-      case "medium":
-        return "#4CAF50";
-      default:
-        return "#666";
-    }
-  };
+  const renderPickupLocation = ({ item }) => (
+    <View style={styles.locationItem}>
+      <View style={styles.locationHeader}>
+        <Text style={styles.locationTitle}>📍 {item.name}</Text>
+        <TouchableOpacity
+          style={styles.navigateButton}
+          onPress={() => handleNavigateToLocation(item.address)}
+        >
+          <Text style={styles.navigateText}>Navigate</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.locationAddress}>{item.address}</Text>
+
+      <Text style={styles.sectionSubtitle}>Items to Pickup:</Text>
+      <FlatList
+        data={item.items}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    </View>
+  );
+
+  const renderItem = ({ item }) => (
+    <View style={styles.itemRow}>
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
+        {item.description && (
+          <Text style={styles.itemNotes}>Note: {item.description}</Text>
+        )}
+      </View>
+      <View style={styles.itemCheckbox}>
+        <Text style={styles.checkboxText}>☐</Text>
+      </View>
+    </View>
+  );
+
+  if (!errand) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text>No errand data available</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>← Back</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleEmergency}>
-            <Text style={styles.emergencyButton}>🚨 Emergency</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Errand Overview */}
         <View style={styles.overviewCard}>
           <View style={styles.titleRow}>
-            <Text style={styles.errandTitle}>{currentErrand.title}</Text>
+            <Text style={styles.errandTitle}>{errand.title}</Text>
             <View style={styles.paymentContainer}>
-              <View
-                style={[
-                  styles.priorityDot,
-                  { backgroundColor: getPriorityColor(currentErrand.priority) },
-                ]}
-              />
               <Text style={styles.payment}>
-                ₦{currentErrand.payment.toLocaleString()}
+                ₦{errand.totalAmount?.toFixed(2)}
               </Text>
             </View>
           </View>
-          <Text style={styles.description}>{currentErrand.description}</Text>
+          <Text style={styles.description}>{errand.description}</Text>
           <View style={styles.errandMeta}>
-            <Text style={styles.metaText}>📍 {currentErrand.distance}</Text>
             <Text style={styles.metaText}>
-              ⏱️ {currentErrand.estimatedTime}
+              🏷️ {errand.clan?.name || "No clan"}
+            </Text>
+            <Text style={styles.metaText}>
+              ⏱️ {new Date(errand.createdAt).toLocaleString()}
             </Text>
           </View>
         </View>
@@ -185,7 +165,7 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
         {/* Progress Tracker */}
         <View style={styles.progressCard}>
           <Text style={styles.cardTitle}>Progress</Text>
-          {steps.map((step, index) => (
+          {steps.map((step) => (
             <View key={step.id} style={styles.progressStep}>
               <View
                 style={[
@@ -211,19 +191,15 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
           <View style={styles.customerInfo}>
             <View style={styles.customerAvatar}>
               <Text style={styles.avatarText}>
-                {currentErrand.customer.name
-                  .split(" ")
+                {errand.user?.name
+                  ?.split(" ")
                   .map((n) => n[0])
                   .join("")}
               </Text>
             </View>
             <View style={styles.customerDetails}>
-              <Text style={styles.customerName}>
-                {currentErrand.customer.name}
-              </Text>
-              <Text style={styles.customerRating}>
-                ⭐ {currentErrand.customer.rating}
-              </Text>
+              <Text style={styles.customerName}>{errand.user?.name}</Text>
+              <Text style={styles.customerEmail}>{errand.user?.email}</Text>
             </View>
             <TouchableOpacity
               style={styles.callButton}
@@ -234,85 +210,66 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Locations */}
+        {/* Pickup Locations */}
         <View style={styles.locationsCard}>
-          <Text style={styles.cardTitle}>Locations</Text>
+          <Text style={styles.cardTitle}>Pickup Locations</Text>
+          <FlatList
+            data={errand.pickupLocations}
+            renderItem={renderPickupLocation}
+            keyExtractor={(item, index) => index.toString()}
+            scrollEnabled={false}
+          />
+        </View>
 
-          {/* Pickup Location */}
+        {/* Delivery Location */}
+        <View style={styles.locationsCard}>
+          <Text style={styles.cardTitle}>Delivery Location</Text>
           <View style={styles.locationItem}>
             <View style={styles.locationHeader}>
-              <Text style={styles.locationTitle}>📍 Pickup Location</Text>
+              <Text style={styles.locationTitle}>🎯 Delivery Address</Text>
               <TouchableOpacity
                 style={styles.navigateButton}
-                onPress={() => handleNavigateToLocation(currentErrand.pickup)}
+                onPress={() => handleNavigateToLocation(errand.deliveryAddress)}
               >
                 <Text style={styles.navigateText}>Navigate</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.locationAddress}>
-              {currentErrand.pickup.address}
-            </Text>
-            <Text style={styles.locationInstructions}>
-              {currentErrand.pickup.instructions}
-            </Text>
-          </View>
-
-          {/* Delivery Location */}
-          <View style={styles.locationItem}>
-            <View style={styles.locationHeader}>
-              <Text style={styles.locationTitle}>🎯 Delivery Location</Text>
-              <TouchableOpacity
-                style={styles.navigateButton}
-                onPress={() => handleNavigateToLocation(currentErrand.delivery)}
-              >
-                <Text style={styles.navigateText}>Navigate</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.locationAddress}>
-              {currentErrand.delivery.address}
-            </Text>
-            <Text style={styles.locationInstructions}>
-              {currentErrand.delivery.instructions}
-            </Text>
+            <Text style={styles.locationAddress}>{errand.deliveryAddress}</Text>
           </View>
         </View>
 
-        {/* Shopping List */}
-        <View style={styles.itemsCard}>
-          <Text style={styles.cardTitle}>Shopping List</Text>
-          {currentErrand.items.map((item, index) => (
-            <View key={index} style={styles.itemRow}>
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
-                {item.notes && (
-                  <Text style={styles.itemNotes}>Note: {item.notes}</Text>
-                )}
-              </View>
-              <View style={styles.itemCheckbox}>
-                <Text style={styles.checkboxText}>☐</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Special Instructions */}
+        {/* Payment Breakdown */}
         <View style={styles.instructionsCard}>
-          <Text style={styles.cardTitle}>Special Instructions</Text>
-          <Text style={styles.instructionsText}>
-            {currentErrand.specialInstructions}
-          </Text>
-          {currentErrand.timeConstraints && (
-            <View style={styles.timeConstraints}>
-              <Text style={styles.timeConstraintsText}>
-                ⏰ {currentErrand.timeConstraints}
-              </Text>
-            </View>
-          )}
+          <Text style={styles.cardTitle}>Payment Breakdown</Text>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>Items Total:</Text>
+            <Text style={styles.paymentValue}>₦{errand.totalPrice}</Text>
+          </View>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>Service Charge:</Text>
+            <Text style={styles.paymentValue}>₦{errand.serviceCharge}</Text>
+          </View>
+          <View style={[styles.paymentRow, styles.totalPaymentRow]}>
+            <Text style={[styles.paymentLabel, styles.totalPaymentLabel]}>
+              Total:
+            </Text>
+            <Text style={[styles.paymentValue, styles.totalPaymentValue]}>
+              ₦{errand.totalAmount}
+            </Text>
+          </View>
         </View>
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
+          {errandStatus === "pending" && (
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => handleUpdateStatus("accepted")}
+            >
+              <Text style={styles.primaryButtonText}>Accept Errand</Text>
+            </TouchableOpacity>
+          )}
+
           {errandStatus === "accepted" && (
             <TouchableOpacity
               style={styles.primaryButton}
@@ -323,24 +280,6 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
           )}
 
           {errandStatus === "in_progress" && (
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => handleUpdateStatus("at_pickup")}
-            >
-              <Text style={styles.primaryButtonText}>Arrived at Pickup</Text>
-            </TouchableOpacity>
-          )}
-
-          {errandStatus === "at_pickup" && (
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => handleUpdateStatus("heading_to_delivery")}
-            >
-              <Text style={styles.primaryButtonText}>Heading to Delivery</Text>
-            </TouchableOpacity>
-          )}
-
-          {errandStatus === "heading_to_delivery" && (
             <TouchableOpacity
               style={styles.primaryButton}
               onPress={() => handleUpdateStatus("completed")}
@@ -363,13 +302,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "white",
-  },
+
   backButton: {
     fontSize: 16,
     color: "#4CAF50",
@@ -381,7 +314,7 @@ const styles = StyleSheet.create({
   },
   overviewCard: {
     backgroundColor: "white",
-    margin: 10,
+    marginHorizontal: 10,
     padding: 20,
     borderRadius: 12,
     elevation: 2,
@@ -405,12 +338,6 @@ const styles = StyleSheet.create({
   paymentContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  priorityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
   },
   payment: {
     fontSize: 18,
@@ -498,9 +425,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
-  customerRating: {
+  customerEmail: {
     fontSize: 12,
-    color: "#FF8800",
+    color: "#666",
     marginTop: 2,
   },
   callButton: {
@@ -558,10 +485,12 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 5,
   },
-  locationInstructions: {
-    fontSize: 12,
-    color: "#888",
-    fontStyle: "italic",
+  sectionSubtitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 10,
+    marginBottom: 5,
   },
   itemsCard: {
     backgroundColor: "white",
@@ -619,21 +548,34 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  instructionsText: {
+  paymentRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  paymentLabel: {
     fontSize: 14,
     color: "#666",
-    lineHeight: 20,
   },
-  timeConstraints: {
-    backgroundColor: "#FFF3E0",
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  timeConstraintsText: {
-    fontSize: 12,
-    color: "#FF8800",
+  paymentValue: {
+    fontSize: 14,
     fontWeight: "bold",
+    color: "#333",
+  },
+  totalPaymentRow: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  totalPaymentLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  totalPaymentValue: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#4CAF50",
   },
   actionButtons: {
     margin: 10,

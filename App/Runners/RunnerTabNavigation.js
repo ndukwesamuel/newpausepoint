@@ -48,23 +48,6 @@ const RunnerTabNavigation = () => {
       />
 
       <Tab.Screen
-        name="Profile"
-        component={RunnerProfileScreen}
-        options={{
-          title: "Dashboard",
-          tabBarActiveTintColor: "#005091",
-          headerShown: false,
-          tabBarIcon: ({ focused, color, size }) => (
-            <AntDesign
-              name="setting"
-              size={24}
-              color={focused ? "#005091" : color}
-            />
-          ),
-        }}
-      />
-
-      <Tab.Screen
         name="analytics"
         component={EarningsAnalyticsScreen}
         options={{
@@ -91,6 +74,23 @@ const RunnerTabNavigation = () => {
           tabBarIcon: ({ focused, color, size }) => (
             <MaterialCommunityIcons
               name="google-analytics"
+              size={24}
+              color={focused ? "#005091" : color}
+            />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Profile"
+        component={RunnerProfileScreen}
+        options={{
+          title: "Dashboard",
+          tabBarActiveTintColor: "#005091",
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => (
+            <AntDesign
+              name="setting"
               size={24}
               color={focused ? "#005091" : color}
             />
