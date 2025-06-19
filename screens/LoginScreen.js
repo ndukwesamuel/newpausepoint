@@ -36,7 +36,263 @@ import { Login_Fun, reset_other_login } from "../Redux/AuthSlice";
 import { authScreenChange, changeauthscreen } from "../Redux/OnboardingSlice";
 import { useNavigation } from "@react-navigation/native";
 
+// const LoginScreen = ({}) => {
+//   const { localremember } = useSelector((state) => state?.DontwantToResetSlice);
+//   const navigation = useNavigation();
+//   const dispatch = useDispatch();
+//   const {
+//     user_data,
+//     user_isError,
+//     user_isSuccess,
+//     user_isLoading,
+//     user_message,
+//     pushtokendata,
+//   } = useSelector((state) => state.AuthSlice);
+
+//   console.log({
+//     james: pushtokendata,
+//   });
+
+//   const [inputValue, setInputValue] = useState("");
+//   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+//   const togglePasswordVisibility = () => {
+//     setIsPasswordVisible(!isPasswordVisible);
+//   };
+//   const [name, setName] = useState("");
+//   const [email, setEmail] = useState(localremember?.email || "");
+
+//   const [remember, setRemember] = useState(false);
+
+//   const [passwords, setPasswords] = useState({
+//     mainPassword: localremember?.password || "",
+//     confirmPassword: "",
+//   });
+
+//   const handlePasswordChange = (field, text) => {
+//     setPasswords((prevPasswords) => ({
+//       ...prevPasswords,
+//       [field]: text,
+//     }));
+//   };
+
+//   const handleInputChange = (text) => {
+//     setInputValue(text);
+//   };
+
+//   const handleLogin = async () => {
+//     // const value = await AsyncStorage.getItem("PushToken");
+//     const value = await AsyncStorage.getItem("PushToken");
+//     let mobile = true;
+//     let data = {
+//       email: email,
+//       password: passwords.mainPassword,
+//       // tokenNotification: value,
+//       // mobile,
+
+//       pushToken: value,
+//     };
+
+//     if (remember) {
+//       dispatch(
+//         remeberUSerPassword({
+//           remember,
+//           email: email,
+//           password: passwords.mainPassword,
+//         })
+//       );
+//     }
+
+//     dispatch(setOtpEmail(email));
+
+//     console.log({
+//       ccc: data,
+//     });
+
+//     dispatch(Login_Fun(data));
+//     // fetchData();
+//   };
+
+//   useEffect(() => {
+//     return () => {
+//       dispatch(reset_other_login());
+//     };
+//   }, []);
+
+//   return (
+//     <AppScreen>
+//       <KeyboardAvoidingView
+//         behavior={Platform.OS === "ios" ? "padding" : "height"}
+//         style={{ flex: 1 }}
+//       >
+//         <View
+//           style={{
+//             paddingHorizontal: 20,
+//             paddingTop: 20,
+//             height: "100%",
+//             justifyContent: "center",
+//           }}
+//         >
+//           <RegistraionHeadersText data="Welcome back" textStyle={{}} />
+
+//           <View style={{ flexDirection: "row", gap: 10, marginBottom: 30 }}>
+//             <RegistraionParagraphText
+//               data="Don’t have an account? "
+//               color="#8E8E8F"
+//             />
+
+//             <TouchableOpacity
+//               onPress={() => dispatch(authScreenChange("REGISTER"))}
+//             >
+//               <RegistraionParagraphText data="Sign Up" color="#04973C" />
+//             </TouchableOpacity>
+//           </View>
+
+//           <View style={{ marginBottom: 15 }}>
+//             <FormLabel data="Email " />
+//             <Forminput
+//               placeholder="Enter your email"
+//               onChangeText={setEmail}
+//               value={email}
+//             />
+//           </View>
+
+//           <View style={{ marginBottom: 20 }}>
+//             <FormLabel data="Password " />
+
+//             <Forminputpassword
+//               placeholder="Enter your password"
+//               onChangeText={(text) =>
+//                 handlePasswordChange("mainPassword", text)
+//               }
+//               value={passwords.mainPassword}
+//             />
+//           </View>
+
+//           <View
+//             style={{
+//               flexDirection: "row",
+//               justifyContent: "space-between",
+//               alignItems: "center",
+//             }}
+//           >
+//             <TouchableOpacity
+//               onPress={() => setRemember(!remember)}
+//               style={{
+//                 flexDirection: "row",
+//                 alignItems: "center",
+//                 gap: 10,
+//                 marginBottom: 20,
+//               }}
+//             >
+//               <Ionicons
+//                 name={`${
+//                   remember
+//                     ? "checkmark-circle-sharp"
+//                     : "checkmark-circle-outline"
+//                 }`}
+//                 size={24}
+//                 color={`${remember ? "green" : "gray"}`}
+//               />
+
+//               <Text
+//                 style={{
+//                   fontSize: 14,
+//                   fontWeight: "400",
+//                   fontFamily: "RobotoSlab-Regular",
+//                 }}
+//               >
+//                 Remember me
+//               </Text>
+//             </TouchableOpacity>
+
+//             <TouchableOpacity
+//               onPress={() => setRemember(!remember)}
+//               style={{
+//                 flexDirection: "row",
+//                 alignItems: "center",
+//                 gap: 10,
+//                 marginBottom: 20,
+//               }}
+//             >
+//               <TouchableOpacity
+//                 onPress={() => dispatch(authScreenChange("FORGOTTENPASSWOD"))}
+//               >
+//                 <Text
+//                   style={{
+//                     fontSize: 14,
+//                     fontWeight: "400",
+//                     fontFamily: "RobotoSlab-Regular",
+//                   }}
+//                 >
+//                   Forgot password ?
+//                 </Text>
+//               </TouchableOpacity>
+//             </TouchableOpacity>
+//           </View>
+
+//           <Formbutton
+//             buttonStyle={{
+//               backgroundColor: "#04973C",
+//               paddingVertical: 14,
+//               alignItems: "center",
+//               borderRadius: 5,
+//             }}
+//             textStyle={{
+//               color: "white",
+//               fontWeight: "500",
+//               fontSize: 14,
+//               fontFamily: "RobotoSlab-Medium",
+//             }}
+//             data="Sign in"
+//             onPress={handleLogin}
+//             isLoading={user_isLoading}
+//           />
+
+//           <View
+//             style={{ height: 20, alignItems: "center", marginVertical: 15 }}
+//           >
+//             <Image
+//               source={require("../assets/images/or.png")}
+//               style={{ width: "80%", flex: 1 }}
+//             />
+//           </View>
+
+//           <Formbutton
+//             buttonStyle={{
+//               borderWidth: 1,
+//               borderColor: "#04973C",
+//               paddingVertical: 14,
+//               alignItems: "center",
+//               borderRadius: 5,
+//               flexDirection: "row",
+//               justifyContent: "center",
+//               gap: 10,
+//             }}
+//             textStyle={{
+//               color: "#454343",
+//               fontWeight: "500",
+//               fontSize: 14,
+//               fontFamily: "RobotoSlab-Medium",
+//             }}
+//             data="Sign Up"
+//             onPress={() => dispatch(authScreenChange("REGISTER"))}
+//           />
+//         </View>
+//       </KeyboardAvoidingView>
+//     </AppScreen>
+//   );
+// };
+
+// export default LoginScreen;
+
+// const styles = StyleSheet.create({});
+
+// LoginScreen.js
+// ... (imports remain the same)
+
 const LoginScreen = ({}) => {
+  // ... (existing state and useSelector)
+
   const { localremember } = useSelector((state) => state?.DontwantToResetSlice);
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -80,15 +336,10 @@ const LoginScreen = ({}) => {
   };
 
   const handleLogin = async () => {
-    // const value = await AsyncStorage.getItem("PushToken");
     const value = await AsyncStorage.getItem("PushToken");
-    let mobile = true;
     let data = {
       email: email,
       password: passwords.mainPassword,
-      // tokenNotification: value,
-      // mobile,
-
       pushToken: value,
     };
 
@@ -103,16 +354,12 @@ const LoginScreen = ({}) => {
     }
 
     dispatch(setOtpEmail(email));
-
-    console.log({
-      ccc: data,
-    });
-
     dispatch(Login_Fun(data));
-    // fetchData();
   };
 
   useEffect(() => {
+    // This cleans up AuthSlice state when LoginScreen unmounts (though with absolute positioning, it's always mounted)
+    // It's still good practice, but less critical for the shaking issue with the new Auth component approach.
     return () => {
       dispatch(reset_other_login());
     };
@@ -139,7 +386,6 @@ const LoginScreen = ({}) => {
               data="Don’t have an account? "
               color="#8E8E8F"
             />
-
             <TouchableOpacity
               onPress={() => dispatch(authScreenChange("REGISTER"))}
             >
@@ -158,7 +404,6 @@ const LoginScreen = ({}) => {
 
           <View style={{ marginBottom: 20 }}>
             <FormLabel data="Password " />
-
             <Forminputpassword
               placeholder="Enter your password"
               onChangeText={(text) =>
@@ -175,6 +420,7 @@ const LoginScreen = ({}) => {
               alignItems: "center",
             }}
           >
+            {/* Remember me checkbox */}
             <TouchableOpacity
               onPress={() => setRemember(!remember)}
               style={{
@@ -193,7 +439,6 @@ const LoginScreen = ({}) => {
                 size={24}
                 color={`${remember ? "green" : "gray"}`}
               />
-
               <Text
                 style={{
                   fontSize: 14,
@@ -205,28 +450,22 @@ const LoginScreen = ({}) => {
               </Text>
             </TouchableOpacity>
 
+            {/* Forgot password link - CORRECTED onPress */}
             <TouchableOpacity
-              onPress={() => setRemember(!remember)}
+              onPress={() => dispatch(authScreenChange("FORGOTTENPASSWOD"))} // Corrected this line
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-                marginBottom: 20,
+                marginBottom: 20, // Keep consistent with the other TouchableOpacity
               }}
             >
-              <TouchableOpacity
-                onPress={() => dispatch(authScreenChange("FORGOTTENPASSWOD"))}
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "400",
+                  fontFamily: "RobotoSlab-Regular",
+                }}
               >
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: "400",
-                    fontFamily: "RobotoSlab-Regular",
-                  }}
-                >
-                  Forgot password ?
-                </Text>
-              </TouchableOpacity>
+                Forgot password ?
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -285,4 +524,4 @@ const LoginScreen = ({}) => {
 
 export default LoginScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({}); // Your existing styles
