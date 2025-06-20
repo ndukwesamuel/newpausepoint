@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFetchData } from "../../../hooks/Request";
+import { useFetchData, useMutateData } from "../../../hooks/Request";
 import { useNavigation } from "@react-navigation/native";
 
 const RunnerDashboard = ({}) => {
@@ -29,12 +29,36 @@ const RunnerDashboard = ({}) => {
     refetch: refetchErrands,
   } = useFetchData(`api/v1/runner/errands`, "geterrandinfo");
 
-  useEffect(() => {
-    if (errandsData?.data) {
-      setAvailableErrands(errandsData.data);
-    }
-    loadEarnings();
-  }, [errandsData]);
+  const {
+    mutate: assignedErrand,
+    isLoading: assignedErrandispending,
+    error: assignedErranderror,
+  } = useMutateData("api/v1/runner/errands", "PATCH", "geterrandinfo");
+
+  // createDue(
+  //   due,
+  //   {
+  //     onSuccess: (response) => {
+  //       console.log({
+  //         jaja: response,
+  //       });
+
+  //       navigation.goBack();
+  //     },
+  //   },
+  //   {
+  //     onError: (error) => {
+  //       console.error("Mutation Error:", error.message);
+  //     },
+  //   }
+  // );
+
+  // useEffect(() => {
+  //   if (errandsData?.data) {
+  //     setAvailableErrands(errandsData?.data);
+  //   }
+  //   loadEarnings();
+  // }, [errandsData]);
 
   const loadEarnings = () => {
     // Simulate API call
@@ -57,26 +81,81 @@ const RunnerDashboard = ({}) => {
     }
   };
 
+  // const acceptErrand = (errand) => {
+  //   let data = {
+  //     status: "assigned",
+  //     errandId: errand?._id, //"6852b976b4b9a6dd9ec41d13",
+  //   };
+
+  //   //  "assignedTo": null,
+  //   //  "status": "pending",
+
+  //   console.log({
+  //     errand,
+  //     mine: errand?._id,
+  //     mine2: errand?.assignedTo,
+  //     mine3: errand?.status,
+  //   });
+
+  //   Alert.alert(
+  //     "Accept Errand",
+  //     `Accept "${errand.title}" for ₦${errand.totalAmount}?`,
+  //     [
+  //       { text: "Cancel", style: "cancel" },
+  //       {
+  //         text: "Accept",
+  //         onPress: () => {
+  //           setActiveErrand(errand);
+  //           setAvailableErrands((prev) =>
+  //             prev.filter((e) => e._id !== errand._id)
+  //           );
+  //           Alert.alert("Errand Accepted", "Navigate to pickup location");
+  //         },
+  //       },
+  //     ]
+  //   );
+  // };
+
   const acceptErrand = (errand) => {
-    Alert.alert(
-      "Accept Errand",
-      `Accept "${errand.title}" for ₦${errand.totalAmount}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Accept",
-          onPress: () => {
-            setActiveErrand(errand);
-            setAvailableErrands((prev) =>
-              prev.filter((e) => e._id !== errand._id)
-            );
-            Alert.alert("Errand Accepted", "Navigate to pickup location");
-          },
+    // Check if errand is already assigned or not in pending status
+    if (errand?.assignedTo !== null && errand?.status !== "pending") {
+      Alert.alert(
+        "Errand Unavailable",
+        "This errand has already been assigned to another runner or is no longer available.",
+        [{ text: "OK", style: "default" }]
+      );
+      return;
+    }
+
+    let data = {
+      status: "assigned",
+      errandId: errand?._id,
+    };
+
+    // console.log({
+    //   errand,
+    //   mine: errand?._id,
+    //   mine2: errand?.assignedTo,
+    //   mine3: errand?.status,
+    // });
+    assignedErrand(
+      data,
+      {
+        onSuccess: (response) => {
+          console.log({
+            jaja: response,
+          });
+
+          navigation.navigate("TaskScreen");
         },
-      ]
+      },
+      {
+        onError: (error) => {
+          console.error("Mutation Error:", error.message);
+        },
+      }
     );
   };
-
   const completeErrand = () => {
     if (activeErrand) {
       Alert.alert("Complete Errand", "Mark this errand as completed?", [
@@ -172,49 +251,6 @@ const RunnerDashboard = ({}) => {
           </View>
         </View>
 
-        {/* Active Errand */}
-        {activeErrand && (
-          <View style={styles.activeErrandCard}>
-            <Text style={styles.cardTitle}>Active Errand</Text>
-            <View style={styles.errandItem}>
-              <View style={styles.errandHeader}>
-                <Text style={styles.errandTitle}>{activeErrand.title}</Text>
-                <Text style={styles.errandPayment}>
-                  ₦{activeErrand?.totalAmount?.toFixed(2)}
-                </Text>
-              </View>
-              <Text style={styles.errandDescription}>
-                {activeErrand.description}
-              </Text>
-              <View style={styles.errandDetails}>
-                <Text style={styles.errandDetail}>
-                  👤 {activeErrand.user?.name || "Customer"}
-                </Text>
-                <Text style={styles.errandDetail}>
-                  📍 {formatAddress(activeErrand.deliveryAddress)}
-                </Text>
-                <Text style={styles.errandDetail}>
-                  🏷️ {activeErrand.clan?.name || "No clan"}
-                </Text>
-              </View>
-              <View style={styles.errandDetails}>
-                <Text style={styles.errandDetail}>
-                  🛒 {activeErrand.pickupLocations?.length || 0} stores
-                </Text>
-                <Text style={styles.errandDetail}>
-                  ⏱️ {new Date(activeErrand.createdAt).toLocaleTimeString()}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.completeButton}
-                onPress={completeErrand}
-              >
-                <Text style={styles.completeButtonText}>Mark as Completed</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
         {/* Available Errands */}
         <View style={styles.availableErrandsCard}>
           <View
@@ -225,7 +261,7 @@ const RunnerDashboard = ({}) => {
             }}
           >
             <Text style={styles.cardTitle}>
-              Available Errands ({availableErrands?.length || 0})
+              Available Errands ({errandsData?.data?.length || 0})
             </Text>
 
             <TouchableOpacity
@@ -247,7 +283,7 @@ const RunnerDashboard = ({}) => {
               </Text>
             </View>
           )}
-          {isOnline && availableErrands.length === 0 && (
+          {isOnline && errandsData?.data.length === 0 && (
             <View style={styles.noErrandsMessage}>
               <Text style={styles.noErrandsText}>
                 No errands available right now
@@ -256,7 +292,7 @@ const RunnerDashboard = ({}) => {
             </View>
           )}
           {isOnline &&
-            availableErrands.map((errand) => (
+            errandsData?.data.map((errand) => (
               <View key={errand._id} style={styles.errandItem}>
                 <TouchableOpacity
                   onPress={() =>
@@ -310,25 +346,6 @@ const RunnerDashboard = ({}) => {
                 </TouchableOpacity>
               </View>
             ))}
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsCard}>
-          <Text style={styles.cardTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsRow}>
-            <TouchableOpacity style={styles.quickActionButton}>
-              <Text style={styles.quickActionIcon}>📊</Text>
-              <Text style={styles.quickActionText}>Analytics</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickActionButton}>
-              <Text style={styles.quickActionIcon}>💬</Text>
-              <Text style={styles.quickActionText}>Support</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickActionButton}>
-              <Text style={styles.quickActionIcon}>⚙️</Text>
-              <Text style={styles.quickActionText}>Settings</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

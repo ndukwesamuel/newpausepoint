@@ -261,7 +261,7 @@ export const NavigationScreen = () => {
     user_data?.token && user_data?.user?.roles?.includes("runner");
 
   console.log({
-    fff: isRunner,
+    fff: forceUpdate,
   });
 
   return (
