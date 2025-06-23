@@ -9,6 +9,8 @@ import {
   StatusBar,
   ActivityIndicator, // Import ActivityIndicator for loading
 } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+
 import { useNavigation } from "@react-navigation/native";
 import { useQueryClient } from "react-query"; // Import useQueryClient for retries
 import { useFetchData } from "../../hooks/Request"; // Assuming this path is correct
@@ -149,8 +151,25 @@ const ErrandsScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5F5F5" />
 
-      <Text style={styles.header}>My Errands</Text>
+      <View style={{ position: "absolute", right: 20, top: 320, zIndex: 1 }}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "green",
+            // paddingHorizontal: 20,
+            // paddingVertical: 10,
+            borderRadius: 50,
+            width: 50,
+            height: 50,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          // navigation.navigate("guestsdetail", { itemdata });
 
+          onPress={() => navigation.navigate("createErrand")}
+        >
+          <MaterialIcons name="mode-edit" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={getallErrand?.data?.errands}
         renderItem={renderErrandItem}

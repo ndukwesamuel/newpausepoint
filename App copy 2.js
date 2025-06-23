@@ -336,10 +336,6 @@ export const NavigationScreen = () => {
 
   let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
 
-  console.log({
-    xxx: user_data?.user?.roles.includes("runner"),
-  });
-
   const isRunner =
     user_data?.token && user_data?.user?.roles.includes("runner");
 

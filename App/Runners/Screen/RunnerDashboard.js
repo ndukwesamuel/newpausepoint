@@ -132,12 +132,6 @@ const RunnerDashboard = ({}) => {
       errandId: errand?._id,
     };
 
-    // console.log({
-    //   errand,
-    //   mine: errand?._id,
-    //   mine2: errand?.assignedTo,
-    //   mine3: errand?.status,
-    // });
     assignedErrand(
       data,
       {

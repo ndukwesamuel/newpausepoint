@@ -253,10 +253,6 @@ export const NavigationScreen = () => {
   const { updateInfo } = useUpdateChecker();
   let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
 
-  console.log({
-    xxx: user_data?.user?.roles?.includes("runner"),
-  });
-
   const isRunner =
     user_data?.token && user_data?.user?.roles?.includes("runner");
 
@@ -280,6 +276,7 @@ export const NavigationScreen = () => {
           )}
         </>
       )}
+      <Toast />
     </NavigationContainer>
   );
 };
