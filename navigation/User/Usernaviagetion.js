@@ -52,6 +52,7 @@ import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletS
 import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
 import Errand from "../../screens/Customerinterface/Errands/Errand";
 import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDetailScreen";
+import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
 const Stack = createNativeStackNavigator();
 
 const SingleScreenWithBackButton = (screenName, component, title) => {
@@ -98,6 +99,13 @@ export const Usernaviagetion = () => {
       component: ErrandDetailScreen,
       title: "Errand Details",
     },
+
+    {
+      name: "createErrand",
+      component: CreateErrandScreen,
+      title: "Create Errand",
+    },
+
     {
       name: "CreatePrivateEvent",
       component: CreatePrivateEvent,

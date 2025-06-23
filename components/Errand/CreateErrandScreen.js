@@ -23,7 +23,6 @@ const CreateErrandScreen = () => {
     title: "",
     deliveryAddress: "",
     description: "",
-    clanId: "",
     pickupLocations: [
       {
         name: "",
@@ -186,12 +185,12 @@ const CreateErrandScreen = () => {
     mutate: createErrand,
     isLoading: isCreating,
     error: creationError,
-  } = useMutateData("errands", "POST", "errands-list");
+  } = useMutateData("api/v1/errand", "POST", "errand");
 
   // Handle form submission
   const handleSubmit = () => {
     // Validate form
-    if (!formData.title || !formData.deliveryAddress || !formData.clanId) {
+    if (!formData.title || !formData.deliveryAddress) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
@@ -236,7 +235,6 @@ const CreateErrandScreen = () => {
       title: formData.title,
       deliveryAddress: formData.deliveryAddress,
       description: formData.description,
-      clanId: formData.clanId,
       pickupLocations: formData.pickupLocations.map((location) => ({
         name: location.name,
         address: location.address,
@@ -253,29 +251,26 @@ const CreateErrandScreen = () => {
     console.log({
       vvv: submissionData,
     });
-
     // Call the mutation
-    // createErrand(submissionData, {
-    //   onSuccess: (data) => {
-    //     Alert.alert("Success", "Errand created successfully!");
-    //     navigation.goBack();
-    //   },
-    //   onError: (error) => {
-    //     console.error("Creation Error:", error); // Log the full error for debugging
-    //     Alert.alert(
-    //       "Error",
-    //       error.message ||
-    //         error.response?.data?.message ||
-    //         "Failed to create errand"
-    //     );
-    //   },
-    // });
+    createErrand(submissionData, {
+      onSuccess: (data) => {
+        Alert.alert("Success", "Errand created successfully!");
+        navigation.goBack();
+      },
+      onError: (error) => {
+        console.error("Creation Error:", error); // Log the full error for debugging
+        Alert.alert(
+          "Error",
+          error.message ||
+            error.response?.data?.message ||
+            "Failed to create errand"
+        );
+      },
+    });
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Create New Errand</Text>
-
       {/* Basic Information */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Basic Information</Text>
@@ -300,13 +295,6 @@ const CreateErrandScreen = () => {
           multiline
           value={formData.description}
           onChangeText={(text) => handleChange("description", text)}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Clan ID"
-          value={formData.clanId}
-          onChangeText={(text) => handleChange("clanId", text)}
         />
       </View>
 
@@ -415,7 +403,7 @@ const CreateErrandScreen = () => {
                 {/* Display total price for the item */}
                 {item.quantity && item.price ? (
                   <Text style={styles.itemTotalPrice}>
-                    Item Total: $
+                    Item Total: ₦
                     {(
                       parseFloat(item.quantity) * parseFloat(item.price)
                     ).toFixed(2)}
@@ -452,7 +440,7 @@ const CreateErrandScreen = () => {
 
             {/* Total price for this location */}
             <Text style={styles.locationTotal}>
-              Location Total: ${calculateItemsTotal(location.items).toFixed(2)}
+              Location Total: ₦{calculateItemsTotal(location.items).toFixed(2)}
             </Text>
           </View>
         ))}
@@ -467,10 +455,19 @@ const CreateErrandScreen = () => {
         </TouchableOpacity>
       </View>
 
+      <View>
+        <Text style={{}}>
+          <Text style={{}}>Service Charge:</Text> ₦ 0.00
+        </Text>
+
+        <Text style={{}}>
+          <Text style={{}}>Delivery Charge:</Text> ₦ 500.00
+        </Text>
+      </View>
       {/* Grand Total for all locations */}
       <View style={styles.grandTotalContainer}>
         <Text style={styles.grandTotalText}>
-          Grand Total for Errand: ${grandTotal.toFixed(2)}
+          Grand Total for Errand: ₦{grandTotal.toFixed(2)}
         </Text>
       </View>
 

@@ -30,10 +30,6 @@ const EditPersonalInformation = ({ navigation }) => {
     (member) => member.user.toString() === userIdToFind.toString()
   );
 
-  console.log({
-    xxx: foundMember?.houseNumber,
-  });
-
   const canEditProfile =
     userProfile_data?.currentClanMeeting?.settings?.allowMembersToEditProfile;
 

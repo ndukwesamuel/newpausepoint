@@ -125,7 +125,7 @@ const ErrandDetailScreen = () => {
                   <View style={styles.itemHeader}>
                     <Text style={styles.itemName}>{item.name}</Text>
                     <Text style={styles.itemQuantityPrice}>
-                      {item.quantity} x ${item.price?.toFixed(2) || "N/A"}
+                      {item.quantity} x ₦{item.price?.toFixed(2) || "N/A"}
                     </Text>
                   </View>
                   <Text style={styles.itemDescription}>{item.description}</Text>
@@ -148,15 +148,24 @@ const ErrandDetailScreen = () => {
         <View style={styles.detailSection}>
           <Text style={styles.sectionHeader}>Financial Summary</Text>
           <Text style={styles.detailText}>
-            <Text style={styles.boldText}>Total Price:</Text> $
+            <Text style={styles.boldText}>Total Price:</Text> ₦
             {errand.totalPrice?.toFixed(2) || "0.00"}
           </Text>
           <Text style={styles.detailText}>
-            <Text style={styles.boldText}>Service Charge:</Text> $
+            <Text style={styles.boldText}>Service Charge:</Text> ₦
             {errand.serviceCharge?.toFixed(2) || "0.00"}
           </Text>
+
+          <Text style={styles.detailText}>
+            <Text style={styles.boldText}>Delivery Charge:</Text> ₦
+            {errand?.deliveryFee?.toFixed(2) || "500.00"}
+          </Text>
+
+          {console.log({
+            asss: errand?.serviceCharge,
+          })}
           <Text style={styles.totalAmountText}>
-            <Text style={styles.boldText}>Total Amount:</Text> $
+            <Text style={styles.boldText}>Total Amount:</Text> ₦
             {errand.totalAmount?.toFixed(2) || "0.00"}
           </Text>
         </View>

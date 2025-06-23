@@ -218,8 +218,6 @@ const Guests = () => {
             </TouchableOpacity>
           </View>
 
-          {}
-
           {filteredData?.length === 0 ? (
             <View
               style={{

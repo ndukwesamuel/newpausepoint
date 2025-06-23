@@ -11,12 +11,16 @@ import {
   FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useMutateData } from "../../../hooks/Request";
+import Toast from "react-native-toast-message";
+import { useNavigation } from "@react-navigation/native";
 
-const ErrandDetailsScreen = ({ route, navigation }) => {
+const ErrandDetailsScreen = ({ route }) => {
   const { errand } = route.params || {};
+  const navigation = useNavigation();
 
   console.log({
-    vvb: errand,
+    vvb: errand?._id,
   });
 
   const [errandStatus, setErrandStatus] = useState(errand?.status || "pending"); // pending, accepted, in_progress, completed
@@ -64,22 +68,78 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
     Linking.openURL(url);
   };
 
+  const {
+    mutate: assignedErrand,
+    isLoading: assignedErrandispending,
+    error: assignedErranderror,
+  } = useMutateData("api/v1/runner/errands", "PATCH", "geterrandinfo");
+
   const handleUpdateStatus = (newStatus) => {
-    setErrandStatus(newStatus);
-    switch (newStatus) {
-      case "accepted":
-        Alert.alert("Status Updated", "You've accepted this errand");
-        break;
-      case "in_progress":
-        Alert.alert("Status Updated", "Heading to pickup location");
-        break;
-      case "completed":
-        Alert.alert(
-          "Errand Completed",
-          `Great job! ₦${errand?.totalAmount} will be processed.`
-        );
-        break;
-    }
+    let data = {
+      status: newStatus,
+      errandId: errand?._id,
+    };
+
+    console.log({
+      gg: data,
+    });
+
+    assignedErrand(data, {
+      onSuccess: (response) => {
+        console.log({ jaja: response });
+
+        // Show success alert
+        Alert.alert("Success", "Status updated successfully", [{ text: "OK" }]);
+        navigation.goBack();
+      },
+      onError: (error) => {
+        console.log({ errorDetails: error });
+
+        const errorMessage =
+          error.message ||
+          error.response?.data?.message ||
+          "Failed to update status";
+
+        Alert.alert("Error", errorMessage, [{ text: "OK" }]);
+      },
+    });
+
+    // assignedErrand(
+    //   data,
+    //   {
+    //     onSuccess: (response) => {
+    //       console.log({
+    //         jaja: response,
+    //       });
+
+    //       Toast.show({
+    //         type: "success",
+    //         text1: "good", //`${error?.message} `,
+    //       });
+
+    //       // navigation.navigate("TaskScreen");
+    //     },
+    //   },
+    //   {
+    //     onError: (error) => {
+    //       console.log({
+    //         gghhh: "kkkkkk",
+    //       });
+
+    //       const errorMessage =
+    //         error.message ||
+    //         error.response?.data?.message ||
+    //         "Failed to update status";
+
+    //       Toast.show({
+    //         type: "error",
+    //         text1: "Error",
+    //         text2: errorMessage,
+    //         visibilityTime: 4000, // Show for 4 seconds
+    //       });
+    //     },
+    //   }
+    // );
   };
 
   const handleEmergency = () => {
@@ -107,6 +167,7 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
       <Text style={styles.locationAddress}>{item.address}</Text>
 
       <Text style={styles.sectionSubtitle}>Items to Pickup:</Text>
+
       <FlatList
         data={item.items}
         renderItem={renderItem}
@@ -124,8 +185,12 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
           <Text style={styles.itemNotes}>Note: {item.description}</Text>
         )}
       </View>
+
+      {console.log({
+        dddd: item,
+      })}
       <View style={styles.itemCheckbox}>
-        <Text style={styles.checkboxText}>☐</Text>
+        <Text style={styles.checkboxText}>₦{item?.price}</Text>
       </View>
     </View>
   );
@@ -270,21 +335,60 @@ const ErrandDetailsScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           )}
 
-          {errandStatus === "accepted" && (
+          {/* "pending",
+        "assigned",
+        "en_route",
+        "picked_up",
+        "delivered",
+        "completed",
+        "cancelled", */}
+
+          {/* {errandStatus === "assigned" && (
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={() => handleUpdateStatus("in_progress")}
+              onPress={() => handleUpdateStatus("en_route")}
             >
               <Text style={styles.primaryButtonText}>Start Errand</Text>
             </TouchableOpacity>
           )}
 
-          {errandStatus === "in_progress" && (
+          {errandStatus === "en_route" && (
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={() => handleUpdateStatus("completed")}
+              onPress={() => handleUpdateStatus("picked_up")}
             >
               <Text style={styles.primaryButtonText}>Complete Errand</Text>
+            </TouchableOpacity>
+          )} */}
+
+          {/* Runner's status flow:
+  "assigned" → "en_route" → "picked_up" → "delivered"
+  */}
+
+          {errandStatus === "assigned" && (
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => handleUpdateStatus("en_route")}
+            >
+              <Text style={styles.primaryButtonText}>Start Trip to Pickup</Text>
+            </TouchableOpacity>
+          )}
+
+          {errandStatus === "en_route" && (
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => handleUpdateStatus("picked_up")}
+            >
+              <Text style={styles.primaryButtonText}>I've Picked Up Item</Text>
+            </TouchableOpacity>
+          )}
+
+          {errandStatus === "picked_up" && (
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => handleUpdateStatus("delivered")}
+            >
+              <Text style={styles.primaryButtonText}>Mark as Delivered</Text>
             </TouchableOpacity>
           )}
 
@@ -535,7 +639,6 @@ const styles = StyleSheet.create({
   },
   checkboxText: {
     fontSize: 18,
-    color: "#ccc",
   },
   instructionsCard: {
     backgroundColor: "white",
