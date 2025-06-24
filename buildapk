@@ -37,3 +37,7 @@ After making this change:
    - Set up signing keys for release builds
 
 Would you like me to provide more detailed instructions for any of these setup steps?
+
+npx eas build -p android --profile preview --local
+
+users-MacBook-Pro:newpausepoint user$ npx eas-cli@latest build -p android --profile preview --local
