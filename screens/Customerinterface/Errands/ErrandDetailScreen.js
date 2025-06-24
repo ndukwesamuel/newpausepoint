@@ -6,19 +6,97 @@ import {
   Image,
   StyleSheet,
   StatusBar,
-  SafeAreaView, // Use SafeAreaView for iOS notch areas
-  Dimensions, // For responsive image sizing
+  SafeAreaView,
+  Dimensions,
+  TouchableOpacity,
+  Alert, // Import Alert
 } from "react-native";
-import { useRoute } from "@react-navigation/native"; // To access navigation parameters
+import { useRoute, useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useMutateData } from "../../../hooks/Request";
 
-const { width } = Dimensions.get("window"); // Get screen width for responsive images
+const { width } = Dimensions.get("window");
 
 const ErrandDetailScreen = () => {
   const route = useRoute();
-  // Extract the 'errand' object passed as a parameter from the previous screen
+  const navigation = useNavigation(); // Get navigation object for goBack()
   const { errand } = route.params;
 
-  // Handle case where errand data might be missing (though unlikely with proper navigation)
+  const {
+    mutate: assignedErrand,
+    isLoading: assignedErrandispending,
+    error: assignedErranderror,
+  } = useMutateData("api/v1/errand", "PATCH", "geterrandinfo");
+
+  // Function to show the confirmation alert
+  const showConfirmStatusUpdate = (newStatus) => {
+    let title = "";
+    let message = "";
+
+    if (newStatus === "assigned") {
+      title = "Confirm Acceptance";
+      message = "Are you sure you want to accept and pay for this errand?";
+    } else if (newStatus === "cancelled") {
+      title = "Confirm Cancellation";
+      message = "Are you sure you want to cancel this errand?";
+    } else if (newStatus === "en_route") {
+      // Added confirmation for 'en_route'
+      title = "Confirm En Route";
+      message = "Are you sure you want to mark this errand as 'En Route'?";
+    } else {
+      // Fallback for unexpected status
+      title = "Confirm Action";
+      message = `Are you sure you want to change status to ${newStatus}?`;
+    }
+
+    Alert.alert(
+      title,
+      message,
+      [
+        {
+          text: "No",
+          onPress: () => console.log("Status update cancelled"),
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => handleUpdateStatus(newStatus), // If 'Yes', trigger the actual update
+        },
+      ],
+      { cancelable: false } // User must tap a button
+    );
+  };
+
+  const handleUpdateStatus = (newStatus) => {
+    let data = {
+      status: newStatus,
+      errandId: errand?._id,
+    };
+
+    console.log({
+      payloadToSend: data, // More descriptive name
+    });
+
+    assignedErrand(data, {
+      onSuccess: (response) => {
+        console.log({ successResponse: response }); // More descriptive name
+
+        Alert.alert("Success", "Status updated successfully", [{ text: "OK" }]);
+        navigation.goBack(); // Navigate back after success
+      },
+      onError: (error) => {
+        console.log({ errorDetails: error?.response });
+
+        // Improve error message extraction
+        const errorMessage =
+          error.response?.data?.message || // Check backend message first
+          error.message ||
+          "Failed to update status. Please try again.";
+
+        Alert.alert("Error", errorMessage, [{ text: "OK" }]);
+      },
+    });
+  };
+
   if (!errand) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
@@ -27,15 +105,18 @@ const ErrandDetailScreen = () => {
     );
   }
 
-  // --- Helper Functions (reused from ErrandsScreen for consistency) ---
-
-  // Function to determine status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
         return "#FFC107"; // Amber
+      case "assigned": // Add assigned status color
+        return "#673AB7"; // Deep Purple
+      case "en_route":
+        return "#FF9800"; // Orange
       case "picked_up":
         return "#2196F3"; // Blue
+      case "delivered":
+        return "#00BCD4"; // Cyan
       case "completed":
         return "#4CAF50"; // Green
       case "cancelled":
@@ -45,7 +126,6 @@ const ErrandDetailScreen = () => {
     }
   };
 
-  // Function to format date strings
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return (
@@ -62,7 +142,6 @@ const ErrandDetailScreen = () => {
     );
   };
 
-  // --- Render the Errand Details ---
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5F5F5" />
@@ -71,14 +150,45 @@ const ErrandDetailScreen = () => {
 
         <View style={styles.detailSection}>
           <Text style={styles.sectionHeader}>Status</Text>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(errand.status) },
-            ]}
-          >
-            <Text style={styles.statusText}>{errand.status.toUpperCase()}</Text>
-          </View>
+          <View style={styles.statusRow}>
+            {" "}
+            {/* Corrected to View */}
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(errand.status) },
+              ]}
+            >
+              <Text style={styles.statusText}>
+                {errand.status.toUpperCase()}
+              </Text>
+            </View>
+            {errand.status === "pending" && (
+              <View style={styles.actionButtonsContainer}>
+                {" "}
+                {/* Corrected to View */}
+                <TouchableOpacity
+                  onPress={() => showConfirmStatusUpdate("assigned")} // Call the confirmation function
+                  style={[styles.actionButton, styles.assignButton]}
+                  disabled={assignedErrandispending} // Disable while loading
+                >
+                  {assignedErrandispending ? (
+                    <Text style={styles.buttonText}>Processing...</Text>
+                  ) : (
+                    <Text style={styles.buttonText}>Accept & Pay</Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => showConfirmStatusUpdate("cancelled")} // Call the confirmation function
+                  style={[styles.actionButton, styles.cancelButton]}
+                  disabled={assignedErrandispending} // Disable while loading
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>{" "}
+          {/* Corrected closing tag to View */}
         </View>
 
         <View style={styles.detailSection}>
@@ -89,60 +199,56 @@ const ErrandDetailScreen = () => {
           </Text>
           <Text style={styles.detailText}>
             <Text style={styles.boldText}>Description:</Text>{" "}
-            {errand.description}
+            {errand.description || "N/A"}{" "}
+            {/* Handle potentially missing description */}
           </Text>
         </View>
 
-        {errand.user && (
-          <View style={styles.detailSection}>
-            <Text style={styles.sectionHeader}>Requested By</Text>
-            <Text style={styles.detailText}>
-              <Text style={styles.boldText}>Name:</Text> {errand.user.name}
-            </Text>
-            <Text style={styles.detailText}>
-              <Text style={styles.boldText}>Email:</Text> {errand.user.email}
-            </Text>
-          </View>
-        )}
-
-        {errand.clan && (
-          <View style={styles.detailSection}>
-            <Text style={styles.sectionHeader}>Clan</Text>
-            <Text style={styles.detailText}>
-              <Text style={styles.boldText}>Name:</Text> {errand.clan.name}
-            </Text>
-          </View>
-        )}
-
         <View style={styles.detailSection}>
           <Text style={styles.sectionHeader}>Pickup Locations & Items</Text>
-          {errand.pickupLocations.map((location, locIndex) => (
-            <View key={locIndex} style={styles.locationCard}>
-              <Text style={styles.locationName}>{location.name}</Text>
-              <Text style={styles.locationAddress}>{location.address}</Text>
-              {location.items.map((item, itemIndex) => (
-                <View key={itemIndex} style={styles.itemCard}>
-                  <View style={styles.itemHeader}>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style={styles.itemQuantityPrice}>
-                      {item.quantity} x ₦{item.price?.toFixed(2) || "N/A"}
-                    </Text>
-                  </View>
-                  <Text style={styles.itemDescription}>{item.description}</Text>
-                  {item.images && item.images.length > 0 && (
-                    <Image
-                      source={{ uri: item.images[0] }} // Display the first image
-                      style={styles.itemImage}
-                      onError={(e) =>
-                        console.log("Image loading error:", e.nativeEvent.error)
-                      }
-                      //   defaultSource={require("../../assets/placeholder-image.png")} // Replace with your placeholder image path
-                    />
-                  )}
-                </View>
-              ))}
-            </View>
-          ))}
+          {errand.pickupLocations && errand.pickupLocations.length > 0 ? (
+            errand.pickupLocations.map((location, locIndex) => (
+              <View key={locIndex} style={styles.locationCard}>
+                <Text style={styles.locationName}>{location.name}</Text>
+                <Text style={styles.locationAddress}>{location.address}</Text>
+                {location.items && location.items.length > 0 ? (
+                  location.items.map((item, itemIndex) => (
+                    <View key={itemIndex} style={styles.itemCard}>
+                      <View style={styles.itemHeader}>
+                        <Text style={styles.itemName}>{item.name}</Text>
+                        <Text style={styles.itemQuantityPrice}>
+                          {item.quantity} x ₦{item.price?.toFixed(2) || "N/A"}
+                        </Text>
+                      </View>
+                      <Text style={styles.itemDescription}>
+                        {item.description || "No description."}
+                      </Text>
+                      {item.images && item.images.length > 0 && (
+                        <Image
+                          source={{ uri: item.images[0] }}
+                          style={styles.itemImage}
+                          onError={(e) =>
+                            console.log(
+                              "Image loading error:",
+                              e.nativeEvent.error
+                            )
+                          }
+                        />
+                      )}
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.noItemsText}>
+                    No items listed for this pickup location.
+                  </Text>
+                )}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noItemsText}>
+              No pickup locations listed for this errand.
+            </Text>
+          )}
         </View>
 
         <View style={styles.detailSection}>
@@ -161,9 +267,6 @@ const ErrandDetailScreen = () => {
             {errand?.deliveryFee?.toFixed(2) || "500.00"}
           </Text>
 
-          {console.log({
-            asss: errand?.serviceCharge,
-          })}
           <Text style={styles.totalAmountText}>
             <Text style={styles.boldText}>Total Amount:</Text> ₦
             {errand.totalAmount?.toFixed(2) || "0.00"}
@@ -193,7 +296,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     padding: 20,
-    paddingBottom: 40, // Extra padding at the bottom for scroll comfort
+    paddingBottom: 40,
   },
   centerContent: {
     justifyContent: "center",
@@ -230,21 +333,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#555",
     marginBottom: 8,
-    lineHeight: 24, // Improve readability
+    lineHeight: 24,
   },
   boldText: {
     fontWeight: "bold",
+  },
+  statusRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
   },
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
-    alignSelf: "flex-start", // Align badge to the left
     marginBottom: 10,
   },
   statusText: {
     color: "#FFF",
     fontSize: 13,
+    fontWeight: "bold",
+  },
+  actionButtonsContainer: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+  },
+  actionButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    minWidth: 90,
+  },
+  assignButton: {
+    backgroundColor: "#4CAF50",
+  },
+  cancelButton: {
+    backgroundColor: "#F44336",
+  },
+  enRouteButton: {
+    backgroundColor: "#FF9800", // Orange for En Route
+  },
+  buttonText: {
+    color: "#FFF",
+    fontSize: 14,
     fontWeight: "bold",
   },
   locationCard: {
@@ -284,7 +419,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
-    flex: 1, // Allow name to take available space
+    flex: 1,
   },
   itemQuantityPrice: {
     fontSize: 15,
@@ -297,8 +432,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   itemImage: {
-    width: "100%", // Make image fluid within its container
-    height: width * 0.5, // Responsive height based on screen width
+    width: "100%",
+    height: width * 0.5,
     borderRadius: 8,
     marginTop: 10,
     resizeMode: "cover",
@@ -306,7 +441,7 @@ const styles = StyleSheet.create({
   totalAmountText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#28A745", // Green for total amount
+    color: "#28A745",
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
@@ -316,6 +451,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#D32F2F",
     textAlign: "center",
+  },
+  noItemsText: {
+    fontSize: 14,
+    color: "#888",
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 10,
   },
 });
 

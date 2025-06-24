@@ -55,8 +55,7 @@ const ErrandDetailsScreen = ({ route }) => {
       { text: "Cancel", style: "cancel" },
       {
         text: "Call",
-        onPress: () =>
-          Linking.openURL(`tel:${errand?.user?.phone || "+2340000000000"}`),
+        onPress: () => Linking.openURL(`tel:${errand?.phoneNumber}`),
       },
     ]);
   };
@@ -93,7 +92,7 @@ const ErrandDetailsScreen = ({ route }) => {
         navigation.goBack();
       },
       onError: (error) => {
-        console.log({ errorDetails: error });
+        console.log({ errorDetails: error?.response });
 
         const errorMessage =
           error.message ||
@@ -103,43 +102,6 @@ const ErrandDetailsScreen = ({ route }) => {
         Alert.alert("Error", errorMessage, [{ text: "OK" }]);
       },
     });
-
-    // assignedErrand(
-    //   data,
-    //   {
-    //     onSuccess: (response) => {
-    //       console.log({
-    //         jaja: response,
-    //       });
-
-    //       Toast.show({
-    //         type: "success",
-    //         text1: "good", //`${error?.message} `,
-    //       });
-
-    //       // navigation.navigate("TaskScreen");
-    //     },
-    //   },
-    //   {
-    //     onError: (error) => {
-    //       console.log({
-    //         gghhh: "kkkkkk",
-    //       });
-
-    //       const errorMessage =
-    //         error.message ||
-    //         error.response?.data?.message ||
-    //         "Failed to update status";
-
-    //       Toast.show({
-    //         type: "error",
-    //         text1: "Error",
-    //         text2: errorMessage,
-    //         visibilityTime: 4000, // Show for 4 seconds
-    //       });
-    //     },
-    //   }
-    // );
   };
 
   const handleEmergency = () => {
@@ -265,6 +227,7 @@ const ErrandDetailsScreen = ({ route }) => {
             <View style={styles.customerDetails}>
               <Text style={styles.customerName}>{errand.user?.name}</Text>
               <Text style={styles.customerEmail}>{errand.user?.email}</Text>
+              <Text style={styles.customerEmail}>{errand?.phoneNumber}</Text>
             </View>
             <TouchableOpacity
               style={styles.callButton}

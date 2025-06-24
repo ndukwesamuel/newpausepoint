@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 
 import UserTabNavigation from "./UserTabNavigation";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
@@ -55,23 +55,74 @@ import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDe
 import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
 const Stack = createNativeStackNavigator();
 
+// const SingleScreenWithBackButton = (screenName, component, title) => {
+//   return {
+//     name: screenName,
+//     component: component,
+//     options: ({ navigation }) => ({
+//       title: title,
+//       headerStyle: {
+//         backgroundColor: "white",
+//       },
+//       headerLeft: () => (
+//         <TouchableOpacity
+//           onPress={() => navigation.goBack()}
+//           style={{
+//             marginLeft: 10,
+//           }}
+//         >
+//           <AntDesign name="arrowleft" size={24} color="black" />
+//         </TouchableOpacity>
+//       ),
+//     }),
+//   };
+// };
+
+import { BackHandler } from "react-native";
+import { useEffect } from "react";
+
 const SingleScreenWithBackButton = (screenName, component, title) => {
   return {
     name: screenName,
-    component: component,
+    component: (props) => {
+      // Handle hardware back button on Android
+      useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+          "hardwareBackPress",
+          () => {
+            props.navigation.goBack();
+            return true; // Prevent default behavior
+          }
+        );
+
+        return () => backHandler.remove();
+      }, [props.navigation]);
+
+      const Component = component;
+      return <Component {...props} />;
+    },
     options: ({ navigation }) => ({
       title: title,
       headerStyle: {
         backgroundColor: "white",
+        elevation: 0, // Remove shadow on Android
+        shadowOpacity: 0, // Remove shadow on iOS
       },
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{
-            marginLeft: 10,
+            marginLeft: Platform.OS === "android" ? 16 : 10,
+            padding: 10,
           }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <AntDesign name="arrowleft" size={24} color="black" />
+          <AntDesign
+            name="arrowleft"
+            size={24}
+            color="black"
+            style={{ marginRight: Platform.OS === "android" ? 0 : -8 }}
+          />
         </TouchableOpacity>
       ),
     }),

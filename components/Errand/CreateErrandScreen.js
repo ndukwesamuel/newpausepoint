@@ -23,6 +23,7 @@ const CreateErrandScreen = () => {
     title: "",
     deliveryAddress: "",
     description: "",
+    phoneNumber: "", // Added phoneNumber field
     pickupLocations: [
       {
         name: "",
@@ -190,8 +191,18 @@ const CreateErrandScreen = () => {
   // Handle form submission
   const handleSubmit = () => {
     // Validate form
-    if (!formData.title || !formData.deliveryAddress) {
-      Alert.alert("Error", "Please fill in all required fields");
+    if (!formData.title || !formData.deliveryAddress || !formData.phoneNumber) {
+      Alert.alert(
+        "Error",
+        "Please fill in all required fields including phone number"
+      );
+      return;
+    }
+
+    // Validate phone number format (basic validation)
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      Alert.alert("Error", "Please enter a valid phone number (10-15 digits)");
       return;
     }
 
@@ -235,6 +246,7 @@ const CreateErrandScreen = () => {
       title: formData.title,
       deliveryAddress: formData.deliveryAddress,
       description: formData.description,
+      phoneNumber: formData.phoneNumber, // Include phone number in submission
       pickupLocations: formData.pickupLocations.map((location) => ({
         name: location.name,
         address: location.address,
@@ -258,7 +270,7 @@ const CreateErrandScreen = () => {
         navigation.goBack();
       },
       onError: (error) => {
-        console.error("Creation Error:", error); // Log the full error for debugging
+        console.error("Creation Error:", error?.response); // Log the full error for debugging
         Alert.alert(
           "Error",
           error.message ||
@@ -287,6 +299,14 @@ const CreateErrandScreen = () => {
           placeholder="Delivery Address"
           value={formData.deliveryAddress}
           onChangeText={(text) => handleChange("deliveryAddress", text)}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Phone Number"
+          value={formData.phoneNumber}
+          onChangeText={(text) => handleChange("phoneNumber", text)}
+          keyboardType="phone-pad"
         />
 
         <TextInput
