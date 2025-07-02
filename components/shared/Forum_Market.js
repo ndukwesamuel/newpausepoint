@@ -11,6 +11,7 @@ import { MediumFontText } from "./Paragrahp";
 import Marketplace from "../../screens/Customerinterface/MarketPlace/Marketplace";
 import { useSelector } from "react-redux";
 import ClickToJoinCLan from "./ClickToJoinCLan";
+import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
 
 const Forum_Market = () => {
   const [forumlist, setforumlist] = useState(true);
@@ -48,7 +49,6 @@ const Forum_Market = () => {
             }}
           />
         </TouchableOpacity>
-
         <TouchableOpacity
           style={{
             borderBottomWidth: forumlist ? 0 : 2,
@@ -61,7 +61,7 @@ const Forum_Market = () => {
           onPress={() => setforumlist(false)}
         >
           <MediumFontText
-            data="Marketplace"
+            data="Wallet"
             textstyle={{
               fontSize: 20,
               fontWeight: "500",
@@ -73,7 +73,7 @@ const Forum_Market = () => {
       </View>
       <View style={{ height: "85%" }}>
         {get_user_profile_data?.currentClanMeeting?._id ? (
-          <>{forumlist ? <Forum /> : <Marketplace />}</>
+          <>{forumlist ? <Forum /> : <WalletScreen />}</>
         ) : (
           <ScrollView
             contentContainerStyle={{
@@ -81,9 +81,6 @@ const Forum_Market = () => {
               justifyContent: "center",
               alignItems: "center",
             }}
-            // refreshControl={
-            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            // }
           >
             <ClickToJoinCLan />
           </ScrollView>

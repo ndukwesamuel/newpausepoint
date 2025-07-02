@@ -339,11 +339,6 @@ export default function App({ navigation }) {
                 }}
               ></Image>
             </TouchableOpacity>
-
-            {/* <View style={{ flexDirection: "row", gap: 20 }}>
-              <AntDesign name="search1" size={24} color="black" />
-              <Ionicons name="notifications-outline" size={24} color="black" />
-            </View> */}
           </View>
 
           <Forum_Market />

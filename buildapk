@@ -40,4 +40,5 @@ Would you like me to provide more detailed instructions for any of these setup s
 
 npx eas build -p android --profile preview --local
 
-users-MacBook-Pro:newpausepoint user$ npx eas-cli@latest build -p android --profile preview --local
+users-MacBook-Pro:newpausepoint user$ 
+npx eas-cli@latest build -p android --profile preview --local

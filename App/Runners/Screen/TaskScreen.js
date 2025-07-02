@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const TaskScreen = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState("assigned");
+  const [activeTab, setActiveTab] = useState("en_route");
 
   const {
     data: errandsData,
@@ -28,12 +28,12 @@ const TaskScreen = () => {
   );
 
   const statusTabs = [
-    "assigned",
+    // "assigned",
     "en_route",
     "picked_up",
     "delivered",
     "completed",
-    "cancelled",
+    // "cancelled",
   ];
 
   const formatStatusText = (status) => {

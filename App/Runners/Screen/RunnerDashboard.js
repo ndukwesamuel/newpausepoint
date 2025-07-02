@@ -118,17 +118,17 @@ const RunnerDashboard = ({}) => {
 
   const acceptErrand = (errand) => {
     // Check if errand is already assigned or not in pending status
-    if (errand?.assignedTo !== null && errand?.status !== "pending") {
+    if (errand?.assignedTo !== null && errand?.status !== "assigned") {
       Alert.alert(
         "Errand Unavailable",
-        "This errand has already been assigned to another runner or is no longer available.",
+        // "This errand has already been assigned to another runner or is no longer available.",
         [{ text: "OK", style: "default" }]
       );
       return;
     }
 
     let data = {
-      status: "assigned",
+      status: "en_route",
       errandId: errand?._id,
     };
 

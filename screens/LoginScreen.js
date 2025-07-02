@@ -337,11 +337,16 @@ const LoginScreen = ({}) => {
 
   const handleLogin = async () => {
     const value = await AsyncStorage.getItem("PushToken");
+
     let data = {
       email: email,
       password: passwords.mainPassword,
       pushToken: value,
     };
+
+    console.log({
+      ggg: data,
+    });
 
     if (remember) {
       dispatch(

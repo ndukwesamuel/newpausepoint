@@ -18,10 +18,11 @@ import {
   Ionicons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 // ... inside your component
 
-const WalletScreen = ({ navigation }) => {
+const WalletScreen = ({}) => {
   const {
     data,
     isLoading,
@@ -35,48 +36,11 @@ const WalletScreen = ({ navigation }) => {
     refetch: refetchDues,
   } = useFetchData("wallet/pay-due", "pay-due");
 
+  const navigation = useNavigation();
+
   const [refreshing, setRefreshing] = useState(false);
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
 
-  // Nigerian utility bill options with image references
-  // const utilityBills = [
-  //   {
-  //     id: 1,
-  //     name: "Electricity (PHCN)",
-  //     image: require("../../../assets/electricity.png"),
-  //     type: "electricity",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Water Bill",
-  //     image: require("../../../assets/water.png"),
-  //     type: "water",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "DSTV/GOTV",
-  //     image: require("../../../assets/dstv.png"),
-  //     type: "cable",
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Internet (WiFi)",
-  //     image: require("../../../assets/internet.png"),
-  //     type: "internet",
-  //   },
-  //   {
-  //     id: 5,
-  //     name: "Airtime/Data",
-  //     image: require("../../../assets/airtime.png"),
-  //     type: "airtime",
-  //   },
-  //   {
-  //     id: 6,
-  //     name: "WAEC/NECO",
-  //     image: require("../../../assets/waec.png"),
-  //     type: "education",
-  //   },
-  // ];
   const utilityBills = [
     {
       id: 1,
@@ -147,12 +111,10 @@ const WalletScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Wallet</Text>
-
       <View style={styles.balanceContainer}>
         <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
         <Text style={styles.balance}>
-          {data?.balance} {data?.currency}
+          {data?.balance?.toFixed(2)} {data?.currency}
         </Text>
       </View>
 
@@ -187,57 +149,6 @@ const WalletScreen = ({ navigation }) => {
         }
       />
 
-      {/* Utilities Modal */}
-      {/* <Modal
-        visible={showUtilitiesModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowUtilitiesModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Select Utility Bill</Text>
-
-            <ScrollView contentContainerStyle={styles.utilitiesGrid}>
-              {utilityBills.map((utility) => (
-                <TouchableOpacity
-                  key={utility.id}
-                  style={styles.utilityCard}
-                  // onPress={() => handleUtilitySelect(utility.type)}
-                >
-                  <Image
-                    // source={utility.image}
-                    source={{ uri: utility.image }}
-                    style={styles.utilityImage}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.utilityName}>{utility.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <Text
-              style={[
-                styles.utilityName,
-                {
-                  color: "red",
-                  fontSize: 16,
-                },
-              ]}
-            >
-              Comming Soon
-            </Text>
-
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowUtilitiesModal(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal> */}
-
-      {/*  */}
       <Modal
         visible={showUtilitiesModal}
         animationType="slide"

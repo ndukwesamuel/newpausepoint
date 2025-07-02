@@ -40,7 +40,7 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "20",
+      "buildNumber": "21",
       "runtimeVersion": "1.0.0"
     },
     "android": {
@@ -49,6 +49,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "com.pause_point.PausePoint",
       "permissions": [
         "android.permission.CAMERA",
