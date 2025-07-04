@@ -1,198 +1,4 @@
-// import React, { useState } from "react";
-// import { WebView } from "react-native-webview";
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   Modal,
-// } from "react-native";
-// import Icon from "react-native-vector-icons/MaterialIcons";
-// import { useMutateData } from "../../../hooks/Request";
-// import Constants from "expo-constants";
-// const FundWalletScreen = ({ navigation }) => {
-//   const [amount, setAmount] = useState("");
-//   const [showFeeModal, setShowFeeModal] = useState(false);
-
-//   const [webviewstart, setwebviewstart] = useState(false);
-//   const [webviewdata, setwebviewdata] = useState(null);
-//   const {
-//     mutate: createUser,
-//     isLoading: ispending,
-//     error,
-//   } = useMutateData("wallet", "POST", "wallet");
-
-//   const handleFundWallet = () => {
-//     createUser(
-//       { amount: amount },
-//       {
-//         onSuccess: (response) => {
-//           console.log({
-//             ddd: response?.data?.data,
-//           });
-//           setwebviewstart(true);
-//           setwebviewdata(response?.data?.data);
-//         },
-//       },
-
-//       {
-//         onError: (error) => {
-//           console.error("Mutation Error:", error.message);
-//         },
-//       }
-//     );
-//     // Handle fund wallet logic here
-//     // navigation.goBack();
-//   };
-
-//   return (
-//     <>
-//       {webviewstart ? (
-//         <>
-//           {console.log({
-//             jdjdjd: webviewdata?.authorization_url,
-//           })}
-//           <WebView
-//             style={{
-//               flex: 1,
-//               marginTop: Constants.statusBarHeight,
-//             }}
-//             source={{ uri: webviewdata?.authorization_url }}
-//           />
-//         </>
-//       ) : (
-//         <View style={styles.container}>
-//           <Text style={styles.title}>Fund Wallet</Text>
-//           <TextInput
-//             style={styles.input}
-//             placeholder="Enter amount"
-//             keyboardType="numeric"
-//             value={amount}
-//             onChangeText={setAmount}
-//           />
-//           <TouchableOpacity
-//             style={styles.feeIcon}
-//             onPress={() => setShowFeeModal(true)}
-//           >
-//             <Icon name="info-outline" size={24} color="#007BFF" />
-//           </TouchableOpacity>
-//           <TouchableOpacity
-//             style={[
-//               styles.button,
-//               {
-//                 marginTop: 30,
-//               },
-//             ]}
-//             onPress={handleFundWallet}
-//           >
-//             {ispending ? (
-//               <Text>Loading...</Text>
-//             ) : (
-//               <Text style={styles.buttonText}>Add Funds</Text>
-//             )}
-//           </TouchableOpacity>
-
-//           {/* Modal to show service charge */}
-//           <Modal
-//             transparent={true}
-//             visible={showFeeModal}
-//             onRequestClose={() => setShowFeeModal(false)}
-//           >
-//             <View style={styles.modalOverlay}>
-//               <View style={styles.modalContent}>
-//                 <Text style={styles.modalTitle}>Service Charge</Text>
-//                 <Text style={styles.modalText}>
-//                   A service charge of 2% will be applied to your transaction.
-//                   +100 naria for transaction more than 10000
-//                 </Text>
-//                 <TouchableOpacity
-//                   style={styles.modalButton}
-//                   onPress={() => setShowFeeModal(false)}
-//                 >
-//                   <Text style={styles.modalButtonText}>Close</Text>
-//                 </TouchableOpacity>
-//               </View>
-//             </View>
-//           </Modal>
-//         </View>
-//       )}
-//     </>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 20,
-//     backgroundColor: "#F5F5F5",
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     marginBottom: 20,
-//   },
-//   input: {
-//     borderWidth: 1,
-//     borderColor: "#CCCCCC",
-//     borderRadius: 5,
-//     padding: 10,
-//     marginBottom: 20,
-//   },
-//   feeIcon: {
-//     position: "absolute",
-//     right: 30,
-//     top: 120,
-//   },
-//   button: {
-//     backgroundColor: "#007BFF",
-//     padding: 15,
-//     borderRadius: 5,
-//     alignItems: "center",
-//   },
-//   buttonText: {
-//     color: "#FFF",
-//     fontSize: 16,
-//   },
-//   modalOverlay: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     backgroundColor: "rgba(0, 0, 0, 0.5)",
-//   },
-//   modalContent: {
-//     width: "80%",
-//     backgroundColor: "#FFF",
-//     borderRadius: 10,
-//     padding: 20,
-//     alignItems: "center",
-//   },
-//   modalTitle: {
-//     fontSize: 20,
-//     fontWeight: "bold",
-//     marginBottom: 10,
-//   },
-//   modalText: {
-//     fontSize: 16,
-//     textAlign: "center",
-//     marginBottom: 20,
-//   },
-//   modalButton: {
-//     backgroundColor: "#007BFF",
-//     padding: 10,
-//     borderRadius: 5,
-//     width: "50%",
-//     alignItems: "center",
-//   },
-//   modalButtonText: {
-//     color: "#FFF",
-//     fontSize: 16,
-//   },
-// });
-
-// export default FundWalletScreen;
-
-import React, { useState, useRef } from "react"; // Import useRef
+import React, { useState, useRef } from "react";
 import { WebView } from "react-native-webview";
 import {
   View,
@@ -201,56 +7,99 @@ import {
   TouchableOpacity,
   StyleSheet,
   Modal,
-  ActivityIndicator, // For a better loading indicator
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { useMutateData } from "../../../hooks/Request";
+import axios from "axios";
 import Constants from "expo-constants";
+import { useSelector } from "react-redux";
 
 const FundWalletScreen = ({ navigation }) => {
   const [amount, setAmount] = useState("");
   const [showFeeModal, setShowFeeModal] = useState(false);
   const [webviewstart, setwebviewstart] = useState(false);
   const [webviewdata, setwebviewdata] = useState(null);
-  const [webviewLoading, setWebviewLoading] = useState(true); // Track WebView loading state
+  const [webviewLoading, setWebviewLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const {
+    user_data,
+    user_isError,
+    user_isSuccess,
+    user_isLoading,
+    user_message,
+  } = useSelector((state) => state.AuthSlice);
 
-  // Use useRef to access the WebView methods if needed
   const webViewRef = useRef(null);
 
-  const {
-    mutate: createUser,
-    isLoading: ispending,
-    error,
-  } = useMutateData("wallet", "POST", "wallet");
-
-  const handleFundWallet = () => {
+  const handleFundWallet = async () => {
     // Basic validation
     if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid amount to fund.");
+      Alert.alert("Invalid Amount", "Please enter a valid amount to fund.");
       return;
     }
 
-    createUser(
-      { amount: amount },
-      {
-        onSuccess: (response) => {
-          console.log({
-            paystackResponse: response?.data?.data,
-          });
-          setwebviewstart(true);
-          setwebviewdata(response?.data?.data);
-          setWebviewLoading(true); // Start loading indicator when WebView appears
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post(
+        "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/wallet",
+        {
+          amount: amount,
         },
-        onError: (error) => {
-          console.error("Mutation Error:", error.message);
-          alert(
-            `Failed to initiate payment: ${
-              error.message || "An error occurred"
-            }`
-          );
-        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            // Add any authentication headers if needed
+            Authorization: `Bearer ${user_data?.token}`,
+          },
+          timeout: 30000, // 30 seconds timeout
+        }
+      );
+
+      console.log(
+        "Payment initialization response:",
+        response.data?.data?.data?.authorization_url
+      );
+
+      // Check if the response contains the authorization URL
+      if (response.data?.data?.data?.authorization_url) {
+        setwebviewstart(true);
+        setwebviewdata(response.data?.data?.data);
+        setWebviewLoading(true);
+      } else {
+        Alert.alert(
+          "Payment Error",
+          "Failed to initialize payment. Please try again."
+        );
       }
-    );
+    } catch (error) {
+      console.error("Payment initialization error:", error);
+
+      let errorMessage = "An error occurred while initializing payment.";
+
+      if (error.response) {
+        // Server responded with error status
+        console.log("Error response:", error.response.data);
+        errorMessage =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        // Network error
+        errorMessage = "Network error. Please check your internet connection.";
+      } else {
+        // Other error
+        errorMessage = error.message || "Unknown error occurred.";
+      }
+
+      Alert.alert("Payment Error", errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onNavigationStateChange = (navState) => {
@@ -262,186 +111,524 @@ const FundWalletScreen = ({ navigation }) => {
       setWebviewLoading(false);
     }
 
-    // IMPORTANT: Handle Paystack success/cancel redirects
-    // Paystack usually redirects to standard.paystack.co/close or your callback_url
-    // You MUST configure a callback_url in your Paystack dashboard or in your API call
-    // for `callback_url` parameter when initializing the transaction.
-    // Replace 'YOUR_SUCCESS_CALLBACK_URL' and 'YOUR_CANCEL_CALLBACK_URL'
-    // with the actual URLs Paystack will redirect to.
-    // For 3DS, Paystack often redirects to https://standard.paystack.co/close
-    // after authentication.
-
-    // Example: If Paystack redirects to a success or cancel page on your server
-    // or a specific Paystack URL that indicates completion.
+    // Handle Paystack success/cancel redirects
     if (url.includes("https://standard.paystack.co/close")) {
-      console.log(
-        "Paystack close URL detected. Payment flow potentially completed."
-      );
-      // This is a common indicator that the Paystack checkout has finished.
-      // You now need to verify the transaction on your backend using the reference.
-      // You can also add a slight delay to allow any final JS to execute if needed.
-      // For example, if your backend call to Paystack to verify requires a moment.
-      // For now, let's just close the webview and assume success/needs verification.
+      console.log("Paystack close URL detected. Payment flow completed.");
       setwebviewstart(false);
-      alert("Payment process completed. Checking status...");
-      // Trigger a verification call to your backend with the reference if available.
-      // e.g., verifyPayment(webviewdata?.reference);
-      return false; // Prevent WebView from loading this URL
+      Alert.alert(
+        "Payment Completed",
+        "Payment process completed. Checking status...",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              // Navigate back or refresh wallet balance
+              navigation.goBack();
+            },
+          },
+        ]
+      );
+      return false;
     }
 
-    // If you have a specific callback URL on your server for success/failure
-    if (url.includes("YOUR_APP_SUCCESS_URL")) {
-      // e.g., yourdomain.com/paystack-success?reference=...
+    // Handle custom callback URLs if you have them
+    if (url.includes("payment-success")) {
       console.log("Success callback URL detected.");
       setwebviewstart(false);
-      alert("Payment Successful!");
-      // Extract reference from URL and verify on backend
-      // navigation.navigate('PaymentSuccess', { reference: getReferenceFromUrl(url) });
-      return false; // Prevent WebView from loading this URL
+      Alert.alert("Success!", "Payment completed successfully!", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+      return false;
     }
 
-    if (url.includes("YOUR_APP_CANCEL_URL")) {
-      // e.g., yourdomain.com/paystack-cancel
+    if (url.includes("payment-cancel")) {
       console.log("Cancel callback URL detected.");
       setwebviewstart(false);
-      alert("Payment Cancelled.");
-      // navigation.goBack();
-      return false; // Prevent WebView from loading this URL
+      Alert.alert("Cancelled", "Payment was cancelled.", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+      return false;
     }
 
-    // Allow other URLs to load in the WebView
     return true;
+  };
+
+  const handleBackFromWebView = () => {
+    Alert.alert(
+      "Cancel Payment",
+      "Are you sure you want to cancel this payment?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => {
+            setwebviewstart(false);
+            setwebviewdata(null);
+          },
+        },
+      ]
+    );
   };
 
   return (
     <>
       {webviewstart ? (
         <View style={{ flex: 1, marginTop: Constants.statusBarHeight }}>
+          <View style={styles.webviewHeader}>
+            <TouchableOpacity
+              style={styles.backButtonWebView}
+              onPress={handleBackFromWebView}
+            >
+              <Icon name="arrow-back" size={24} color="green" />
+              <Text style={styles.backButtonText}>Cancel Payment</Text>
+            </TouchableOpacity>
+          </View>
+
           {webviewLoading && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator size="large" color="#007BFF" />
               <Text style={styles.loadingText}>Loading Paystack...</Text>
             </View>
           )}
-          {console.log({
-            loadingWebviewUrl: webviewdata?.authorization_url,
-          })}
+
           <WebView
-            ref={webViewRef} // Assign ref
+            ref={webViewRef}
             style={{ flex: 1 }}
             source={{ uri: webviewdata?.authorization_url }}
-            onNavigationStateChange={onNavigationStateChange} // Crucial for redirects
+            onNavigationStateChange={onNavigationStateChange}
             onLoadStart={() => setWebviewLoading(true)}
             onLoadEnd={() => setWebviewLoading(false)}
             onError={(syntheticEvent) => {
               const { nativeEvent } = syntheticEvent;
               console.warn("WebView error: ", nativeEvent);
-              alert(`WebView Error: ${nativeEvent.description}`);
-              setwebviewstart(false); // Close webview on error
+              Alert.alert(
+                "WebView Error",
+                `Error loading payment page: ${nativeEvent.description}`
+              );
+              setwebviewstart(false);
             }}
-            // Optional: onShouldStartLoadWithRequest can be used if you need more granular control
-            // before a navigation even begins. For most Paystack cases, onNavigationStateChange is enough.
-            // onShouldStartLoadWithRequest={onNavigationStateChange} // Can use the same handler
-            javaScriptEnabled={true} // Ensure JavaScript is enabled
-            domStorageEnabled={true} // Enable DOM storage for some sites
-            cacheEnabled={false} // Disable cache to ensure fresh load
-            incognito={true} // Private Browse mode
-            allowsBackForwardNavigationGestures={true} // Allow swipe gestures for navigation
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            cacheEnabled={false}
+            incognito={true}
+            allowsBackForwardNavigationGestures={true}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#007BFF" />
+                <Text style={styles.loadingText}>Loading...</Text>
+              </View>
+            )}
           />
         </View>
       ) : (
-        <View style={styles.container}>
-          <Text style={styles.title}>Fund Wallet</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter amount"
-            keyboardType="numeric"
-            value={amount}
-            onChangeText={setAmount}
-          />
-          <TouchableOpacity
-            style={styles.feeIcon}
-            onPress={() => setShowFeeModal(true)}
-          >
-            <Icon name="info-outline" size={24} color="#007BFF" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                marginTop: 30,
-              },
-            ]}
-            onPress={handleFundWallet}
-            disabled={ispending} // Disable button while loading
-          >
-            {ispending ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
-              <Text style={styles.buttonText}>Add Funds</Text>
-            )}
-          </TouchableOpacity>
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-          {/* Modal to show service charge */}
+          <ScrollView
+            style={styles.container}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Balance Card */}
+            <View style={styles.balanceCard}>
+              <View style={styles.balanceContent}>
+                <Icon name="account-balance-wallet" size={48} color="green" />
+                <Text style={styles.balanceLabel}>Current Balance</Text>
+                <Text style={styles.balanceAmount}>₦0.00</Text>
+                <Text style={styles.balanceSubtext}>
+                  Add funds to get started
+                </Text>
+              </View>
+            </View>
+
+            {/* Amount Input Section */}
+            <View style={styles.inputSection}>
+              <Text style={styles.sectionTitle}>Enter Amount</Text>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.currencySymbol}>₦</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="0.00"
+                  keyboardType="numeric"
+                  value={amount}
+                  onChangeText={setAmount}
+                  editable={!isLoading}
+                  placeholderTextColor="#999"
+                />
+                <TouchableOpacity
+                  style={styles.feeIcon}
+                  onPress={() => setShowFeeModal(true)}
+                >
+                  <Icon name="info-outline" size={20} color="green" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Quick Amount Buttons */}
+              <View style={styles.quickAmountContainer}>
+                <Text style={styles.quickAmountLabel}>Quick amounts</Text>
+                <View style={styles.quickAmountButtons}>
+                  {[1000, 5000, 10000, 20000].map((quickAmount) => (
+                    <TouchableOpacity
+                      key={quickAmount}
+                      style={[
+                        styles.quickAmountButton,
+                        amount === quickAmount.toString() &&
+                          styles.quickAmountButtonActive,
+                      ]}
+                      onPress={() => setAmount(quickAmount.toString())}
+                    >
+                      <Text
+                        style={[
+                          styles.quickAmountButtonText,
+                          amount === quickAmount.toString() &&
+                            styles.quickAmountButtonTextActive,
+                        ]}
+                      >
+                        ₦{quickAmount.toLocaleString()}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </View>
+
+            {/* Fee Information */}
+            <View style={styles.feeInfoCard}>
+              <View style={styles.feeInfoHeader}>
+                <Icon name="info-outline" size={20} color="#007BFF" />
+                <Text style={styles.feeInfoTitle}>Transaction Fee</Text>
+              </View>
+              <Text style={styles.feeInfoText}>
+                2% service charge + ₦100 for transactions above ₦10,000
+              </Text>
+            </View>
+
+            {/* Fund Button */}
+            <TouchableOpacity
+              style={[
+                styles.fundButton,
+                {
+                  opacity: isLoading || !amount ? 0.6 : 1,
+                },
+              ]}
+              onPress={handleFundWallet}
+              disabled={isLoading || !amount}
+            >
+              {isLoading ? (
+                <View style={styles.buttonLoading}>
+                  <ActivityIndicator color="#FFF" size="small" />
+                  <Text style={[styles.buttonText, { marginLeft: 10 }]}>
+                    Processing...
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.buttonContent}>
+                  <Icon name="add" size={20} color="#FFF" />
+                  <Text style={styles.buttonText}>Add Funds</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {/* Security Note */}
+            <View style={styles.securityNote}>
+              <Icon name="security" size={16} color="#666" />
+              <Text style={styles.securityText}>
+                Your payment is secured with 256-bit SSL encryption
+              </Text>
+            </View>
+          </ScrollView>
+
+          {/* Enhanced Modal for service charge */}
           <Modal
             transparent={true}
             visible={showFeeModal}
             onRequestClose={() => setShowFeeModal(false)}
+            animationType="slide"
           >
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Service Charge</Text>
-                <Text style={styles.modalText}>
-                  A service charge of 2% will be applied to your transaction.
-                  +100 naria for transaction more than 10000
-                </Text>
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalIconContainer}>
+                    <Icon name="info-outline" size={32} color="#007BFF" />
+                  </View>
+                  <Text style={styles.modalTitle}>Transaction Fees</Text>
+                </View>
+
+                <View style={styles.modalBody}>
+                  <View style={styles.feeRow}>
+                    <View style={styles.feeItem}>
+                      <Text style={styles.feeLabel}>Service Charge</Text>
+                      <Text style={styles.feeValue}>2%</Text>
+                    </View>
+                    <View style={styles.feeItem}>
+                      <Text style={styles.feeLabel}>Additional Fee</Text>
+                      <Text style={styles.feeValue}>₦100</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.feeNote}>
+                    <Text style={styles.feeNoteText}>
+                      Additional ₦100 fee applies to transactions above ₦10,000
+                    </Text>
+                  </View>
+                </View>
+
                 <TouchableOpacity
                   style={styles.modalButton}
                   onPress={() => setShowFeeModal(false)}
                 >
-                  <Text style={styles.modalButtonText}>Close</Text>
+                  <Text style={styles.modalButtonText}>Got it</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </Modal>
-        </View>
+        </SafeAreaView>
       )}
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F8F9FA",
   },
-  title: {
-    fontSize: 24,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9ECEF",
+  },
+  backButton: {
+    padding: 5,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  headerRight: {
+    width: 34, // Same width as back button to center title
+  },
+  balanceCard: {
+    backgroundColor: "#FFFFFF",
+    margin: 20,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  balanceContent: {
+    alignItems: "center",
+  },
+  balanceLabel: {
+    fontSize: 14,
+    color: "#6C757D",
+    marginTop: 12,
+  },
+  balanceAmount: {
+    fontSize: 32,
     fontWeight: "bold",
+    color: "#007BFF",
+    marginTop: 4,
+  },
+  balanceSubtext: {
+    fontSize: 12,
+    color: "#ADB5BD",
+    marginTop: 4,
+  },
+  inputSection: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
     marginBottom: 20,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#E9ECEF",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#F8F9FA",
+    marginBottom: 20,
+  },
+  currencySymbol: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginRight: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#CCCCCC",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    padding: 0,
   },
   feeIcon: {
-    position: "absolute",
-    right: 30,
-    top: 120,
+    padding: 4,
   },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 15,
-    borderRadius: 5,
+  quickAmountContainer: {
+    marginTop: 8,
+  },
+  quickAmountLabel: {
+    fontSize: 14,
+    color: "#6C757D",
+    marginBottom: 12,
+  },
+  quickAmountButtons: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  quickAmountButton: {
+    backgroundColor: "#F8F9FA",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E9ECEF",
+    minWidth: 80,
+    alignItems: "center",
+  },
+  quickAmountButtonActive: {
+    backgroundColor: "green",
+    borderColor: "#007BFF",
+  },
+  quickAmountButtonText: {
+    fontSize: 12,
+    color: "#6C757D",
+    fontWeight: "500",
+  },
+  quickAmountButtonTextActive: {
+    color: "#FFFFFF",
+  },
+  feeInfoCard: {
+    backgroundColor: "#E3F2FD",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 12,
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#007BFF",
+  },
+  feeInfoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  feeInfoTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#007BFF",
+    marginLeft: 8,
+  },
+  feeInfoText: {
+    fontSize: 13,
+    color: "#1565C0",
+    lineHeight: 18,
+  },
+  fundButton: {
+    backgroundColor: "green",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    shadowColor: "#007BFF",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  buttonContent: {
+    flexDirection: "row",
     alignItems: "center",
   },
   buttonText: {
     color: "#FFF",
     fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  buttonLoading: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  securityNote: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  securityText: {
+    fontSize: 12,
+    color: "#6C757D",
+    marginLeft: 6,
+  },
+  webviewHeader: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9ECEF",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButtonWebView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButtonText: {
+    marginLeft: 8,
+    color: "#007BFF",
+    fontSize: 16,
+    fontWeight: "500",
   },
   modalOverlay: {
     flex: 1,
@@ -450,32 +637,92 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: "80%",
+    width: "85%",
     backgroundColor: "#FFF",
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 16,
+    padding: 0,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    alignItems: "center",
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  modalIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#E3F2FD",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
   },
-  modalText: {
+  modalBody: {
+    width: "100%",
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  feeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  feeItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 12,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  feeLabel: {
+    fontSize: 12,
+    color: "#6C757D",
+    marginBottom: 4,
+  },
+  feeValue: {
     fontSize: 16,
-    textAlign: "center",
-    marginBottom: 20,
+    fontWeight: "600",
+    color: "#007BFF",
+  },
+  feeNote: {
+    backgroundColor: "#FFF3CD",
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: "#FFC107",
+  },
+  feeNoteText: {
+    fontSize: 12,
+    color: "#856404",
+    lineHeight: 16,
   },
   modalButton: {
     backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 5,
-    width: "50%",
-    alignItems: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 24,
+    minWidth: 120,
   },
   modalButtonText: {
     color: "#FFF",
     fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
   loadingOverlay: {
     position: "absolute",
@@ -485,13 +732,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    zIndex: 10, // Ensure it's above the WebView
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    zIndex: 10,
   },
   loadingText: {
-    marginTop: 10,
+    marginTop: 12,
     fontSize: 16,
     color: "#333",
+    fontWeight: "500",
   },
 });
 

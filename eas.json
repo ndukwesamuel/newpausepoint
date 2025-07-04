@@ -4,6 +4,9 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "simulator": true
+      },
       "channel": "preview"
     },
     "preview2": {
