@@ -35,6 +35,11 @@ const EditPersonalInformation = ({ navigation }) => {
 
   const [name, setName] = useState(userProfile_data?.user?.name);
   const [gender, setGender] = useState("Male");
+
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+
+  // Add this array with your other options arrays
+  const genderOptions = ["Male", "Female"];
   const [profileImage, setProfileImage] = useState(userProfile_data?.photo);
   const [hasImageChanged, setHasImageChanged] = useState(false);
 
@@ -337,10 +342,20 @@ const EditPersonalInformation = ({ navigation }) => {
 
           <View>
             <FormLabel data="Gender" />
-            <Forminput
-              placeholder="Your gender"
-              onChangeText={setGender}
-              value={gender}
+            <TouchableOpacity
+              onPress={() => setShowGenderDropdown(true)}
+              style={styles.dropdownTrigger}
+            >
+              <Text style={styles.dropdownTriggerText}>
+                {gender || "Select Gender"}
+              </Text>
+            </TouchableOpacity>
+            <CustomDropdown
+              visible={showGenderDropdown}
+              onClose={() => setShowGenderDropdown(false)}
+              options={genderOptions}
+              onSelect={(item) => setGender(item)}
+              selectedValue={gender}
             />
           </View>
 

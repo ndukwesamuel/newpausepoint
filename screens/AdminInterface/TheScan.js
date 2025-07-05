@@ -1,297 +1,30 @@
-// import React, { useState, useEffect } from "react";
-// import { Text, View, StyleSheet, Button, TouchableOpacity } from "react-native";
-// import { BarCodeScanner } from "expo-barcode-scanner";
-// // import { DeleteAccountModal } from "./components/Account/Modal";
-// // import { CenterReuseModals } from "./components/shared/ReuseModals";
-// // import { formatDateandTime } from "./utils/DateTime";
-// import { MaterialIcons } from "@expo/vector-icons";
-
-// import {
-//   NavigationContainer,
-//   NavigationProp,
-//   useNavigation,
-// } from "@react-navigation/native";
-// import { formatDateandTime } from "../../utils/DateTime";
-// import { CenterReuseModals } from "../../components/shared/ReuseModals";
-// import { useDispatch, useSelector } from "react-redux";
-// import { Admin_Get_All_Clan_Memeber_Fun } from "../../Redux/UserSide/ClanSlice";
-
-// export default function TheScan() {
-//   const [hasPermission, setHasPermission] = useState(null);
-//   const [scanned, setScanned] = useState(false);
-//   const [maindata, setMaindata] = useState(null);
-//   const dispatch = useDispatch();
-//   const {
-//     get_user_clan_data,
-//     get_all_clan_adminIN_data,
-//     get_Single_clan_data,
-//     admin_get_all_clan_memeber_data,
-//   } = useSelector((state) => state?.ClanSlice);
-
-//   useEffect(() => {
-//     const getBarCodeScannerPermissions = async () => {
-//       const { status } = await BarCodeScanner.requestPermissionsAsync();
-//       setHasPermission(status === "granted");
-//     };
-
-//     getBarCodeScannerPermissions();
-//     dispatch(Admin_Get_All_Clan_Memeber_Fun());
-//   }, []);
-
-//   const [modalVisible, setModalVisible] = useState(false);
-//   const [modalformVisible, setModalFormVisible] = useState(false);
-
-//   const closeModal = () => {
-//     setModalVisible(false);
-//   };
-//   const handleBarCodeScanned = ({ type, data }) => {
-//     setScanned(true);
-//     setModalVisible(true);
-//     setMaindata(data);
-//   };
-
-//   if (hasPermission === null) {
-//     return <Text>Requesting for camera permission</Text>;
-//   }
-//   if (hasPermission === false) {
-//     return <Text>No access to camera</Text>;
-//   }
-
-//   return (
-//     <>
-//       <View style={styles.container}>
-//         <BarCodeScanner
-//           onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-//           style={StyleSheet.absoluteFillObject}
-//         />
-//         {scanned && (
-//           <>
-//             <Button
-//               title={"Tap to Scan Again"}
-//               onPress={() => {
-//                 // setHasPermission(null);
-//                 setScanned(false);
-//                 setMaindata(null);
-//               }}
-//             />
-
-//             <CenterReuseModals
-//               visible={modalVisible}
-//               onClose={() => setModalVisible(false)}
-//             >
-//               <View
-//                 style={{
-//                   backgroundColor: "white",
-//                   padding: 20,
-//                   borderRadius: 10,
-//                   elevation: 5,
-//                   width: "80%",
-//                 }}
-//               >
-//                 <View
-//                   style={{
-//                     backgroundColor: "white",
-//                     // padding: 20,
-//                     width: "100%",
-//                     borderTopLeftRadius: 30,
-//                     borderTopRightRadius: 30,
-//                     height: "80%",
-//                   }}
-//                 >
-//                   <TouchableOpacity
-//                     style={{
-//                       // backgroundColor: "white",
-//                       // padding: 20,
-//                       // borderRadius: 10,
-//                       // elevation: 5,
-//                       // width: "80%",
-//                       justifyContent: "flex-end",
-//                       alignItems: "flex-end",
-//                     }}
-//                     onPress={() => {
-//                       setModalVisible(false);
-//                     }}
-//                   >
-//                     <MaterialIcons name="cancel" size={24} color="black" />
-//                   </TouchableOpacity>
-//                   <COnveter data={maindata} />
-//                 </View>
-//               </View>
-//             </CenterReuseModals>
-//           </>
-//         )}
-//       </View>
-//     </>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     flexDirection: "column",
-//     justifyContent: "center",
-//   },
-// });
-
-// const COnveter = ({ data }) => {
-//   const navigation = useNavigation();
-//   const {
-//     get_user_clan_data,
-//     get_all_clan_adminIN_data,
-//     get_Single_clan_data,
-//     admin_get_all_clan_memeber_data,
-//   } = useSelector((state) => state?.ClanSlice);
-
-//   // const itemdata = JSON.parse(data);
-
-//   let itemdata;
-
-//   let usercode = data;
-//   const findmemberwithcode = admin_get_all_clan_memeber_data?.data?.find(
-//     (item) => item?.memberCode === usercode
-//   );
-
-//   console.log({
-//     jaja: usercode,
-//   });
-
-//   console.log({
-//     iiii: findmemberwithcode,
-//   });
-
-//   try {
-//     itemdata = {}; // JSON.parse(data);
-//   } catch (error) {
-//     console.error("JSON Parse error:", error);
-//     // You can customize the error message as needed
-//     return <Text>Error: Invalid data format</Text>;
-//   }
-
-//   console.log({
-//     ee: itemdata,
-//   });
-
-//   return (
-//     <View>
-//       <View style={{ marginBottom: 10 }}>
-//         <Text
-//           style={{
-//             fontSize: 11,
-//             fontFamily: "RobotoSlab-Medium",
-//             fontWeight: "500",
-//           }}
-//         >
-//           User Verification
-//         </Text>
-
-//         <View style={{ flexDirection: "row", marginBottom: 10, gap: 10 }}>
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             Name:
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {findmemberwithcode?.user?.name}
-//           </Text>
-//         </View>
-
-//         <View style={{ flexDirection: "row", marginBottom: 10, gap: 10 }}>
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             Email:
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {findmemberwithcode?.user?.email}
-//           </Text>
-//         </View>
-
-//         <View style={{ flexDirection: "row", marginBottom: 10, gap: 10 }}>
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             Estate Status:
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {findmemberwithcode?.status}
-//           </Text>
-//         </View>
-//       </View>
-
-//       <TouchableOpacity
-//         style={{
-//           flexDirection: "row",
-//           justifyContent: "space-around",
-//           borderWidth: 1,
-//           borderColor: "#CFCDCD",
-//           marginBottom: 10,
-//           paddingVertical: 10,
-//           borderRadius: 9,
-//         }}
-//         onPress={() =>
-//           navigation.navigate("adminUserDetails", { item: findmemberwithcode })
-//         }
-//       >
-//         <Text>Verify</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
-
-import React, { useState, useEffect, useRef } from "react";
-import { Text, View, StyleSheet, Button, TouchableOpacity } from "react-native";
-import { Camera } from "expo-camera";
-import { MaterialIcons } from "@expo/vector-icons";
-
+import React, { useState, useRef, useEffect } from "react";
 import {
-  NavigationContainer,
-  NavigationProp,
-  useNavigation,
-} from "@react-navigation/native";
+  Text,
+  View,
+  StyleSheet,
+  Button,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { formatDateandTime } from "../../utils/DateTime";
-import { CenterReuseModals } from "../../components/shared/ReuseModals";
 import { useDispatch, useSelector } from "react-redux";
-import { Admin_Get_All_Clan_Memeber_Fun } from "../../Redux/UserSide/ClanSlice";
+import {
+  Admin_Get_All_Clan_Memeber_Fun,
+  Get_Single_clan,
+} from "../../Redux/UserSide/ClanSlice";
 
 export default function TheScan() {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [maindata, setMaindata] = useState(null);
   const cameraRef = useRef(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const dispatch = useDispatch();
+
   const {
     get_user_clan_data,
     get_all_clan_adminIN_data,
@@ -299,49 +32,70 @@ export default function TheScan() {
     admin_get_all_clan_memeber_data,
   } = useSelector((state) => state?.ClanSlice);
 
-  useEffect(() => {
-    const getCameraPermissions = async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
-    };
+  const { get_user_profile_data } = useSelector(
+    (state) => state?.UserProfileSlice
+  );
 
-    getCameraPermissions();
+  useEffect(() => {
     dispatch(Admin_Get_All_Clan_Memeber_Fun());
+    dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+    return () => {};
   }, []);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalformVisible, setModalFormVisible] = useState(false);
+  const All_User = get_Single_clan_data?.data?.members;
 
-  const closeModal = () => {
-    setModalVisible(false);
-  };
+  console.log({
+    fff: All_User[0]?.memberCode,
+  });
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarcodeScanned = ({ type, data }) => {
+    if (scanned) return;
+
     setScanned(true);
     setModalVisible(true);
     setMaindata(data);
   };
 
-  if (hasPermission === null) {
-    return <Text>Requesting for camera permission</Text>;
+  // Check if data is a PI code (e.g., "PI-AAAA-0018")
+  const isPiCode = (data) => {
+    if (typeof data !== "string") return false;
+
+    // This matches any 3 letters, then 4 letters/numbers, then 4 numbers
+    // Example matches: PI-AAAA-0018, CCE-BB22-0001, HLE-1234-0002, ABC-DEFG-1234
+    return /^[A-Z]{3}-[A-Z0-9]{4}-\d{4}$/.test(data);
+    // return typeof data === "string" && /^PI-[A-Z]{4}-\d{4}$/.test(data);
+  };
+
+  if (!permission) {
+    return <Text>Loading camera permissions...</Text>;
   }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: "center", marginBottom: 20 }}>
+          We need your permission to show the camera
+        </Text>
+        <Button onPress={requestPermission} title="Grant Camera Permission" />
+      </View>
+    );
   }
 
   return (
-    <>
-      <View style={styles.container}>
-        <Camera
-          ref={cameraRef}
-          style={StyleSheet.absoluteFillObject}
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-          barCodeScannerSettings={{
-            barCodeTypes: ["qr", "code128", "code39", "ean13"],
-          }}
-        />
-        {scanned && (
-          <>
+    <View style={styles.container}>
+      <CameraView
+        ref={cameraRef}
+        style={StyleSheet.absoluteFillObject}
+        facing="back"
+        onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr", "code128", "code39", "ean13"],
+        }}
+      />
+
+      {scanned && (
+        <>
+          <View style={styles.scanAgainContainer}>
             <Button
               title={"Tap to Scan Again"}
               onPress={() => {
@@ -349,61 +103,83 @@ export default function TheScan() {
                 setMaindata(null);
               }}
             />
+          </View>
 
-            <CenterReuseModals
-              visible={modalVisible}
-              onClose={() => setModalVisible(false)}
-            >
-              <View
-                style={{
-                  backgroundColor: "white",
-                  padding: 20,
-                  borderRadius: 10,
-                  elevation: 5,
-                  width: "80%",
-                }}
-              >
-                <View
-                  style={{
-                    backgroundColor: "white",
-                    width: "100%",
-                    borderTopLeftRadius: 30,
-                    borderTopRightRadius: 30,
-                    height: "80%",
+          {modalVisible && (
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setScanned(false);
+                    setMaindata(null);
+                    setModalVisible(false);
                   }}
                 >
-                  <TouchableOpacity
-                    style={{
-                      justifyContent: "flex-end",
-                      alignItems: "flex-end",
-                    }}
-                    onPress={() => {
-                      setModalVisible(false);
-                    }}
-                  >
-                    <MaterialIcons name="cancel" size={24} color="black" />
-                  </TouchableOpacity>
-                  <COnveter data={maindata} />
+                  <MaterialIcons name="cancel" size={24} color="black" />
+                </TouchableOpacity>
+                <View style={styles.modalContent}>
+                  <Converter data={maindata} />
                 </View>
               </View>
-            </CenterReuseModals>
-          </>
-        )}
-      </View>
-    </>
+            </View>
+          )}
+        </>
+      )}
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-  },
-});
+// New component for PI code display
+const PiCodeScreen = ({ data }) => {
+  return (
+    <View style={{ padding: 20 }}>
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: "bold",
+          textAlign: "center",
+          marginBottom: 20,
+        }}
+      >
+        PI Code Detected
+      </Text>
 
-const COnveter = ({ data }) => {
-  const navigation = useNavigation();
+      <View
+        style={{
+          backgroundColor: "#f0f0f0",
+          padding: 15,
+          borderRadius: 8,
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: "bold",
+            color: "#2c3e50",
+          }}
+        >
+          {data}
+        </Text>
+      </View>
+
+      <Text
+        style={{
+          marginTop: 20,
+          fontSize: 14,
+          color: "#7f8c8d",
+          textAlign: "center",
+        }}
+      >
+        This is a product identification code
+      </Text>
+    </View>
+  );
+};
+
+// Your existing Converter component remains the same
+const Converter = ({ data }) => {
   const {
     get_user_clan_data,
     get_all_clan_adminIN_data,
@@ -411,31 +187,148 @@ const COnveter = ({ data }) => {
     admin_get_all_clan_memeber_data,
   } = useSelector((state) => state?.ClanSlice);
 
-  let usercode = data;
-  const findmemberwithcode = admin_get_all_clan_memeber_data?.data?.find(
-    (item) => item?.memberCode === usercode
+  const { get_user_profile_data } = useSelector(
+    (state) => state?.UserProfileSlice
   );
 
+  const All_User = get_Single_clan_data?.data?.members;
   console.log({
-    jaja: usercode,
+    oooo: All_User,
   });
 
-  console.log({
-    iiii: findmemberwithcode,
-  });
-
+  const navigation = useNavigation();
   let itemdata;
 
   try {
-    itemdata = {}; // JSON.parse(data);
+    itemdata = JSON.parse(data);
   } catch (error) {
     console.error("JSON Parse error:", error);
-    return <Text>Error: Invalid data format</Text>;
-  }
 
-  console.log({
-    ee: itemdata,
-  });
+    // console.log();
+
+    const foundUser = All_User.find((member) => member.memberCode === data);
+    console.log({
+      cc: foundUser,
+    });
+
+    return (
+      <>
+        {foundUser ? (
+          <View>
+            {/* Your existing Converter JSX remains unchanged */}
+            <View>
+              <View style={{ marginBottom: 10 }}>
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontFamily: "RobotoSlab-Medium",
+                    fontWeight: "500",
+                  }}
+                >
+                  Resident Name
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontFamily: "Inter-SemiBold",
+                    fontWeight: "600",
+                  }}
+                >
+                  {foundUser?.user?.name}
+                </Text>
+              </View>
+
+              <View style={{ marginBottom: 10 }}>
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontFamily: "RobotoSlab-Medium",
+                    fontWeight: "500",
+                  }}
+                >
+                  Member Code ID
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "Inter-SemiBold",
+                    fontWeight: "600",
+                  }}
+                >
+                  {foundUser?.memberCode}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  borderWidth: 1,
+                  borderColor: "#CFCDCD",
+                  marginBottom: 10,
+                  paddingVertical: 10,
+                  borderRadius: 9,
+                }}
+                onPress={() =>
+                  navigation.navigate("AdminTab", {
+                    screen: "adminUserDetails",
+                    params: { item: foundUser },
+                  })
+                }
+              >
+                <Text>Verify </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Rest of your Converter component... */}
+          </View>
+        ) : (
+          <View style={{ padding: 20 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                textAlign: "center",
+                marginBottom: 20,
+              }}
+            >
+              PI Code Detected
+            </Text>
+
+            <View
+              style={{
+                backgroundColor: "#f0f0f0",
+                padding: 15,
+                borderRadius: 8,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#2c3e50",
+                }}
+              >
+                {data}
+              </Text>
+            </View>
+
+            <Text
+              style={{
+                marginTop: 20,
+                fontSize: 14,
+                color: "#7f8c8d",
+                textAlign: "center",
+              }}
+            >
+              This is a product identification code
+            </Text>
+          </View>
+        )}
+      </>
+    );
+  }
 
   return (
     <View>
@@ -447,74 +340,80 @@ const COnveter = ({ data }) => {
             fontWeight: "500",
           }}
         >
-          User Verification
+          Visitor Name
         </Text>
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: "Inter-SemiBold",
+            fontWeight: "600",
+          }}
+        >
+          {itemdata?.visitor_name}
+        </Text>
+      </View>
 
-        <View style={{ flexDirection: "row", marginBottom: 10, gap: 10 }}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            Name:
-          </Text>
+      <View style={{ marginBottom: 10 }}>
+        <Text
+          style={{
+            fontSize: 11,
+            fontFamily: "RobotoSlab-Medium",
+            fontWeight: "500",
+          }}
+        >
+          Code ID
+        </Text>
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: "Inter-SemiBold",
+            fontWeight: "600",
+          }}
+        >
+          {itemdata?.access_code}
+        </Text>
+      </View>
 
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            {findmemberwithcode?.user?.name}
-          </Text>
-        </View>
+      <View style={{ marginBottom: 10 }}>
+        <Text
+          style={{
+            fontSize: 11,
+            fontFamily: "RobotoSlab-Medium",
+            fontWeight: "500",
+          }}
+        >
+          Expire Time
+        </Text>
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: "Inter-SemiBold",
+            fontWeight: "600",
+          }}
+        >
+          {formatDateandTime(itemdata?.expires)}
+        </Text>
+      </View>
 
-        <View style={{ flexDirection: "row", marginBottom: 10, gap: 10 }}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            Email:
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            {findmemberwithcode?.user?.email}
-          </Text>
-        </View>
-
-        <View style={{ flexDirection: "row", marginBottom: 10, gap: 10 }}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            Estate Status:
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            {findmemberwithcode?.status}
-          </Text>
-        </View>
+      <View style={{ marginBottom: 10 }}>
+        <Text
+          style={{
+            fontSize: 11,
+            fontFamily: "RobotoSlab-Medium",
+            fontWeight: "500",
+          }}
+        >
+          Phone Number
+        </Text>
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: "Inter-SemiBold",
+            fontWeight: "600",
+          }}
+        >
+          {itemdata?.phone_number}
+        </Text>
       </View>
 
       <TouchableOpacity
@@ -527,12 +426,59 @@ const COnveter = ({ data }) => {
           paddingVertical: 10,
           borderRadius: 9,
         }}
-        onPress={() =>
-          navigation.navigate("adminUserDetails", { item: findmemberwithcode })
-        }
+        onPress={() => {
+          navigation.navigate("AdminGuestsDetail", { itemdata });
+        }}
       >
-        <Text>Verify</Text>
+        <Text>Verify </Text>
       </TouchableOpacity>
     </View>
   );
 };
+
+// Your existing styles remain the same
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  scanAgainContainer: {
+    position: "absolute",
+    bottom: 50,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+    width: "80%",
+    maxHeight: "80%",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    width: "100%",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingTop: 40,
+  },
+});

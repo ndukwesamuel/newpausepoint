@@ -28,7 +28,7 @@ import { formatDateandTime } from "../../../utils/DateTime";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import { Admin_Get_All_User_Guest_Fun } from "../../../Redux/Admin/AdminGuestSlice";
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
-import TheScan from "../../../TheScan";
+import TheScan from "../TheScan";
 
 const AdminGuests = () => {
   const dispatch = useDispatch();

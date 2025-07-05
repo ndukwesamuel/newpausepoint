@@ -50,6 +50,10 @@ export default function UserDetails({ navigation }) {
 
   const route = useRoute();
 
+  console.log({
+    iii: route,
+  });
+
   // const { item } = route.params as { item: any };
 
   const { item } = route.params;
