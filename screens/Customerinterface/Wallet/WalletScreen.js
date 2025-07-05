@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import LottieView from "lottie-react-native";
 
 // ... inside your component
 
@@ -35,6 +36,7 @@ const WalletScreen = ({}) => {
     error: isError,
     refetch: refetchDues,
   } = useFetchData("wallet/pay-due", "pay-due");
+  const animation = useRef(null);
 
   const navigation = useNavigation();
 
@@ -146,6 +148,31 @@ const WalletScreen = ({}) => {
         keyExtractor={(item) => item._id}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <LottieView
+              autoPlay
+              ref={animation}
+              style={{
+                width: 200,
+                height: 200,
+                // backgroundColor: "#eee",
+              }}
+              source={require("../../../assets/Lottie/notFund.json")}
+            />
+            <Text
+              style={{
+                fontSize: 22,
+                fontWeight: "bold",
+                color: "#333",
+                marginBottom: 10,
+                textAlign: "center",
+              }}
+            >
+              No Dues Found
+            </Text>
+          </View>
         }
       />
 

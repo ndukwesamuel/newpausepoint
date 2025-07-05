@@ -17,6 +17,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useSelector } from "react-redux";
+import { useFetchData } from "../../../hooks/Request";
 
 const FundWalletScreen = ({ navigation }) => {
   const [amount, setAmount] = useState("");
@@ -179,6 +180,13 @@ const FundWalletScreen = ({ navigation }) => {
     );
   };
 
+  const {
+    data,
+    isLoadingData,
+    error,
+    refetch: refetchWallet,
+  } = useFetchData("wallet", "wallet");
+
   return (
     <>
       {webviewstart ? (
@@ -239,16 +247,18 @@ const FundWalletScreen = ({ navigation }) => {
             showsVerticalScrollIndicator={false}
           >
             {/* Balance Card */}
-            <View style={styles.balanceCard}>
+            {/* <View style={styles.balanceCard}>
               <View style={styles.balanceContent}>
                 <Icon name="account-balance-wallet" size={48} color="green" />
                 <Text style={styles.balanceLabel}>Current Balance</Text>
-                <Text style={styles.balanceAmount}>₦0.00</Text>
+                <Text style={styles.balanceAmount}>
+                  {data?.balance?.toFixed(2)} {data?.currency}
+                </Text>
                 <Text style={styles.balanceSubtext}>
                   Add funds to get started
                 </Text>
               </View>
-            </View>
+            </View> */}
 
             {/* Amount Input Section */}
             <View style={styles.inputSection}>
