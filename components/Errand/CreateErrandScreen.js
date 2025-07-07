@@ -486,8 +486,12 @@ const CreateErrandScreen = () => {
       </View>
       {/* Grand Total for all locations */}
       <View style={styles.grandTotalContainer}>
+        {/* <Text style={styles.grandTotalText}>
+          Grand Total for Errand: ₦{grandTotal.toFixed(2) + 500.0}
+        </Text> */}
+
         <Text style={styles.grandTotalText}>
-          Grand Total for Errand: ₦{grandTotal.toFixed(2)}
+          Grand Total for Errand: ₦{(grandTotal + 500.0).toFixed(2)}
         </Text>
       </View>
 

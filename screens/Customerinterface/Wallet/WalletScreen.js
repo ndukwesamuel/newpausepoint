@@ -116,7 +116,7 @@ const WalletScreen = ({}) => {
       <View style={styles.balanceContainer}>
         <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
         <Text style={styles.balance}>
-          {data?.balance?.toFixed(2)} {data?.currency}
+          {data?.balance} {data?.currency}
         </Text>
       </View>
 
