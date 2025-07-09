@@ -59,7 +59,6 @@ import {
   RegularFontText,
   SemiBoldFontText,
 } from "../../components/shared/Paragrahp";
-import Forum, { StaticForum } from "../../components/Forum/Forum";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { Get_Single_clan } from "../../Redux/UserSide/ClanSlice";
@@ -608,7 +607,6 @@ export default function AdminHome() {
                     />
                   </TouchableOpacity>
                 </View>
-                <StaticForum />
               </View> */}
 
               <View style={{ flex: 1 }}>
@@ -637,7 +635,6 @@ export default function AdminHome() {
                     />
                   </TouchableOpacity> */}
                 </View>
-                {/* <StaticForum /> */}
                 <Announcement />
               </View>
             </ScrollView>

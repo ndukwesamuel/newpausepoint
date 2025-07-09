@@ -217,22 +217,6 @@ const Forum = () => {
                       />
                     </View>
                   </TouchableOpacity>
-
-                  {/* uncmment later */}
-                  {/* <TouchableOpacity
-                    style={{
-                      paddingHorizontal: 12,
-                      paddingVertical: 2,
-                      borderRadius: 6,
-                    }}
-                    onPress={toggleModal}
-                  >
-                    <Entypo
-                      name="dots-three-vertical"
-                      size={24}
-                      color="black"
-                    />
-                  </TouchableOpacity> */}
                 </View>
 
                 <View style={{ paddingHorizontal: 20 }}>
@@ -253,8 +237,6 @@ const Forum = () => {
                     marginVertical: 10,
                   }}
                 />
-
-                {/* oncomment t latter */}
 
                 <View
                   style={{
@@ -287,24 +269,11 @@ const Forum = () => {
                       alignItems: "center",
                       gap: 5,
                     }}
-                    onPress={() =>
-                      navigation.navigate("forumdetail", { forumid: item })
-                    }
+                    onPress={() => navigation.navigate("forumdetail", item)}
                   >
                     <AntDesign name="message1" size={24} color="black" />
                     <Text>Comment</Text>
                   </TouchableOpacity>
-                  {/*
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <AntDesign name="sharealt" size={24} color="black" />
-                <Text>Share</Text>
-              </View> */}
                 </View>
               </View>
             )}
@@ -383,134 +352,5 @@ const Forum = () => {
 };
 
 export default Forum;
-
-export const StaticForum = ({}) => {
-  const [isModalVisible, setModalVisible] = useState(false);
-  const navigation = useNavigation();
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
-  return (
-    <View style={{}}>
-      {data?.map((item, index) => (
-        <View key={index}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginVertical: 20,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <Image
-                source={{
-                  uri: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-                }}
-                style={{ width: 40, height: 40, borderRadius: 50 }}
-              />
-
-              <View>
-                <MediumFontText
-                  data="Bursted Pipe"
-                  textstyle={{ fontSize: 16, fontWeight: "500" }}
-                />
-
-                <LightFontText
-                  data="Jane Doe - 54 mins ago"
-                  textstyle={{ fontSize: 12, fontWeight: "300" }}
-                />
-              </View>
-            </View>
-            <TouchableOpacity
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 2,
-                borderRadius: 6,
-              }}
-              onPress={toggleModal}
-            >
-              <Entypo name="dots-three-vertical" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={{ paddingHorizontal: 20 }}>
-            <RegularFontText
-              data="Lorem ipsum dolor sit amet consectetur. Purus sed quisque lacinia venenatis. Egestas odio neque aliquet id. Et tortor gravida sit ipsum mauris feugiat. Sit imperdiet egestas donec elit morbi consectetur viverra sapien nunc."
-              textstyle={{
-                fontSize: 12,
-                fontWeight: "400",
-                textAlign: "justify",
-              }}
-            />
-          </View>
-
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: "#D9D9D9",
-              marginVertical: 10,
-            }}
-          />
-
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginVertical: 10,
-              paddingHorizontal: 30,
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <AntDesign name="hearto" size={24} color="black" />
-              <Text>Love Game</Text>
-            </TouchableOpacity>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
-              }}
-              onPress={() =>
-                navigation.navigate("Welcome", { screen: "CommentScreen" })
-              }
-
-              // navigation.navigate('Root', { screen: 'Profile' });
-            >
-              <AntDesign name="message1" size={24} color="black" />
-              <Text>Comment</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <AntDesign name="sharealt" size={24} color="black" />
-              <Text>Share</Text>
-            </View>
-          </View>
-        </View>
-      ))}
-
-      <ForumModal visible={isModalVisible} onClose={toggleModal} />
-    </View>
-  );
-};
 
 const styles = StyleSheet.create({});

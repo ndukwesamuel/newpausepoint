@@ -44,17 +44,10 @@ import {
 const ForumDetails = () => {
   const maindata = useRoute()?.params;
 
-  console.log({
-    ggg: maindata,
-  });
-
   const { get_user_profile_data } = useSelector(
     (state) => state.UserProfileSlice
   );
 
-  console.log({
-    cccc: maindata,
-  });
   console.log({
     jhhhh: maindata?.forumid?._id,
   });

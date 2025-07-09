@@ -234,20 +234,8 @@ export default function App({ navigation }) {
 
                 "aboutus"
               )}
-
-              {/* {TabButton(
-                currentTab,
-                setCurrentTab,
-                "About Us",
-                // color_swatch,
-                aboutusicon,
-
-                "aboutus"
-              )} */}
             </View>
           </View>
-
-          {/* <View>{TabButton(currentTab, setCurrentTab, "LogOut", logout)}</View> */}
         </View>
       </ScrollView>
 

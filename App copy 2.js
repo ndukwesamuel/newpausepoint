@@ -277,10 +277,6 @@ export const NavigationScreen = () => {
       //   })
       // ).data;
 
-      console.log({
-        jajacccc: token,
-      });
-
       // console.log({ first_token: token });
       // Permission granted, handle accordingly
       await AsyncStorage.setItem("PushToken", token);

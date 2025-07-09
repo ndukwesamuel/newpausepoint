@@ -38,7 +38,6 @@ import {
 import { userFile } from "../../../utils/fakedata";
 import { useRoute } from "@react-navigation/native";
 import { HalfScreenModal } from "../../../components/shared/ReuseableModal";
-import { StaticForum } from "../../../components/Forum/Forum";
 import { Admin_Get_My_Clan_Announcement_Fun } from "../../../Redux/Admin/AdminForumSlice";
 import { formatDateandTime } from "../../../utils/DateTime";
 

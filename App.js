@@ -222,10 +222,6 @@ export const NavigationScreen = () => {
         })
       ).data;
 
-      console.log({
-        jajacccc: token,
-      });
-
       await AsyncStorage.setItem("PushToken", token);
       const value = await AsyncStorage.getItem("PushToken");
     }
