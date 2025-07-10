@@ -363,6 +363,7 @@ const Account: React.FC = () => {
             {data?.map((item: GeneralData, index: number) => (
               <General key={item?.id} item={item} />
             ))}
+            <DeleteLAccount item={new_item} />
           </View>
         </View>
 
@@ -373,112 +374,7 @@ const Account: React.FC = () => {
           // Also ensure 'Announcement' interface and 'sampleAnnouncements' data
           // are uncommented at the top of this file.
           */}
-        <View style={{}}>
-          <View style={styles.sectionHeaderContainer}>
-            <MediumFontText
-              data="Announcements"
-              textstyle={styles.sectionHeaderText}
-            />
-            <View style={styles.divider} />
-          </View>
-          <View style={styles.announcementsContainer}>
-            {/* {sampleAnnouncements.length > 0 ? (
-              <>
-                {console.log({
-                  ccccvv: sampleAnnouncements[0],
-                })}
 
-                <TouchableOpacity
-                  style={styles.announcementItem}
-                  // onPress={() =>
-                  //   handleAnnouncementPress(sampleAnnouncements[0]?.link)
-                  // }
-                >
-                  <MediumFontText
-                    data={sampleAnnouncements[0]?.title}
-                    textstyle={styles.announcementTitle}
-                  />
-                  <RegularFontText
-                    data={sampleAnnouncements[0]?.content}
-                    textstyle={styles.announcementContent}
-                    numberOfLines={2}
-                  />
-                  <RegularFontText
-                    data={`Date: ${sampleAnnouncements[0]?.date}`}
-                    textstyle={styles.announcementDate}
-                  />
-
-                  <Text style={styles.readMoreLink}>Read More</Text>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <RegularFontText
-                data="No announcements at this time."
-                textstyle={styles.noAnnouncementsText}
-              />
-            )} */}
-          </View>
-        </View>
-
-        <View style={{}}>
-          <View style={styles.sectionHeaderContainer}>
-            <MediumFontText
-              data="Advertisements"
-              textstyle={styles.sectionHeaderText}
-            />
-            <View style={styles.divider} />
-          </View>
-          <View style={styles.advertisementsContainer}>
-            {sampleAdvertisements.length > 0 ? (
-              <FlatList
-                horizontal
-                data={sampleAdvertisements}
-                keyExtractor={(item) => item.id}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={{
-                      width: 300,
-                      height: "100%",
-                      borderRadius: 10,
-                      overflow: "hidden",
-                      backgroundColor: "#f5f5f5",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                    onPress={() => handleAdvertPress(item.linkUrl)}
-                  >
-                    <Image
-                      // source={{
-                      //   uri: "https://pausepoint.net/assets/pause_logo_light1-43f3898b.jpeg",
-                      // }}
-
-                      source={require("../../../assets/ssss.jpeg")}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        resizeMode: "cover",
-                        borderRadius: 10,
-                      }}
-                      accessibilityLabel={item.altText}
-                    />
-                    {/* You can add text overlays on the image if needed */}
-                    {/* <Text style={styles.advertText}>{item.altText}</Text> */}
-                  </TouchableOpacity>
-                )}
-                ItemSeparatorComponent={() => <View style={{ width: 15 }} />} // Space between ads
-                // This FlatList is horizontal, so its own scrollEnabled should remain true if there are more ads than fit
-                // If you want it to scroll internally, enable it. If not, set to false.
-                scrollEnabled={true} // Allow horizontal scrolling for ads
-              />
-            ) : (
-              <RegularFontText
-                data="No advertisements available."
-                textstyle={styles.noAdvertsText}
-              />
-            )}
-          </View>
-        </View>
         {/* --- END: Advertisements Section --- */}
 
         {/* Spacer before Logout/Delete Account to push them to bottom if content is short */}
