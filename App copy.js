@@ -363,16 +363,6 @@ export const NavigationScreen = () => {
 };
 
 export const UpdateScreen = ({ message }) => {
-  // const handleUpdate = () => {
-
-  //   if (Platform.OS ) {
-
-  //   }
-  //   Linking.openURL(
-  //     `https://play.google.com/store/apps/details?id=com.pause_point.PausePoint&hl=en`
-  //   );
-  // };
-
   const handleUpdate = () => {
     const url =
       Platform.OS === "ios"
