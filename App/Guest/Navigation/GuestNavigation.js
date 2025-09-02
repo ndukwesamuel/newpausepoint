@@ -1,61 +1,16 @@
 import React from "react";
 import { Platform, TouchableOpacity } from "react-native";
 
-import UserTabNavigation from "./UserTabNavigation";
-import Neigborhood from "../../screens/Customerinterface/Neigborhood";
 import { AntDesign } from "@expo/vector-icons";
-import Chats from "../../screens/Customerinterface/Chats";
-import Myclan from "../../screens/Customerinterface/Clan/Myclan";
-import Createclan from "../../screens/Customerinterface/Clan/Createclan.js";
-import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
-import ICEcontact from "../../screens/Customerinterface/ICEcontact";
-import HelpSupport from "../../screens/Customerinterface/Help/HelpSupport";
-import LiveSupport from "../../screens/Customerinterface/Help/LiveSupport";
-import ComplaintsandFeedback from "../../screens/Customerinterface/Help/ComplaintsandFeedback";
-import UserPolicy from "../../screens/Customerinterface/Help/UserPolicy";
-import FAQ from "../../screens/Customerinterface/Help/FAQ";
-import TermsConditions from "../../screens/Customerinterface/Help/TermsConditions";
-import PrivacyPolicy from "../../screens/Customerinterface/Help/PrivacyPolicy";
-import Share from "../../screens/Customerinterface/Help/Share";
-import CommentScreen from "../../screens/SharedScreen/CommentScreen";
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import CreatePrivateEvent from "../../screens/Customerinterface/Events/CreateMainEvent";
-import CreatePublicEvent from "../../screens/Customerinterface/Events/CreatePublicEvent";
-import Commingsoon from "../../screens/SharedScreen/Commingsoon";
-import UserClans from "../../screens/Customerinterface/Clan/UserClans";
-import CreateForum from "../../screens/Customerinterface/Forum/CreateForum";
-import ForumDetails from "../../screens/Customerinterface/Forum/ForumDetails";
-import EditPersonalInformation from "../../screens/Customerinterface/Account/EditPersonalInformation";
-import CreateGuests from "../../screens/Customerinterface/Guest/CreateGuests";
-import GuestsDetail from "../../screens/Customerinterface/Guest/GuestsDetail";
-import UserPolls from "../../screens/Customerinterface/Poll/UserPolls";
-import UserPollDetails from "../../screens/Customerinterface/Poll/UserPollDetails";
-import ServiceView from "../../screens/Customerinterface/ServiceView";
-import VendorService from "../../screens/Customerinterface/VendorService";
-import AboutUS from "../../screens/Customerinterface/About.tsx";
-import ViewProfile from "../../screens/Customerinterface/Account/ViewProfile";
-import Review from "../../screens/Customerinterface/Review";
-import VendorReview from "../../screens/Customerinterface/VendorReview";
-import MainEvent from "../../screens/Customerinterface/Events/MainEvent";
-import CreateMainEvent from "../../screens/Customerinterface/Events/CreateMainEvent";
-import EventDetals from "../../screens/Customerinterface/Events/EventDetals";
-import Service from "../../screens/Customerinterface/Service/Service";
-import MarketPlace from "../../screens/Customerinterface/MarketPlace/Marketplace";
-import MarketReview from "../../screens/Customerinterface/MarketPlace/MarketReview";
-import CreateProduct from "../../screens/Customerinterface/MarketPlace/CreateProduct";
-import DomesticStaff from "../../screens/Customerinterface/DomesticStaff/DomesticStaff";
-import CreateDomesticStaff from "../../screens/Customerinterface/DomesticStaff/CreateDomesticStaff";
-import DomesticDetail from "../../screens/Customerinterface/DomesticStaff/DomesticDetail";
-import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
-import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
-import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
-import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
-import Errand from "../../screens/Customerinterface/Errands/Errand";
-import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDetailScreen";
-import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
+
 import { BackHandler } from "react-native";
 import { useEffect, useCallback } from "react";
-import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
+import GuestTabNavigation from "./GuestTabNavigation";
+import CreateErrandScreen from "../../../components/Errand/CreateErrandScreen";
+import ErrandDetailScreen from "../../../screens/Customerinterface/Errands/ErrandDetailScreen";
+import FundWalletScreen from "../../../screens/Customerinterface/Wallet/FundWalletScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -136,165 +91,184 @@ const createScreen = (name, component, title) => {
   );
 };
 
-export const Usernaviagetion = () => {
-  const screens = [
-    {
-      name: "CreatePrivateEvent",
-      component: CreatePrivateEvent,
-      title: "Create Private Event",
-    },
-    {
-      name: "CreateMainEvent",
-      component: CreateMainEvent,
-      title: "Create Main Event",
-    },
-    {
-      name: "FundWallet",
-      component: FundWalletScreen,
-      title: "FundWallet",
-    },
-    {
-      name: "payment",
-      component: WalletScreen,
-      title: "Payment",
-    },
-    {
-      name: "duedetails",
-      component: DueDetails,
-      title: "Due Details",
-    },
-    {
-      name: "CreatePublicEvent",
-      component: CreatePublicEvent,
-      title: "Create Public Event",
-    },
-    {
-      name: "createforum",
-      component: CreateForum,
-      title: "Write Message",
-    },
-    {
-      name: "forumdetail",
-      component: ForumDetails,
-      title: "",
-    },
-    // {
-    //   name: "PersonalInfo",
-    //   component: ViewProfile,
-    //   title: "",
-    // },
-    // {
-    //   name: "editPersonalInfo",
-    //   component: EditPersonalInformation,
-    //   title: "",
-    // },
-    {
-      name: "inviteguest",
-      component: CreateGuests,
-      title: "Invite Guest",
-    },
-    {
-      name: "guestsdetail",
-      component: GuestsDetail,
-      title: " Guest Details",
-    },
-    {
-      name: "eventdetails",
-      component: EventDetals,
-      title: " Event Details",
-    },
-    {
-      name: "userpolls",
-      component: UserPolls,
-      title: "Estate Polls",
-    },
-    {
-      name: "estatepollsdetail",
-      component: UserPollDetails,
-      title: "Estate Polls Details",
-    },
-    // {
-    //   name: "service",
-    //   component: ServiceView,
-    //   title: "Services",
-    // },
-    // {
-    //   name: "Marketplace",
-    //   component: MarketPlace,
-    //   title: "Market Place",
-    // },
-    {
-      name: "amentities",
-      component: Amenities,
-      title: "Amenities",
-    },
-    {
-      name: "MarketReview",
-      component: MarketReview,
-      title: "Market Review",
-    },
-    {
-      name: "CreateProduct",
-      component: CreateProduct,
-      title: "Create Product",
-    },
-    {
-      name: "vendorService",
-      component: VendorService,
-      title: "Services",
-    },
-    {
-      name: "review",
-      component: Review,
-      title: "Reviews",
-    },
-    {
-      name: "vendorReview",
-      component: VendorReview,
-      title: "Reviews",
-    },
-    {
-      title: "ICE Contact",
-      component: ICEcontact,
-      name: "icecontact",
-    },
-    {
-      title: "Help Support",
-      component: HelpSupport,
-      name: "HelpSupport",
-    },
-    {
-      title: "About Us",
-      component: AboutUS,
-      name: "aboutus",
-    },
-    {
-      title: "Domestic Staff",
-      component: DomesticStaff,
-      name: "domestic",
-    },
-    {
-      title: "Domestic Staff Details",
-      component: DomesticDetail,
-      name: "domesticDetail",
-    },
-    {
-      title: "Domestic Staff",
-      component: CreateDomesticStaff,
-      name: "creatdomestic",
-    },
-  ];
+export default function GuestNavigation() {
+  //   const screens = [
+  //     {
+  //       name: "CreatePrivateEvent",
+  //       component: CreatePrivateEvent,
+  //       title: "Create Private Event",
+  //     },
+  //     {
+  //       name: "CreateMainEvent",
+  //       component: CreateMainEvent,
+  //       title: "Create Main Event",
+  //     },
+  //     {
+  //       name: "FundWallet",
+  //       component: FundWalletScreen,
+  //       title: "FundWallet",
+  //     },
+  //     {
+  //       name: "payment",
+  //       component: WalletScreen,
+  //       title: "Payment",
+  //     },
+  //     {
+  //       name: "duedetails",
+  //       component: DueDetails,
+  //       title: "Due Details",
+  //     },
+  //     {
+  //       name: "CreatePublicEvent",
+  //       component: CreatePublicEvent,
+  //       title: "Create Public Event",
+  //     },
+  //     {
+  //       name: "createforum",
+  //       component: CreateForum,
+  //       title: "Write Message",
+  //     },
+  //     {
+  //       name: "forumdetail",
+  //       component: ForumDetails,
+  //       title: "",
+  //     },
+  //     {
+  //       name: "PersonalInfo",
+  //       component: ViewProfile,
+  //       title: "",
+  //     },
+  //     {
+  //       name: "editPersonalInfo",
+  //       component: EditPersonalInformation,
+  //       title: "",
+  //     },
+  //     {
+  //       name: "inviteguest",
+  //       component: CreateGuests,
+  //       title: "Invite Guest",
+  //     },
+  //     {
+  //       name: "guestsdetail",
+  //       component: GuestsDetail,
+  //       title: " Guest Details",
+  //     },
+  //     {
+  //       name: "eventdetails",
+  //       component: EventDetals,
+  //       title: " Event Details",
+  //     },
+  //     {
+  //       name: "userpolls",
+  //       component: UserPolls,
+  //       title: "Estate Polls",
+  //     },
+  //     {
+  //       name: "estatepollsdetail",
+  //       component: UserPollDetails,
+  //       title: "Estate Polls Details",
+  //     },
+  //     {
+  //       name: "service",
+  //       component: ServiceView,
+  //       title: "Services",
+  //     },
+  //     {
+  //       name: "Marketplace",
+  //       component: MarketPlace,
+  //       title: "Market Place",
+  //     },
+  //     {
+  //       name: "amentities",
+  //       component: Amenities,
+  //       title: "Amenities",
+  //     },
+  //     {
+  //       name: "MarketReview",
+  //       component: MarketReview,
+  //       title: "Market Review",
+  //     },
+  //     {
+  //       name: "CreateProduct",
+  //       component: CreateProduct,
+  //       title: "Create Product",
+  //     },
+  //     {
+  //       name: "vendorService",
+  //       component: VendorService,
+  //       title: "Services",
+  //     },
+  //     {
+  //       name: "review",
+  //       component: Review,
+  //       title: "Reviews",
+  //     },
+  //     {
+  //       name: "vendorReview",
+  //       component: VendorReview,
+  //       title: "Reviews",
+  //     },
+  //     {
+  //       title: "ICE Contact",
+  //       component: ICEcontact,
+  //       name: "icecontact",
+  //     },
+  //     {
+  //       title: "Help Support",
+  //       component: HelpSupport,
+  //       name: "HelpSupport",
+  //     },
+  //     {
+  //       title: "About Us",
+  //       component: AboutUS,
+  //       name: "aboutus",
+  //     },
+  //     {
+  //       title: "Domestic Staff",
+  //       component: DomesticStaff,
+  //       name: "domestic",
+  //     },
+  //     {
+  //       title: "Domestic Staff Details",
+  //       component: DomesticDetail,
+  //       name: "domesticDetail",
+  //     },
+  //     {
+  //       title: "Domestic Staff",
+  //       component: CreateDomesticStaff,
+  //       name: "creatdomestic",
+  //     },
+  //   ];
 
   return (
-    <Stack.Navigator initialRouteName="UserTabNavigation">
+    <Stack.Navigator initialRouteName="GuestTabNavigation">
       <Stack.Screen
         options={{
           headerShown: false,
         }}
-        name="UserTabNavigation"
-        component={UserTabNavigation}
+        name="GuestTabNavigation"
+        component={GuestTabNavigation}
       />
 
+      <Stack.Screen
+        name="erranddetail"
+        component={ErrandDetailScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="createErrand"
+        component={CreateErrandScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="FundWallet"
+        component={FundWalletScreen}
+        // options={{ headerShown: false }}
+      />
+
+      {/* 
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Events",
@@ -723,44 +697,10 @@ export const Usernaviagetion = () => {
       />
 
       <Stack.Screen
-        name="PersonalInfo"
-        component={ViewProfile}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
-        name="editPersonalInfo"
-        component={EditPersonalInformation}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
         name="errands"
         component={Errand}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="service"
-        component={ServiceView}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Emergencyscreen"
-        component={Emergency}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
-        name="Marketplace"
-        component={MarketPlace}
-        options={{ headerShown: false }}
-      />
-
-      {/* {
-      name: "Marketplace",
-      component: MarketPlace,
-      title: "Market Place",
-    }, */}
 
       <Stack.Screen
         name="erranddetail"
@@ -780,7 +720,7 @@ export const Usernaviagetion = () => {
           CommentScreen,
           "Comments"
         )}
-      />
+      /> */}
     </Stack.Navigator>
   );
-};
+}

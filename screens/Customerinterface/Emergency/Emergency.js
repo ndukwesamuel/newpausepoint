@@ -43,8 +43,9 @@ import {
 } from "../../../components/shared/InputForm";
 import ClickToJoinCLan from "../../../components/shared/ClickToJoinCLan";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 
-const Emergency = () => {
+const Emergency = ({ navigation }) => {
   const [modalformVisible, setModalFormVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const { get_user_profile_data } = useSelector(
@@ -196,24 +197,19 @@ const Emergency = () => {
   };
 
   return (
-    <AppScreen>
+    <ScreenWrapper
+      title="Emergency"
+      navigation={navigation}
+      headerStyle={{
+        backgroundColor: "white",
+      }}
+      showHeader={true}
+    >
       {get_user_profile_data?.currentClanMeeting ? (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
-          <View
-            style={{
-              marginBottom: 20,
-              justifyContent: "center",
-              alignItems: "center",
-              borderBottomColor: "#CFCDCD",
-              borderBottomWidth: 1,
-              paddingBottom: 10,
-            }}
-          >
-            <MediumFontText data="Emergency" textstyle={{ fontSize: 18 }} />
-          </View>
           <View style={{ flex: 1, paddingHorizontal: 20 }}>
             <FlatList
               data={emergencydata}
@@ -367,7 +363,7 @@ const Emergency = () => {
           </Text>
         </ScrollView>
       )}
-    </AppScreen>
+    </ScreenWrapper>
   );
 };
 

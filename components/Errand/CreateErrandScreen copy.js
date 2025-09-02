@@ -8,28 +8,22 @@ import {
   StyleSheet,
   Alert,
   Image,
-  ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutateData } from "../../hooks/Request";
-import ScreenWrapper from "../shared/ScreenWrapper";
-import { Switch } from "react-native";
-import PickupErrandScreen from "./PickupErrandScreen";
 
-const ShoppingCreateErrandScreen = () => {
+const CreateErrandScreen = () => {
   const navigation = useNavigation();
-  const [uploadingImages, setUploadingImages] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
     title: "",
     deliveryAddress: "",
     description: "",
-    phoneNumber: "",
-    isWithinEstate: false,
+    phoneNumber: "", // Added phoneNumber field
     pickupLocations: [
       {
         name: "",
@@ -47,114 +41,6 @@ const ShoppingCreateErrandScreen = () => {
     ],
   });
 
-  // Cloudinary configuration - Replace with your actual values
-  const CLOUDINARY_CLOUD_NAME = "dkzds0azx";
-  const CLOUDINARY_UPLOAD_PRESET = "ydnmnjxq";
-
-  // Upload single image to Cloudinary
-  const uploadToCloudinary = async (imageUri) => {
-    try {
-      const formData = new FormData();
-
-      formData.append("file", {
-        uri: imageUri,
-        type: "image/jpeg",
-        name: "image.jpg",
-      });
-
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-      formData.append("cloud_name", CLOUDINARY_CLOUD_NAME);
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        return {
-          success: true,
-          url: data.secure_url,
-          publicId: data.public_id,
-        };
-      } else {
-        throw new Error(data.error?.message || "Upload failed");
-      }
-    } catch (error) {
-      console.error("Cloudinary upload error:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  };
-
-  // Upload all images in the form data
-  const uploadAllImages = async () => {
-    setUploadingImages(true);
-
-    try {
-      const updatedPickupLocations = await Promise.all(
-        formData.pickupLocations.map(async (location) => {
-          const updatedItems = await Promise.all(
-            location.items.map(async (item) => {
-              if (item.images.length === 0) {
-                return item;
-              }
-
-              // Upload all images for this item
-              const uploadPromises = item.images.map((imageUri) =>
-                uploadToCloudinary(imageUri)
-              );
-              const uploadResults = await Promise.all(uploadPromises);
-
-              // Filter successful uploads and get URLs
-              const successfulUploads = uploadResults.filter(
-                (result) => result.success
-              );
-              const uploadedUrls = successfulUploads.map(
-                (result) => result.url
-              );
-
-              // Log any failed uploads
-              const failedUploads = uploadResults.filter(
-                (result) => !result.success
-              );
-              if (failedUploads.length > 0) {
-                console.warn(
-                  `Failed to upload ${failedUploads.length} images for item: ${item.name}`
-                );
-              }
-
-              return {
-                ...item,
-                images: uploadedUrls, // Replace local URIs with Cloudinary URLs
-              };
-            })
-          );
-
-          return {
-            ...location,
-            items: updatedItems,
-          };
-        })
-      );
-
-      setUploadingImages(false);
-      return updatedPickupLocations;
-    } catch (error) {
-      setUploadingImages(false);
-      throw error;
-    }
-  };
-
   // Helper function to calculate total for a list of items
   const calculateItemsTotal = (items) => {
     return items.reduce((sum, item) => {
@@ -171,6 +57,7 @@ const ShoppingCreateErrandScreen = () => {
 
   // Handle text input changes
   const handleChange = (field, value) => {
+    // Regex for top-level fields or the structure for pickupLocations and items
     const locationMatch = field.match(/pickupLocations\[(\d+)\]\.(\w+)/);
     const itemMatch = field.match(
       /pickupLocations\[(\d+)\]\.items\[(\d+)\]\.(\w+)/
@@ -199,6 +86,7 @@ const ShoppingCreateErrandScreen = () => {
         };
         return { ...prev, pickupLocations: newPickupLocations };
       } else {
+        // Top level field changed
         return { ...prev, [field]: value };
       }
     });
@@ -294,30 +182,14 @@ const ShoppingCreateErrandScreen = () => {
     }
   };
 
-  // Remove image
-  const removeImage = (locationIndex, itemIndex, imageIndex) => {
-    setFormData((prev) => {
-      const newPickupLocations = [...prev.pickupLocations];
-      const images = [
-        ...newPickupLocations[locationIndex].items[itemIndex].images,
-      ];
-      images.splice(imageIndex, 1);
-      newPickupLocations[locationIndex].items[itemIndex] = {
-        ...newPickupLocations[locationIndex].items[itemIndex],
-        images,
-      };
-      return { ...prev, pickupLocations: newPickupLocations };
-    });
-  };
-
   const {
     mutate: createErrand,
     isLoading: isCreating,
     error: creationError,
-  } = useMutateData("api/v1/general/shoping", "POST", "errand");
+  } = useMutateData("api/v1/errand", "POST", "errand");
 
   // Handle form submission
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     // Validate form
     if (!formData.title || !formData.deliveryAddress || !formData.phoneNumber) {
       Alert.alert(
@@ -348,6 +220,7 @@ const ShoppingCreateErrandScreen = () => {
           );
           return;
         }
+        // Basic validation for quantity and price to be numbers
         if (
           isNaN(parseFloat(item.quantity)) ||
           parseFloat(item.quantity) <= 0
@@ -368,58 +241,51 @@ const ShoppingCreateErrandScreen = () => {
       }
     }
 
-    try {
-      // Upload all images first
-      const updatedPickupLocations = await uploadAllImages();
-
-      const submissionData = {
-        title: formData.title,
-        deliveryAddress: formData.deliveryAddress,
-        description: formData.description,
-        phoneNumber: formData.phoneNumber,
-        isWithinEstate: formData.isWithinEstate, // Include the toggle value
-        pickupLocations: updatedPickupLocations.map((location) => ({
-          name: location.name,
-          address: location.address,
-          items: location.items.map((item) => ({
-            name: item.name,
-            description: item.description,
-            quantity: parseFloat(item.quantity),
-            price: parseFloat(item.price),
-            images: item.images,
-          })),
+    // Prepare the data for submission
+    const submissionData = {
+      title: formData.title,
+      deliveryAddress: formData.deliveryAddress,
+      description: formData.description,
+      phoneNumber: formData.phoneNumber, // Include phone number in submission
+      pickupLocations: formData.pickupLocations.map((location) => ({
+        name: location.name,
+        address: location.address,
+        items: location.items.map((item) => ({
+          name: item.name,
+          description: item.description,
+          quantity: parseFloat(item.quantity), // Convert to number
+          price: parseFloat(item.price), // Convert to number
+          images: item.images,
         })),
-      };
+      })),
+    };
 
-      console.log("Submission data with Cloudinary URLs:", submissionData);
-
-      // Call the mutation
-      createErrand(submissionData, {
-        onSuccess: (data) => {
-          Alert.alert("Success", "Errand created successfully!");
-          navigation.goBack();
-        },
-        onError: (error) => {
-          console.error("Creation Error:", error?.response);
-          Alert.alert(
-            "Error",
-            error.message ||
-              error.response?.data?.message ||
-              "Failed to create errand"
-          );
-        },
-      });
-    } catch (error) {
-      console.error("Image upload error:", error);
-      Alert.alert("Error", "Failed to upload images. Please try again.");
-    }
+    // Call the mutation
+    createErrand(submissionData, {
+      onSuccess: (data) => {
+        Alert.alert("Success", "Errand created successfully!");
+        navigation.goBack();
+      },
+      onError: (error) => {
+        console.error("Creation Error:", error?.response); // Log the full error for debugging
+        Alert.alert(
+          "Error",
+          error.message ||
+            error.response?.data?.message ||
+            "Failed to create errand"
+        );
+      },
+    });
   };
 
+  console.log({
+    vvv: formData?.pickupLocations?.[0]?.items[0]?.images,
+  });
   return (
     <ScrollView style={styles.container}>
       {/* Basic Information */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Basic Information </Text>
+        <Text style={styles.sectionTitle}>Basic Information</Text>
 
         <TextInput
           style={styles.input}
@@ -450,20 +316,6 @@ const ShoppingCreateErrandScreen = () => {
           value={formData.description}
           onChangeText={(text) => handleChange("description", text)}
         />
-        <View style={styles.toggleContainer}>
-          <Text style={styles.toggleLabel}>
-            Errand Inside your Estate ? (₦500 fee)
-          </Text>
-          <Switch
-            value={formData.isWithinEstate}
-            onValueChange={(value) => handleChange("isWithinEstate", value)}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={formData.isWithinEstate ? "#005091" : "#f4f3f4"}
-          />
-        </View>
-        <Text style={styles.deliveryFeeText}>
-          Delivery Fee: ₦{formData.isWithinEstate ? "500" : "1000"}
-        </Text>
       </View>
 
       {/* Pickup Locations */}
@@ -588,24 +440,11 @@ const ShoppingCreateErrandScreen = () => {
                 {item.images.length > 0 && (
                   <View style={styles.imagePreviewContainer}>
                     {item.images.map((imageUri, imgIndex) => (
-                      <View key={imgIndex} style={styles.imageWrapper}>
-                        <Image
-                          source={{ uri: imageUri }}
-                          style={styles.imagePreview}
-                        />
-                        <TouchableOpacity
-                          style={styles.removeImageButton}
-                          onPress={() =>
-                            removeImage(locationIndex, itemIndex, imgIndex)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={20}
-                            color="#FF3B30"
-                          />
-                        </TouchableOpacity>
-                      </View>
+                      <Image
+                        key={imgIndex}
+                        source={{ uri: imageUri }}
+                        style={styles.imagePreview}
+                      />
                     ))}
                   </View>
                 )}
@@ -638,50 +477,33 @@ const ShoppingCreateErrandScreen = () => {
 
       <View>
         <Text style={{}}>
-          {/* <Text style={{}}>Service Charge:</Text> ₦ 0.00 */}
-          <Text style={styles.feeLabel}>Service Charge:</Text> ₦0.00
+          <Text style={{}}>Service Charge:</Text> ₦ 0.00
         </Text>
 
         <Text style={{}}>
-          {/* <Text style={{}}>Delivery Charge:</Text> ₦ 500.00 */}
-
-          <Text style={styles.feeText}>
-            <Text style={styles.feeLabel}>Delivery Charge:</Text>₦
-            {formData.isWithinEstate ? "500.00" : "1000.00"}
-          </Text>
+          <Text style={{}}>Delivery Charge:</Text> ₦ 500.00
         </Text>
       </View>
-
       {/* Grand Total for all locations */}
       <View style={styles.grandTotalContainer}>
         {/* <Text style={styles.grandTotalText}>
-            Grand Total for Errand: ₦{(grandTotal + 500.0).toFixed(2)}
-          </Text> */}
+          Grand Total for Errand: ₦{grandTotal.toFixed(2) + 500.0}
+        </Text> */}
+
         <Text style={styles.grandTotalText}>
-          Grand Total for Errand: ₦
-          {(grandTotal + (formData.isWithinEstate ? 500 : 1000)).toFixed(2)}
+          Grand Total for Errand: ₦{(grandTotal + 500.0).toFixed(2)}
         </Text>
       </View>
 
       {/* Submit Button */}
       <TouchableOpacity
-        style={[
-          styles.submitButton,
-          (isCreating || uploadingImages) && styles.disabledButton,
-        ]}
+        style={styles.submitButton}
         onPress={handleSubmit}
-        disabled={isCreating || uploadingImages}
+        disabled={isCreating}
       >
-        {uploadingImages ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#FFF" />
-            <Text style={styles.submitButtonText}>Uploading Images...</Text>
-          </View>
-        ) : (
-          <Text style={styles.submitButtonText}>
-            {isCreating ? "Creating Errand..." : "Create Errand"}
-          </Text>
-        )}
+        <Text style={styles.submitButtonText}>
+          {isCreating ? "Creating Errand..." : "Create Errand"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -770,7 +592,7 @@ const styles = StyleSheet.create({
   locationTotal: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#28A745",
+    color: "#28A745", // Green color for location total
     marginTop: 15,
     paddingTop: 10,
     borderTopWidth: 1,
@@ -778,7 +600,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   grandTotalContainer: {
-    backgroundColor: "#E0F7FA",
+    backgroundColor: "#E0F7FA", // Light blue background
     padding: 20,
     borderRadius: 10,
     marginTop: 20,
@@ -790,7 +612,7 @@ const styles = StyleSheet.create({
   grandTotalText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#00796B",
+    color: "#00796B", // Teal color for grand total
   },
   imageButton: {
     backgroundColor: "#E3F2FD",
@@ -808,22 +630,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     marginTop: 10,
   },
-  imageWrapper: {
-    position: "relative",
-    marginRight: 10,
-    marginBottom: 10,
-  },
   imagePreview: {
     width: 80,
     height: 80,
     borderRadius: 8,
-  },
-  removeImageButton: {
-    position: "absolute",
-    top: -8,
-    right: -8,
-    backgroundColor: "#FFF",
-    borderRadius: 10,
+    marginRight: 10,
+    marginBottom: 10,
   },
   addButton: {
     backgroundColor: "#E8F5E9",
@@ -854,140 +666,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
   },
-  disabledButton: {
-    backgroundColor: "#A5D6A7",
-  },
   submitButtonText: {
     color: "#FFF",
     fontWeight: "bold",
     fontSize: 16,
   },
-  loadingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
-  toggleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 15,
-    padding: 12,
-    backgroundColor: "#FFF",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#DDD",
-  },
-  toggleLabel: {
-    fontSize: 16,
-    color: "#555",
-    flex: 1,
-  },
-  deliveryFeeText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#005091",
-    marginLeft: 10,
-  },
-  feeText: {
-    fontSize: 16,
-    marginBottom: 5,
-    color: "#555",
-  },
-  feeLabel: {
-    fontWeight: "bold",
-  },
 });
 
-// import { View, Text } from 'react-native'
-// import React from 'react'
-
-export default function CreateErrandScreen() {
-  const navigation = useNavigation();
-
-  const [selected, setSelected] = useState("shopping");
-  return (
-    <ScreenWrapper
-      title="Create Errand"
-      navigation={navigation}
-      headerStyle={{
-        backgroundColor: "white",
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          padding: 20,
-        }}
-      >
-        {/* Buttons Row */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            gap: 12, // for spacing (works in RN 0.71+), else use margin
-          }}
-        >
-          {/* Shopping Button */}
-          <TouchableOpacity
-            onPress={() => setSelected("shopping")}
-            style={{
-              flex: 1,
-              paddingVertical: 14,
-              backgroundColor: selected === "shopping" ? "green" : "lightgray",
-              borderRadius: 8,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 16, color: "#fff", fontWeight: "600" }}>
-              Shopping
-            </Text>
-          </TouchableOpacity>
-
-          {/* Pickup Button */}
-          <TouchableOpacity
-            onPress={() => setSelected("pickup")}
-            style={{
-              flex: 1,
-              paddingVertical: 14,
-              backgroundColor: selected === "pickup" ? "blue" : "lightgray",
-              borderRadius: 8,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 16, color: "#fff", fontWeight: "600" }}>
-              Pickup
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Show Selected */}
-        {selected && (
-          <View
-            style={{
-              flex: 1,
-            }}
-          >
-            {selected === "shopping" && <ShoppingCreateErrandScreen />}
-            {selected === "pickup" && <PickupErrandScreen />}
-          </View>
-          // <Text
-          //   style={{
-          //     marginTop: 40,
-          //     fontSize: 20,
-          //     fontWeight: "bold",
-          //     textAlign: "center",
-          //   }}
-          // >
-          //   Selected: {selected === "shopping" ? "Shopping" : "Pickup"}
-          // </Text>
-        )}
-      </View>
-    </ScreenWrapper>
-  );
-}
-
-{
-  /* // export default CreateErrandScreen; */
-}
+export default CreateErrandScreen;

@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { useMutateData } from "../../../hooks/Request";
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 
 const { width } = Dimensions.get("window");
 
@@ -21,11 +22,15 @@ const ErrandDetailScreen = () => {
   const navigation = useNavigation(); // Get navigation object for goBack()
   const { errand } = route.params;
 
+  console.log({
+    vvv: errand, // Log the errand object for debugging
+  });
+
   const {
     mutate: assignedErrand,
     isLoading: assignedErrandispending,
     error: assignedErranderror,
-  } = useMutateData("api/v1/errand", "PATCH", "geterrandinfo");
+  } = useMutateData("api/v1/guesterrand", "PATCH", "geterrandinfo");
 
   // Function to show the confirmation alert
   const showConfirmStatusUpdate = (newStatus) => {
@@ -143,15 +148,19 @@ const ErrandDetailScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5F5F5" />
+    <ScreenWrapper
+      title="Errand Details"
+      navigation={navigation}
+      headerStyle={{
+        backgroundColor: "white",
+      }}
+    >
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Text style={styles.headerTitle}>{errand.title}</Text>
 
         <View style={styles.detailSection}>
           <Text style={styles.sectionHeader}>Status</Text>
           <View style={styles.statusRow}>
-            {" "}
             {/* Corrected to View */}
             <View
               style={[
@@ -187,7 +196,7 @@ const ErrandDetailScreen = () => {
                 </TouchableOpacity>
               </View>
             )}
-          </View>{" "}
+          </View>
           {/* Corrected closing tag to View */}
         </View>
 
@@ -197,59 +206,82 @@ const ErrandDetailScreen = () => {
             <Text style={styles.boldText}>Address:</Text>{" "}
             {errand.deliveryAddress}
           </Text>
-          <Text style={styles.detailText}>
-            <Text style={styles.boldText}>Description:</Text>{" "}
-            {errand.description || "N/A"}{" "}
-            {/* Handle potentially missing description */}
-          </Text>
         </View>
 
-        <View style={styles.detailSection}>
-          <Text style={styles.sectionHeader}>Pickup Locations & Items</Text>
-          {errand.pickupLocations && errand.pickupLocations.length > 0 ? (
-            errand.pickupLocations.map((location, locIndex) => (
-              <View key={locIndex} style={styles.locationCard}>
-                <Text style={styles.locationName}>{location.name}</Text>
-                <Text style={styles.locationAddress}>{location.address}</Text>
-                {location.items && location.items.length > 0 ? (
-                  location.items.map((item, itemIndex) => (
-                    <View key={itemIndex} style={styles.itemCard}>
-                      <View style={styles.itemHeader}>
-                        <Text style={styles.itemName}>{item.name}</Text>
-                        <Text style={styles.itemQuantityPrice}>
-                          {item.quantity} x ₦{item.price?.toFixed(2) || "N/A"}
-                        </Text>
-                      </View>
-                      <Text style={styles.itemDescription}>
-                        {item.description || "No description."}
-                      </Text>
-                      {item.images && item.images.length > 0 && (
-                        <Image
-                          source={{ uri: item.images[0] }}
-                          style={styles.itemImage}
-                          onError={(e) =>
-                            console.log(
-                              "Image loading error:",
-                              e.nativeEvent.error
-                            )
-                          }
-                        />
-                      )}
-                    </View>
-                  ))
-                ) : (
-                  <Text style={styles.noItemsText}>
-                    No items listed for this pickup location.
-                  </Text>
-                )}
-              </View>
-            ))
-          ) : (
-            <Text style={styles.noItemsText}>
-              No pickup locations listed for this errand.
+        {errand?.type === "pickup" ? (
+          <View style={styles.detailSection}>
+            <Text style={styles.sectionHeader}>Pickup Information</Text>
+            title
+            <Text style={styles.detailText}>
+              <Text style={styles.boldText}>title:</Text> {errand.title}
             </Text>
-          )}
-        </View>
+            <Text style={styles.detailText}>
+              <Text style={styles.boldText}>Description:</Text>
+              {errand.description || "N/A"}
+              </Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.boldText}>Address:</Text>{" "}
+              {errand.pickUpAddress}
+            </Text>
+            {errand.images && errand.images.length > 0 && (
+              <Image
+                source={{ uri: errand?.images[0]?.url }}
+                style={styles.itemImage}
+                onError={(e) =>
+                  console.log("Image loading error:", e.nativeEvent.error)
+                }
+              />
+            )}
+          </View>
+        ) : (
+          <View style={styles.detailSection}>
+            <Text style={styles.sectionHeader}>Pickup Locations & Items</Text>
+            {errand.pickupLocations && errand.pickupLocations.length > 0 ? (
+              errand.pickupLocations.map((location, locIndex) => (
+                <View key={locIndex} style={styles.locationCard}>
+                  <Text style={styles.locationName}>{location.name}</Text>
+                  <Text style={styles.locationAddress}>{location.address}</Text>
+                  {location.items && location.items.length > 0 ? (
+                    location.items.map((item, itemIndex) => (
+                      <View key={itemIndex} style={styles.itemCard}>
+                        <View style={styles.itemHeader}>
+                          <Text style={styles.itemName}>{item.name}</Text>
+                          <Text style={styles.itemQuantityPrice}>
+                            {item.quantity} x ₦{item.price?.toFixed(2) || "N/A"}
+                          </Text>
+                        </View>
+                        <Text style={styles.itemDescription}>
+                          {item.description || "No description."}
+                        </Text>
+
+                        {item.images && item.images.length > 0 && (
+                          <Image
+                            source={{ uri: item.images[0] }}
+                            style={styles.itemImage}
+                            onError={(e) =>
+                              console.log(
+                                "Image loading error:",
+                                e.nativeEvent.error
+                              )
+                            }
+                          />
+                        )}
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.noItemsText}>
+                      No items listed for this pickup location.
+                    </Text>
+                  )}
+                </View>
+              ))
+            ) : (
+              <Text style={styles.noItemsText}>
+                No pickup locations listed for this errand.
+              </Text>
+            )}
+          </View>
+        )}
 
         <View style={styles.detailSection}>
           <Text style={styles.sectionHeader}>Financial Summary</Text>
@@ -285,7 +317,7 @@ const ErrandDetailScreen = () => {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

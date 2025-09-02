@@ -8,37 +8,34 @@ import {
   TouchableOpacity,
   StatusBar,
   ActivityIndicator,
-  ScrollView, // Import ActivityIndicator for loading
+  ScrollView,
+  SafeAreaView, // Import ActivityIndicator for loading
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import { useNavigation } from "@react-navigation/native";
 import { useQueryClient } from "react-query"; // Import useQueryClient for retries
-import { useFetchData } from "../../hooks/Request"; // Assuming this path is correct
+// import { useFetchData } from "../../hooks/Request"; // Assuming this path is correct
 import { useDispatch, useSelector } from "react-redux";
-import { Get_User_Clans_Fun } from "../../Redux/UserSide/ClanSlice";
-import ScreenWrapper from "../shared/ScreenWrapper";
-const ErrandsScreen = () => {
+import { useFetchData } from "../../../hooks/Request";
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
+// import { Get_User_Clans_Fun } from "../../Redux/UserSide/ClanSlice";
+// import ScreenWrapper from "../shared/ScreenWrapper";
+// ScreenWrapper
+// useFetchData
+const GuestErrands = () => {
   const navigation = useNavigation();
   const queryClient = useQueryClient(); // Initialize query client
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-
-  // const {
-  //   data: getallErrand,
-  //   isLoading: isLoadinggetallErrand,
-  //   error: iserrorgetallErrand,
-  // } = useFetchData(`api/v1/guesterrand`, "errand");
 
   const {
     data: getallErrand,
     isLoading: isLoadinggetallErrand,
     error: iserrorgetallErrand,
-    isFetching, // 👈 important: tells if query is refetching
-    refetch, // 👈 function to manually trigger refetch
-  } = useFetchData(`api/v1/guesterrand`, "errand");
+  } = useFetchData(`api/v1/errand`, "errand");
 
   console.log({
-    mnmn: getallErrand?.data?.errands[0],
+    mnmn: userProfile_data?.currentClanMeeting?.settings,
   });
 
   // Function to determine status badge color
@@ -120,44 +117,45 @@ const ErrandsScreen = () => {
     );
   };
 
-  // Conditional rendering for loading state
-  if (isLoadinggetallErrand) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#007BFF" />
-        <Text style={styles.loadingText}>Loading errands...</Text>
-      </View>
-    );
-  }
+  //   // Conditional rendering for loading state
+  //   if (isLoadinggetallErrand) {
+  //     return (
+  //       <View style={[styles.container, styles.centerContent]}>
+  //         <ActivityIndicator size="large" color="#007BFF" />
+  //         <Text style={styles.loadingText}>Loading errands...</Text>
+  //       </View>
+  //     );
+  //   }
 
-  // Conditional rendering for error state
-  if (iserrorgetallErrand) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <Text style={styles.errorText}>
-          Error: {iserrorgetallErrand.message || "Failed to fetch data."}
-        </Text>
-        <TouchableOpacity
-          onPress={() => queryClient.invalidateQueries("errand")}
-        >
-          <Text style={styles.retryButton}>Tap to Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  //   // Conditional rendering for error state
+  //   if (iserrorgetallErrand) {
+  //     return (
+  //       <View style={[styles.container, styles.centerContent]}>
+  //         <Text style={styles.errorText}>
+  //           Error: {iserrorgetallErrand.message || "Failed to fetch data."}
+  //         </Text>
+  //         <TouchableOpacity
+  //           onPress={() => queryClient.invalidateQueries("errand")}
+  //         >
+  //           <Text style={styles.retryButton}>Tap to Retry</Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     );
+  //   }
 
   let freeErrandsRemaining = userProfile_data?.user?.freeErrandsRemaining;
 
   return (
-    <ScreenWrapper
-      title="Errand"
-      navigation={navigation}
-      headerStyle={{
-        backgroundColor: "white",
-      }}
-      showHeader={false}
-    >
-      {/* {userProfile_data?.currentClanMeeting?.settings?.allowErrand ? ( */}
+    // <ScreenWrapper
+    //   title="Errand"
+    //   navigation={navigation}
+    //   headerStyle={{
+    //     backgroundColor: "white",
+    //   }}
+    // >
+
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#4CAF50" />
       <View>
         {freeErrandsRemaining > 0 && (
           <View
@@ -216,11 +214,10 @@ const ErrandsScreen = () => {
             // This will only show if data is successfully fetched but the array is empty
             <Text style={styles.emptyText}>No errands found.</Text>
           }
-          refreshing={isFetching}
-          onRefresh={refetch}
         />
       </View>
-    </ScreenWrapper>
+    </SafeAreaView>
+    // {/* </ScreenWrapper> */}
   );
 };
 
@@ -345,4 +342,179 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ErrandsScreen;
+export default GuestErrands;
+
+const ErrandComingSoonScreen = ({ clanName, liveFromDate }) => {
+  const navigation = useNavigation();
+
+  // Helper function to format the date if provided
+  const formatLiveDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return ` Please check back on ${d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })} at ${d.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    })} WAT.`;
+  };
+
+  return (
+    <ScrollView
+      contentContainerStyle={{
+        flexGrow: 1,
+        backgroundColor: "#F0F8FF",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: 40,
+        paddingHorizontal: 25,
+      }}
+    >
+      <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
+
+      <View
+        style={{
+          alignItems: "center",
+          maxWidth: 600,
+          width: "100%",
+        }}
+      >
+        <MaterialIcons name="timer" size={100} color="green" />
+        <Text
+          style={{
+            fontSize: 32,
+            fontWeight: "bold",
+            color: "green",
+            marginTop: 30,
+            marginBottom: 15,
+            textAlign: "center",
+          }}
+        >
+          Errands Coming Soon!
+        </Text>
+        <Text
+          style={{
+            fontSize: 17,
+            color: "#555",
+            textAlign: "center",
+            lineHeight: 26,
+            marginBottom: 30,
+          }}
+        >
+          We're excited to bring convenient errand services to your clan,{" "}
+          {clanName || "this clan"}! The errand feature is not yet active.
+          {formatLiveDate(liveFromDate)}
+          {!liveFromDate &&
+            ` Stay tuned for updates on when you can start requesting errands.`}
+        </Text>
+
+        <View
+          style={{
+            backgroundColor: "#FFF",
+            borderRadius: 15,
+            padding: 25,
+            marginTop: 20,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 6,
+            width: "100%",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 22,
+              fontWeight: "bold",
+              color: "#333",
+              marginBottom: 15,
+              textAlign: "center",
+            }}
+          >
+            What is an Errand?
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#666",
+              lineHeight: 24,
+              marginBottom: 10,
+            }}
+          >
+            An "errand" allows you to request assistance with various tasks
+            within your community, such as:
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#666",
+              marginLeft: 15,
+              marginBottom: 5,
+            }}
+          >
+            • Picking up groceries or food from local stores.
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#666",
+              marginLeft: 15,
+              marginBottom: 5,
+            }}
+          >
+            • Delivering packages or documents.
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#666",
+              marginLeft: 15,
+              marginBottom: 5,
+            }}
+          >
+            • Getting items from specific pickup locations.
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#666",
+              lineHeight: 24,
+              marginBottom: 10,
+            }}
+          >
+            Our aim is to simplify your daily life by connecting you with
+            trusted members who can help efficiently.
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={{
+            backgroundColor: "",
+            paddingVertical: 14,
+            paddingHorizontal: 30,
+            borderRadius: 30,
+            marginTop: 50,
+            shadowColor: "#007BFF",
+            shadowOffset: { width: 0, height: 5 },
+            shadowOpacity: 0.3,
+            shadowRadius: 10,
+            elevation: 8,
+          }}
+          onPress={() => navigation.goBack()}
+        >
+          <Text
+            style={{
+              color: "white",
+              fontSize: 18,
+              fontWeight: "bold",
+            }}
+          >
+            Go Back
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};

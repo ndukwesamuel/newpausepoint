@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const RunnerDashboard = ({}) => {
   const navigation = useNavigation();
-  const [isOnline, setIsOnline] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const [availableErrands, setAvailableErrands] = useState([]);
   const [activeErrand, setActiveErrand] = useState(null);
   const [earnings, setEarnings] = useState({ today: 0, week: 0, total: 0 });
@@ -35,31 +35,6 @@ const RunnerDashboard = ({}) => {
     error: assignedErranderror,
   } = useMutateData("api/v1/runner/errands", "PATCH", "geterrandinfo");
 
-  // createDue(
-  //   due,
-  //   {
-  //     onSuccess: (response) => {
-  //       console.log({
-  //         jaja: response,
-  //       });
-
-  //       navigation.goBack();
-  //     },
-  //   },
-  //   {
-  //     onError: (error) => {
-  //       console.error("Mutation Error:", error.message);
-  //     },
-  //   }
-  // );
-
-  // useEffect(() => {
-  //   if (errandsData?.data) {
-  //     setAvailableErrands(errandsData?.data);
-  //   }
-  //   loadEarnings();
-  // }, [errandsData]);
-
   const loadEarnings = () => {
     // Simulate API call
     setEarnings({
@@ -69,17 +44,7 @@ const RunnerDashboard = ({}) => {
     });
   };
 
-  const toggleOnlineStatus = () => {
-    setIsOnline(!isOnline);
-    if (!isOnline) {
-      Alert.alert(
-        "Status Changed",
-        "You are now online and can receive errand requests"
-      );
-    } else {
-      Alert.alert("Status Changed", "You are now offline");
-    }
-  };
+  const toggleOnlineStatus = () => {};
 
   // const acceptErrand = (errand) => {
   //   let data = {

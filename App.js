@@ -54,6 +54,7 @@ import { pushtokendata, reset_login } from "./Redux/AuthSlice";
 
 import * as Device from "expo-device";
 import RunnerNavigation from "./App/Runners/RunnerNavigation";
+import GuestNavigation from "./App/Guest/Navigation/GuestNavigation";
 
 const queryClient = new QueryClient();
 
@@ -94,7 +95,6 @@ export default function App() {
           </PersistGate>
         </Provider>
       </QueryClientProvider>
-      {/* CRITICAL FIX: Toast must be OUTSIDE all providers and containers */}
       <Toast />
     </>
   );
@@ -276,6 +276,28 @@ export const NavigationScreen = () => {
     </NavigationContainer>
   );
 };
+
+const UserAndGuest = () => {
+  const {
+    user_data,
+    user_isError,
+    user_isSuccess,
+    user_isLoading,
+    user_message,
+  } = useSelector((state) => state.AuthSlice);
+  const dispatch = useDispatch();
+
+  console.log({
+    fireme: user_data?.user?.isGuest,
+  });
+
+  return;
+  <>{user_data?.user?.isGuest ? <GuestNavigation /> : <MainScreen />}</>;
+};
+
+{
+  /* <MainScreen /> */
+}
 
 export const UpdateScreen = ({ message }) => {
   const handleUpdate = () => {

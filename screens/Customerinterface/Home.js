@@ -28,7 +28,7 @@ import service from "../../assets/settings.png";
 import market from "../../assets/mdi_marketplace-outline.png";
 import aboutusicon from "../../assets/Info_alt_light.png";
 import bikeIcon from "../../assets/fastbike.png";
-
+import emergencyIcon from "../../assets/images/emergency.png";
 import search from "../../assets/search.png";
 import color_swatch from "../../assets/color-swatch.png";
 
@@ -71,6 +71,10 @@ export default function App({ navigation }) {
     user_message,
   } = useSelector((state) => state.AuthSlice);
 
+  console.log({
+    xxx: user_data?.user?.isGuest,
+  });
+
   // Animated Properties...
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
   let user_clan_info = userProfile_data?.currentClanMeeting;
@@ -85,6 +89,8 @@ export default function App({ navigation }) {
 
     return () => {};
   }, [dispatch]);
+
+  const isGuest = user_data?.user?.isGuest;
 
   return (
     <SafeAreaView
@@ -127,83 +133,104 @@ export default function App({ navigation }) {
 
           <View>
             <ScrollView style={{ flexGrow: 1, marginTop: 5 }}>
-              {TabButton(currentTab, setCurrentTab, "My Clans", clan, "myclan")}
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Errands",
-                bikeIcon,
-                "errands"
-              )}
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Polls/Surveys",
-                color_swatch,
-                "userpolls",
-                user_clan_info
-              )}
+              {/* Conditionally render TabButton based on isGuest */}
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="My Clans"
+                image={clan}
+                link="myclan"
+                user_clan_info={user_clan_info}
+                condition={true} // Only show if not a guest
+              />
 
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Wallet",
-                Calendar_light,
-                "payment",
-                user_clan_info
-              )}
+              {/* <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Errands"
+                image={bikeIcon}
+                link="errands"
+                user_clan_info={user_clan_info}
+                condition={true} // Always show Errands
+              /> */}
 
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Service",
-                service,
-                // customer-support
-                "service",
-                user_clan_info
-              )}
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Emergency"
+                image={emergencyIcon}
+                link="Emergencyscreen"
+                user_clan_info={user_clan_info}
+                condition={!isGuest} // Always show Errands
+              />
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Polls/Surveys"
+                image={color_swatch}
+                link="userpolls"
+                user_clan_info={user_clan_info}
+                condition={!isGuest} // Only show if not a guest
+              />
 
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Marketplace",
-                market,
-                // "Neigborhood"
-                "Marketplace",
-                user_clan_info
-              )}
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Wallet"
+                image={Calendar_light}
+                link="payment"
+                user_clan_info={user_clan_info}
+                condition={true} // Only show if not a guest
+              />
 
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "ICE Contacts",
-                Contact,
-                "icecontact"
-              )}
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Service"
+                image={service}
+                link="service"
+                user_clan_info={user_clan_info}
+                condition={true} // Always show Service
+              />
 
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Domestic Staff",
-                teamwork,
-                "domestic"
-              )}
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Amenities",
-                amenicon,
-                "amentities"
-              )}
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Marketplace"
+                image={market}
+                link="Marketplace"
+                user_clan_info={user_clan_info}
+                condition={true} // Always show Marketplace
+              />
 
-              {/* {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Directory",
-                bookmark,
-                "Neigborhood",
-                user_clan_info
-              )} */}
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="ICE Contacts"
+                image={Contact}
+                link="icecontact"
+                user_clan_info={user_clan_info}
+                condition={!isGuest} // Only show if not a guest
+              />
+
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Domestic Staff"
+                image={teamwork}
+                link="domestic"
+                user_clan_info={user_clan_info}
+                condition={!isGuest} // Only show if not a guest
+              />
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Amenities"
+                image={amenicon}
+                link="amentities"
+                user_clan_info={user_clan_info}
+                condition={!isGuest} // Always show Amenities
+              />
             </ScrollView>
 
             <View
@@ -211,29 +238,24 @@ export default function App({ navigation }) {
             />
 
             <View style={{ flexGrow: 1 }}>
-              {
-                // Tab Bar Buttons....
-              }
-
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "Help/Support",
-                clan,
-                // "HelpSupport"
-
-                "HelpSupport"
-              )}
-              {/* {TabButton(currentTab, setCurrentTab, "Rate Us", search, "comming")} */}
-              {TabButton(
-                currentTab,
-                setCurrentTab,
-                "About Us",
-                // color_swatch,
-                aboutusicon,
-
-                "aboutus"
-              )}
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="Help/Support"
+                image={clan}
+                link="HelpSupport"
+                user_clan_info={user_clan_info}
+                condition={true} // Always show Help/Support
+              />
+              <TabButton
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                title="About Us"
+                image={aboutusicon}
+                link="aboutus"
+                user_clan_info={user_clan_info}
+                condition={true} // Always show About Us
+              />
             </View>
           </View>
         </View>
@@ -337,15 +359,21 @@ export default function App({ navigation }) {
 }
 
 // For multiple Buttons...
-const TabButton = (
+const TabButton = ({
   currentTab,
   setCurrentTab,
   title,
   image,
   link,
-  user_clan_info
-) => {
+  user_clan_info,
+  condition = true, // Default to true if no condition is provided
+}) => {
   const navigation = useNavigation();
+
+  // If the condition is false, return null to not render the component
+  if (!condition) {
+    return null;
+  }
 
   return (
     <TouchableOpacity
@@ -354,9 +382,16 @@ const TabButton = (
           // Do your Stuff...
           console.log("LogOut");
         }
-        if (user_clan_info === null) {
+        if (
+          user_clan_info === null &&
+          link !== "HelpSupport" &&
+          link !== "aboutus" &&
+          link !== "errands" &&
+          link !== "Marketplace" &&
+          link !== "service" &&
+          link !== "amentities"
+        ) {
           navigation.navigate("myclan");
-
           return null;
         } else {
           setCurrentTab(title);

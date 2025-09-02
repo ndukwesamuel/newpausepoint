@@ -39,6 +39,7 @@ import { Get_Single_clan } from "../../../Redux/UserSide/ClanSlice";
 import QRCode from "react-native-qrcode-svg";
 import { useFetchData } from "../../../hooks/Request";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 export default function ViewProfile({ navigation }) {
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -50,6 +51,10 @@ export default function ViewProfile({ navigation }) {
   let item = {};
 
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
+
+  console.log({
+    vvv: userProfile_data?.user?.isGuest,
+  });
 
   const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
@@ -183,110 +188,121 @@ export default function ViewProfile({ navigation }) {
   );
 
   return (
-    <ScrollView>
-      <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
-        <View
-          style={{
-            borderRadius: 6,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <Image
-            source={{
-              uri: userProfile_data?.photo,
-            }}
-            style={{ width: 100, height: 100, borderRadius: 50 }}
-          />
-
-          <View style={{ flex: 1, gap: 5 }}>
-            <SemiBoldFontText
-              data={userProfile_data?.user?.name}
-              textstyle={{ fontSize: 22 }}
-            />
-            <MediumFontText
-              data={userProfile_data?.user?.email}
-              textstyle={{ fontSize: 11 }}
-            />
-          </View>
-        </View>
-
-        <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 7,
-            borderColor: "#2632381F",
-            paddingHorizontal: 10,
-            paddingVertical: 10,
-            marginTop: 20,
-          }}
-        >
+    <ScreenWrapper
+      title="Personal Info"
+      navigation={navigation}
+      headerStyle={{
+        backgroundColor: "white",
+      }}
+      // showHeader={false}
+    >
+      <ScrollView>
+        <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
           <View
             style={{
-              marginBottom: 20,
-              borderBottomColor: "#CFCDCD",
-              borderBottomWidth: 1,
-              paddingBottom: 10,
+              borderRadius: 6,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
             }}
           >
-            <SemiBoldFontText data="User Info" textstyle={{ fontSize: 18 }} />
+            <Image
+              source={{
+                uri: userProfile_data?.photo,
+              }}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+            />
+
+            <View style={{ flex: 1, gap: 5 }}>
+              <SemiBoldFontText
+                data={userProfile_data?.user?.name}
+                textstyle={{ fontSize: 22 }}
+              />
+              <MediumFontText
+                data={userProfile_data?.user?.email}
+                textstyle={{ fontSize: 11 }}
+              />
+            </View>
           </View>
-          <View>
-            {/* New fields added here */}
-            {foundermember?.apartmentType && (
-              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-                <RegularFontText
-                  data="Apartment Type"
-                  textstyle={{ fontSize: 13, color: "#696969" }}
-                />
-                <MediumFontText
-                  data={foundermember?.apartmentType}
-                  textstyle={{ fontSize: 19 }}
-                />
-              </View>
-            )}
 
-            {foundermember?.houseNumber && (
-              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-                <RegularFontText
-                  data="House Number"
-                  textstyle={{ fontSize: 13, color: "#696969" }}
-                />
-                <MediumFontText
-                  data={foundermember?.houseNumber}
-                  textstyle={{ fontSize: 19 }}
-                />
-              </View>
-            )}
+          <View
+            style={{
+              borderWidth: 1,
+              borderRadius: 7,
+              borderColor: "#2632381F",
+              paddingHorizontal: 10,
+              paddingVertical: 10,
+              marginTop: 20,
+            }}
+          >
+            <View
+              style={{
+                marginBottom: 20,
+                borderBottomColor: "#CFCDCD",
+                borderBottomWidth: 1,
+                paddingBottom: 10,
+              }}
+            >
+              <SemiBoldFontText
+                data="User Info "
+                textstyle={{ fontSize: 18 }}
+              />
+            </View>
+            <View>
+              {/* New fields added here */}
+              {foundermember?.apartmentType && (
+                <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                  <RegularFontText
+                    data="Apartment Type"
+                    textstyle={{ fontSize: 13, color: "#696969" }}
+                  />
+                  <MediumFontText
+                    data={foundermember?.apartmentType}
+                    textstyle={{ fontSize: 19 }}
+                  />
+                </View>
+              )}
 
-            {foundermember?.street && (
-              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-                <RegularFontText
-                  data="Street"
-                  textstyle={{ fontSize: 13, color: "#696969" }}
-                />
-                <MediumFontText
-                  data={foundermember?.street}
-                  textstyle={{ fontSize: 19 }}
-                />
-              </View>
-            )}
+              {foundermember?.houseNumber && (
+                <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                  <RegularFontText
+                    data="House Number"
+                    textstyle={{ fontSize: 13, color: "#696969" }}
+                  />
+                  <MediumFontText
+                    data={foundermember?.houseNumber}
+                    textstyle={{ fontSize: 19 }}
+                  />
+                </View>
+              )}
 
-            {foundermember?.unitNumber && (
-              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-                <RegularFontText
-                  data="Unit Number"
-                  textstyle={{ fontSize: 13, color: "#696969" }}
-                />
-                <MediumFontText
-                  data={foundermember?.unitNumber}
-                  textstyle={{ fontSize: 19 }}
-                />
-              </View>
-            )}
-          </View>
-          {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+              {foundermember?.street && (
+                <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                  <RegularFontText
+                    data="Street"
+                    textstyle={{ fontSize: 13, color: "#696969" }}
+                  />
+                  <MediumFontText
+                    data={foundermember?.street}
+                    textstyle={{ fontSize: 19 }}
+                  />
+                </View>
+              )}
+
+              {foundermember?.unitNumber && (
+                <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                  <RegularFontText
+                    data="Unit Number"
+                    textstyle={{ fontSize: 13, color: "#696969" }}
+                  />
+                  <MediumFontText
+                    data={foundermember?.unitNumber}
+                    textstyle={{ fontSize: 19 }}
+                  />
+                </View>
+              )}
+            </View>
+            {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
           <RegularFontText
             data="Resident ID"
             textstyle={{ fontSize: 13, color: "#696969" }}
@@ -294,273 +310,267 @@ export default function ViewProfile({ navigation }) {
           <MediumFontText data="2340OPL56" textstyle={{ fontSize: 19 }} />
         </View> */}
 
-          {!getuserclanInfo?.data?.settings?.allowMembersToEditProfile && (
-            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-              <RegularFontText
-                data="Home Address "
-                textstyle={{ fontSize: 13, color: "#696969" }}
-              />
-              <MediumFontText
-                data={foundermember?.homeAddress}
-                textstyle={{ fontSize: 19 }}
-              />
-            </View>
-          )}
-
-          <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Phone Number"
-              textstyle={{ fontSize: 13, color: "#696969" }}
-            />
-            <MediumFontText
-              data={foundermember?.phonenumber}
-              textstyle={{ fontSize: 19 }}
-            />
-          </View>
-          <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Member Code"
-              textstyle={{ fontSize: 13, color: "#696969" }}
-            />
-            <MediumFontText
-              data={foundermember?.memberCode}
-              textstyle={{ fontSize: 19 }}
-            />
-          </View>
-        </View>
-
-        <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 7,
-            borderColor: "#2632381F",
-            paddingHorizontal: 10,
-            paddingVertical: 10,
-            marginTop: 20,
-          }}
-        >
-          <View
-            style={{
-              marginBottom: 20,
-              borderBottomColor: "#CFCDCD",
-              borderBottomWidth: 1,
-              paddingBottom: 10,
-            }}
-          >
-            <SemiBoldFontText data="Qr Code" textstyle={{ fontSize: 18 }} />
-          </View>
-
-          <View
-            style={{
-              marginBottom: 5,
-              paddingBottom: 10,
-              flexDirection: "row",
-              gap: 20,
-            }}
-          >
-            {/* <RegularFontText
-            data="Status History"
-            textstyle={{ fontSize: 14, color: "#696969", width: "30%" }}
-          />
-          <MediumFontText
-            data="2023-09-15 10:30 AM  "
-            textstyle={{ fontSize: 14 }}
-          /> */}
-
-            {jsonString !== "" && (
-              <View
-                style={{
-                  marginTop: 20,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <QRCode
-                  value={foundermember?.memberCode}
-                  size={200}
-                  color="black"
-                  backgroundColor="white"
+            {!getuserclanInfo?.data?.settings?.allowMembersToEditProfile && (
+              <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+                <RegularFontText
+                  data="Home Address "
+                  textstyle={{ fontSize: 13, color: "#696969" }}
+                />
+                <MediumFontText
+                  data={foundermember?.homeAddress}
+                  textstyle={{ fontSize: 19 }}
                 />
               </View>
             )}
+
+            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+              <RegularFontText
+                data="Phone Number"
+                textstyle={{ fontSize: 13, color: "#696969" }}
+              />
+              <MediumFontText
+                data={foundermember?.phonenumber}
+                textstyle={{ fontSize: 19 }}
+              />
+            </View>
+            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+              <RegularFontText
+                data="Member Code"
+                textstyle={{ fontSize: 13, color: "#696969" }}
+              />
+              <MediumFontText
+                data={foundermember?.memberCode}
+                textstyle={{ fontSize: 19 }}
+              />
+            </View>
           </View>
 
-          <View
-            style={{
-              marginBottom: 5,
-              paddingBottom: 10,
-              flexDirection: "row",
-              gap: 20,
-            }}
-          ></View>
-        </View>
+          {userProfile_data?.user?.isGuest != true && (
+            <View
+              style={{
+                borderWidth: 1,
+                borderRadius: 7,
+                borderColor: "#2632381F",
+                paddingHorizontal: 10,
+                paddingVertical: 10,
+                marginTop: 20,
+              }}
+            >
+              <View
+                style={{
+                  marginBottom: 20,
+                  borderBottomColor: "#CFCDCD",
+                  borderBottomWidth: 1,
+                  paddingBottom: 10,
+                }}
+              >
+                <SemiBoldFontText data="Qr Code" textstyle={{ fontSize: 18 }} />
+              </View>
 
-        {/* <EmergencyModal visible={modalVisible} onClose={closeModal} setModalFormVisible={setModalFormVisible} /> */}
-
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={isModalVisible}
-        >
-          <TouchableWithoutFeedback onPress={toggleModal}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <View
-                  style={{
-                    marginBottom: 20,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderBottomColor: "#CFCDCD",
-                    borderBottomWidth: 1,
-                    paddingBottom: 10,
-                  }}
-                >
-                  <MediumFontText
-                    data={
-                      item?.status === "approved"
-                        ? "Ban User "
-                        : "Reinstate User"
-                    }
-                    textstyle={{
-                      fontSize: 18,
-                      textAlign: "center",
-                      width: "100%",
-                    }}
-                  />
-                </View>
-
-                <RegularFontText
-                  data={
-                    item?.status === "approved"
-                      ? "BBanning this user will suspend their account indefinitely, preventing further access to the system."
-                      : "Reinstating this user will reactivate their account, allowing them to access the system"
-                  }
-                  textstyle={{
-                    fontSize: 14,
-                    fontWeight: "400",
-                    textAlign: "center",
-                  }}
-                />
-                {item?.status === "approved" ? (
+              <View
+                style={{
+                  marginBottom: 5,
+                  paddingBottom: 10,
+                  flexDirection: "row",
+                  gap: 20,
+                }}
+              >
+                {jsonString !== "" && (
                   <View
                     style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
                       marginTop: 20,
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#FDF2F3",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={() => {
-                        ApproveMember_Mutation.mutate({
-                          clanId:
-                            get_user_profile_data?.AdmincurrentClanMeeting,
-                          memberId: item?.user?._id,
-                          approvalStatus: "suspended",
-                        });
-                      }}
-                    >
-                      <RegularFontText
-                        data="Ban User"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                        }}
-                      />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#04973C",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={toggleModal}
-                    >
-                      <RegularFontText
-                        data="Cancel"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 20,
-                    }}
-                  >
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "white",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                        borderWidth: 1,
-                        borderColor: "#04973C",
-                      }}
-                      onPress={toggleModal}
-                    >
-                      <RegularFontText
-                        data="Cancel"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "#04973C",
-                        }}
-                      />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#04973C",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={() => {
-                        ApproveMember_Mutation.mutate({
-                          clanId:
-                            get_user_profile_data?.AdmincurrentClanMeeting,
-                          memberId: item?.user?._id,
-                          approvalStatus: "approved",
-                        });
-                      }}
-                    >
-                      <RegularFontText
-                        data="Reinstate"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      />
-                    </TouchableOpacity>
+                    <QRCode
+                      value={foundermember?.memberCode}
+                      size={200}
+                      color="black"
+                      backgroundColor="white"
+                    />
                   </View>
                 )}
               </View>
+
+              <View
+                style={{
+                  marginBottom: 5,
+                  paddingBottom: 10,
+                  flexDirection: "row",
+                  gap: 20,
+                }}
+              ></View>
             </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      </View>
-    </ScrollView>
+          )}
+
+          {/* <EmergencyModal visible={modalVisible} onClose={closeModal} setModalFormVisible={setModalFormVisible} /> */}
+
+          <Modal
+            transparent={true}
+            animationType="slide"
+            visible={isModalVisible}
+          >
+            <TouchableWithoutFeedback onPress={toggleModal}>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <View
+                    style={{
+                      marginBottom: 20,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderBottomColor: "#CFCDCD",
+                      borderBottomWidth: 1,
+                      paddingBottom: 10,
+                    }}
+                  >
+                    <MediumFontText
+                      data={
+                        item?.status === "approved"
+                          ? "Ban User "
+                          : "Reinstate User"
+                      }
+                      textstyle={{
+                        fontSize: 18,
+                        textAlign: "center",
+                        width: "100%",
+                      }}
+                    />
+                  </View>
+
+                  <RegularFontText
+                    data={
+                      item?.status === "approved"
+                        ? "BBanning this user will suspend their account indefinitely, preventing further access to the system."
+                        : "Reinstating this user will reactivate their account, allowing them to access the system"
+                    }
+                    textstyle={{
+                      fontSize: 14,
+                      fontWeight: "400",
+                      textAlign: "center",
+                    }}
+                  />
+                  {item?.status === "approved" ? (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginTop: 20,
+                      }}
+                    >
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: "#FDF2F3",
+                          paddingHorizontal: 12,
+                          paddingVertical: 12,
+                          borderRadius: 6,
+                        }}
+                        onPress={() => {
+                          ApproveMember_Mutation.mutate({
+                            clanId:
+                              get_user_profile_data?.AdmincurrentClanMeeting,
+                            memberId: item?.user?._id,
+                            approvalStatus: "suspended",
+                          });
+                        }}
+                      >
+                        <RegularFontText
+                          data="Ban User"
+                          textstyle={{
+                            fontSize: 14,
+                            fontWeight: "400",
+                            textAlign: "center",
+                          }}
+                        />
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: "#04973C",
+                          paddingHorizontal: 12,
+                          paddingVertical: 12,
+                          borderRadius: 6,
+                        }}
+                        onPress={toggleModal}
+                      >
+                        <RegularFontText
+                          data="Cancel"
+                          textstyle={{
+                            fontSize: 14,
+                            fontWeight: "400",
+                            textAlign: "center",
+                            color: "white",
+                          }}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginTop: 20,
+                      }}
+                    >
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: "white",
+                          paddingHorizontal: 12,
+                          paddingVertical: 12,
+                          borderRadius: 6,
+                          borderWidth: 1,
+                          borderColor: "#04973C",
+                        }}
+                        onPress={toggleModal}
+                      >
+                        <RegularFontText
+                          data="Cancel"
+                          textstyle={{
+                            fontSize: 14,
+                            fontWeight: "400",
+                            textAlign: "center",
+                            color: "#04973C",
+                          }}
+                        />
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: "#04973C",
+                          paddingHorizontal: 12,
+                          paddingVertical: 12,
+                          borderRadius: 6,
+                        }}
+                        onPress={() => {
+                          ApproveMember_Mutation.mutate({
+                            clanId:
+                              get_user_profile_data?.AdmincurrentClanMeeting,
+                            memberId: item?.user?._id,
+                            approvalStatus: "approved",
+                          });
+                        }}
+                      >
+                        <RegularFontText
+                          data="Reinstate"
+                          textstyle={{
+                            fontSize: 14,
+                            fontWeight: "400",
+                            textAlign: "center",
+                            color: "white",
+                          }}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </View>
+      </ScrollView>
+    </ScreenWrapper>
   );
 }
 

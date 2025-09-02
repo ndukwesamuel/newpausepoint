@@ -49,7 +49,7 @@ const Registraion = ({}: {}) => {
       // Use formData to send the image data to the API
       //   const tokengot = data?.token;
 
-      let joinurl = `${API_BASEURL}register`;
+      let joinurl = `${API_BASEURL}api/v1/auth/user-register`;
 
       let data = {
         name: name,

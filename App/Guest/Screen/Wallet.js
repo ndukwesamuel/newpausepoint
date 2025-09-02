@@ -9,9 +9,10 @@ import {
   Modal,
   Image,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { useFetchData } from "../../../hooks/Request";
+// import { useFetchData } from "../../../hooks/Request";
 import {
   MaterialCommunityIcons,
   FontAwesome5,
@@ -20,27 +21,33 @@ import {
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
+import { useFetchData } from "../../../hooks/Request";
+import { StatusBar } from "react-native";
 import { useSelector } from "react-redux";
 
 // ... inside your component
 
-const WalletScreen = ({}) => {
+const Wallet = ({}) => {
   const {
     data,
     isLoading,
     error,
     refetch: refetchWallet,
   } = useFetchData("wallet", "wallet");
+
+  const {
+    user_data,
+    user_isError,
+    user_isSuccess,
+    user_isLoading,
+    user_message,
+  } = useSelector((state) => state.AuthSlice);
   const {
     data: allmydues,
     isLoading: ispending,
     error: isError,
     refetch: refetchDues,
   } = useFetchData("wallet/pay-due", "pay-due");
-
-  const { user_data } = useSelector((state) => state.AuthSlice); // Get user_data from AuthSlice
-
-  const isGuest = user_data?.user?.isGuest;
   const animation = useRef(null);
 
   const navigation = useNavigation();
@@ -117,241 +124,247 @@ const WalletScreen = ({}) => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.balanceContainer}>
-        <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
-        <Text style={styles.balance}>
-          {data?.balance?.toFixed(2)} {data?.currency}
-        </Text>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#4CAF50" />
 
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("FundWallet")}
-        >
-          <Icon name="add" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Fund Wallet</Text>
-        </TouchableOpacity>
+      <View style={styles.container}>
+        <View style={styles.balanceContainer}>
+          <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
+          <Text style={styles.balance}>
+            {data?.balance?.toFixed(2)} {data?.currency}
+          </Text>
+        </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setShowUtilitiesModal(true)}
-        >
-          <Icon name="payment" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Pay Bills</Text>
-        </TouchableOpacity>
-      </View>
-
-      {isGuest != true && (
-        <>
-          <Text style={styles.subTitle}>Invoices due</Text>
-
-          <FlatList
-            data={allmydues?.dues}
-            renderItem={({ item }) => (
-              <DueItem item={item} navigation={navigation} />
-            )}
-            keyExtractor={(item) => item._id}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListEmptyComponent={
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <LottieView
-                  autoPlay
-                  ref={animation}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    // backgroundColor: "#eee",
-                  }}
-                  source={require("../../../assets/Lottie/notFund.json")}
-                />
-                <Text
-                  style={{
-                    fontSize: 22,
-                    fontWeight: "bold",
-                    color: "#333",
-                    marginBottom: 10,
-                    textAlign: "center",
-                  }}
-                >
-                  No Dues Found
-                </Text>
-              </View>
-            }
-          />
-        </>
-      )}
-
-      <Modal
-        visible={showUtilitiesModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowUtilitiesModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "white",
-              width: "90%",
-              borderRadius: 20,
-              padding: 20,
-              maxHeight: "80%",
-            }}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("FundWallet")}
           >
-            <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "bold",
-                textAlign: "center",
-                marginBottom: 20,
-                color: "#2c3e50",
-              }}
-            >
-              Select Utility Bill
-            </Text>
+            <Icon name="add" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Fund Wallet</Text>
+          </TouchableOpacity>
 
-            <ScrollView
-              contentContainerStyle={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-                paddingBottom: 20,
-              }}
-            >
-              {[
-                {
-                  id: 1,
-                  name: "Electricity",
-                  icon: "flash",
-                  iconSet: MaterialCommunityIcons,
-                  color: "#f39c12",
-                },
-                {
-                  id: 2,
-                  name: "Water",
-                  icon: "water",
-                  iconSet: FontAwesome5,
-                  color: "#3498db",
-                },
-                {
-                  id: 3,
-                  name: "Internet",
-                  icon: "wifi",
-                  iconSet: Ionicons,
-                  color: "#9b59b6",
-                },
-                {
-                  id: 4,
-                  name: "Cable TV",
-                  icon: "tv",
-                  iconSet: Ionicons,
-                  color: "#e74c3c",
-                },
-                {
-                  id: 5,
-                  name: "Gas",
-                  icon: "fire",
-                  iconSet: FontAwesome5,
-                  color: "#e67e22",
-                },
-                {
-                  id: 6,
-                  name: "Waste",
-                  icon: "delete",
-                  iconSet: MaterialIcons,
-                  color: "#2ecc71",
-                },
-              ].map((utility) => (
-                <TouchableOpacity
-                  key={utility.id}
-                  style={{
-                    width: "48%",
-                    backgroundColor: "#f8f9fa",
-                    borderRadius: 12,
-                    padding: 15,
-                    marginBottom: 15,
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor: "#ecf0f1",
-                  }}
-                  disabled={true} // Disabled for "Coming Soon"
+          {/* <TouchableOpacity
+            style={styles.button}
+            onPress={() => setShowUtilitiesModal(true)}
+          >
+            <Icon name="payment" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Pay Bills</Text>
+          </TouchableOpacity> */}
+        </View>
+
+        {user_data?.user?.isGuest != true && (
+          <>
+            <Text style={styles.subTitle}>Invoices due</Text>
+
+            <FlatList
+              data={allmydues?.dues}
+              renderItem={({ item }) => (
+                <DueItem item={item} navigation={navigation} />
+              )}
+              keyExtractor={(item) => item._id}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              ListEmptyComponent={
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
                 >
-                  <utility.iconSet
-                    name={utility.icon}
-                    size={40}
-                    color={utility.color}
-                    style={{ marginBottom: 10 }}
+                  <LottieView
+                    autoPlay
+                    ref={animation}
+                    style={{
+                      width: 200,
+                      height: 200,
+                      // backgroundColor: "#eee",
+                    }}
+                    source={require("../../../assets/Lottie/notFund.json")}
                   />
                   <Text
                     style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      color: "#34495e",
+                      fontSize: 22,
+                      fontWeight: "bold",
+                      color: "#333",
+                      marginBottom: 10,
                       textAlign: "center",
                     }}
                   >
-                    {utility.name}
+                    No Dues Found
                   </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+                </View>
+              }
+            />
+          </>
+        )}
 
+        <Modal
+          visible={showUtilitiesModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowUtilitiesModal(false)}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View
               style={{
-                backgroundColor: "#fff9e6",
-                padding: 15,
-                borderRadius: 10,
-                marginBottom: 15,
-                flexDirection: "row",
-                alignItems: "center",
+                backgroundColor: "white",
+                width: "90%",
+                borderRadius: 20,
+                padding: 20,
+                maxHeight: "80%",
               }}
-            >
-              <Ionicons name="time-outline" size={24} color="#f39c12" />
-              <Text
-                style={{
-                  color: "#e67e22",
-                  fontSize: 16,
-                  marginLeft: 10,
-                  flex: 1,
-                }}
-              >
-                Utility bill payments coming soon!
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#3498db",
-                padding: 15,
-                borderRadius: 10,
-                alignItems: "center",
-              }}
-              onPress={() => setShowUtilitiesModal(false)}
             >
               <Text
                 style={{
-                  color: "white",
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: "bold",
+                  textAlign: "center",
+                  marginBottom: 20,
+                  color: "#2c3e50",
                 }}
               >
-                Close
+                Select Utility Bill
               </Text>
-            </TouchableOpacity>
+
+              <ScrollView
+                contentContainerStyle={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                  paddingBottom: 20,
+                }}
+              >
+                {[
+                  {
+                    id: 1,
+                    name: "Electricity",
+                    icon: "flash",
+                    iconSet: MaterialCommunityIcons,
+                    color: "#f39c12",
+                  },
+                  {
+                    id: 2,
+                    name: "Water",
+                    icon: "water",
+                    iconSet: FontAwesome5,
+                    color: "#3498db",
+                  },
+                  {
+                    id: 3,
+                    name: "Internet",
+                    icon: "wifi",
+                    iconSet: Ionicons,
+                    color: "#9b59b6",
+                  },
+                  {
+                    id: 4,
+                    name: "Cable TV",
+                    icon: "tv",
+                    iconSet: Ionicons,
+                    color: "#e74c3c",
+                  },
+                  {
+                    id: 5,
+                    name: "Gas",
+                    icon: "fire",
+                    iconSet: FontAwesome5,
+                    color: "#e67e22",
+                  },
+                  {
+                    id: 6,
+                    name: "Waste",
+                    icon: "delete",
+                    iconSet: MaterialIcons,
+                    color: "#2ecc71",
+                  },
+                ].map((utility) => (
+                  <TouchableOpacity
+                    key={utility.id}
+                    style={{
+                      width: "48%",
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: 12,
+                      padding: 15,
+                      marginBottom: 15,
+                      alignItems: "center",
+                      borderWidth: 1,
+                      borderColor: "#ecf0f1",
+                    }}
+                    disabled={true} // Disabled for "Coming Soon"
+                  >
+                    <utility.iconSet
+                      name={utility.icon}
+                      size={40}
+                      color={utility.color}
+                      style={{ marginBottom: 10 }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: "#34495e",
+                        textAlign: "center",
+                      }}
+                    >
+                      {utility.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <View
+                style={{
+                  backgroundColor: "#fff9e6",
+                  padding: 15,
+                  borderRadius: 10,
+                  marginBottom: 15,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <Ionicons name="time-outline" size={24} color="#f39c12" />
+                <Text
+                  style={{
+                    color: "#e67e22",
+                    fontSize: 16,
+                    marginLeft: 10,
+                    flex: 1,
+                  }}
+                >
+                  Utility bill payments coming soon!
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#3498db",
+                  padding: 15,
+                  borderRadius: 10,
+                  alignItems: "center",
+                }}
+                onPress={() => setShowUtilitiesModal(false)}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 18,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Close
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -589,4 +602,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WalletScreen;
+export default Wallet;

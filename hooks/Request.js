@@ -98,3 +98,44 @@ export const useMutateData = (url, method, queryKey) => {
     },
   });
 };
+
+const formdataapiRequest = async ({ url, method, data, token }) => {
+  if (!token) throw new Error("Token is missing");
+
+  try {
+    const response = await axios({
+      url: `${apiUrl}${url}`,
+      method,
+      data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data", // 👈 force multipart
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("API Error:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "API request failed");
+  }
+};
+
+// Hook for making API requests (POST, UPDATE, DELETE)
+export const formdatauseMutateData = (url, method, queryKey) => {
+  const { user_data } = useSelector((state) => state.AuthSlice);
+  const token = user_data?.token;
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data) => formdataapiRequest({ url, method, data, token }),
+    {
+      onSuccess: (data) => {
+        console.log("Mutation Successful", { data });
+        queryClient.invalidateQueries(queryKey); // Refresh data
+      },
+      onError: (error) => {
+        console.error("Mutation Error:", error.message);
+      },
+    }
+  );
+};
