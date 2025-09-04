@@ -13,6 +13,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { formdatauseMutateData } from "../../hooks/Request";
 import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 // import { useMutateData } from "../hooks/api"; // 👈 adjust path
 
 // formdataapiRequest
@@ -27,6 +28,12 @@ const PickupErrandScreen = () => {
   const [description, setDescription] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [images, setImages] = useState([]);
+
+  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
+
+  console.log({
+    ffl: userProfile_data?.currentClanMeeting,
+  });
 
   // Use mutation hook
   const { mutate, isLoading } = formdatauseMutateData(
@@ -58,11 +65,23 @@ const PickupErrandScreen = () => {
       return;
     }
 
+    const withinEstateValue = isWithinEstate.toString(); // "true" or "false"
+
+    console.log({
+      fff: images,
+      title,
+      deliveryAddress,
+      pickUpAddress,
+      withinEstateValue,
+      description,
+      phoneNumber,
+    });
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("deliveryAddress", deliveryAddress);
     formData.append("pickUpAddress", pickUpAddress);
-    formData.append("isWithinEstate", isWithinEstate);
+    formData.append("isWithinEstate", withinEstateValue);
     formData.append("description", description);
     formData.append("phoneNumber", phoneNumber);
 
@@ -103,6 +122,27 @@ const PickupErrandScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      {userProfile_data?.currentClanMeeting && (
+        <View
+          style={{
+            backgroundColor: "#f2f6ff",
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 16,
+          }}
+        >
+          <Text style={{ fontWeight: "700", fontSize: 16, marginBottom: 4 }}>
+            Estate: {userProfile_data?.currentClanMeeting.name}
+          </Text>
+          <Text style={{ color: "#555" }}>
+            Code: {userProfile_data?.currentClanMeeting.uniqueClanID}
+          </Text>
+          <Text style={{ color: "#00796b", fontWeight: "600" }}>
+            You can select within estate if pickup is within your estate.
+          </Text>
+        </View>
+      )}
+
       <Text style={styles.label}>Title *</Text>
       <TextInput style={styles.input} value={title} onChangeText={setTitle} />
 
@@ -119,18 +159,18 @@ const PickupErrandScreen = () => {
         value={deliveryAddress}
         onChangeText={setDeliveryAddress}
       />
-      <Text style={styles.toggleLabel}>
-        Errand Inside your Estate ? (₦500 fee)
-      </Text>
+      {userProfile_data?.currentClanMeeting && (
+        <>
+          <Text style={styles.toggleLabel}>
+            Errand Inside your Estate ? (₦500 fee)
+          </Text>
 
-      <View style={styles.switchRow}>
-        <Text style={styles.label}>Is within estate?</Text>
-        <Switch value={isWithinEstate} onValueChange={setIsWithinEstate} />
-      </View>
-
-      <Text style={styles.deliveryFeeText}>
-        Delivery Fee: ₦{isWithinEstate === true ? "500" : "1000"}
-      </Text>
+          <View style={styles.switchRow}>
+            <Text style={styles.label}>Is within estate?</Text>
+            <Switch value={isWithinEstate} onValueChange={setIsWithinEstate} />
+          </View>
+        </>
+      )}
 
       <Text style={styles.label}>Description</Text>
       <TextInput
@@ -162,6 +202,17 @@ const PickupErrandScreen = () => {
           />
         ))}
       </ScrollView>
+
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: "700",
+          marginTop: 10,
+          color: "#000",
+        }}
+      >
+        Total Delivery Fee: ₦{isWithinEstate ? "500" : "1000"}
+      </Text>
 
       <TouchableOpacity
         style={[styles.submitBtn, { opacity: isLoading ? 0.6 : 1 }]}
