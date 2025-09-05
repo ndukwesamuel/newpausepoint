@@ -972,16 +972,6 @@ export default function CreateErrandScreen() {
             {selected === "shopping" && <ShoppingCreateErrandScreen />}
             {selected === "pickup" && <PickupErrandScreen />}
           </View>
-          // <Text
-          //   style={{
-          //     marginTop: 40,
-          //     fontSize: 20,
-          //     fontWeight: "bold",
-          //     textAlign: "center",
-          //   }}
-          // >
-          //   Selected: {selected === "shopping" ? "Shopping" : "Pickup"}
-          // </Text>
         )}
       </View>
     </ScreenWrapper>
