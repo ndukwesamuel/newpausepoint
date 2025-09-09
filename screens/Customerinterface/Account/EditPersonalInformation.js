@@ -22,10 +22,19 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
+import {
+  formdatauseMutateData,
+  useFetchData,
+  useMutateData,
+} from "../../../hooks/Request";
+import { useNavigation } from "@react-navigation/native";
 
 const EditPersonalInformation = ({ navigation }) => {
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
+  console.log({
+    vvv: userProfile_data?.user?.isGuest,
+  });
   const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
     (member) => member.user.toString() === userIdToFind.toString()
@@ -284,165 +293,125 @@ const EditPersonalInformation = ({ navigation }) => {
             Personal Information
           </Text>
 
-          <View
-            style={{
-              alignItems: "center",
-              paddingVertical: 20,
-              borderBottomWidth: 1,
-              borderBottomColor: "#eee",
-              marginHorizontal: 20,
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 20,
-            }}
-          >
-            <TouchableOpacity
-              onPress={pickImage}
-              style={{ alignItems: "center", justifyContent: "center" }}
-            >
-              <Image
-                source={{ uri: profileImage }}
-                style={{ width: 100, height: 100, borderRadius: 50 }}
-              />
-              <Text style={styles.changeImageText}>Tap to change image</Text>
-              <Text>{userProfile_data?.user?.email}</Text>
-            </TouchableOpacity>
+          <ProfileImageUploader />
 
-            {/* Only show update button if image has changed */}
-            <View>
-              {hasImageChanged && (
-                <Formbutton
-                  buttonStyle={[
-                    styles.submitButton,
-                    {
-                      backgroundColor: "green",
-                      marginTop: 15,
-                      paddingHorizontal: 20,
-                    },
-                  ]}
-                  textStyle={styles.submitButtonText}
-                  data="Update Image"
-                  onPress={handleImageUpdate}
-                  isLoading={UpdateImage_Mutation.isLoading}
+          {userProfile_data?.user?.isGuest === true ? (
+            <GeneralEditPersonalInformation />
+          ) : (
+            <View style={{ paddingHorizontal: 20, gap: 10, marginTop: 20 }}>
+              <View>
+                <FormLabel data="Name" />
+                <Forminput
+                  placeholder="Your Name"
+                  onChangeText={setName}
+                  value={name}
                 />
+              </View>
+
+              <View>
+                <FormLabel data="Phone Number" />
+                <Forminput
+                  placeholder="Phone Number"
+                  onChangeText={setPhone}
+                  value={phone}
+                />
+              </View>
+
+              <View>
+                <FormLabel data="Gender" />
+                <TouchableOpacity
+                  onPress={() => setShowGenderDropdown(true)}
+                  style={styles.dropdownTrigger}
+                >
+                  <Text style={styles.dropdownTriggerText}>
+                    {gender || "Select Gender"}
+                  </Text>
+                </TouchableOpacity>
+                <CustomDropdown
+                  visible={showGenderDropdown}
+                  onClose={() => setShowGenderDropdown(false)}
+                  options={genderOptions}
+                  onSelect={(item) => setGender(item)}
+                  selectedValue={gender}
+                />
+              </View>
+
+              {/* Only show address fields if canEditProfile is true */}
+              {canEditProfile && (
+                <>
+                  <Text style={styles.sectionTitle}>Address Information</Text>
+
+                  <View>
+                    <FormLabel data="Street Name" />
+                    <TouchableOpacity
+                      onPress={() => setShowStreetDropdown(true)}
+                      style={styles.dropdownTrigger}
+                    >
+                      <Text style={styles.dropdownTriggerText}>
+                        {street || "Select Street"}
+                      </Text>
+                    </TouchableOpacity>
+                    <CustomDropdown
+                      visible={showStreetDropdown}
+                      onClose={() => setShowStreetDropdown(false)}
+                      options={availableStreets}
+                      onSelect={(item) => setStreet(item)}
+                      selectedValue={street}
+                    />
+                  </View>
+
+                  <View>
+                    <FormLabel data="House Number" />
+                    <Forminput
+                      placeholder="House Number"
+                      onChangeText={sethouseNumber}
+                      value={houseNumber}
+                    />
+                  </View>
+
+                  <View>
+                    <FormLabel data="Type of Apartment" />
+                    <TouchableOpacity
+                      onPress={() => setShowApartmentDropdown(true)}
+                      style={styles.dropdownTrigger}
+                    >
+                      <Text style={styles.dropdownTriggerText}>
+                        {typeOfApartment || "Select Apartment Type"}
+                      </Text>
+                    </TouchableOpacity>
+                    <CustomDropdown
+                      visible={showApartmentDropdown}
+                      onClose={() => setShowApartmentDropdown(false)}
+                      options={availableApartmentTypes}
+                      onSelect={(item) => setTypeOfApartment(item)}
+                      selectedValue={typeOfApartment}
+                    />
+                  </View>
+
+                  <View>
+                    <FormLabel data="Unit Number" />
+                    <Forminput
+                      placeholder="Unit Number"
+                      onChangeText={setUnitNumber}
+                      value={unitNumber}
+                    />
+                  </View>
+                </>
               )}
-            </View>
-          </View>
-          {/* Text Information Section */}
-          <View style={{ paddingHorizontal: 20, gap: 10, marginTop: 20 }}>
-            <View>
-              <FormLabel data="Name" />
-              <Forminput
-                placeholder="Your Name"
-                onChangeText={setName}
-                value={name}
+
+              {/* Text Update Button */}
+              <Formbutton
+                buttonStyle={[
+                  styles.submitButton,
+                  { backgroundColor: "#04973C" },
+                ]}
+                textStyle={styles.submitButtonText}
+                data="Update Information"
+                onPress={handleTextUpdate}
+                isLoading={UpdateText_Mutation.isLoading}
               />
             </View>
-
-            <View>
-              <FormLabel data="Phone Number" />
-              <Forminput
-                placeholder="Phone Number"
-                onChangeText={setPhone}
-                value={phone}
-              />
-            </View>
-
-            <View>
-              <FormLabel data="Gender" />
-              <TouchableOpacity
-                onPress={() => setShowGenderDropdown(true)}
-                style={styles.dropdownTrigger}
-              >
-                <Text style={styles.dropdownTriggerText}>
-                  {gender || "Select Gender"}
-                </Text>
-              </TouchableOpacity>
-              <CustomDropdown
-                visible={showGenderDropdown}
-                onClose={() => setShowGenderDropdown(false)}
-                options={genderOptions}
-                onSelect={(item) => setGender(item)}
-                selectedValue={gender}
-              />
-            </View>
-
-            {/* Only show address fields if canEditProfile is true */}
-            {canEditProfile && (
-              <>
-                <Text style={styles.sectionTitle}>Address Information</Text>
-
-                <View>
-                  <FormLabel data="Street Name" />
-                  <TouchableOpacity
-                    onPress={() => setShowStreetDropdown(true)}
-                    style={styles.dropdownTrigger}
-                  >
-                    <Text style={styles.dropdownTriggerText}>
-                      {street || "Select Street"}
-                    </Text>
-                  </TouchableOpacity>
-                  <CustomDropdown
-                    visible={showStreetDropdown}
-                    onClose={() => setShowStreetDropdown(false)}
-                    options={availableStreets}
-                    onSelect={(item) => setStreet(item)}
-                    selectedValue={street}
-                  />
-                </View>
-
-                <View>
-                  <FormLabel data="House Number" />
-                  <Forminput
-                    placeholder="House Number"
-                    onChangeText={sethouseNumber}
-                    value={houseNumber}
-                  />
-                </View>
-
-                <View>
-                  <FormLabel data="Type of Apartment" />
-                  <TouchableOpacity
-                    onPress={() => setShowApartmentDropdown(true)}
-                    style={styles.dropdownTrigger}
-                  >
-                    <Text style={styles.dropdownTriggerText}>
-                      {typeOfApartment || "Select Apartment Type"}
-                    </Text>
-                  </TouchableOpacity>
-                  <CustomDropdown
-                    visible={showApartmentDropdown}
-                    onClose={() => setShowApartmentDropdown(false)}
-                    options={availableApartmentTypes}
-                    onSelect={(item) => setTypeOfApartment(item)}
-                    selectedValue={typeOfApartment}
-                  />
-                </View>
-
-                <View>
-                  <FormLabel data="Unit Number" />
-                  <Forminput
-                    placeholder="Unit Number"
-                    onChangeText={setUnitNumber}
-                    value={unitNumber}
-                  />
-                </View>
-              </>
-            )}
-
-            {/* Text Update Button */}
-            <Formbutton
-              buttonStyle={[
-                styles.submitButton,
-                { backgroundColor: "#04973C" },
-              ]}
-              textStyle={styles.submitButtonText}
-              data="Update Information"
-              onPress={handleTextUpdate}
-              isLoading={UpdateText_Mutation.isLoading}
-            />
-          </View>
+          )}
         </ScrollView>
       </View>
     </ScreenWrapper>
@@ -515,5 +484,271 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
 });
+
+function GeneralEditPersonalInformation() {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+
+  // mutation for PATCH update
+  const UpdateText_Mutation = useMutateData(
+    "api/v1/general/UserProfile",
+    "PATCH",
+    "userProfile"
+  );
+
+  // fetch current user profile
+  const {
+    data: getuserinfo,
+    isLoading: isloadinggetuserinfo,
+    error: iserrorgetuserinfo,
+  } = useFetchData("api/v1/general/UserProfile", "getuserinfo");
+
+  // ✅ populate state once data is fetched
+  useEffect(() => {
+    if (getuserinfo?.user) {
+      const { name, phoneNumber, address } = getuserinfo.user;
+
+      setName(name || "");
+      setPhone(phoneNumber || "");
+      setStreet(address?.street || "");
+      setCity(address?.city || "");
+      setState(address?.state || "");
+    }
+  }, [getuserinfo]);
+
+  // ✅ navigate back after success
+  useEffect(() => {
+    if (UpdateText_Mutation.isSuccess) {
+      dispatch(UserProfile_data_Fun());
+      navigation.goBack();
+    }
+  }, [UpdateText_Mutation.isSuccess, navigation]);
+
+  const handleTextUpdate = () => {
+    const payload = {
+      name,
+      phoneNumber: phone,
+      address: {
+        street,
+        city,
+        state,
+      },
+    };
+
+    console.log("Submitting:", payload);
+    UpdateText_Mutation.mutate(payload);
+  };
+
+  return (
+    <View>
+      <View style={{ paddingHorizontal: 20, gap: 10, marginTop: 20 }}>
+        {/* Name */}
+        <View>
+          <FormLabel data="Name" />
+          <Forminput
+            placeholder="Your Name"
+            onChangeText={setName}
+            value={name}
+          />
+        </View>
+
+        {/* Phone Number */}
+        <View>
+          <FormLabel data="Phone Number" />
+          <Forminput
+            placeholder="Phone Number"
+            onChangeText={setPhone}
+            value={phone}
+          />
+        </View>
+
+        {/* Street */}
+        <View>
+          <FormLabel data="Street" />
+          <Forminput
+            placeholder="Street Address"
+            onChangeText={setStreet}
+            value={street}
+          />
+        </View>
+
+        {/* City */}
+        <View>
+          <FormLabel data="City" />
+          <Forminput placeholder="City" onChangeText={setCity} value={city} />
+        </View>
+
+        {/* State */}
+        <View>
+          <FormLabel data="State" />
+          <Forminput
+            placeholder="State"
+            onChangeText={setState}
+            value={state}
+          />
+        </View>
+
+        {/* Submit Button */}
+        <Formbutton
+          buttonStyle={[styles.submitButton, { backgroundColor: "#04973C" }]}
+          textStyle={styles.submitButtonText}
+          data="Update Information"
+          onPress={handleTextUpdate}
+          isLoading={UpdateText_Mutation.isLoading}
+        />
+      </View>
+    </View>
+  );
+}
+
+function ProfileImageUploader({}) {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
+
+  console.log({
+    vvv: userProfile_data?.photo,
+  });
+
+  const [profileImage, setProfileImage] = useState(
+    userProfile_data?.photo ||
+      "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg"
+  );
+  const [hasImageChanged, setHasImageChanged] = useState(false);
+
+  // mutation for uploading image
+  const UpdateImage_Mutation = formdatauseMutateData(
+    "api/v1/general/update-profile-image",
+    "PUT",
+    "userProfile"
+  );
+
+  // Pick image from device
+  // const pickImage = async () => {
+  //   const permissionResult =
+  //     await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+  //   if (!permissionResult.granted) {
+  //     alert("Permission to access gallery is required!");
+  //     return;
+  //   }
+
+  //   const result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     quality: 0.7,
+  //   });
+
+  //   if (!result.canceled) {
+  //     setProfileImage(result.assets[0].uri);
+  //     setHasImageChanged(true);
+  //   }
+  // };
+
+  const pickImage = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert("Permission to access gallery is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // square crop for profile pic
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      const localUri = result.assets[0].uri;
+
+      console.log("Selected Image URI:", localUri);
+
+      setProfileImage(localUri); // for preview
+      setHasImageChanged(true);
+    }
+  };
+
+  const handleImageUpdate = async () => {
+    const formData = new FormData();
+    formData.append("image", {
+      uri: profileImage,
+      type: "image/jpeg", // or infer with mime from extension
+      name: `profile_${Date.now()}.jpg`,
+    });
+
+    UpdateImage_Mutation.mutate(formData, {
+      onSuccess: () => {
+        dispatch(UserProfile_data_Fun()); // refresh profile
+        setHasImageChanged(false);
+        navigation.goBack(); // navigate back
+      },
+    });
+  };
+
+  return (
+    <View
+      style={{
+        alignItems: "center",
+        paddingVertical: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+        marginHorizontal: 20,
+        flexDirection: "row",
+        justifyContent: "center",
+        gap: 20,
+      }}
+    >
+      <TouchableOpacity
+        onPress={pickImage}
+        style={{ alignItems: "center", justifyContent: "center" }}
+      >
+        {/* <Image
+          source={{ uri: profileImage }}
+          style={{ width: 100, height: 100, borderRadius: 50 }}
+        /> */}
+
+        <Image
+          source={{ uri: profileImage }}
+          style={{ width: 100, height: 100, borderRadius: 50 }}
+          onError={(e) => console.log("Image load error:", e.nativeEvent.error)}
+        />
+        <Text style={{ color: "blue", marginTop: 5, fontSize: 12 }}>
+          Tap to change image
+        </Text>
+        <Text>{userProfile_data?.user?.email}</Text>
+      </TouchableOpacity>
+
+      {/* Only show update button if image has changed */}
+      {hasImageChanged && (
+        <Formbutton
+          buttonStyle={{
+            backgroundColor: "green",
+            marginTop: 15,
+            paddingHorizontal: 20,
+            borderRadius: 10,
+            paddingVertical: 10,
+          }}
+          textStyle={{
+            color: "#fff",
+            fontSize: 14,
+            fontWeight: "600",
+          }}
+          data="Update Image"
+          onPress={handleImageUpdate}
+          isLoading={UpdateImage_Mutation.isLoading}
+        />
+      )}
+    </View>
+  );
+}
 
 export default EditPersonalInformation;
