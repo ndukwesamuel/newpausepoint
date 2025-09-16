@@ -77,8 +77,8 @@ const apiRequest = async ({ url, method, data, token }) => {
     console.log("API Response:", response.data); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
-    console.error("API Error:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "API request failed");
+    console.error("API Errorss:", error.response?.data);
+    throw new Error(error.response?.data.error || "API request failed");
   }
 };
 
@@ -94,7 +94,7 @@ export const useMutateData = (url, method, queryKey) => {
       queryClient.invalidateQueries(queryKey); // Refresh data
     },
     onError: (error) => {
-      console.error("Mutation Error:", error.message);
+      console.error("Mutation Error:", error);
     },
   });
 };

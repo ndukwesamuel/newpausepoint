@@ -37,8 +37,11 @@ const WalletScreen = ({}) => {
     error: isError,
     refetch: refetchDues,
   } = useFetchData("wallet/pay-due", "pay-due");
+  const { userProfile_data } = useSelector((state) => state?.ProfileSlice); // Get user_data from AuthSlice
 
   const { user_data } = useSelector((state) => state.AuthSlice); // Get user_data from AuthSlice
+
+  const clanID = userProfile_data?.currentClanMeeting?.uniqueClanID;
 
   const isGuest = user_data?.user?.isGuest;
   const animation = useRef(null);
@@ -90,6 +93,64 @@ const WalletScreen = ({}) => {
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI_WAj-T6ltOQdewMA40uKgy9DvWBtikXyvQ&s", //"https://cdn-icons-png.flaticon.com/512/3976/3976626.png",
       type: "education",
+    },
+  ];
+
+  const utilities = [
+    {
+      id: 1,
+      name: "Electricity",
+      icon: "flash",
+      iconSet: MaterialCommunityIcons,
+      color: "#f39c12",
+      type: "electricity",
+      // enable only if clanID matches
+      enabled: clanID === "CCE-9-2025",
+    },
+    {
+      id: 2,
+      name: "Water",
+      icon: "water",
+      iconSet: FontAwesome5,
+      color: "#3498db",
+      type: "water",
+      enabled: false,
+    },
+    {
+      id: 3,
+      name: "Internet",
+      icon: "wifi",
+      iconSet: Ionicons,
+      color: "#9b59b6",
+      type: "internet",
+      enabled: false,
+    },
+    {
+      id: 4,
+      name: "Cable TV",
+      icon: "tv",
+      iconSet: Ionicons,
+      color: "#e74c3c",
+      type: "cable",
+      enabled: false,
+    },
+    {
+      id: 5,
+      name: "Gas",
+      icon: "fire",
+      iconSet: FontAwesome5,
+      color: "#e67e22",
+      type: "gas",
+      enabled: false,
+    },
+    {
+      id: 6,
+      name: "Waste",
+      icon: "delete",
+      iconSet: MaterialIcons,
+      color: "#2ecc71",
+      type: "waste",
+      enabled: false,
     },
   ];
 
@@ -185,7 +246,7 @@ const WalletScreen = ({}) => {
         </>
       )}
 
-      <Modal
+      {/* <Modal
         visible={showUtilitiesModal}
         animationType="slide"
         transparent={true}
@@ -347,6 +408,78 @@ const WalletScreen = ({}) => {
               >
                 Close
               </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal> */}
+
+      <Modal
+        visible={showUtilitiesModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowUtilitiesModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Select Utility Bill</Text>
+
+            <ScrollView
+              contentContainerStyle={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                paddingBottom: 20,
+              }}
+            >
+              {utilities.map((utility) => (
+                <TouchableOpacity
+                  key={utility.id}
+                  style={{
+                    width: "48%",
+                    backgroundColor: utility.enabled ? "#ecf0f1" : "#f8f9fa",
+                    borderRadius: 12,
+                    padding: 15,
+                    marginBottom: 15,
+                    alignItems: "center",
+                    borderWidth: 1,
+                    borderColor: utility.enabled ? "#3498db" : "#ecf0f1",
+                    opacity: utility.enabled ? 1 : 0.5,
+                  }}
+                  disabled={!utility.enabled}
+                  onPress={() =>
+                    utility.enabled && handleUtilitySelect(utility.type)
+                  }
+                >
+                  <utility.iconSet
+                    name={utility.icon}
+                    size={40}
+                    color={utility.color}
+                    style={{ marginBottom: 10 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: "#34495e",
+                      textAlign: "center",
+                    }}
+                  >
+                    {utility.name}
+                  </Text>
+                  {!utility.enabled && (
+                    <Text style={{ fontSize: 12, color: "#e67e22" }}>
+                      Coming Soon
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowUtilitiesModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>

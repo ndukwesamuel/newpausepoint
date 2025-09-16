@@ -56,6 +56,8 @@ import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
 import { BackHandler } from "react-native";
 import { useEffect, useCallback } from "react";
 import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
+import BillDashboard from "../../screens/Customerinterface/BillPayment/BillDashboard";
+import ElectricityPaymentScreen from "../../screens/Customerinterface/BillPayment/ElectricityPaymentScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -213,6 +215,19 @@ export const Usernaviagetion = () => {
       component: UserPollDetails,
       title: "Estate Polls Details",
     },
+
+    {
+      name: "UtilityPayment",
+      component: BillDashboard,
+      title: "UtilityPayment",
+    },
+
+    {
+      name: "MakeUtilityPayment",
+      component: ElectricityPaymentScreen,
+      title: "Make Utility Payment",
+    },
+
     // {
     //   name: "service",
     //   component: ServiceView,
