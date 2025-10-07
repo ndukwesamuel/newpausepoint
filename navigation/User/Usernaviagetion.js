@@ -216,17 +216,17 @@ export const Usernaviagetion = () => {
       title: "Estate Polls Details",
     },
 
-    {
-      name: "UtilityPayment",
-      component: BillDashboard,
-      title: "UtilityPayment",
-    },
+    // {
+    //   name: "UtilityPayment",
+    //   component: BillDashboard,
+    //   title: "UtilityPayment",
+    // },
 
-    {
-      name: "MakeUtilityPayment",
-      component: ElectricityPaymentScreen,
-      title: "Make Utility Payment",
-    },
+    // {
+    //   name: "MakeUtilityPayment",
+    //   component: ElectricityPaymentScreen,
+    //   title: "Make Utility Payment",
+    // },
 
     // {
     //   name: "service",
@@ -754,6 +754,7 @@ export const Usernaviagetion = () => {
         component={Errand}
         options={{ headerShown: false }}
       />
+
       <Stack.Screen
         name="service"
         component={ServiceView}
@@ -780,6 +781,18 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         name="erranddetail"
         component={ErrandDetailScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="MakeUtilityPayment"
+        component={ElectricityPaymentScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="UtilityPayment"
+        component={BillDashboard}
         options={{ headerShown: false }}
       />
 

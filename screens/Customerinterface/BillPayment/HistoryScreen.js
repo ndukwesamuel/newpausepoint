@@ -1,296 +1,3 @@
-// import React from "react";
-// import { View, Text, FlatList, TouchableOpacity } from "react-native";
-// import { useNavigation } from "@react-navigation/native";
-// import { Ionicons } from "@expo/vector-icons";
-// import { useFetchData } from "../../../hooks/Request";
-
-// const data = [
-//   {
-//     _id: "68c889f5ae11a1e70fd61e81",
-//     customerName: "MR & MRS SAMUEL COMFORT MAKINDE",
-//     meterId: "58103787865",
-//     totalAmount: 270,
-//     totalUnit: 1,
-//     token: "6378 9370 0080 6049 3191",
-//     createdAt: "2025-09-15T21:49:41.820Z",
-//   },
-//   {
-//     _id: "68c889c51a10dfd814d71cfa",
-//     customerName: "MR & MRS SAMUEL COMFORT MAKINDE",
-//     meterId: "58103787865",
-//     totalAmount: 270,
-//     totalUnit: 1,
-//     token: "6563 5666 8582 4032 1598",
-//     createdAt: "2025-09-15T21:48:53.493Z",
-//   },
-//   {
-//     _id: "68c8549f685ed282d621a032",
-//     customerName: "MR & MRS SAMUEL COMFORT MAKINDE",
-//     meterId: "58103787865",
-//     totalAmount: 540,
-//     totalUnit: 2,
-//     token: "1549 9420 1413 1439 2973",
-//     createdAt: "2025-09-15T18:02:07.504Z",
-//   },
-//   {
-//     _id: "68c85495685ed282d6219ec6",
-//     customerName: "MR & MRS SAMUEL COMFORT MAKINDE",
-//     meterId: "58103787865",
-//     totalAmount: 270,
-//     totalUnit: 1,
-//     token: "2036 4005 6270 3095 1974",
-//     createdAt: "2025-09-15T18:01:57.074Z",
-//   },
-//   {
-//     _id: "68c845f0bf6a11a37655d94c",
-//     customerName: "MR & MRS SAMUEL COMFORT MAKINDE",
-//     meterId: "58103787865",
-//     totalAmount: 270,
-//     totalUnit: 1,
-//     token: "3465 3662 6757 9135 2949",
-//     createdAt: "2025-09-15T16:59:28.303Z",
-//   },
-// ];
-
-// export default function HistoryScreen() {
-//   const navigation = useNavigation();
-
-//   const {
-//     data: history_info,
-//     isLoading,
-//     error,
-//     refetch: refetchWallet,
-//   } = useFetchData("api/captain", "history_info");
-
-//   console.log({
-//     fgf: history_info?.transactions,
-//   });
-
-//   const renderItem = ({ item }) => (
-//     <View
-//       style={{
-//         backgroundColor: "#fff",
-//         padding: 12,
-//         marginVertical: 6,
-//         borderRadius: 10,
-//         shadowColor: "#000",
-//         shadowOpacity: 0.1,
-//         shadowRadius: 4,
-//         elevation: 2,
-//       }}
-//     >
-//       <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-//         {item.customerName}
-//       </Text>
-//       <Text style={{ fontSize: 14, color: "#333" }}>Meter: {item.meterId}</Text>
-//       <Text style={{ fontSize: 14, color: "#333" }}>
-//         Amount: ₦{item.totalAmount}
-//       </Text>
-//       <Text style={{ fontSize: 14, color: "#333" }}>
-//         Units: {item.totalUnit} kWh
-//       </Text>
-//       <Text style={{ fontSize: 12, color: "#666" }}>Token: {item.token}</Text>
-//       <Text style={{ fontSize: 12, color: "#999" }}>
-//         Date: {new Date(item.createdAt).toLocaleString()}
-//       </Text>
-//     </View>
-//   );
-
-//   return (
-//     <View style={{ flex: 1, backgroundColor: "#f9f9f9", padding: 12 }}>
-//       {/* Header with Create Icon */}
-//       <View
-//         style={{
-//           flexDirection: "row",
-//           justifyContent: "space-between",
-//           alignItems: "center",
-//           marginBottom: 10,
-//         }}
-//       >
-//         <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: "center" }}>
-//           Transaction History
-//         </Text>
-// <TouchableOpacity
-//   onPress={() => navigation.navigate("MakeUtilityPayment")}
-//   style={{
-//     backgroundColor: "#007AFF",
-//     padding: 8,
-//     borderRadius: 20,
-//   }}
-// >
-//   <Ionicons name="add" size={20} color="#fff" />
-// </TouchableOpacity>
-//       </View>
-
-//       {/* Transaction List */}
-//       <FlatList
-//         data={history_info?.transactions}
-//         keyExtractor={(item) => item._id}
-//         renderItem={renderItem}
-//         ListEmptyComponent={
-//           <View style={{ padding: 20, alignItems: "center" }}>
-//             <Text style={{ fontSize: 16, color: "gray" }}>
-//               No transactions found.
-//             </Text>
-//           </View>
-//         }
-//       />
-//     </View>
-//   );
-// }
-
-// import React, { useState, useRef, useEffect } from "react";
-// import { View, Text, FlatList, TouchableOpacity, Animated } from "react-native";
-// import { Ionicons } from "@expo/vector-icons";
-// import { useFetchData } from "../../../hooks/Request";
-
-// export default function HistoryScreen() {
-//   const [selected, setSelected] = useState(null);
-//   const fadeAnim = useRef(new Animated.Value(1)).current;
-
-//   const {
-//     data: history_info,
-//     isLoading,
-//     error,
-//   } = useFetchData("api/captain", "history_info");
-
-//   // Animate transition
-//   const animate = (toValue) => {
-//     Animated.timing(fadeAnim, {
-//       toValue,
-//       duration: 300,
-//       useNativeDriver: true,
-//     }).start();
-//   };
-
-//   // Render each transaction card
-//   const renderItem = ({ item }) => (
-//     <TouchableOpacity onPress={() => setSelected(item)}>
-//       <View
-//         style={{
-//           backgroundColor: "#fff",
-//           padding: 16,
-//           marginVertical: 6,
-//           borderRadius: 12,
-//           shadowColor: "#000",
-//           shadowOpacity: 0.1,
-//           shadowRadius: 6,
-//           elevation: 3,
-//         }}
-//       >
-//         <Text style={{ fontWeight: "bold", fontSize: 16, marginBottom: 4 }}>
-//           {item.customerName}
-//         </Text>
-//         <Text style={{ fontSize: 14, color: "#333" }}>
-//           Amount: ₦{item.totalAmount}
-//         </Text>
-//         <Text style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
-//           {new Date(item.createdAt).toLocaleString()}
-//         </Text>
-//       </View>
-//     </TouchableOpacity>
-//   );
-
-//   // Render transaction details
-//   const renderDetails = () => (
-//     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-//       {/* Back button */}
-//       <TouchableOpacity
-//         onPress={() => {
-//           animate(0);
-//           setTimeout(() => {
-//             setSelected(null);
-//             animate(1);
-//           }, 300);
-//         }}
-//         style={{
-//           flexDirection: "row",
-//           alignItems: "center",
-//           marginBottom: 16,
-//         }}
-//       >
-//         <Ionicons name="arrow-back" size={22} color="#007AFF" />
-//         <Text style={{ marginLeft: 6, fontSize: 16, color: "#007AFF" }}>
-//           Back
-//         </Text>
-//       </TouchableOpacity>
-
-//       <View
-//         style={{
-//           backgroundColor: "#fff",
-//           padding: 20,
-//           borderRadius: 12,
-//           shadowColor: "#000",
-//           shadowOpacity: 0.1,
-//           shadowRadius: 6,
-//           elevation: 3,
-//         }}
-//       >
-//         <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12 }}>
-//           Transaction Details
-//         </Text>
-
-//         <DetailRow label="Customer" value={selected.customerName} />
-//         <DetailRow label="Meter" value={selected.meterId} />
-//         <DetailRow label="Amount" value={`₦${selected.totalAmount}`} />
-//         <DetailRow label="Units" value={`${selected.totalUnit} kWh`} />
-//         <DetailRow label="Token" value={selected.token} />
-//         <DetailRow
-//           label="Date"
-//           value={new Date(selected.createdAt).toLocaleString()}
-//         />
-//       </View>
-//     </Animated.View>
-//   );
-
-//   return (
-//     <View style={{ flex: 1, backgroundColor: "#f2f2f7", padding: 16 }}>
-//       {selected ? (
-//         renderDetails()
-//       ) : (
-//         <>
-//           {/* Header */}
-//           <View
-//             style={{
-//               flexDirection: "row",
-//               justifyContent: "center",
-//               marginBottom: 12,
-//             }}
-//           >
-//             <Text style={{ fontSize: 22, fontWeight: "bold" }}>
-//               Transaction History
-//             </Text>
-//           </View>
-
-//           {/* List */}
-//           <FlatList
-//             data={history_info?.transactions}
-//             keyExtractor={(item) => item._id}
-//             renderItem={renderItem}
-//             ListEmptyComponent={
-//               <View style={{ padding: 20, alignItems: "center" }}>
-//                 <Text style={{ fontSize: 16, color: "gray" }}>
-//                   No transactions found.
-//                 </Text>
-//               </View>
-//             }
-//           />
-//         </>
-//       )}
-//     </View>
-//   );
-// }
-
-// // Reusable row for details
-// const DetailRow = ({ label, value }) => (
-//   <View style={{ marginBottom: 10 }}>
-//     <Text style={{ fontSize: 14, color: "#666" }}>{label}</Text>
-//     <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>
-//       {value}
-//     </Text>
-//   </View>
-// );
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -306,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useFetchData } from "../../../hooks/Request";
 import { useNavigation } from "@react-navigation/native";
+import ReceiptPDF from "./ReceiptPDF";
 
 const { width, height } = Dimensions.get("window");
 
@@ -459,6 +167,28 @@ export default function HistoryScreen() {
 
     const { date, time } = formatDate(selectedTransaction.createdAt);
 
+    const transactionData = {
+      date: `${date} ${time}`, // "2024-01-15 14:30:00",
+      userCode: selectedTransaction?.customerName,
+      customerNo: selectedTransaction?.customerId,
+      meterNo: selectedTransaction?.meterId,
+      activity: "Electricity Purchase",
+      district: "Ajah",
+      accountNo: "ACC789012",
+      paymentMethod: "Online Payment",
+      address: selectedTransaction?.customerAddress,
+      value: selectedTransaction?.totalUnit + selectedTransaction?.unit,
+      token: selectedTransaction?.token,
+      vat: "",
+      totalFees: "",
+      amountPaid: selectedTransaction?.totalAmount,
+      netValue: selectedTransaction?.totalAmount,
+    };
+
+    console.log({
+      jaja: selectedTransaction?.token,
+    });
+
     return (
       <Modal
         visible={modalVisible}
@@ -570,10 +300,12 @@ export default function HistoryScreen() {
             {/* Transaction ID */}
             <View style={[styles.detailSection, { marginBottom: 40 }]}>
               <View style={styles.transactionIdContainer}>
+                <ReceiptPDF transaction={transactionData} />
+                {/* 
                 <Text style={styles.transactionIdLabel}>Transaction ID</Text>
                 <Text style={styles.transactionIdValue}>
                   {selectedTransaction._id}
-                </Text>
+                </Text> */}
               </View>
             </View>
           </ScrollView>

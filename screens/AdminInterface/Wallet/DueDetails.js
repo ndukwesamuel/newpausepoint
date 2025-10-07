@@ -16,9 +16,6 @@ const DueDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { data } = route.params; // Get the due ID from the navigation params
-  console.log({
-    vvv: data,
-  });
 
   const [dueDetails, setDueDetails] = useState(null);
 

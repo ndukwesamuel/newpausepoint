@@ -9,9 +9,11 @@ import {
   Modal,
   Image,
   ScrollView,
+  Alert,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { useFetchData } from "../../../hooks/Request";
+import { useFetchData, useMutateData } from "../../../hooks/Request";
 import {
   MaterialCommunityIcons,
   FontAwesome5,
@@ -37,11 +39,20 @@ const WalletScreen = ({}) => {
     error: isError,
     refetch: refetchDues,
   } = useFetchData("wallet/pay-due", "pay-due");
+
+  const {
+    data: virtualAccountData,
+    isLoading: isLoadingVirtualAccount,
+    error: virtualAccountError,
+    refetch: refetchVirtualAccount,
+  } = useFetchData("api/v3/bank/singleUser", "virtual-account");
+
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice); // Get user_data from AuthSlice
 
   const { user_data } = useSelector((state) => state.AuthSlice); // Get user_data from AuthSlice
 
-  const clanID = userProfile_data?.currentClanMeeting?.uniqueClanID;
+  const clanIDf = userProfile_data?.currentClanMeeting?.uniqueClanID;
+  const clanID = userProfile_data?.currentClanMeeting?._id;
 
   const isGuest = user_data?.user?.isGuest;
   const animation = useRef(null);
@@ -105,7 +116,7 @@ const WalletScreen = ({}) => {
       color: "#f39c12",
       type: "electricity",
       // enable only if clanID matches
-      enabled: clanID === "CCE-9-2025",
+      enabled: clanID === "6807bbbf6152e3e0bb049580",
     },
     {
       id: 2,
@@ -171,6 +182,130 @@ const WalletScreen = ({}) => {
     navigation.navigate("UtilityPayment", { billType: type });
   };
 
+  const handleCopyToClipboard = async (text, label) => {
+    try {
+      console.log({
+        dc: text,
+        label,
+      });
+
+      await Clipboard.setStringAsync(text);
+      // You can show an alert or toast notification here
+      Alert.alert("Copied!", `${text} copied to clipboard`);
+
+      // Alternatively, if you have a toast library:
+      // Toast.show(`${label} copied to clipboard!`, { type: 'success' });
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      Alert.alert("Error", "Failed to copy to clipboard");
+    }
+  };
+
+  // const {
+  //   mutate: createVirtualAccount,
+  //   isLoading: isCreatingVirtualAccount,
+  //   error: creationError,
+  // } = useMutateData("v3/bank/create-virtual-account", "GET", "virtual-account");
+
+  const UpdateText_Mutation = useMutateData(
+    "api/v3/bank/create-virtual-account",
+    "POST",
+    "virtual-account"
+  );
+
+  // const {
+  //   mutate: createVirtualAccount,
+  //   isLoading: isCreatingVirtualAccount,
+  //   error: creationError,
+  // } = useMutateData(
+  //   "api/v3/bank/create-virtual-account",
+  //   "POST",
+  //   "virtual-account"
+  // );
+  // const handleCreateVirtualAccount = () => {
+  //   // 2. Call the mutate function (no data payload needed for this GET request)
+  //   createVirtualAccount(null, {
+  //     onSuccess: () => {
+  //       Alert.alert(
+  //         "Success",
+  //         "Your virtual account has been created! Details loading..."
+  //       );
+  //       // 3. Manually trigger a refetch of the virtual account data
+  //       // (useMutateData already invalidates "virtual-account" but a manual refetch ensures immediate update)
+  //       refetchVirtualAccount();
+  //     },
+  //     onError: (error) => {
+  //       // The error message is handled by your hook, but display an alert here
+  //       // console.error("Virtual Account Creation Error:", error);
+  //       Alert.alert(
+  //         "Error",
+  //         "phone number is missing please update your profile with a valid phone number to create a virtual account"
+  //       );
+  //     },
+  //   });
+  // };
+
+  // const handleCreateVirtualAccount = () => {
+  //   // 2. Call the mutate function with null data payload for the POST request
+  //   // createVirtualAccount(null, {
+  //   //   // or createVirtualAccount({}, { ...
+  //   //   onSuccess: () => {
+  //   //     Alert.alert(
+  //   //       "Success",
+  //   //       "Your virtual account has been created! Details loading..."
+  //   //     );
+  //   //     // 3. Manually trigger a refetch of the virtual account data
+  //   //     refetchVirtualAccount();
+  //   //   },
+
+  //   //   onError: (error) => {
+  //   //     console.log({
+  //   //       cvb: error,
+  //   //     });
+
+  //   //     // Alert.alert(
+  //   //     //   "Error",
+  //   //     //   "phone number is missing please update your profile with a valid phone number to create a virtual account"
+  //   //     // );
+  //   //   },
+  //   // });
+
+  //   const payload = {
+  //     name: user_data?.user?.fullName || "No Name",
+  //   };
+
+  //   console.log("Submitting:", payload);
+  //   UpdateText_Mutation.mutate(payload);
+  // };
+
+  // NEW CODE in handleCreateVirtualAccount function:
+
+  const handleCreateVirtualAccount = () => {
+    // ... setup payload
+    const payload = {
+      name: user_data?.user?.fullName || "No Name",
+    };
+    console.log("Submitting:", payload);
+
+    UpdateText_Mutation.mutate(payload, {
+      onSuccess: () => {
+        // This runs if successful
+        Alert.alert(
+          "Success",
+          "Your virtual account has been created! Details loading..."
+        );
+        refetchVirtualAccount();
+      },
+      onError: (error) => {
+        // This runs if it fails (using the message we fixed in Step 1)
+        Alert.alert(
+          "Creation Failed",
+          // error.message now holds "User not found or essential profile data..."
+          error.message || "An unexpected error occurred."
+        );
+      },
+    });
+  };
   if (isLoading || ispending) return <Text>Loading...</Text>;
   if (error || isError) {
     console.error("Fetch Error:", error?.message || isError?.message);
@@ -186,22 +321,102 @@ const WalletScreen = ({}) => {
         </Text>
       </View>
 
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("FundWallet")}
-        >
-          <Icon name="add" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Fund Wallet</Text>
-        </TouchableOpacity>
+      {/* Virtual Account Card */}
+      {virtualAccountData?.data && (
+        <View style={styles.virtualAccountCard}>
+          <View style={styles.virtualAccountHeader}>
+            <Icon name="account-balance" size={24} color="#2196F3" />
+            <Text style={styles.virtualAccountTitle}>Your Virtual Account</Text>
+          </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setShowUtilitiesModal(true)}
-        >
-          <Icon name="payment" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Pay Bills</Text>
-        </TouchableOpacity>
+          <View style={styles.virtualAccountDetails}>
+            <View style={styles.accountDetailRow}>
+              <Text style={styles.accountDetailLabel}>Account Name:</Text>
+              <TouchableOpacity
+                style={styles.copyButton}
+                onPress={() =>
+                  handleCopyToClipboard(virtualAccountData.data.accountName)
+                }
+              >
+                <Text style={styles.accountDetailValue}>
+                  {virtualAccountData.data.accountName}
+                </Text>
+                <Icon
+                  name="content-copy"
+                  size={16}
+                  color="#666"
+                  style={styles.copyIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.accountDetailRow}>
+              <Text style={styles.accountDetailLabel}>Account Number:</Text>
+              <TouchableOpacity
+                style={styles.copyButton}
+                onPress={() =>
+                  handleCopyToClipboard(virtualAccountData.data.accountNumber)
+                }
+              >
+                <Text style={styles.accountDetailValue}>
+                  {virtualAccountData.data.accountNumber}
+                </Text>
+                <Icon
+                  name="content-copy"
+                  size={16}
+                  color="#666"
+                  style={styles.copyIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.accountDetailRow}>
+              <Text style={styles.accountDetailLabel}>Bank Name:</Text>
+              <Text style={styles.accountDetailValue}>
+                {virtualAccountData.data.bankName}
+              </Text>
+            </View>
+
+            <View style={styles.accountInfo}>
+              <Icon name="info" size={16} color="#FF9800" />
+              <Text style={styles.accountInfoText}>
+                Transfer money to this account to fund your wallet automatically
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      <View style={styles.buttonRow}>
+        {virtualAccountData?.data ? (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setShowUtilitiesModal(true)}
+          >
+            <Icon name="payment" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Pay Bills </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleCreateVirtualAccount}
+            // disabled={isCreatingVirtualAccount}
+            // onPress={() => navigation.navigate("FundWallet")}
+          >
+            {/* {isCreatingVirtualAccount ? (
+              <Text style={styles.buttonText}>Creating...</Text> // Show loading text
+            ) : ( */}
+            <>
+              <Icon name="add" size={20} color="#FFF" />
+              <Text style={styles.buttonText}>Create Virtual Account</Text>
+            </>
+            {/* )} */}
+            {/* <Icon name="add" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Create Virtual Account</Text> */}
+
+            {/* <Text style={styles.buttonText}>Fund Wallet</Text> */}
+          </TouchableOpacity>
+        )}
       </View>
 
       {isGuest != true && (
@@ -568,6 +783,74 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontWeight: "600",
     color: "#4CAF50",
+  },
+
+  // Virtual Account Card Styles
+  virtualAccountCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  virtualAccountHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    paddingBottom: 12,
+  },
+  virtualAccountTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+    color: "#2196F3",
+  },
+  virtualAccountDetails: {
+    gap: 12,
+  },
+  accountDetailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  accountDetailLabel: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+  },
+  accountDetailValue: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "600",
+  },
+  copyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 4,
+  },
+  copyIcon: {
+    marginLeft: 6,
+  },
+  accountInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#FFF3E0",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  accountInfoText: {
+    fontSize: 12,
+    color: "#E65100",
+    marginLeft: 8,
+    flex: 1,
+    lineHeight: 16,
   },
   buttonRow: {
     flexDirection: "row",

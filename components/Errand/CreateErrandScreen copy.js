@@ -278,9 +278,6 @@ const CreateErrandScreen = () => {
     });
   };
 
-  console.log({
-    vvv: formData?.pickupLocations?.[0]?.items[0]?.images,
-  });
   return (
     <ScrollView style={styles.container}>
       {/* Basic Information */}

@@ -1,289 +1,3 @@
-// import React, { useState } from "react";
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   ActivityIndicator,
-//   Alert,
-// } from "react-native";
-// import { useSelector } from "react-redux";
-// import axios from "axios";
-// import { useMutateData } from "../../../hooks/Request";
-// import { useNavigation } from "@react-navigation/native";
-// import Toast from "react-native-toast-message";
-
-// const ElectricityPaymentScreen = () => {
-//   const { user } = useSelector((state) => state.AuthSlice);
-
-//   const navigation = useNavigation();
-
-//   const [meterId, setMeterId] = useState("");
-//   const [units, setUnits] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const [checking, setChecking] = useState(false);
-//   const [meterInfo, setMeterInfo] = useState(null);
-
-//   const {
-//     mutate: checkMeter,
-//     isLoading: checkMeterispending,
-//     error,
-//   } = useMutateData("api/captain/vend", "POST", "billpayment");
-
-//   const {
-//     mutate: paybillsmeter,
-//     isLoading: paybillsmeterispending,
-//     error: errorpaybillsmeter,
-//   } = useMutateData("api/captain/buy", "POST", "billpayment");
-
-//   // Constants (should match backend)
-//   const amountPerUnit = 230;
-//   const vatPerUnit = 30;
-//   const serviceFeePerUnit = 10;
-
-//   const calculateCosts = () => {
-//     const u = Number(units) || 0;
-//     const amount = u * amountPerUnit;
-//     const vat = u * vatPerUnit;
-//     const service = u * serviceFeePerUnit;
-//     const total = amount + vat + service;
-//     return { amount, vat, service, total };
-//   };
-
-//   const handleCheckMeter = async () => {
-//     if (!meterId) {
-//       Alert.alert("Error", "Please enter meter ID");
-//       return;
-//     }
-//     let data = {
-//       meterId,
-//     };
-
-//     checkMeter(
-//       data,
-//       {
-//         onSuccess: (response) => {
-//           console.log({
-//             jaja: response?.data[0],
-//           });
-//           setMeterInfo(response.data[0]);
-//         },
-//       },
-//       {
-//         onError: (error) => {
-//           Toast.show({
-//             type: "error",
-//             text1: `${error?.message} `,
-//           });
-//           console.error("Mutation Error:", error.message);
-//         },
-//       }
-//     );
-//   };
-
-//   const handlePayment = async () => {
-//     if (!meterId || !units) {
-//       Alert.alert("Error", "Please enter meter ID and units");
-//       return;
-//     }
-//     if (!meterInfo) {
-//       Alert.alert("Error", "Please verify the meter first");
-//       return;
-//     }
-
-//     let data = { meterId, units };
-
-//     paybillsmeter(
-//       data,
-//       {
-//         onSuccess: (response) => {
-//           //   console.log({
-//           //     jaja: response?.data[0],
-//           //   });
-//           //   setMeterInfo(response.data[0]);
-
-//           navigation.goBack();
-//         },
-//       },
-//       {
-//         onError: (error) => {
-//           console.error("Mutation Error:", error.message);
-//         },
-//       }
-//     );
-//   };
-
-//   const { amount, vat, service, total } = calculateCosts();
-
-//   return (
-//     <View style={{ flex: 1, backgroundColor: "#fff", padding: 20 }}>
-//       <Text
-//         style={{
-//           fontSize: 22,
-//           fontWeight: "bold",
-//           marginBottom: 20,
-//           textAlign: "center",
-//           color: "#2563eb",
-//         }}
-//       >
-//         Electricity Payment
-//       </Text>
-
-//       {/* Meter ID Input + Proceed Button */}
-//       <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 5 }}>
-//         Meter ID
-//       </Text>
-//       <View style={{ flexDirection: "row" }}>
-//         <TextInput
-//           value={meterId}
-//           onChangeText={setMeterId}
-//           placeholder="Enter meter ID"
-//           style={{
-//             flex: 1,
-//             borderWidth: 1,
-//             borderColor: "#ccc",
-//             borderRadius: 8,
-//             paddingHorizontal: 12,
-//             paddingVertical: 8,
-//             marginRight: 10,
-//           }}
-//         />
-
-//         {console.log({
-//           nvnv: meterId.length,
-//         })}
-//         {meterId.length === 11 && (
-//           <TouchableOpacity
-//             onPress={handleCheckMeter}
-//             disabled={checking}
-//             style={{
-//               backgroundColor: checking ? "#9ca3af" : "#2563eb",
-//               borderRadius: 8,
-//               paddingHorizontal: 15,
-//               justifyContent: "center",
-//             }}
-//           >
-//             {checkMeterispending ? (
-//               <ActivityIndicator color="#fff" />
-//             ) : (
-//               <Text style={{ color: "#fff", fontWeight: "600" }}>Proceed</Text>
-//             )}
-//           </TouchableOpacity>
-//         )}
-//       </View>
-//       {meterId.length != 11 && (
-//         <Text
-//           style={{
-//             color: "red",
-//           }}
-//         >
-//           {" "}
-//           MeterId must be 11 digits
-//         </Text>
-//       )}
-
-//       {/* Show Meter Info if available */}
-//       {meterInfo && (
-//         <View
-//           style={{
-//             backgroundColor: "#f3f4f6",
-//             borderRadius: 8,
-//             padding: 12,
-//             marginBottom: 20,
-//           }}
-//         >
-//           <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 4 }}>
-//             Meter Information
-//           </Text>
-//           <Text>Name: {meterInfo?.Customer_name}</Text>
-//           <Text>Address: {meterInfo?.Customer_address}</Text>
-//           {/* <Text>Type: {meterInfo.type}</Text> */}
-//         </View>
-//       )}
-
-//       {/* Units Input */}
-//       <Text
-//         style={{
-//           fontSize: 16,
-//           fontWeight: "600",
-//           marginBottom: 5,
-//           marginTop: 10,
-//         }}
-//       >
-//         Units (kWh)
-//       </Text>
-//       <TextInput
-//         value={units}
-//         onChangeText={setUnits}
-//         placeholder="Enter units"
-//         keyboardType="numeric"
-//         style={{
-//           borderWidth: 1,
-//           borderColor: "#ccc",
-//           borderRadius: 8,
-//           paddingHorizontal: 12,
-//           paddingVertical: 8,
-//           marginBottom: 20,
-//         }}
-//       />
-
-//       {/* Cost Breakdown */}
-//       <View
-//         style={{
-//           backgroundColor: "#f3f4f6",
-//           borderRadius: 8,
-//           padding: 15,
-//           marginBottom: 20,
-//         }}
-//       >
-//         {/* <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 8 }}>
-//           Cost Breakdown
-//         </Text>
-//         <Text>Amount: ₦{amount}</Text>
-//         <Text>VAT: ₦{vat}</Text>
-//         <Text>Service Fee: ₦{service}</Text> */}
-//         {/* <Text>Service Fee: ₦{service}</Text>
-
-//         <Text>Service Fee: ₦{service}</Text> */}
-//         <Text style={{ fontWeight: "bold", marginTop: 8 }}>
-//           Total: ₦{total}
-//         </Text>
-//       </View>
-
-//       {/* Pay Button */}
-
-//       {meterInfo && (
-//         <TouchableOpacity
-//           onPress={handlePayment}
-//           disabled={loading}
-//           style={{
-//             backgroundColor: loading ? "#9ca3af" : "#2563eb",
-//             borderRadius: 8,
-//             paddingVertical: 14,
-//           }}
-//         >
-//           {paybillsmeterispending ? (
-//             <ActivityIndicator color="#fff" />
-//           ) : (
-//             <Text
-//               style={{
-//                 color: "#fff",
-//                 textAlign: "center",
-//                 fontSize: 16,
-//                 fontWeight: "600",
-//               }}
-//             >
-//               Pay Now
-//             </Text>
-//           )}
-//         </TouchableOpacity>
-//       )}
-//     </View>
-//   );
-// };
-
-// export default ElectricityPaymentScreen;
-
 import React, { useState } from "react";
 import {
   View,
@@ -295,9 +9,10 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { useMutateData } from "../../../hooks/Request";
+import { useFetchData, useMutateData } from "../../../hooks/Request";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 
 const ElectricityPaymentScreen = () => {
   const { user } = useSelector((state) => state.AuthSlice);
@@ -322,20 +37,34 @@ const ElectricityPaymentScreen = () => {
     error: errorpaybillsmeter,
   } = useMutateData("api/captain/buy", "POST", "billpayment");
 
+  const {
+    data: electRate,
+    isLoading: electRateIsloading,
+    error: electRateError,
+  } = useFetchData("api/captain/electricity-rates", "history_info");
+
   // Constants (should match backend)
   const amountPerUnit = 230;
   const vatPerUnit = 30;
   const serviceFeePerUnit = 10;
 
+  // const calculateCosts = () => {
+  //   const u = Number(units) || 0;
+  //   const amount = u * amountPerUnit;
+  //   const vat = u * vatPerUnit;
+  //   const service = u * serviceFeePerUnit;
+  //   const total = amount + vat + service;
+  //   return { amount, vat, service, total };
+  // };
+
   const calculateCosts = () => {
     const u = Number(units) || 0;
-    const amount = u * amountPerUnit;
-    const vat = u * vatPerUnit;
-    const service = u * serviceFeePerUnit;
+    const amount = u * (electRate?.amountPerUnit || 0);
+    const vat = u * (electRate?.vatPerUnit || 0);
+    const service = u * (electRate?.serviceFeePerUnit || 0);
     const total = amount + vat + service;
     return { amount, vat, service, total };
   };
-
   const handleCheckMeter = async () => {
     // Validation checks
     if (!meterId) {
@@ -488,6 +217,9 @@ const ElectricityPaymentScreen = () => {
       },
       onError: (error) => {
         // console.error("Payment Error:", error?.message);
+        console.log({
+          fggc: error,
+        });
 
         // Handle different payment error scenarios
         let errorMessage = "Payment failed. Please try again";
@@ -544,236 +276,242 @@ const ElectricityPaymentScreen = () => {
 
   const { amount, vat, service, total } = calculateCosts();
 
-  return (
-    <View style={{ flex: 1, backgroundColor: "#fff", padding: 20 }}>
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: "bold",
-          marginBottom: 20,
-          textAlign: "center",
-          color: "#2563eb",
-        }}
-      >
-        Electricity Payment
-      </Text>
-
-      {/* Meter ID Input + Proceed Button */}
-      <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 5 }}>
-        Meter ID
-      </Text>
-      <View style={{ flexDirection: "row" }}>
-        <TextInput
-          value={meterId}
-          onChangeText={handleMeterIdChange}
-          placeholder="Enter 11-digit meter ID"
-          keyboardType="numeric"
-          maxLength={11}
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: meterId.length === 11 ? "#2563eb" : "#ccc",
-            borderRadius: 8,
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-            marginRight: 10,
-          }}
-        />
-
-        {meterId.length === 11 && (
-          <TouchableOpacity
-            onPress={handleCheckMeter}
-            disabled={checkMeterispending}
-            style={{
-              backgroundColor: checkMeterispending ? "#9ca3af" : "#2563eb",
-              borderRadius: 8,
-              paddingHorizontal: 15,
-              justifyContent: "center",
-            }}
-          >
-            {checkMeterispending ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={{ color: "#fff", fontWeight: "600" }}>Verify</Text>
-            )}
-          </TouchableOpacity>
-        )}
+  if (electRateIsloading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text style={{ marginTop: 10 }}>Loading rates...</Text>
       </View>
+    );
+  }
 
-      {meterId.length > 0 && meterId.length !== 11 && (
-        <Text style={{ color: "red", fontSize: 12, marginTop: 5 }}>
-          Meter ID must be exactly 11 digits ({meterId.length}/11)
+  return (
+    <ScreenWrapper
+      title="Make Utility Payment"
+      navigation={navigation}
+      headerStyle={{
+        backgroundColor: "white",
+      }}
+      // showHeader={false}
+    >
+      <View style={{ flex: 1, backgroundColor: "#fff", padding: 20 }}>
+        {/* Meter ID Input + Proceed Button */}
+        <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 5 }}>
+          Meter ID
         </Text>
-      )}
-
-      {/* Show Meter Info if available */}
-      {meterInfo && (
-        <View
-          style={{
-            backgroundColor: "#f0f9ff",
-            borderRadius: 8,
-            padding: 12,
-            marginTop: 15,
-            marginBottom: 20,
-            borderLeft: 4,
-            borderLeftColor: "#2563eb",
-          }}
-        >
-          <Text
+        <View style={{ flexDirection: "row" }}>
+          <TextInput
+            value={meterId}
+            onChangeText={handleMeterIdChange}
+            placeholder="Enter 11-digit meter ID"
+            keyboardType="numeric"
+            maxLength={11}
             style={{
-              fontSize: 16,
-              fontWeight: "600",
-              marginBottom: 8,
-              color: "#2563eb",
+              flex: 1,
+              borderWidth: 1,
+              borderColor: meterId.length === 11 ? "#2563eb" : "#ccc",
+              borderRadius: 8,
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              marginRight: 10,
             }}
-          >
-            ✓ Meter Verified
-          </Text>
-          <Text style={{ marginBottom: 4 }}>
-            <Text style={{ fontWeight: "600" }}>Name:</Text>{" "}
-            {meterInfo?.Customer_name}
-          </Text>
-          <Text>
-            <Text style={{ fontWeight: "600" }}>Address:</Text>{" "}
-            {meterInfo?.Customer_address}
-          </Text>
+          />
+
+          {meterId.length === 11 && (
+            <TouchableOpacity
+              onPress={handleCheckMeter}
+              disabled={checkMeterispending}
+              style={{
+                backgroundColor: checkMeterispending ? "#9ca3af" : "#2563eb",
+                borderRadius: 8,
+                paddingHorizontal: 15,
+                justifyContent: "center",
+              }}
+            >
+              {checkMeterispending ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={{ color: "#fff", fontWeight: "600" }}>Verify</Text>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
-      )}
 
-      {/* Units Input */}
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "600",
-          marginBottom: 5,
-          marginTop: 10,
-        }}
-      >
-        Units (kWh)
-      </Text>
-      <TextInput
-        value={units}
-        onChangeText={handleUnitsChange}
-        placeholder="Enter units (e.g., 10.5)"
-        keyboardType="decimal-pad"
-        editable={!!meterInfo}
-        style={{
-          borderWidth: 1,
-          borderColor: meterInfo ? "#ccc" : "#e5e5e5",
-          backgroundColor: meterInfo ? "#fff" : "#f9f9f9",
-          borderRadius: 8,
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-          marginBottom: 20,
-          color: meterInfo ? "#000" : "#999",
-        }}
-      />
-
-      {!meterInfo && units && (
-        <Text
-          style={{
-            color: "orange",
-            fontSize: 12,
-            marginTop: -15,
-            marginBottom: 15,
-          }}
-        >
-          Please verify meter first before entering units
-        </Text>
-      )}
-
-      {/* Cost Breakdown */}
-      {units && Number(units) > 0 && (
-        <View
-          style={{
-            backgroundColor: "#f3f4f6",
-            borderRadius: 8,
-            padding: 15,
-            marginBottom: 20,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 8 }}>
-            Cost Breakdown
+        {meterId.length > 0 && meterId.length !== 11 && (
+          <Text style={{ color: "red", fontSize: 12, marginTop: 5 }}>
+            Meter ID must be exactly 11 digits ({meterId.length}/11)
           </Text>
-          <Text>Units: {units} kWh</Text>
-          {/* <Text>Rate: ₦{amountPerUnit} per unit</Text> */}
+        )}
+
+        {/* Show Meter Info if available */}
+        {meterInfo && (
           <View
             style={{
-              marginTop: 8,
-              paddingTop: 8,
-              borderTopWidth: 1,
-              borderTopColor: "#e5e5e5",
+              backgroundColor: "#f0f9ff",
+              borderRadius: 8,
+              padding: 12,
+              marginTop: 15,
+              marginBottom: 20,
+              borderLeft: 4,
+              borderLeftColor: "#2563eb",
             }}
           >
-            <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-              Total: ₦{total.toLocaleString()}
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "600",
+                marginBottom: 8,
+                color: "#2563eb",
+              }}
+            >
+              ✓ Meter Verified
+            </Text>
+            <Text style={{ marginBottom: 4 }}>
+              <Text style={{ fontWeight: "600" }}>Name:</Text>{" "}
+              {meterInfo?.Customer_name}
+            </Text>
+            <Text>
+              <Text style={{ fontWeight: "600" }}>Address:</Text>{" "}
+              {meterInfo?.Customer_address}
             </Text>
           </View>
-        </View>
-      )}
+        )}
 
-      {/* Pay Button */}
-      {meterInfo && units && Number(units) > 0 && (
-        <TouchableOpacity
-          onPress={handlePayment}
-          disabled={paybillsmeterispending}
+        {/* Units Input */}
+        <Text
           style={{
-            backgroundColor: paybillsmeterispending ? "#9ca3af" : "#2563eb",
-            borderRadius: 8,
-            paddingVertical: 14,
+            fontSize: 16,
+            fontWeight: "600",
+            marginBottom: 5,
             marginTop: 10,
           }}
         >
-          {paybillsmeterispending ? (
+          Units (kWh)
+        </Text>
+        <TextInput
+          value={units}
+          onChangeText={handleUnitsChange}
+          placeholder="Enter units (e.g., 10.5)"
+          keyboardType="decimal-pad"
+          editable={!!meterInfo}
+          style={{
+            borderWidth: 1,
+            borderColor: meterInfo ? "#ccc" : "#e5e5e5",
+            backgroundColor: meterInfo ? "#fff" : "#f9f9f9",
+            borderRadius: 8,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            marginBottom: 20,
+            color: meterInfo ? "#000" : "#999",
+          }}
+        />
+
+        {!meterInfo && units && (
+          <Text
+            style={{
+              color: "orange",
+              fontSize: 12,
+              marginTop: -15,
+              marginBottom: 15,
+            }}
+          >
+            Please verify meter first before entering units
+          </Text>
+        )}
+
+        {/* Cost Breakdown */}
+        {units && Number(units) > 0 && (
+          <View
+            style={{
+              backgroundColor: "#f3f4f6",
+              borderRadius: 8,
+              padding: 15,
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 8 }}>
+              Cost Breakdown
+            </Text>
+            <Text>Units: {units} kWh</Text>
+            {/* <Text>Rate: ₦{amountPerUnit} per unit</Text> */}
             <View
               style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
+                marginTop: 8,
+                paddingTop: 8,
+                borderTopWidth: 1,
+                borderTopColor: "#e5e5e5",
               }}
             >
-              <ActivityIndicator color="#fff" />
+              <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                Total: ₦{total.toLocaleString()}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Pay Button */}
+        {meterInfo && units && Number(units) > 0 && (
+          <TouchableOpacity
+            onPress={handlePayment}
+            disabled={paybillsmeterispending}
+            style={{
+              backgroundColor: paybillsmeterispending ? "#9ca3af" : "#2563eb",
+              borderRadius: 8,
+              paddingVertical: 14,
+              marginTop: 10,
+            }}
+          >
+            {paybillsmeterispending ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <ActivityIndicator color="#fff" />
+                <Text
+                  style={{
+                    color: "#fff",
+                    marginLeft: 10,
+                    fontSize: 16,
+                    fontWeight: "600",
+                  }}
+                >
+                  Processing...
+                </Text>
+              </View>
+            ) : (
               <Text
                 style={{
                   color: "#fff",
-                  marginLeft: 10,
+                  textAlign: "center",
                   fontSize: 16,
                   fontWeight: "600",
                 }}
               >
-                Processing...
+                Pay ₦{total.toLocaleString()}
               </Text>
-            </View>
-          ) : (
-            <Text
-              style={{
-                color: "#fff",
-                textAlign: "center",
-                fontSize: 16,
-                fontWeight: "600",
-              }}
-            >
-              Pay ₦{total.toLocaleString()}
-            </Text>
-          )}
-        </TouchableOpacity>
-      )}
+            )}
+          </TouchableOpacity>
+        )}
 
-      {/* Helper Text */}
-      {!meterInfo && (
-        <Text
-          style={{
-            textAlign: "center",
-            color: "#666",
-            fontSize: 14,
-            marginTop: 20,
-            fontStyle: "italic",
-          }}
-        >
-          Enter your 11-digit meter ID and tap "Verify" to continue
-        </Text>
-      )}
-    </View>
+        {/* Helper Text */}
+        {!meterInfo && (
+          <Text
+            style={{
+              textAlign: "center",
+              color: "#666",
+              fontSize: 14,
+              marginTop: 20,
+              fontStyle: "italic",
+            }}
+          >
+            Enter your 11-digit meter ID and tap "Verify" to continue
+          </Text>
+        )}
+      </View>
+    </ScreenWrapper>
   );
 };
 

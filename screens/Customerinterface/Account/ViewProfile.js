@@ -52,10 +52,6 @@ function ViewProfile_main({ navigation }) {
 
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
 
-  console.log({
-    vvv: userProfile_data?.user?.isGuest,
-  });
-
   const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
     (member) => member.user.toString() === userIdToFind.toString()
@@ -561,10 +557,6 @@ function GeneralViewProfile({ navigation }) {
   let item = {};
 
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
-
-  console.log({
-    vvv: userProfile_data?.user?.isGuest,
-  });
 
   const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
   const foundMember = userProfile_data?.currentClanMeeting?.members.find(

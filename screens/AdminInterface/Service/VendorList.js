@@ -58,9 +58,6 @@
 //           (vendor) => vendor?.category?.slug === category
 //         );
 
-//   console.log({
-//     jfjf: get_all_admin_Service_data?.vendors,
-//   });
 //   const renderItem = ({ item, index }) => (
 //     <Pressable
 //       onPress={() => {

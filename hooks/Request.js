@@ -63,6 +63,8 @@ export const useFetchData = (url, queryKey, options = {}) => {
 const apiRequest = async ({ url, method, data, token }) => {
   if (!token) throw new Error("Token is missing");
 
+  // console.log({ccc: url, method, data, token});
+
   try {
     const response = await axios({
       url: `${apiUrl}${url}`,
@@ -77,8 +79,12 @@ const apiRequest = async ({ url, method, data, token }) => {
     console.log("API Response:", response.data); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
-    console.error("API Errorss:", error.response?.data);
-    throw new Error(error.response?.data.error || "API request failed");
+    console.error("API Errorss:", error.response);
+    throw new Error(
+      error.response?.data.error ||
+        error.response?.data?.message ||
+        "API request failed"
+    );
   }
 };
 
@@ -94,6 +100,10 @@ export const useMutateData = (url, method, queryKey) => {
       queryClient.invalidateQueries(queryKey); // Refresh data
     },
     onError: (error) => {
+      console.log({
+        fadafada: error.message,
+      });
+
       console.error("Mutation Error:", error);
     },
   });

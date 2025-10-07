@@ -32,9 +32,6 @@ import { useNavigation } from "@react-navigation/native";
 const EditPersonalInformation = ({ navigation }) => {
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
-  console.log({
-    vvv: userProfile_data?.user?.isGuest,
-  });
   const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
     (member) => member.user.toString() === userIdToFind.toString()
@@ -177,10 +174,6 @@ const EditPersonalInformation = ({ navigation }) => {
         navigation.goBack(); // Navigate back after successful update
       },
       onError: (error) => {
-        console.log({
-          vvvbL: error?.response?.data,
-        });
-
         Toast.show({
           type: "error",
           text1: `${
@@ -611,10 +604,6 @@ function ProfileImageUploader({}) {
   const navigation = useNavigation();
 
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-
-  console.log({
-    vvv: userProfile_data?.photo,
-  });
 
   const [profileImage, setProfileImage] = useState(
     userProfile_data?.photo ||

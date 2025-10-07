@@ -19,10 +19,6 @@
 
 //   const { user_data } = useSelector((state) => state.AuthSlice);
 
-//   console.log({
-//     jfjf: user_data,
-//   });
-
 //   const [dueDetails, setDueDetails] = useState(null);
 
 //   const {
@@ -82,9 +78,6 @@
 
 //   // Handle update due
 //   const handleUpdateDue = () => {
-//     console.log({
-//       vvv: data?._id,
-//     });
 
 //     let url = `wallet/pay-due/${data?._id}`;
 //     console.log({
@@ -247,10 +240,6 @@ const DueDetails = () => {
     user_isLoading,
     user_message,
   } = useSelector((state) => state.AuthSlice);
-
-  console.log({
-    jjfjf: user_data?.token,
-  });
 
   const navigatation = useNavigation();
 

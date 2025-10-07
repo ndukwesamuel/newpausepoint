@@ -17,9 +17,6 @@ import { useNavigation } from "@react-navigation/native";
 const ErrandDetailsScreen = ({ route }) => {
   const { errand } = route.params || {};
   const navigation = useNavigation();
-  console.log({
-    fgfg: errand,
-  });
 
   const [errandStatus, setErrandStatus] = useState(errand?.status || "pending");
 

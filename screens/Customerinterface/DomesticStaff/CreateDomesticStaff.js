@@ -109,10 +109,6 @@ const CreateDomesticStaff = () => {
   };
 
   const handleSubmit = () => {
-    // console.log({
-    //   vvv: formData,
-    // });
-
     // const formData = new FormData();
     // formData.append("staffName", formData?.staffName);
     // formData.append("gender", formData?.gender);

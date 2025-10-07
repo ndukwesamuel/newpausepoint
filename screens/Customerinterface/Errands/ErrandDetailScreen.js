@@ -22,10 +22,6 @@ const ErrandDetailScreen = () => {
   const navigation = useNavigation(); // Get navigation object for goBack()
   const { errand } = route.params;
 
-  console.log({
-    vvv: errand, // Log the errand object for debugging
-  });
-
   const {
     mutate: assignedErrand,
     isLoading: assignedErrandispending,
@@ -218,7 +214,7 @@ const ErrandDetailScreen = () => {
             <Text style={styles.detailText}>
               <Text style={styles.boldText}>Description:</Text>
               {errand.description || "N/A"}
-              </Text>
+            </Text>
             <Text style={styles.detailText}>
               <Text style={styles.boldText}>Address:</Text>{" "}
               {errand.pickUpAddress}

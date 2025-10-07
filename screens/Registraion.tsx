@@ -45,10 +45,6 @@ const Registraion = ({}: {}) => {
 
   const RegistraionMutation = useMutation(
     (_) => {
-      // Your API request code here
-      // Use formData to send the image data to the API
-      //   const tokengot = data?.token;
-
       let joinurl = `${API_BASEURL}api/v1/auth/user-register`;
 
       let data = {
@@ -181,7 +177,7 @@ const Registraion = ({}: {}) => {
           </View>
 
           <View style={{ marginBottom: 20 }}>
-            <FormLabel data="Confirm Password " />
+            <FormLabel data="Confirm Password  " />
 
             <Forminputpassword
               placeholder="Enter your password"
