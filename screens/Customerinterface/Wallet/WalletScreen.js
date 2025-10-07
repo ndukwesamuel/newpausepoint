@@ -213,6 +213,16 @@ const WalletScreen = ({}) => {
     "virtual-account"
   );
 
+  const {
+    mutate: paybillsmeter,
+    isLoading: paybillsmeterispending,
+    error: errorpaybillsmeter,
+  } = useMutateData(
+    "api/v3/bank/create-virtual-account",
+    "POST",
+    "virtual-account"
+  );
+
   // const {
   //   mutate: createVirtualAccount,
   //   isLoading: isCreatingVirtualAccount,
@@ -287,22 +297,72 @@ const WalletScreen = ({}) => {
     };
     console.log("Submitting:", payload);
 
-    UpdateText_Mutation.mutate(payload, {
-      onSuccess: () => {
-        // This runs if successful
-        Alert.alert(
-          "Success",
-          "Your virtual account has been created! Details loading..."
-        );
-        refetchVirtualAccount();
+    // UpdateText_Mutation.mutate(payload, {
+    //   onSuccess: () => {
+    //     // This runs if successful
+    //     Alert.alert(
+    //       "Success",
+    //       "Your virtual account has been created! Details loading..."
+    //     );
+    //     refetchVirtualAccount();
+    //   },
+    //   onError: (error) => {
+    //     // This runs if it fails (using the message we fixed in Step 1)
+    //     Alert.alert(
+    //       "Creation Failed",
+    //       // error.message now holds "User not found or essential profile data..."
+    //       error.message || "An unexpected error occurred."
+    //     );
+    //   },
+    // });
+
+    paybillsmeter(payload, {
+      onSuccess: (response) => {
+        try {
+          console.log("Payment success:", response);
+
+          // This runs if successful
+          Alert.alert(
+            "Success",
+            "Your virtual account has been created! Details loading..."
+          );
+          refetchVirtualAccount();
+        } catch (err) {
+          console.error("Payment success handler error:", err);
+
+          Alert.alert(
+            "Creation Failed",
+            // error.message now holds "User not found or essential profile data..."
+            error.message || "An unexpected error occurred."
+          );
+          // navigation.goBack();
+        }
       },
       onError: (error) => {
-        // This runs if it fails (using the message we fixed in Step 1)
-        Alert.alert(
-          "Creation Failed",
-          // error.message now holds "User not found or essential profile data..."
-          error.message || "An unexpected error occurred."
-        );
+        // console.error("Payment Error:", error?.message);
+        console.log({
+          fggc: error,
+        });
+
+        // // Handle different payment error scenarios
+        // let errorMessage = "Payment failed. Please try again";
+
+        // if (error?.response?.data?.message) {
+        //   errorMessage = error.response.data.message;
+        // } else if (error?.message) {
+        //   errorMessage = error.message;
+        // } else if (error?.response?.status === 402) {
+        //   errorMessage = "Insufficient funds. Please top up your wallet";
+        // } else if (error?.response?.status === 400) {
+        //   errorMessage = "Invalid payment request";
+        // } else if (error?.response?.status === 500) {
+        //   errorMessage =
+        //     "Server error. If money was debited, it will be refunded";
+        // } else if (error?.code === "NETWORK_ERROR") {
+        //   errorMessage = "Network error. Please check your connection";
+        // }
+
+        Alert.alert("Account  Failed", error.message);
       },
     });
   };
@@ -312,13 +372,39 @@ const WalletScreen = ({}) => {
     return <Text>Error: {error?.message || isError?.message}</Text>;
   }
 
+  const handleReloadWallet = async () => {
+    try {
+      const { data } = await refetchWallet();
+      if (data) {
+        Alert.alert("Success", "Wallet balance updated!");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to refresh wallet. Please try again.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.balanceContainer}>
-        <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
-        <Text style={styles.balance}>
-          {data?.balance?.toFixed(2)} {data?.currency}
-        </Text>
+        <View style={styles.balanceContainer}>
+          <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
+          <Text style={styles.balance}>
+            {data?.balance?.toFixed(2)} {data?.currency}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          onPress={handleReloadWallet}
+          disabled={isLoading} // Disable while the query is already running
+          style={styles.reloadButton}
+        >
+          <Ionicons
+            name={isLoading ? "sync" : "reload"} // Show sync icon if loading
+            size={24}
+            color="#2196F3"
+            style={isLoading && styles.loadingSpin} // Apply spin animation if possible (requires more complex RN styling/animation not included here, but the name change helps)
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Virtual Account Card */}
@@ -382,6 +468,20 @@ const WalletScreen = ({}) => {
               <Text style={styles.accountInfoText}>
                 Transfer money to this account to fund your wallet automatically
               </Text>
+            </View>
+
+            <View style={styles.accountInfo}>
+              <View style={{ marginLeft: 8 }}>
+                <Text
+                  style={[
+                    styles.accountInfoText,
+                    { color: "#666", marginTop: 2 },
+                  ]}
+                >
+                  ⚠️ A 1% transaction fee applies (capped at ₦250 per
+                  transaction).
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -636,7 +736,7 @@ const WalletScreen = ({}) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Select Utility Bill</Text>
+            <Text style={styles.modalTitle}>Select Utility Bill kaka </Text>
 
             <ScrollView
               contentContainerStyle={{
@@ -1002,6 +1102,31 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
+  },
+
+  balanceContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // ADDED to space out content and refresh button
+    marginBottom: 20,
+    padding: 15,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    elevation: 2,
+  },
+
+  accountInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#FFF8E1",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 10,
+  },
+  accountInfoText: {
+    fontSize: 13,
+    color: "#333",
+    lineHeight: 18,
   },
 });
 
