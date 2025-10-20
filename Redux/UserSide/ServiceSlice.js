@@ -81,9 +81,6 @@ export const All_serviceReview_data_Fun = createAsyncThunk(
         config
       );
 
-      console.log({
-        kakaka: response.data,
-      });
       return response.data;
     } catch (error) {
       const errorMessage = handleApiError(error);

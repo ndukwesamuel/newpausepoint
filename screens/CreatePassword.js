@@ -59,22 +59,10 @@ const CreatePassword = ({}) => {
         },
       };
 
-      console.log({
-        cvc: url,
-      });
-
-      console.log({
-        ggg: data_info,
-      });
-
       return axios.post(url, data_info, config);
     },
     {
       onSuccess: (success) => {
-        console.log({
-          ggg: success?.data?.data,
-        });
-
         Toast.show({
           type: "success",
           text1: `${success?.data?.data}`,
@@ -96,10 +84,6 @@ const CreatePassword = ({}) => {
   );
 
   const handleSubmit = () => {
-    console.log({
-      ggg: "skdjdkj",
-    });
-
     if (newPassword !== confirmPassword) {
       Toast.show({
         type: "error",

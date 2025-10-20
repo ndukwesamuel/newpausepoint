@@ -104,9 +104,6 @@
 
 //   const [userRating, setUserRating] = useState(0); // Store the rating selected by the user
 
-//   console.log({
-//     kaka: userRating,
-//   });
 //   // This function will be passed as a prop to CustomStarRating
 //   const handleRatingSelected = (rating) => {
 //     setUserRating(rating); // Update the state with the selected rating

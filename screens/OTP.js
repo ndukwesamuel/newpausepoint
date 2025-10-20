@@ -41,9 +41,6 @@ const OTP = ({}) => {
   const dispatch = useDispatch();
 
   const { otpemail } = useSelector((state) => state.DontwantToResetSlice);
-  console.log({
-    eer: otpemail,
-  });
 
   const handleLogout = async () => {
     dispatch(reset_login());
@@ -57,8 +54,6 @@ const OTP = ({}) => {
   const handleOTPChange = (otp) => {
     setOTPValue(otp);
   };
-
-  console.log({ otpValue });
 
   const ResendOtp_Mutation = useMutation(
     (data_info) => {

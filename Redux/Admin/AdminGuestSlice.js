@@ -76,9 +76,6 @@ export const Admin_Get_All_DomesticStaff_Fun = createAsyncThunk(
       let clan_id =
         thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
           ?.AdmincurrentClanMeeting;
-      console.log({
-        fff: token_Data,
-      });
 
       const config = {
         headers: {
@@ -93,15 +90,8 @@ export const Admin_Get_All_DomesticStaff_Fun = createAsyncThunk(
         config
       );
 
-      console.log({
-        fff: response.data,
-      });
-
       return response.data;
     } catch (error) {
-      console.log({
-        ggg: error?.response.data,
-      });
       Toast.show({
         type: "error",
         text1: `${error?.response?.data?.error} `,

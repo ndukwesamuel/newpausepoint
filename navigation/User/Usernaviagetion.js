@@ -180,16 +180,7 @@ export const Usernaviagetion = () => {
       component: ForumDetails,
       title: "",
     },
-    // {
-    //   name: "PersonalInfo",
-    //   component: ViewProfile,
-    //   title: "",
-    // },
-    // {
-    //   name: "editPersonalInfo",
-    //   component: EditPersonalInformation,
-    //   title: "",
-    // },
+
     {
       name: "inviteguest",
       component: CreateGuests,
@@ -216,28 +207,6 @@ export const Usernaviagetion = () => {
       title: "Estate Polls Details",
     },
 
-    // {
-    //   name: "UtilityPayment",
-    //   component: BillDashboard,
-    //   title: "UtilityPayment",
-    // },
-
-    // {
-    //   name: "MakeUtilityPayment",
-    //   component: ElectricityPaymentScreen,
-    //   title: "Make Utility Payment",
-    // },
-
-    // {
-    //   name: "service",
-    //   component: ServiceView,
-    //   title: "Services",
-    // },
-    // {
-    //   name: "Marketplace",
-    //   component: MarketPlace,
-    //   title: "Market Place",
-    // },
     {
       name: "amentities",
       component: Amenities,

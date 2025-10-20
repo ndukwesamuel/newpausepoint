@@ -295,33 +295,12 @@ const WalletScreen = ({}) => {
     const payload = {
       name: user_data?.user?.fullName || "No Name",
     };
-    console.log("Submitting:", payload);
-
-    // UpdateText_Mutation.mutate(payload, {
-    //   onSuccess: () => {
-    //     // This runs if successful
-    //     Alert.alert(
-    //       "Success",
-    //       "Your virtual account has been created! Details loading..."
-    //     );
-    //     refetchVirtualAccount();
-    //   },
-    //   onError: (error) => {
-    //     // This runs if it fails (using the message we fixed in Step 1)
-    //     Alert.alert(
-    //       "Creation Failed",
-    //       // error.message now holds "User not found or essential profile data..."
-    //       error.message || "An unexpected error occurred."
-    //     );
-    //   },
-    // });
 
     paybillsmeter(payload, {
       onSuccess: (response) => {
         try {
           console.log("Payment success:", response);
 
-          // This runs if successful
           Alert.alert(
             "Success",
             "Your virtual account has been created! Details loading..."
@@ -407,326 +386,114 @@ const WalletScreen = ({}) => {
         </TouchableOpacity>
       </View>
 
-      {/* Virtual Account Card */}
-      {virtualAccountData?.data && (
-        <View style={styles.virtualAccountCard}>
-          <View style={styles.virtualAccountHeader}>
-            <Icon name="account-balance" size={24} color="#2196F3" />
-            <Text style={styles.virtualAccountTitle}>Your Virtual Account</Text>
-          </View>
-
-          <View style={styles.virtualAccountDetails}>
-            <View style={styles.accountDetailRow}>
-              <Text style={styles.accountDetailLabel}>Account Name:</Text>
-              <TouchableOpacity
-                style={styles.copyButton}
-                onPress={() =>
-                  handleCopyToClipboard(virtualAccountData.data.accountName)
-                }
-              >
-                <Text style={styles.accountDetailValue}>
-                  {virtualAccountData.data.accountName}
-                </Text>
-                <Icon
-                  name="content-copy"
-                  size={16}
-                  color="#666"
-                  style={styles.copyIcon}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.accountDetailRow}>
-              <Text style={styles.accountDetailLabel}>Account Number:</Text>
-              <TouchableOpacity
-                style={styles.copyButton}
-                onPress={() =>
-                  handleCopyToClipboard(virtualAccountData.data.accountNumber)
-                }
-              >
-                <Text style={styles.accountDetailValue}>
-                  {virtualAccountData.data.accountNumber}
-                </Text>
-                <Icon
-                  name="content-copy"
-                  size={16}
-                  color="#666"
-                  style={styles.copyIcon}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.accountDetailRow}>
-              <Text style={styles.accountDetailLabel}>Bank Name:</Text>
-              <Text style={styles.accountDetailValue}>
-                {virtualAccountData.data.bankName}
+      <ScrollView>
+        {/* Virtual Account Card */}
+        {virtualAccountData?.data && (
+          <View style={styles.virtualAccountCard}>
+            <View style={styles.virtualAccountHeader}>
+              <Icon name="account-balance" size={24} color="#2196F3" />
+              <Text style={styles.virtualAccountTitle}>
+                Your Virtual Account
               </Text>
             </View>
 
-            <View style={styles.accountInfo}>
-              <Icon name="info" size={16} color="#FF9800" />
-              <Text style={styles.accountInfoText}>
-                Transfer money to this account to fund your wallet automatically
-              </Text>
-            </View>
-
-            <View style={styles.accountInfo}>
-              <View style={{ marginLeft: 8 }}>
-                <Text
-                  style={[
-                    styles.accountInfoText,
-                    { color: "#666", marginTop: 2 },
-                  ]}
-                >
-                  ⚠️ A 1% transaction fee applies (capped at ₦250 per
-                  transaction).
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-
-      <View style={styles.buttonRow}>
-        {virtualAccountData?.data ? (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => setShowUtilitiesModal(true)}
-          >
-            <Icon name="payment" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Pay Bills </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleCreateVirtualAccount}
-            // disabled={isCreatingVirtualAccount}
-            // onPress={() => navigation.navigate("FundWallet")}
-          >
-            {/* {isCreatingVirtualAccount ? (
-              <Text style={styles.buttonText}>Creating...</Text> // Show loading text
-            ) : ( */}
-            <>
-              <Icon name="add" size={20} color="#FFF" />
-              <Text style={styles.buttonText}>Create Virtual Account</Text>
-            </>
-            {/* )} */}
-            {/* <Icon name="add" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Create Virtual Account</Text> */}
-
-            {/* <Text style={styles.buttonText}>Fund Wallet</Text> */}
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {isGuest != true && (
-        <>
-          <Text style={styles.subTitle}>Invoices due</Text>
-
-          <FlatList
-            data={allmydues?.dues}
-            renderItem={({ item }) => (
-              <DueItem item={item} navigation={navigation} />
-            )}
-            keyExtractor={(item) => item._id}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListEmptyComponent={
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <LottieView
-                  autoPlay
-                  ref={animation}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    // backgroundColor: "#eee",
-                  }}
-                  source={require("../../../assets/Lottie/notFund.json")}
-                />
-                <Text
-                  style={{
-                    fontSize: 22,
-                    fontWeight: "bold",
-                    color: "#333",
-                    marginBottom: 10,
-                    textAlign: "center",
-                  }}
-                >
-                  No Dues Found
-                </Text>
-              </View>
-            }
-          />
-        </>
-      )}
-
-      {/* <Modal
-        visible={showUtilitiesModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowUtilitiesModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "white",
-              width: "90%",
-              borderRadius: 20,
-              padding: 20,
-              maxHeight: "80%",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "bold",
-                textAlign: "center",
-                marginBottom: 20,
-                color: "#2c3e50",
-              }}
-            >
-              Select Utility Bill
-            </Text>
-
-            <ScrollView
-              contentContainerStyle={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-                paddingBottom: 20,
-              }}
-            >
-              {[
-                {
-                  id: 1,
-                  name: "Electricity",
-                  icon: "flash",
-                  iconSet: MaterialCommunityIcons,
-                  color: "#f39c12",
-                },
-                {
-                  id: 2,
-                  name: "Water",
-                  icon: "water",
-                  iconSet: FontAwesome5,
-                  color: "#3498db",
-                },
-                {
-                  id: 3,
-                  name: "Internet",
-                  icon: "wifi",
-                  iconSet: Ionicons,
-                  color: "#9b59b6",
-                },
-                {
-                  id: 4,
-                  name: "Cable TV",
-                  icon: "tv",
-                  iconSet: Ionicons,
-                  color: "#e74c3c",
-                },
-                {
-                  id: 5,
-                  name: "Gas",
-                  icon: "fire",
-                  iconSet: FontAwesome5,
-                  color: "#e67e22",
-                },
-                {
-                  id: 6,
-                  name: "Waste",
-                  icon: "delete",
-                  iconSet: MaterialIcons,
-                  color: "#2ecc71",
-                },
-              ].map((utility) => (
+            <View style={styles.virtualAccountDetails}>
+              <View style={styles.accountDetailRow}>
+                <Text style={styles.accountDetailLabel}>Account Name:</Text>
                 <TouchableOpacity
-                  key={utility.id}
-                  style={{
-                    width: "48%",
-                    backgroundColor: "#f8f9fa",
-                    borderRadius: 12,
-                    padding: 15,
-                    marginBottom: 15,
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor: "#ecf0f1",
-                  }}
-                  disabled={true} // Disabled for "Coming Soon"
+                  style={styles.copyButton}
+                  onPress={() =>
+                    handleCopyToClipboard(virtualAccountData.data.accountName)
+                  }
                 >
-                  <utility.iconSet
-                    name={utility.icon}
-                    size={40}
-                    color={utility.color}
-                    style={{ marginBottom: 10 }}
-                  />
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      color: "#34495e",
-                      textAlign: "center",
-                    }}
-                  >
-                    {utility.name}
+                  <Text style={styles.accountDetailValue}>
+                    {virtualAccountData.data.accountName}
                   </Text>
+                  <Icon
+                    name="content-copy"
+                    size={16}
+                    color="#666"
+                    style={styles.copyIcon}
+                  />
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
+              </View>
 
-            <View
-              style={{
-                backgroundColor: "#fff9e6",
-                padding: 15,
-                borderRadius: 10,
-                marginBottom: 15,
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Ionicons name="time-outline" size={24} color="#f39c12" />
-              <Text
-                style={{
-                  color: "#e67e22",
-                  fontSize: 16,
-                  marginLeft: 10,
-                  flex: 1,
-                }}
-              >
-                Utility bill payments coming soon!
-              </Text>
+              <View style={styles.accountDetailRow}>
+                <Text style={styles.accountDetailLabel}>Account Number:</Text>
+                <TouchableOpacity
+                  style={styles.copyButton}
+                  onPress={() =>
+                    handleCopyToClipboard(virtualAccountData.data.accountNumber)
+                  }
+                >
+                  <Text style={styles.accountDetailValue}>
+                    {virtualAccountData.data.accountNumber}
+                  </Text>
+                  <Icon
+                    name="content-copy"
+                    size={16}
+                    color="#666"
+                    style={styles.copyIcon}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.accountDetailRow}>
+                <Text style={styles.accountDetailLabel}>Bank Name:</Text>
+                <Text style={styles.accountDetailValue}>
+                  {virtualAccountData.data.bankName}
+                </Text>
+              </View>
+
+              <View style={styles.accountInfo}>
+                <Icon name="info" size={16} color="#FF9800" />
+                <Text style={styles.accountInfoText}>
+                  Transfer money to this account to fund your wallet
+                  automatically
+                </Text>
+              </View>
+
+              <View style={styles.accountInfo}>
+                <View style={{ marginLeft: 8 }}>
+                  <Text
+                    style={[
+                      styles.accountInfoText,
+                      { color: "#666", marginTop: 2 },
+                    ]}
+                  >
+                    ⚠️ A 1% transaction fee applies (capped at ₦250 per
+                    transaction).
+                  </Text>
+                </View>
+              </View>
             </View>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#3498db",
-                padding: 15,
-                borderRadius: 10,
-                alignItems: "center",
-              }}
-              onPress={() => setShowUtilitiesModal(false)}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontSize: 18,
-                  fontWeight: "bold",
-                }}
-              >
-                Close
-              </Text>
-            </TouchableOpacity>
           </View>
+        )}
+
+        <View style={styles.buttonRow}>
+          {virtualAccountData?.data ? (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setShowUtilitiesModal(true)}
+            >
+              <Icon name="payment" size={20} color="#FFF" />
+              <Text style={styles.buttonText}>Pay Bills </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleCreateVirtualAccount}
+              // disabled={isCreatingVirtualAccount}
+              // onPress={() => navigation.navigate("FundWallet")}
+            >
+              <>
+                <Icon name="add" size={20} color="#FFF" />
+                <Text style={styles.buttonText}>Create Virtual Account</Text>
+              </>
+            </TouchableOpacity>
+          )}
         </View>
-      </Modal> */}
+      </ScrollView>
 
       <Modal
         visible={showUtilitiesModal}

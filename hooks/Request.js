@@ -5,6 +5,10 @@ import { useSelector } from "react-redux";
 import { useMutation, useQueryClient } from "react-query";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
+console.log({
+  tytyy: apiUrl,
+});
+
 // Function to fetch data
 const fetchData = async ({ queryKey }) => {
   const [, url, token] = queryKey;

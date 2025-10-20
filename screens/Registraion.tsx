@@ -67,11 +67,6 @@ const Registraion = ({}: {}) => {
       },
       onError: (error: any) => {
         console.log(error?.response?.data);
-        console.log({
-          jjj: error?.response,
-        });
-
-        console.error("Error occurred while submitting the form:", error);
 
         Toast.show({
           type: "error",

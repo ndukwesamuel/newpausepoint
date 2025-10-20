@@ -59,10 +59,6 @@ const EditPersonalInformation = ({ navigation }) => {
     foundMember?.apartmentType
   );
 
-  console.log({
-    vbvb: typeOfApartment,
-  });
-
   const [selfcon, setSelfcon] = useState(userProfile_data?.address?.selfcon);
   const [unitNumber, setUnitNumber] = useState(foundMember?.unitNumber);
 

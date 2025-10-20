@@ -44,10 +44,6 @@ import {
 const ForumDetails = () => {
   const maindata = useRoute()?.params;
 
-  console.log({
-    ggg: maindata,
-  });
-
   const { get_user_profile_data } = useSelector(
     (state) => state.UserProfileSlice
   );
@@ -59,7 +55,6 @@ const ForumDetails = () => {
     jhhhh: maindata?.forumid?._id,
   });
   let forumid = maindata?._id;
-  // const {gggggg} = useRoute()?.params?.forumid;
 
   const deleteDate = () => {
     Delete_Mutation.mutate();

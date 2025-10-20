@@ -44,10 +44,6 @@ export default function TheScan() {
 
   const All_User = get_Single_clan_data?.data?.members;
 
-  console.log({
-    fff: All_User[0]?.memberCode,
-  });
-
   const handleBarcodeScanned = ({ type, data }) => {
     if (scanned) return;
 

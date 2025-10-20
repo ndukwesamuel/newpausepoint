@@ -143,14 +143,6 @@ const Wallet = ({}) => {
             <Icon name="add" size={20} color="#FFF" />
             <Text style={styles.buttonText}>Fund Wallet</Text>
           </TouchableOpacity>
-
-          {/* <TouchableOpacity
-            style={styles.button}
-            onPress={() => setShowUtilitiesModal(true)}
-          >
-            <Icon name="payment" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Pay Bills</Text>
-          </TouchableOpacity> */}
         </View>
 
         {user_data?.user?.isGuest != true && (

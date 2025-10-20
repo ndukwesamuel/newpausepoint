@@ -45,9 +45,6 @@ const VendorListDetails = ({ navigation }) => {
     Linking.openURL(`tel:${item?.phone_number}`);
   };
 
-  console.log({
-    fghhh: user_data?.token,
-  });
   const Delete_Mutation = useMutation(
     (data_info) => {
       const config = {

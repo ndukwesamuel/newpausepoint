@@ -93,9 +93,6 @@ const ForgottenPasswod = ({}) => {
     },
     {
       onSuccess: (success) => {
-        console.log({
-          aaa: success?.data,
-        });
         Toast.show({
           type: "success",
           text1: `${success?.data?.message}`,
@@ -106,7 +103,7 @@ const ForgottenPasswod = ({}) => {
 
       onError: (error) => {
         console.log({
-          aaa: error?.response,
+          nnnnnnn: error?.response?.data,
         });
         Toast.show({
           type: "error",

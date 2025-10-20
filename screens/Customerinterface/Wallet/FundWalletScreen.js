@@ -38,10 +38,6 @@ const FundWalletScreen = ({ navigation }) => {
   } = useSelector((state) => state.AuthSlice);
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice); // Adjust 'any' to your actual RootState type
 
-  console.log({
-    ggg: userProfile_data?.user?._id,
-  });
-
   const webViewRef = useRef(null);
 
   // Calculate transaction fee

@@ -311,10 +311,6 @@ export function DeleteLAccountModal({
     user_message,
   } = useSelector((state) => state?.AuthSlice);
 
-  console.log({
-    fire: user_data?.token,
-  });
-
   const handleLogout = async () => {
     // await AsyncStorage.removeItem("token");
     // await AsyncStorage.removeItem("userdata");log

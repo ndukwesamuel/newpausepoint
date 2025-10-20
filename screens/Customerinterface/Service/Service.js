@@ -20,9 +20,6 @@ const Service = ({ navigation }) => {
   const { all_service_category_data } = useSelector(
     (state) => state.ServiceSlice
   );
-  console.log({
-    ggg: all_service_category_data,
-  });
   const images = [
     {
       id: 1,

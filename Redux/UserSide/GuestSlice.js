@@ -67,9 +67,6 @@ export const Get_All_User_Guest_Fun = createAsyncThunk(
 export const Get_All_Domestic_Fun = createAsyncThunk(
   "GuestSlice/Get_All_Domestic_Fun",
   async (_, thunkAPI) => {
-    console.log({
-      fggg: "this is working ",
-    });
     try {
       let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
       let clan_id =
@@ -85,9 +82,6 @@ export const Get_All_Domestic_Fun = createAsyncThunk(
       };
 
       const response = await axios.get(`${API_BASEURL}domesticstaff`, config);
-      console.log({
-        fff: response.data,
-      });
 
       return response.data;
     } catch (error) {
