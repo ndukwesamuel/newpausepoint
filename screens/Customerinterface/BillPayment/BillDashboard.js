@@ -10,9 +10,15 @@ import * as WebBrowser from "expo-web-browser";
 import * as FileSystem from "expo-file-system";
 import ReceiptPDF from "./ReceiptPDF";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import Airtime from "./Airtime";
 export default function BillDashboard() {
   const navigation = useNavigation();
+
+  const route = useRoute();
+  const { billType } = route.params || {};
+  console.log({ billType });
+
   return (
     <ScreenWrapper
       title=" Utility Payment"
@@ -21,7 +27,7 @@ export default function BillDashboard() {
         backgroundColor: "white",
       }}
     >
-      <HistoryScreen />
+      {billType === "airtime" ? <Airtime /> : <HistoryScreen />}
     </ScreenWrapper>
   );
 }

@@ -71,10 +71,6 @@ export default function App({ navigation }) {
     user_message,
   } = useSelector((state) => state.AuthSlice);
 
-  console.log({
-    xxx: user_data?.user?.isGuest,
-  });
-
   // Animated Properties...
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
   let user_clan_info = userProfile_data?.currentClanMeeting;

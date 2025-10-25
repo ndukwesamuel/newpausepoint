@@ -19,6 +19,7 @@ import {
   FontAwesome5,
   Ionicons,
   MaterialIcons,
+  Entypo,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
@@ -39,7 +40,8 @@ const WalletScreen = ({}) => {
     error: isError,
     refetch: refetchDues,
   } = useFetchData("wallet/pay-due", "pay-due");
-
+  const [isVirtualAccountExpanded, setIsVirtualAccountExpanded] =
+    useState(false);
   const {
     data: virtualAccountData,
     isLoading: isLoadingVirtualAccount,
@@ -62,51 +64,6 @@ const WalletScreen = ({}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [showUtilitiesModal, setShowUtilitiesModal] = useState(false);
 
-  const utilityBills = [
-    {
-      id: 1,
-      name: "Electricity (PHCN)",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ19zpaIEhnv7Tndjz_HAhxkJBrlNg4CBeBPw&s", //"https://cdn-icons-png.flaticon.com/512/3627/3627068.png",
-      type: "electricity",
-    },
-    {
-      id: 2,
-      name: "Water Bill",
-      image:
-        "https://domf5oio6qrcr.cloudfront.net/medialibrary/7909/conversions/b8a1309a-ba53-48c7-bca3-9c36aab2338a-thumb.jpg", //"https://cdn-icons-png.flaticon.com/512/3437/3437539.png",
-      type: "water",
-    },
-    {
-      id: 3,
-      name: "DSTV/GOTV",
-      image:
-        "https://yt3.googleusercontent.com/ytc/AIdro_lJ6O-csU6TV2rLiQrAdMPCBGulqXuoz0qSunmRCGLWmg=s900-c-k-c0x00ffffff-no-rj", //"https://cdn-icons-png.flaticon.com/512/2504/2504921.png",
-      type: "cable",
-    },
-    {
-      id: 4,
-      name: "Internet (WiFi)",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjql54yQIHWOl8m2DESARmhhz5op2PgSKFUA&s", // "https://cdn-icons-png.flaticon.com/512/2285/2285533.png",
-      type: "internet",
-    },
-    {
-      id: 5,
-      name: "Airtime/Data",
-      image:
-        "https://read.cardtonic.com/wp-content/uploads/2024/04/How-to-Buy-Cheap-Airtime-Online-in-Nigeria-in-2024@3x-100-scaled.jpg", //"https://cdn-icons-png.flaticon.com/512/3059/3059518.png",
-      type: "airtime",
-    },
-    {
-      id: 6,
-      name: "WAEC/NECO",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI_WAj-T6ltOQdewMA40uKgy9DvWBtikXyvQ&s", //"https://cdn-icons-png.flaticon.com/512/3976/3976626.png",
-      type: "education",
-    },
-  ];
-
   const utilities = [
     {
       id: 1,
@@ -120,12 +77,12 @@ const WalletScreen = ({}) => {
     },
     {
       id: 2,
-      name: "Water",
-      icon: "water",
-      iconSet: FontAwesome5,
+      name: "Airtime",
+      icon: "network",
+      iconSet: Entypo,
       color: "#3498db",
-      type: "water",
-      enabled: false,
+      type: "airtime",
+      enabled: true,
     },
     {
       id: 3,
@@ -179,6 +136,7 @@ const WalletScreen = ({}) => {
 
   const handleUtilitySelect = (type) => {
     setShowUtilitiesModal(false);
+
     navigation.navigate("UtilityPayment", { billType: type });
   };
 
@@ -200,12 +158,6 @@ const WalletScreen = ({}) => {
       Alert.alert("Error", "Failed to copy to clipboard");
     }
   };
-
-  // const {
-  //   mutate: createVirtualAccount,
-  //   isLoading: isCreatingVirtualAccount,
-  //   error: creationError,
-  // } = useMutateData("v3/bank/create-virtual-account", "GET", "virtual-account");
 
   const UpdateText_Mutation = useMutateData(
     "api/v3/bank/create-virtual-account",
@@ -363,32 +315,32 @@ const WalletScreen = ({}) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.balanceContainer}>
+    <ScrollView>
+      <View style={styles.container}>
         <View style={styles.balanceContainer}>
-          <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
-          <Text style={styles.balance}>
-            {data?.balance?.toFixed(2)} {data?.currency}
-          </Text>
+          <View style={styles.balanceContainer}>
+            <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
+            <Text style={styles.balance}>
+              {data?.balance?.toFixed(2)} {data?.currency}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleReloadWallet}
+            disabled={isLoading} // Disable while the query is already running
+            style={styles.reloadButton}
+          >
+            <Ionicons
+              name={isLoading ? "sync" : "reload"} // Show sync icon if loading
+              size={24}
+              color="#2196F3"
+              style={isLoading && styles.loadingSpin} // Apply spin animation if possible (requires more complex RN styling/animation not included here, but the name change helps)
+            />
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          onPress={handleReloadWallet}
-          disabled={isLoading} // Disable while the query is already running
-          style={styles.reloadButton}
-        >
-          <Ionicons
-            name={isLoading ? "sync" : "reload"} // Show sync icon if loading
-            size={24}
-            color="#2196F3"
-            style={isLoading && styles.loadingSpin} // Apply spin animation if possible (requires more complex RN styling/animation not included here, but the name change helps)
-          />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView>
         {/* Virtual Account Card */}
-        {virtualAccountData?.data && (
+        {/* {virtualAccountData?.data && (
           <View style={styles.virtualAccountCard}>
             <View style={styles.virtualAccountHeader}>
               <Icon name="account-balance" size={24} color="#2196F3" />
@@ -468,8 +420,109 @@ const WalletScreen = ({}) => {
               </View>
             </View>
           </View>
-        )}
+        )} */}
 
+        {virtualAccountData?.data && (
+          <View style={styles.virtualAccountCard}>
+            <TouchableOpacity
+              style={styles.virtualAccountHeader}
+              onPress={() =>
+                setIsVirtualAccountExpanded(!isVirtualAccountExpanded)
+              }
+              activeOpacity={0.7}
+            >
+              <Icon name="account-balance" size={24} color="#2196F3" />
+              <Text style={styles.virtualAccountTitle}>
+                Your Virtual Account
+              </Text>
+              <Icon
+                name={
+                  isVirtualAccountExpanded
+                    ? "keyboard-arrow-up"
+                    : "keyboard-arrow-down"
+                }
+                size={24}
+                color="#666"
+                style={{ marginLeft: "auto" }}
+              />
+            </TouchableOpacity>
+
+            {isVirtualAccountExpanded && (
+              <View style={styles.virtualAccountDetails}>
+                <View style={styles.accountDetailRow}>
+                  <Text style={styles.accountDetailLabel}>Account Name:</Text>
+                  <TouchableOpacity
+                    style={styles.copyButton}
+                    onPress={() =>
+                      handleCopyToClipboard(virtualAccountData.data.accountName)
+                    }
+                  >
+                    <Text style={styles.accountDetailValue}>
+                      {virtualAccountData.data.accountName}
+                    </Text>
+                    <Icon
+                      name="content-copy"
+                      size={16}
+                      color="#666"
+                      style={styles.copyIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.accountDetailRow}>
+                  <Text style={styles.accountDetailLabel}>Account Number:</Text>
+                  <TouchableOpacity
+                    style={styles.copyButton}
+                    onPress={() =>
+                      handleCopyToClipboard(
+                        virtualAccountData.data.accountNumber
+                      )
+                    }
+                  >
+                    <Text style={styles.accountDetailValue}>
+                      {virtualAccountData.data.accountNumber}
+                    </Text>
+                    <Icon
+                      name="content-copy"
+                      size={16}
+                      color="#666"
+                      style={styles.copyIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.accountDetailRow}>
+                  <Text style={styles.accountDetailLabel}>Bank Name:</Text>
+                  <Text style={styles.accountDetailValue}>
+                    {virtualAccountData.data.bankName}
+                  </Text>
+                </View>
+
+                <View style={styles.accountInfo}>
+                  <Icon name="info" size={16} color="#FF9800" />
+                  <Text style={styles.accountInfoText}>
+                    Transfer money to this account to fund your wallet
+                    automatically
+                  </Text>
+                </View>
+
+                <View style={styles.accountInfo}>
+                  <View style={{ marginLeft: 8 }}>
+                    <Text
+                      style={[
+                        styles.accountInfoText,
+                        { color: "#666", marginTop: 2 },
+                      ]}
+                    >
+                      ⚠️ A 1% transaction fee applies (capped at ₦250 per
+                      transaction).
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
         <View style={styles.buttonRow}>
           {virtualAccountData?.data ? (
             <TouchableOpacity
@@ -483,8 +536,6 @@ const WalletScreen = ({}) => {
             <TouchableOpacity
               style={styles.button}
               onPress={handleCreateVirtualAccount}
-              // disabled={isCreatingVirtualAccount}
-              // onPress={() => navigation.navigate("FundWallet")}
             >
               <>
                 <Icon name="add" size={20} color="#FFF" />
@@ -493,80 +544,80 @@ const WalletScreen = ({}) => {
             </TouchableOpacity>
           )}
         </View>
-      </ScrollView>
 
-      <Modal
-        visible={showUtilitiesModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowUtilitiesModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Select Utility Bill kaka </Text>
+        <Modal
+          visible={showUtilitiesModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowUtilitiesModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Select Utility Bill </Text>
 
-            <ScrollView
-              contentContainerStyle={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-                paddingBottom: 20,
-              }}
-            >
-              {utilities.map((utility) => (
-                <TouchableOpacity
-                  key={utility.id}
-                  style={{
-                    width: "48%",
-                    backgroundColor: utility.enabled ? "#ecf0f1" : "#f8f9fa",
-                    borderRadius: 12,
-                    padding: 15,
-                    marginBottom: 15,
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor: utility.enabled ? "#3498db" : "#ecf0f1",
-                    opacity: utility.enabled ? 1 : 0.5,
-                  }}
-                  disabled={!utility.enabled}
-                  onPress={() =>
-                    utility.enabled && handleUtilitySelect(utility.type)
-                  }
-                >
-                  <utility.iconSet
-                    name={utility.icon}
-                    size={40}
-                    color={utility.color}
-                    style={{ marginBottom: 10 }}
-                  />
-                  <Text
+              <ScrollView
+                contentContainerStyle={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                  paddingBottom: 20,
+                }}
+              >
+                {utilities.map((utility) => (
+                  <TouchableOpacity
+                    key={utility.id}
                     style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      color: "#34495e",
-                      textAlign: "center",
+                      width: "48%",
+                      backgroundColor: utility.enabled ? "#ecf0f1" : "#f8f9fa",
+                      borderRadius: 12,
+                      padding: 15,
+                      marginBottom: 15,
+                      alignItems: "center",
+                      borderWidth: 1,
+                      borderColor: utility.enabled ? "#3498db" : "#ecf0f1",
+                      opacity: utility.enabled ? 1 : 0.5,
                     }}
+                    disabled={!utility.enabled}
+                    onPress={() =>
+                      utility.enabled && handleUtilitySelect(utility.type)
+                    }
                   >
-                    {utility.name}
-                  </Text>
-                  {!utility.enabled && (
-                    <Text style={{ fontSize: 12, color: "#e67e22" }}>
-                      Coming Soon
+                    <utility.iconSet
+                      name={utility.icon}
+                      size={40}
+                      color={utility.color}
+                      style={{ marginBottom: 10 }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: "#34495e",
+                        textAlign: "center",
+                      }}
+                    >
+                      {utility.name}
                     </Text>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+                    {!utility.enabled && (
+                      <Text style={{ fontSize: 12, color: "#e67e22" }}>
+                        Coming Soon
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
 
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowUtilitiesModal(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowUtilitiesModal(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </ScrollView>
   );
 };
 

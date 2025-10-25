@@ -247,6 +247,11 @@ export const NavigationScreen = () => {
   }, []);
 
   const { updateInfo } = useUpdateChecker();
+
+  console.log({
+    tyyyy: updateInfo,
+  });
+
   let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
 
   const isRunner =
@@ -287,9 +292,63 @@ const UserAndGuest = () => {
   <>{user_data?.user?.isGuest ? <GuestNavigation /> : <MainScreen />}</>;
 };
 
-{
-  /* <MainScreen /> */
-}
+// export const UpdateScreen = ({ message }) => {
+//   const handleUpdate = () => {
+//     const url =
+//       Platform.OS === "ios"
+//         ? "https://apps.apple.com/ng/app/pausepoint/id6739864683"
+//         : "https://play.google.com/store/apps/details?id=com.pause_point.PausePoint&hl=en";
+
+//     Linking.openURL(url).catch((err) =>
+//       console.error("An error occurred while opening the store link", err)
+//     );
+//   };
+
+//   return (
+//     <View
+//       style={{
+//         flex: 1,
+//         justifyContent: "center",
+//         alignItems: "center",
+//         padding: 20,
+//         backgroundColor: "#fff",
+//       }}
+//     >
+//       <Text
+//         style={{
+//           fontSize: 24,
+//           fontWeight: "bold",
+//           marginBottom: 20,
+//         }}
+//       >
+//         Update Required
+//       </Text>
+//       <Text style={styles.message}>
+//         {message ||
+//           "A new version of the app is available. Please update to continue."}
+//       </Text>
+//       <TouchableOpacity
+//         style={{
+//           backgroundColor: "#007AFF",
+//           paddingHorizontal: 30,
+//           paddingVertical: 15,
+//           borderRadius: 8,
+//         }}
+//         onPress={handleUpdate}
+//       >
+//         <Text
+//           style={{
+//             color: "#fff",
+//             fontSize: 16,
+//             fontWeight: "bold",
+//           }}
+//         >
+//           Update Now
+//         </Text>
+//       </TouchableOpacity>
+//     </View>
+//   );
+// };
 
 export const UpdateScreen = ({ message }) => {
   const handleUpdate = () => {
@@ -310,41 +369,176 @@ export const UpdateScreen = ({ message }) => {
         justifyContent: "center",
         alignItems: "center",
         padding: 20,
-        backgroundColor: "#fff",
+        backgroundColor: "#f8fafc",
       }}
     >
-      <Text
+      {/* Animated Background Elements */}
+      <View
         style={{
-          fontSize: 24,
-          fontWeight: "bold",
-          marginBottom: 20,
+          position: "absolute",
+          top: 50,
+          right: 30,
+          width: 100,
+          height: 100,
+          backgroundColor: "#e0f2fe",
+          borderRadius: 50,
+          opacity: 0.6,
+          transform: [{ rotate: "15deg" }],
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          bottom: 80,
+          left: 20,
+          width: 80,
+          height: 80,
+          backgroundColor: "#f0fdf4",
+          borderRadius: 40,
+          opacity: 0.6,
+          transform: [{ rotate: "-10deg" }],
+        }}
+      />
+
+      {/* Main Card */}
+      <View
+        style={{
+          backgroundColor: "#ffffff",
+          borderRadius: 24,
+          padding: 32,
+          alignItems: "center",
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 4,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 20,
+          elevation: 8,
+          borderWidth: 1,
+          borderColor: "#f1f5f9",
+          maxWidth: 400,
+          width: "100%",
         }}
       >
-        Update Required
-      </Text>
-      <Text style={styles.message}>
-        {message ||
-          "A new version of the app is available. Please update to continue."}
-      </Text>
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#007AFF",
-          paddingHorizontal: 30,
-          paddingVertical: 15,
-          borderRadius: 8,
-        }}
-        onPress={handleUpdate}
-      >
+        {/* Title */}
         <Text
           style={{
-            color: "#fff",
-            fontSize: 16,
+            fontSize: 32,
             fontWeight: "bold",
+            marginBottom: 16,
+            color: "#1e293b",
+            textAlign: "center",
+            textShadowColor: "rgba(0, 0, 0, 0.05)",
+            textShadowOffset: { width: 0, height: 2 },
+            textShadowRadius: 4,
           }}
         >
-          Update Now
+          Update Available!
         </Text>
-      </TouchableOpacity>
+
+        {/* Progress Bar Container */}
+        <View
+          style={{
+            width: "100%",
+            height: 12,
+            backgroundColor: "#e2e8f0",
+            borderRadius: 6,
+            marginBottom: 28,
+            overflow: "hidden",
+          }}
+        >
+          <View
+            style={{
+              width: "75%",
+              height: "100%",
+              backgroundColor: "#3b82f6",
+              borderRadius: 6,
+              shadowColor: "#3b82f6",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+            }}
+          />
+        </View>
+
+        {/* Message */}
+        <Text
+          style={{
+            fontSize: 16,
+            color: "#64748b",
+            textAlign: "center",
+            marginBottom: 32,
+            lineHeight: 24,
+          }}
+        >
+          {message ||
+            "🎮 New features unlocked! Update to discover exciting new levels and power-ups!"}
+        </Text>
+
+        {/* Update Button */}
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#3b82f6",
+            paddingHorizontal: 40,
+            paddingVertical: 18,
+            borderRadius: 50,
+            shadowColor: "#3b82f6",
+            shadowOffset: {
+              width: 0,
+              height: 6,
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 8,
+            borderWidth: 2,
+            borderColor: "#2563eb",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+          onPress={handleUpdate}
+        >
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 18,
+              fontWeight: "bold",
+              marginRight: 12,
+            }}
+          >
+            🚀 Update Now
+          </Text>
+          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>
+            →
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Sparkle Elements */}
+      <View
+        style={{
+          position: "absolute",
+          top: 100,
+          left: 40,
+          width: 6,
+          height: 6,
+          backgroundColor: "#f59e0b",
+          borderRadius: 3,
+          opacity: 0.6,
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          top: 200,
+          right: 60,
+          width: 4,
+          height: 4,
+          backgroundColor: "#10b981",
+          borderRadius: 2,
+          opacity: 0.6,
+        }}
+      />
     </View>
   );
 };
@@ -355,6 +549,10 @@ export const useUpdateChecker = (checkInterval = 60000) => {
 
   const version = Constants.expoConfig?.version;
   let url = `${API_BASEURL}checkversion?version=${version}`;
+
+  console.log({
+    iiiiii: version,
+  });
 
   const checkForUpdates = async () => {
     try {

@@ -199,8 +199,6 @@ const Forum = () => {
                     <Image
                       source={{
                         uri: item?.user?.photo,
-                        // ||
-                        // "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
                       }}
                       style={{ width: 40, height: 40, borderRadius: 50 }}
                     />
@@ -263,6 +261,7 @@ const Forum = () => {
                     <AntDesign name="hearto" size={24} color="black" />
                     <Text>{item?.likes?.length} Likes </Text>
                   </TouchableOpacity>
+
                   <TouchableOpacity
                     style={{
                       flexDirection: "row",

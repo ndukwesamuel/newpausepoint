@@ -83,7 +83,7 @@ const apiRequest = async ({ url, method, data, token }) => {
     console.log("API Response:", response.data); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
-    console.error("API Errorss:", error.response);
+    console.error("API Errorss:", error.response.data);
     throw new Error(
       error.response?.data.error ||
         error.response?.data?.message ||
@@ -104,10 +104,6 @@ export const useMutateData = (url, method, queryKey) => {
       queryClient.invalidateQueries(queryKey); // Refresh data
     },
     onError: (error) => {
-      console.log({
-        fadafada: error.message,
-      });
-
       console.error("Mutation Error:", error);
     },
   });
