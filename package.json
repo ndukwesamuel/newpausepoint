@@ -1,6 +1,6 @@
 {
   "name": "pausepoint",
-  "version": "1.5.1",
+  "version": "1.5.4",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",

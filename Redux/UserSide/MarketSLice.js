@@ -54,9 +54,6 @@ export const Market_data_Fun = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      console.log({
-        fdf: error?.response,
-      });
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
     }
