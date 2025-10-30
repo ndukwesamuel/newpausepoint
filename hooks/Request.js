@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 
 import { useMutation, useQueryClient } from "react-query";
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+const apiUrl = "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/"; //process.env.EXPO_PUBLIC_API_URL;
 
 console.log({
   tytyy: apiUrl,

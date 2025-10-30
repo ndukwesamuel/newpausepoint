@@ -10,6 +10,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -82,7 +83,7 @@ const WalletScreen = ({}) => {
       iconSet: Entypo,
       color: "#3498db",
       type: "airtime",
-      enabled: true,
+      enabled: false,
     },
     {
       id: 3,
@@ -175,128 +176,75 @@ const WalletScreen = ({}) => {
     "virtual-account"
   );
 
-  // const {
-  //   mutate: createVirtualAccount,
-  //   isLoading: isCreatingVirtualAccount,
-  //   error: creationError,
-  // } = useMutateData(
-  //   "api/v3/bank/create-virtual-account",
-  //   "POST",
-  //   "virtual-account"
-  // );
-  // const handleCreateVirtualAccount = () => {
-  //   // 2. Call the mutate function (no data payload needed for this GET request)
-  //   createVirtualAccount(null, {
-  //     onSuccess: () => {
-  //       Alert.alert(
-  //         "Success",
-  //         "Your virtual account has been created! Details loading..."
-  //       );
-  //       // 3. Manually trigger a refetch of the virtual account data
-  //       // (useMutateData already invalidates "virtual-account" but a manual refetch ensures immediate update)
-  //       refetchVirtualAccount();
-  //     },
-  //     onError: (error) => {
-  //       // The error message is handled by your hook, but display an alert here
-  //       // console.error("Virtual Account Creation Error:", error);
-  //       Alert.alert(
-  //         "Error",
-  //         "phone number is missing please update your profile with a valid phone number to create a virtual account"
-  //       );
-  //     },
-  //   });
-  // };
+  const [isLoading_fact, setIsLoading_fact] = useState(false);
 
-  // const handleCreateVirtualAccount = () => {
-  //   // 2. Call the mutate function with null data payload for the POST request
-  //   // createVirtualAccount(null, {
-  //   //   // or createVirtualAccount({}, { ...
-  //   //   onSuccess: () => {
-  //   //     Alert.alert(
-  //   //       "Success",
-  //   //       "Your virtual account has been created! Details loading..."
-  //   //     );
-  //   //     // 3. Manually trigger a refetch of the virtual account data
-  //   //     refetchVirtualAccount();
-  //   //   },
-
-  //   //   onError: (error) => {
-  //   //     console.log({
-  //   //       cvb: error,
-  //   //     });
-
-  //   //     // Alert.alert(
-  //   //     //   "Error",
-  //   //     //   "phone number is missing please update your profile with a valid phone number to create a virtual account"
-  //   //     // );
-  //   //   },
-  //   // });
-
-  //   const payload = {
-  //     name: user_data?.user?.fullName || "No Name",
-  //   };
-
-  //   console.log("Submitting:", payload);
-  //   UpdateText_Mutation.mutate(payload);
-  // };
-
-  // NEW CODE in handleCreateVirtualAccount function:
-
-  const handleCreateVirtualAccount = () => {
-    // ... setup payload
+  const handleCreateVirtualAccount = async () => {
     const payload = {
-      name: user_data?.user?.fullName || "No Name",
+      userId: user_data?.user.id,
     };
 
-    paybillsmeter(payload, {
-      onSuccess: (response) => {
-        try {
-          console.log("Payment success:", response);
+    setIsLoading_fact(true);
 
-          Alert.alert(
-            "Success",
-            "Your virtual account has been created! Details loading..."
-          );
-          refetchVirtualAccount();
-        } catch (err) {
-          console.error("Payment success handler error:", err);
-
-          Alert.alert(
-            "Creation Failed",
-            // error.message now holds "User not found or essential profile data..."
-            error.message || "An unexpected error occurred."
-          );
-          // navigation.goBack();
+    try {
+      const response = await fetch(
+        "https://communist-carla-pausepoint-fb082012.koyeb.app/api/v1/user/bankpi",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Authorization: `Bearer ${token}`, // Add if needed
+          },
+          body: JSON.stringify(payload),
         }
-      },
-      onError: (error) => {
-        // console.error("Payment Error:", error?.message);
-        console.log({
-          fggc: error,
-        });
+      );
 
-        // // Handle different payment error scenarios
-        // let errorMessage = "Payment failed. Please try again";
+      const data = await response.json();
 
-        // if (error?.response?.data?.message) {
-        //   errorMessage = error.response.data.message;
-        // } else if (error?.message) {
-        //   errorMessage = error.message;
-        // } else if (error?.response?.status === 402) {
-        //   errorMessage = "Insufficient funds. Please top up your wallet";
-        // } else if (error?.response?.status === 400) {
-        //   errorMessage = "Invalid payment request";
-        // } else if (error?.response?.status === 500) {
-        //   errorMessage =
-        //     "Server error. If money was debited, it will be refunded";
-        // } else if (error?.code === "NETWORK_ERROR") {
-        //   errorMessage = "Network error. Please check your connection";
-        // }
+      if (!response.ok) {
+        throw new Error(data.message || "Request failed");
+      }
 
-        Alert.alert("Account  Failed", error.message);
-      },
-    });
+      // Success
+      console.log("Success:", data);
+      Alert.alert("Success", "Your virtual account has been created!");
+      refetchVirtualAccount();
+    } catch (error) {
+      // Error
+      console.log("Error:", error);
+      Alert.alert("Account Creation Failed", error.message);
+      setIsLoading_fact(false);
+    } finally {
+      setIsLoading_fact(false);
+    }
   };
+
+  // Fetch virtual account data
+  // const fetchVirtualAccount = async (userId) => {
+  //   try {
+  //     const response = await fetch(
+  //       "https://communist-carla-pausepoint-fb082012.koyeb.app/api/v1/user/bank",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ userId: userId }),
+  //       }
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.message || "Request failed");
+  //     }
+
+  //     console.log("Account data:", data);
+  //     return data;
+  //   } catch (error) {
+  //     console.log("Error:", error);
+  //     Alert.alert("Error", error.message);
+  //   }
+  // };
   if (isLoading || ispending) return <Text>Loading...</Text>;
   if (error || isError) {
     console.error("Fetch Error:", error?.message || isError?.message);
@@ -340,87 +288,6 @@ const WalletScreen = ({}) => {
         </View>
 
         {/* Virtual Account Card */}
-        {/* {virtualAccountData?.data && (
-          <View style={styles.virtualAccountCard}>
-            <View style={styles.virtualAccountHeader}>
-              <Icon name="account-balance" size={24} color="#2196F3" />
-              <Text style={styles.virtualAccountTitle}>
-                Your Virtual Account
-              </Text>
-            </View>
-
-            <View style={styles.virtualAccountDetails}>
-              <View style={styles.accountDetailRow}>
-                <Text style={styles.accountDetailLabel}>Account Name:</Text>
-                <TouchableOpacity
-                  style={styles.copyButton}
-                  onPress={() =>
-                    handleCopyToClipboard(virtualAccountData.data.accountName)
-                  }
-                >
-                  <Text style={styles.accountDetailValue}>
-                    {virtualAccountData.data.accountName}
-                  </Text>
-                  <Icon
-                    name="content-copy"
-                    size={16}
-                    color="#666"
-                    style={styles.copyIcon}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.accountDetailRow}>
-                <Text style={styles.accountDetailLabel}>Account Number:</Text>
-                <TouchableOpacity
-                  style={styles.copyButton}
-                  onPress={() =>
-                    handleCopyToClipboard(virtualAccountData.data.accountNumber)
-                  }
-                >
-                  <Text style={styles.accountDetailValue}>
-                    {virtualAccountData.data.accountNumber}
-                  </Text>
-                  <Icon
-                    name="content-copy"
-                    size={16}
-                    color="#666"
-                    style={styles.copyIcon}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.accountDetailRow}>
-                <Text style={styles.accountDetailLabel}>Bank Name:</Text>
-                <Text style={styles.accountDetailValue}>
-                  {virtualAccountData.data.bankName}
-                </Text>
-              </View>
-
-              <View style={styles.accountInfo}>
-                <Icon name="info" size={16} color="#FF9800" />
-                <Text style={styles.accountInfoText}>
-                  Transfer money to this account to fund your wallet
-                  automatically
-                </Text>
-              </View>
-
-              <View style={styles.accountInfo}>
-                <View style={{ marginLeft: 8 }}>
-                  <Text
-                    style={[
-                      styles.accountInfoText,
-                      { color: "#666", marginTop: 2 },
-                    ]}
-                  >
-                    ⚠️ A 1% transaction fee applies (capped at ₦250 per
-                    transaction).
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        )} */}
 
         {virtualAccountData?.data && (
           <View style={styles.virtualAccountCard}>
@@ -514,8 +381,7 @@ const WalletScreen = ({}) => {
                         { color: "#666", marginTop: 2 },
                       ]}
                     >
-                      ⚠️ A 1% transaction fee applies (capped at ₦250 per
-                      transaction).
+                      ⚠️ A transaction fee applies ₦250 per transaction.
                     </Text>
                   </View>
                 </View>
@@ -536,11 +402,21 @@ const WalletScreen = ({}) => {
             <TouchableOpacity
               style={styles.button}
               onPress={handleCreateVirtualAccount}
+              disabled={isLoading}
             >
-              <>
+              {/* <>
                 <Icon name="add" size={20} color="#FFF" />
                 <Text style={styles.buttonText}>Create Virtual Account</Text>
-              </>
+              </> */}
+
+              {isLoading_fact ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <>
+                  <Icon name="add" size={20} color="#FFF" />
+                  <Text style={styles.buttonText}>Create Virtual Account</Text>
+                </>
+              )}
             </TouchableOpacity>
           )}
         </View>

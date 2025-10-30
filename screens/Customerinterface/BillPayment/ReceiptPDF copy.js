@@ -422,38 +422,3 @@ const ReceiptPDF = ({ transaction, customConfig = {} }) => {
 };
 
 export default ReceiptPDF;
-
-// Example usage with STRON format:
-/*
-const transactionData = {
-  date: "2024-01-15 14:30:00",
-  userCode: "UC123456",
-  customerNo: "123456789",
-  meterNo: "MTR001234",
-  activity: "Electricity Purchase",
-  district: "Ajah",
-  accountNo: "ACC789012",
-  paymentMethod: "Online Payment",
-  address: "Captains Court Estate, Ajah",
-  value: "5000.00",
-  token: "1234-5678-9012-3456-7890",
-  vat: "375.00",
-  totalFees: "100.00",
-  amountPaid: "5475.00",
-  netValue: "5000.00"
-};
-
-// Custom configuration (optional)
-const customConfig = {
-  companyName: "YOUR COMPANY",
-  companySubtitle: "YOUR SUBTITLE HERE", 
-  receiptTitle: "YOUR CUSTOM TITLE",
-  logoUrl: "https://yoursite.com/logo.png", // Optional logo URL
-  watermarkText: "YOUR BRAND"
-};
-
-<ReceiptPDF transaction={transactionData} />
-
-// Or with custom config:
-// <ReceiptPDF transaction={transactionData} customConfig={customConfig} />
-*/

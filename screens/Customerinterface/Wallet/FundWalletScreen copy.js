@@ -242,7 +242,7 @@ const FundWalletScreen = ({ navigation }) => {
           setWebviewLoading(true); // Start loading indicator when WebView appears
         },
         onError: (error) => {
-          console.error("Mutation Error:", error.message);
+          console.error("Mutation Error jaja:", error.message);
           alert(
             `Failed to initiate payment: ${
               error.message || "An error occurred"

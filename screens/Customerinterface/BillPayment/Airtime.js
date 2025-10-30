@@ -172,16 +172,9 @@ const Airtime = () => {
       },
       onError: (error) => {
         console.log({
-          cncnc: error,
+          cncnc: error.message,
         });
-
-        let errorMessage = "Purchase failed. Please try again";
-        if (error?.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        } else if (error?.response?.status === 402) {
-          errorMessage = "Insufficient funds. Please top up your wallet";
-        }
-        Alert.alert("Purchase Failed", errorMessage);
+        Alert.alert("Purchase Failed", error.message);
       },
     });
   };
