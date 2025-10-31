@@ -35,12 +35,7 @@ const WalletScreen = ({}) => {
     error,
     refetch: refetchWallet,
   } = useFetchData("wallet", "wallet");
-  const {
-    data: allmydues,
-    isLoading: ispending,
-    error: isError,
-    refetch: refetchDues,
-  } = useFetchData("wallet/pay-due", "pay-due");
+
   const [isVirtualAccountExpanded, setIsVirtualAccountExpanded] =
     useState(false);
   const {
@@ -201,7 +196,7 @@ const WalletScreen = ({}) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Request failed");
+        throw new Error(data?.message || "Request failed");
       }
 
       // Success
@@ -217,39 +212,6 @@ const WalletScreen = ({}) => {
       setIsLoading_fact(false);
     }
   };
-
-  // Fetch virtual account data
-  // const fetchVirtualAccount = async (userId) => {
-  //   try {
-  //     const response = await fetch(
-  //       "https://communist-carla-pausepoint-fb082012.koyeb.app/api/v1/user/bank",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ userId: userId }),
-  //       }
-  //     );
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(data.message || "Request failed");
-  //     }
-
-  //     console.log("Account data:", data);
-  //     return data;
-  //   } catch (error) {
-  //     console.log("Error:", error);
-  //     Alert.alert("Error", error.message);
-  //   }
-  // };
-  if (isLoading || ispending) return <Text>Loading...</Text>;
-  if (error || isError) {
-    console.error("Fetch Error:", error?.message || isError?.message);
-    return <Text>Error: {error?.message || isError?.message}</Text>;
-  }
 
   const handleReloadWallet = async () => {
     try {
@@ -321,11 +283,13 @@ const WalletScreen = ({}) => {
                   <TouchableOpacity
                     style={styles.copyButton}
                     onPress={() =>
-                      handleCopyToClipboard(virtualAccountData.data.accountName)
+                      handleCopyToClipboard(
+                        virtualAccountData?.data?.accountName
+                      )
                     }
                   >
                     <Text style={styles.accountDetailValue}>
-                      {virtualAccountData.data.accountName}
+                      {virtualAccountData?.data?.accountName}
                     </Text>
                     <Icon
                       name="content-copy"
@@ -342,12 +306,12 @@ const WalletScreen = ({}) => {
                     style={styles.copyButton}
                     onPress={() =>
                       handleCopyToClipboard(
-                        virtualAccountData.data.accountNumber
+                        virtualAccountData?.data?.accountNumber
                       )
                     }
                   >
                     <Text style={styles.accountDetailValue}>
-                      {virtualAccountData.data.accountNumber}
+                      {virtualAccountData?.data?.accountNumber}
                     </Text>
                     <Icon
                       name="content-copy"
@@ -361,7 +325,7 @@ const WalletScreen = ({}) => {
                 <View style={styles.accountDetailRow}>
                   <Text style={styles.accountDetailLabel}>Bank Name:</Text>
                   <Text style={styles.accountDetailValue}>
-                    {virtualAccountData.data.bankName}
+                    {virtualAccountData?.data?.bankName}
                   </Text>
                 </View>
 
