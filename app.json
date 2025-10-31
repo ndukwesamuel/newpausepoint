@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -28,7 +28,8 @@
         }
       ],
       "expo-build-properties",
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ],
     "ios": {
       "supportsTablet": false,
@@ -39,7 +40,7 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "43",
+      "buildNumber": "44",
       "runtimeVersion": "1.0.0"
     },
     "android": {

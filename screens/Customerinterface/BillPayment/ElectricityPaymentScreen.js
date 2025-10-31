@@ -1610,10 +1610,15 @@ import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 
 const ElectricityPaymentScreen = () => {
   const { user_data } = useSelector((state) => state.AuthSlice);
+  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
   const navigation = useNavigation();
 
   console.log({
-    vvv: user_data?.token,
+    vvv: user_data?.user.id,
+  });
+
+  console.log({
+    vvv2: userProfile_data?.currentClanMeeting?._id,
   });
 
   const [meterId, setMeterId] = useState("");
@@ -1744,7 +1749,13 @@ const ElectricityPaymentScreen = () => {
       const paymentData = {
         meterId,
         units: Number(units),
+        userID: user_data.user.id,
+        ClanId: userProfile_data?.currentClanMeeting?._id,
       };
+
+      console.log({
+        xxxx: paymentData,
+      });
 
       // Replace with your actual API base URL
       const baseURL = "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/";
@@ -1752,7 +1763,7 @@ const ElectricityPaymentScreen = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user_data?.token}`, // Add auth token if needed
+          Authorization: `Bearer ${user_data.token}`, // Add auth token if needed
         },
         body: JSON.stringify(paymentData),
       });
