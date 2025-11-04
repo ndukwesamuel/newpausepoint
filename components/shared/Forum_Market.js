@@ -178,22 +178,7 @@ const Forum_Market = () => {
         </TouchableOpacity>
       </View>
       <View style={{ height: "85%" }}>
-        {get_user_profile_data?.currentClanMeeting?._id && !isGuest ? ( // Only show Forum/Wallet if clan meeting exists AND user is not a guest
-          <>{forumlist ? <Forum /> : <WalletScreen />}</>
-        ) : // If a guest, always show WalletScreen, otherwise show ClickToJoinCLan
-        isGuest ? (
-          <WalletScreen />
-        ) : (
-          <ScrollView
-            contentContainerStyle={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <ClickToJoinCLan />
-          </ScrollView>
-        )}
+        <WalletScreen />
       </View>
     </>
   );

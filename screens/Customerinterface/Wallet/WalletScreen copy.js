@@ -118,101 +118,6 @@ const WalletScreen = ({}) => {
     },
   ];
 
-  const quickLinks = [
-    {
-      id: 1,
-      name: "My Clans",
-      icon: "people-outline",
-      iconSet: Ionicons,
-      color: "#2196F3",
-      type: "clans",
-      route: "myclan",
-      params: {},
-      condition: true, // Always show
-    },
-
-    {
-      id: 2,
-      name: "Amenities",
-      icon: "apartment",
-      iconSet: MaterialIcons,
-      color: "#009688",
-      type: "amenities",
-      route: "amentities",
-      params: {},
-      condition: !isGuest,
-    },
-    {
-      id: 3,
-      name: "Emergency",
-      icon: "emergency",
-      iconSet: MaterialIcons,
-      color: "#F44336",
-      type: "emergency",
-      route: "Emergencyscreen",
-      params: {},
-      condition: !isGuest,
-    },
-    {
-      id: 4,
-      name: "Polls/Surveys",
-      icon: "poll",
-      iconSet: MaterialIcons,
-      color: "#9C27B0",
-      type: "polls",
-      route: "userpolls",
-      params: {},
-      condition: !isGuest,
-    },
-    {
-      id: 5,
-      name: "Service",
-      icon: "room-service",
-      iconSet: MaterialIcons,
-      color: "#FF9800",
-      type: "service",
-      route: "service",
-      params: {},
-      condition: true,
-    },
-    {
-      id: 6,
-      name: "Marketplace",
-      icon: "store",
-      iconSet: MaterialIcons,
-      color: "#00BCD4",
-      type: "marketplace",
-      route: "Marketplace",
-      params: {},
-      condition: true,
-    },
-    {
-      id: 7,
-      name: "ICE Contacts",
-      icon: "contact-phone",
-      iconSet: MaterialIcons,
-      color: "#E91E63",
-      type: "ice",
-      route: "icecontact",
-      params: {},
-      condition: !isGuest,
-    },
-    {
-      id: 8,
-      name: "Domestic Staff",
-      icon: "people",
-      iconSet: MaterialIcons,
-      color: "#3F51B5",
-      type: "domestic",
-      route: "domestic",
-      params: {},
-      condition: !isGuest,
-    },
-  ];
-
-  // Filter the quick links based on conditions
-  const visibleQuickLinks = quickLinks.filter((link) => link.condition);
-
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -320,422 +225,164 @@ const WalletScreen = ({}) => {
   };
 
   return (
-    <ScrollView
-      style={{
-        flex: 1,
-      }}
-    >
+    <ScrollView>
       <View style={styles.container}>
-        <View
-          style={{
-            backgroundColor: "#4CAF50",
-            borderRadius: 10,
-            padding: 15,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 5,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 15,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text
-                style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "500" }}
-              >
-                Available Balance
-              </Text>
-            </View>
-
-            {/* <TouchableOpacity>
-              <Text style={{ color: "#FFFFFF", fontSize: 14 }}>
-                Transaction History →
-              </Text>
-            </TouchableOpacity> */}
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                color: "#FFFFFF",
-                fontSize: 18,
-                fontWeight: "bold",
-              }}
-            >
-              ₦ {data?.balance?.toFixed(2)}
+        <View style={styles.balanceContainer}>
+          <View style={styles.balanceContainer}>
+            <Icon name="account-balance-wallet" size={30} color="#4CAF50" />
+            <Text style={styles.balance}>
+              {data?.balance?.toFixed(2)} {data?.currency}
             </Text>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#FFFFFF",
-                paddingHorizontal: 20,
-                paddingVertical: 10,
-                borderRadius: 20,
-              }}
-              onPress={() => navigation.navigate("FundWallet")}
-            >
-              <Text style={{ color: "#00D09E", fontWeight: "600" }}>
-                + Add Money
-              </Text>
-            </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            onPress={handleReloadWallet}
+            disabled={isLoading} // Disable while the query is already running
+            style={styles.reloadButton}
+          >
+            <Ionicons
+              name={isLoading ? "sync" : "reload"} // Show sync icon if loading
+              size={24}
+              color="#2196F3"
+              style={isLoading && styles.loadingSpin} // Apply spin animation if possible (requires more complex RN styling/animation not included here, but the name change helps)
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* Quick Actions */}
-        <View
-          style={{
-            marginTop: 20,
-            marginBottom: 20,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: "#8E8E93",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "bold",
-            }}
-          >
-            Bills Payment
-          </Text>
+        {/* Virtual Account Card */}
 
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              marginTop: 10,
-            }}
-          >
-            {/* Row 1 */}
+        {virtualAccountData?.data && (
+          <View style={styles.virtualAccountCard}>
             <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
+              style={styles.virtualAccountHeader}
               onPress={() =>
-                navigation.navigate("UtilityPayment", {
-                  billType: "electricty",
-                })
+                setIsVirtualAccountExpanded(!isVirtualAccountExpanded)
               }
+              activeOpacity={0.7}
             >
-              <View style={{ position: "relative" }}>
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    backgroundColor: "#4CAF50",
-                    borderRadius: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <Icon name="electric-bolt" size={30} color="white" />
-                </View>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                Electricity
+              <Icon name="account-balance" size={24} color="#2196F3" />
+              <Text style={styles.virtualAccountTitle}>
+                Your Virtual Account
               </Text>
+              <Icon
+                name={
+                  isVirtualAccountExpanded
+                    ? "keyboard-arrow-up"
+                    : "keyboard-arrow-down"
+                }
+                size={24}
+                color="#666"
+                style={{ marginLeft: "auto" }}
+              />
             </TouchableOpacity>
 
-            {/* <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <View style={{ position: "relative" }}>
-                <View
-                  style={{
-                    width: 60,
-                    height: 60,
-                    backgroundColor: "#00D09E",
-                    borderRadius: 15,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <Text style={{ fontSize: 24 }}>📊</Text>
-                </View>
-                <View
-                  style={{
-                    position: "absolute",
-                    top: -5,
-                    right: -5,
-                    backgroundColor: "#FF3366",
-                    borderRadius: 10,
-                    paddingHorizontal: 6,
-                    paddingVertical: 2,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#FFFFFF",
-                      fontSize: 9,
-                      fontWeight: "bold",
-                    }}
+            {isVirtualAccountExpanded && (
+              <View style={styles.virtualAccountDetails}>
+                <View style={styles.accountDetailRow}>
+                  <Text style={styles.accountDetailLabel}>Account Name:</Text>
+                  <TouchableOpacity
+                    style={styles.copyButton}
+                    onPress={() =>
+                      handleCopyToClipboard(
+                        virtualAccountData?.data?.accountName
+                      )
+                    }
                   >
-                    Up to 6%
+                    <Text style={styles.accountDetailValue}>
+                      {virtualAccountData?.data?.accountName}
+                    </Text>
+                    <Icon
+                      name="content-copy"
+                      size={16}
+                      color="#666"
+                      style={styles.copyIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.accountDetailRow}>
+                  <Text style={styles.accountDetailLabel}>Account Number:</Text>
+                  <TouchableOpacity
+                    style={styles.copyButton}
+                    onPress={() =>
+                      handleCopyToClipboard(
+                        virtualAccountData?.data?.accountNumber
+                      )
+                    }
+                  >
+                    <Text style={styles.accountDetailValue}>
+                      {virtualAccountData?.data?.accountNumber}
+                    </Text>
+                    <Icon
+                      name="content-copy"
+                      size={16}
+                      color="#666"
+                      style={styles.copyIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.accountDetailRow}>
+                  <Text style={styles.accountDetailLabel}>Bank Name:</Text>
+                  <Text style={styles.accountDetailValue}>
+                    {virtualAccountData?.data?.bankName}
                   </Text>
                 </View>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                Data
-              </Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <View
-                style={{
-                  width: 60,
-                  height: 60,
-                  backgroundColor: "#F0F0F0",
-                  borderRadius: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 24 }}>⚽</Text>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                Betting
-              </Text>
-            </TouchableOpacity>
+                <View style={styles.accountInfo}>
+                  <Icon name="info" size={16} color="#FF9800" />
+                  <Text style={styles.accountInfoText}>
+                    Transfer money to this account to fund your wallet
+                    automatically
+                  </Text>
+                </View>
 
-            <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <View
-                style={{
-                  width: 60,
-                  height: 60,
-                  backgroundColor: "#00D09E",
-                  borderRadius: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 24 }}>📺</Text>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                TV
-              </Text>
-            </TouchableOpacity> */}
-
-            {/* Row 2 */}
-            {/* <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <View
-                style={{
-                  width: 60,
-                  height: 60,
-                  backgroundColor: "#00D09E",
-                  borderRadius: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 24 }}>💼</Text>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                Safebox
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <View
-                style={{
-                  width: 60,
-                  height: 60,
-                  backgroundColor: "#00D09E",
-                  borderRadius: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 24 }}>💵</Text>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                Loan
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <View
-                style={{
-                  width: 60,
-                  height: 60,
-                  backgroundColor: "#00D09E",
-                  borderRadius: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 24 }}>💚</Text>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                Play4aChild
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: "23%",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <View
-                style={{
-                  width: 60,
-                  height: 60,
-                  backgroundColor: "#00D09E",
-                  borderRadius: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 24 }}>⋯</Text>
-              </View>
-              <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-              >
-                More
-              </Text>
-            </TouchableOpacity> */}
-          </View>
-        </View>
-
-        {/* Quick Links */}
-        <View
-          style={{
-            marginTop: 20,
-            marginBottom: 20,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: "#8E8E93",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "bold",
-            }}
-          >
-            Quick Links
-          </Text>
-
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              marginTop: 10,
-            }}
-          >
-            {visibleQuickLinks.map((link) => {
-              const IconComponent = link.iconSet;
-              return (
-                <TouchableOpacity
-                  key={link.id}
-                  style={{
-                    width: "23%",
-                    alignItems: "center",
-                    marginBottom: 20,
-                  }}
-                  onPress={() => navigation.navigate(link.route, link.params)}
-                >
-                  <View style={{ position: "relative" }}>
-                    <View
-                      style={{
-                        width: 40,
-                        height: 40,
-                        backgroundColor: link.color,
-                        borderRadius: 10,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginBottom: 8,
-                      }}
+                <View style={styles.accountInfo}>
+                  <View style={{ marginLeft: 8 }}>
+                    <Text
+                      style={[
+                        styles.accountInfoText,
+                        { color: "#666", marginTop: 2 },
+                      ]}
                     >
-                      <IconComponent name={link.icon} size={20} color="white" />
-                    </View>
+                      ⚠️ A transaction fee applies ₦250 per transaction.
+                    </Text>
                   </View>
-                  <Text
-                    style={{ fontSize: 12, color: "#333", textAlign: "center" }}
-                  >
-                    {link.name}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+                </View>
+              </View>
+            )}
           </View>
+        )}
+        <View style={styles.buttonRow}>
+          {virtualAccountData?.data ? (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setShowUtilitiesModal(true)}
+            >
+              <Icon name="payment" size={20} color="#FFF" />
+              <Text style={styles.buttonText}>Pay Bills </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleCreateVirtualAccount}
+              disabled={isLoading}
+            >
+              {/* <>
+                <Icon name="add" size={20} color="#FFF" />
+                <Text style={styles.buttonText}>Create Virtual Account</Text>
+              </> */}
+
+              {isLoading_fact ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <>
+                  <Icon name="add" size={20} color="#FFF" />
+                  <Text style={styles.buttonText}>Create Virtual Account</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
         <Modal
@@ -871,9 +518,8 @@ const DueDateIndicator = ({ dueDate }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    // backgroundColor: "white",
+    padding: 20,
+    backgroundColor: "#F5F5F5",
   },
   title: {
     fontSize: 24,

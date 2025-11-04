@@ -195,6 +195,7 @@ import {
   CustomTabButton,
   Tabcomponent,
 } from "../../components/shared/naviagetion";
+import Forum from "../../components/Forum/Forum";
 
 const Tab = createBottomTabNavigator();
 
@@ -239,8 +240,8 @@ const UserTabNavigation = () => {
             }}
           />
           <Tab.Screen
-            name="Neigborhood"
-            component={Neigborhood}
+            name="Forum"
+            component={Forum}
             options={{
               tabBarActiveTintColor: "#005091",
               headerShown: false,
@@ -249,7 +250,7 @@ const UserTabNavigation = () => {
                   focused={focused}
                   iconFocused={require("../../assets/message-text2.png")}
                   iconUnfocused={require("../../assets/message-text.png")}
-                  label="Chat"
+                  label="Forum"
                   containerStyle={{ alignItems: "center", top: 10 }}
                   texttStyle={{ color: "#000000" }}
                 />
