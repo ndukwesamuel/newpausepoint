@@ -59,6 +59,9 @@ import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
 import BillDashboard from "../../screens/Customerinterface/BillPayment/BillDashboard";
 import ElectricityPaymentScreen from "../../screens/Customerinterface/BillPayment/ElectricityPaymentScreen";
 import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
+import Ajo from "../../App/General/Ajo/Screen/Ajo";
+import CreateGroupScreen from "../../App/General/Ajo/Screen/Creategroupscreen";
+import Airtime from "../../screens/Customerinterface/BillPayment/Airtime";
 
 const Stack = createNativeStackNavigator();
 
@@ -213,6 +216,13 @@ export const Usernaviagetion = () => {
       component: Amenities,
       title: "Amenities",
     },
+
+    {
+      name: "Airtime",
+      component: Airtime,
+      title: "Airtime",
+    },
+
     {
       name: "MarketReview",
       component: MarketReview,
@@ -247,6 +257,17 @@ export const Usernaviagetion = () => {
       title: "Help Support",
       component: HelpSupport,
       name: "HelpSupport",
+    },
+    {
+      title: "Ajo",
+      component: Ajo,
+      name: "Ajo",
+    },
+
+    {
+      title: "Create Group'",
+      component: CreateGroupScreen,
+      name: "CreateGroup",
     },
     {
       title: "About Us",

@@ -21,6 +21,7 @@ import {
   Ionicons,
   MaterialIcons,
   Entypo,
+  AntDesign,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
@@ -457,55 +458,70 @@ const WalletScreen = ({}) => {
               </Text>
             </TouchableOpacity>
 
-            {/* <TouchableOpacity
+            <TouchableOpacity
               style={{
                 width: "23%",
                 alignItems: "center",
                 marginBottom: 20,
               }}
+              onPress={() => navigation.navigate("Ajo")}
             >
               <View style={{ position: "relative" }}>
                 <View
                   style={{
-                    width: 60,
-                    height: 60,
-                    backgroundColor: "#00D09E",
-                    borderRadius: 15,
+                    width: 40,
+                    height: 40,
+                    backgroundColor: "#4CAF50",
+                    borderRadius: 10,
                     justifyContent: "center",
                     alignItems: "center",
                     marginBottom: 8,
                   }}
                 >
-                  <Text style={{ fontSize: 24 }}>📊</Text>
-                </View>
-                <View
-                  style={{
-                    position: "absolute",
-                    top: -5,
-                    right: -5,
-                    backgroundColor: "#FF3366",
-                    borderRadius: 10,
-                    paddingHorizontal: 6,
-                    paddingVertical: 2,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#FFFFFF",
-                      fontSize: 9,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Up to 6%
-                  </Text>
+                  <MaterialIcons name="savings" size={24} color="white" />
+                  {/* <Icon name="electric-bolt" size={30} color="white" /> */}
                 </View>
               </View>
               <Text
                 style={{ fontSize: 12, color: "#333", textAlign: "center" }}
               >
-                Data
+                Ajo
               </Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                width: "23%",
+                alignItems: "center",
+                marginBottom: 20,
+              }}
+              onPress={() => navigation.navigate("Airtime")}
+            >
+              <View style={{ position: "relative" }}>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    backgroundColor: "#4CAF50",
+                    borderRadius: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <AntDesign name="aliyun" size={24} color="white" />
+                  {/* <Icon name="electric-bolt" size={30} color="white" /> */}
+                </View>
+              </View>
+              <Text
+                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
+              >
+                Airtime
+              </Text>
+            </TouchableOpacity>
+
+            {/*
+           
 
             <TouchableOpacity
               style={{
