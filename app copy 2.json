@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "plugins": [
       [
         "expo-camera",
@@ -39,9 +37,7 @@
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
+        "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
       "buildNumber": "44",
@@ -66,7 +62,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "0f1db893-0297-4749-bf54-53826b86139d"
+        "projectId": "e012faf4-1814-4ba6-986a-167a537c8ea3"
       }
     },
     "updates": {

@@ -60,8 +60,14 @@ import BillDashboard from "../../screens/Customerinterface/BillPayment/BillDashb
 import ElectricityPaymentScreen from "../../screens/Customerinterface/BillPayment/ElectricityPaymentScreen";
 import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
 import Ajo from "../../App/General/Ajo/Screen/Ajo";
+
 import CreateGroupScreen from "../../App/General/Ajo/Screen/Creategroupscreen";
 import Airtime from "../../screens/Customerinterface/BillPayment/Airtime";
+import GroupDetailScreen from "../../App/General/Ajo/Screen/GroupDetailScreen";
+import EsusuLandingScreen from "../../App/General/Ajo/Screen/EsusuLandingScreen";
+import EsusuCreateGroupScreen from "../../App/General/Ajo/Screen/EsusuCreateGroupScreen";
+import EsusuGroupDetailsScreen from "../../App/General/Ajo/Screen/EsusuGroupDetailsScreen";
+import CycleScreen from "../../App/General/Ajo/Screen/CycleScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -265,9 +271,39 @@ export const Usernaviagetion = () => {
     },
 
     {
+      title: "Cycle",
+      component: CycleScreen,
+      name: "CycleScreen",
+    },
+
+    {
+      title: "Esusu",
+      component: EsusuLandingScreen,
+      name: "EsusuLandingScreen",
+    },
+
+    {
+      title: "Group Details",
+      component: GroupDetailScreen,
+      name: "GroupDetail",
+    },
+
+    {
+      title: "Group Details",
+      component: EsusuGroupDetailsScreen,
+      name: "EsusuGroupDetailsScreen",
+    },
+
+    {
       title: "Create Group'",
       component: CreateGroupScreen,
       name: "CreateGroup",
+    },
+
+    {
+      title: "Create Group'",
+      component: EsusuCreateGroupScreen,
+      name: "EsusuCreateGroupScreen",
     },
     {
       title: "About Us",

@@ -38,6 +38,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useMutateData } from "../hooks/Request";
 import { useMutation } from "react-query";
 import Toast from "react-native-toast-message";
+import { loginUser } from "../Redux/v2/AuthSlicev2";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 // const LoginScreen = ({}) => {
@@ -170,8 +171,8 @@ const LoginScreen = ({}) => {
     }
 
     dispatch(setOtpEmail(email));
-
     dispatch(Login_Fun(data));
+    dispatch(loginUser(data));
   };
 
   useEffect(() => {

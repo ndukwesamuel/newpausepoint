@@ -329,7 +329,7 @@ const WalletScreen = ({}) => {
       <View style={styles.container}>
         <View
           style={{
-            backgroundColor: "#4CAF50",
+            backgroundColor: "green",
             borderRadius: 10,
             padding: 15,
             shadowColor: "#000",
@@ -353,13 +353,26 @@ const WalletScreen = ({}) => {
               >
                 Available Balance
               </Text>
+              {/* Add Reload Button */}
+              <TouchableOpacity
+                onPress={handleReloadWallet}
+                disabled={isLoading}
+                style={{
+                  marginLeft: 10,
+                  padding: 5,
+                }}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="reload"
+                    size={20}
+                    color="#FFFFFF"
+                  />
+                )}
+              </TouchableOpacity>
             </View>
-
-            {/* <TouchableOpacity>
-              <Text style={{ color: "#FFFFFF", fontSize: 14 }}>
-                Transaction History →
-              </Text>
-            </TouchableOpacity> */}
           </View>
 
           <View
@@ -376,7 +389,7 @@ const WalletScreen = ({}) => {
                 fontWeight: "bold",
               }}
             >
-              ₦ {data?.balance?.toFixed(2)}
+              ₦ {data?.balance?.toFixed(2) || "0.00"}
             </Text>
 
             <TouchableOpacity
@@ -458,13 +471,13 @@ const WalletScreen = ({}) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 width: "23%",
                 alignItems: "center",
                 marginBottom: 20,
               }}
-              onPress={() => navigation.navigate("Ajo")}
+              onPress={() => navigation.navigate("EsusuLandingScreen")}
             >
               <View style={{ position: "relative" }}>
                 <View
@@ -479,15 +492,14 @@ const WalletScreen = ({}) => {
                   }}
                 >
                   <MaterialIcons name="savings" size={24} color="white" />
-                  {/* <Icon name="electric-bolt" size={30} color="white" /> */}
                 </View>
               </View>
               <Text
                 style={{ fontSize: 12, color: "#333", textAlign: "center" }}
               >
-                Ajo
+                Esusu
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity
               style={{

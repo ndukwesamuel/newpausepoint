@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -10,41 +10,38 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
+// import { useFetchData_v2 } from "../../../../hooks/Requestv2";
+import { useSelector } from "react-redux";
+import { useFetchData_v2 } from "../../../../hooks/Requestv2";
 
 const Ajo = () => {
   const navigation = useNavigation();
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+
+  // const qqqq = useSelector((state) => state.authSlice);
+  // console.log({
+  //   emek: qqqq,
+  // });
+
+  const { userData } = useSelector((state) => state.authSlice);
+  console.log({
+    emek: userData,
+  });
 
   const {
-    data: getallErrand,
-    isLoading: isLoadinggetallErrand,
-    error: iserrorgetallErrand,
-    isFetching, // 👈 important: tells if query is refetching
-    refetch, // 👈 function to manually trigger refetch
-  } = useFetchData(`api/v1/guesterrand`, "errand");
+    data: getALlAjo,
+    isLoading: isLoadinggetALlAjo,
+    error: iserrorgetALlAjo,
+    isFetching,
+    refetch,
+  } = useFetchData_v2(`api/v1/ajo/67fe7602ff5d9e29a8f31baf/`, "errand");
 
-  useEffect(() => {
-    fetchGroups();
-  }, []);
-
-  const fetchGroups = async () => {
-    try {
-      const response = await axios.get("/api/groups");
-      setGroups(response.data);
-    } catch (error) {
-      console.error("Error fetching groups:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  // Extract groups from the response
+  const groups = getALlAjo || [];
+  const loading = isLoadinggetALlAjo;
+  const refreshing = isFetching && !isLoadinggetALlAjo;
 
   const onRefresh = () => {
-    setRefreshing(true);
-    fetchGroups();
+    refetch();
   };
 
   const calculateProgress = (totalSaved, goalAmount) => {
@@ -71,15 +68,13 @@ const Ajo = () => {
   const renderGroupCard = ({ item }) => {
     const progress = calculateProgress(item.totalSaved, item.goalAmount);
     const myContribution =
-      item.members.find((m) => m.user._id === item.currentUserId)
+      item.members.find((m) => m.user._id === "67fe7602ff5d9e29a8f31baf")
         ?.totalContributed || 0;
 
     return (
       <TouchableOpacity
         style={styles.groupCard}
-        onPress={() =>
-          navigation.navigate("GroupDetail", { groupId: item._id })
-        }
+        onPress={() => navigation.navigate("GroupDetail", { item: item })}
         activeOpacity={0.7}
       >
         <View style={styles.cardHeader}>
@@ -143,6 +138,21 @@ const Ajo = () => {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#8B5CF6" />
+      </View>
+    );
+  }
+
+  if (iserrorgetALlAjo) {
+    return (
+      <View style={styles.centerContainer}>
+        <Ionicons name="alert-circle-outline" size={80} color="#EF4444" />
+        <Text style={styles.emptyTitle}>Error Loading Groups</Text>
+        <Text style={styles.emptyText}>
+          {iserrorgetALlAjo?.message || "Something went wrong"}
+        </Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -339,6 +349,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6B7280",
     textAlign: "center",
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: "#8B5CF6",
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
   },
   fab: {
     position: "absolute",

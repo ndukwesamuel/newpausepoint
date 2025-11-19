@@ -292,64 +292,6 @@ const UserAndGuest = () => {
   <>{user_data?.user?.isGuest ? <GuestNavigation /> : <MainScreen />}</>;
 };
 
-// export const UpdateScreen = ({ message }) => {
-//   const handleUpdate = () => {
-//     const url =
-//       Platform.OS === "ios"
-//         ? "https://apps.apple.com/ng/app/pausepoint/id6739864683"
-//         : "https://play.google.com/store/apps/details?id=com.pause_point.PausePoint&hl=en";
-
-//     Linking.openURL(url).catch((err) =>
-//       console.error("An error occurred while opening the store link", err)
-//     );
-//   };
-
-//   return (
-//     <View
-//       style={{
-//         flex: 1,
-//         justifyContent: "center",
-//         alignItems: "center",
-//         padding: 20,
-//         backgroundColor: "#fff",
-//       }}
-//     >
-//       <Text
-//         style={{
-//           fontSize: 24,
-//           fontWeight: "bold",
-//           marginBottom: 20,
-//         }}
-//       >
-//         Update Required
-//       </Text>
-//       <Text style={styles.message}>
-//         {message ||
-//           "A new version of the app is available. Please update to continue."}
-//       </Text>
-//       <TouchableOpacity
-//         style={{
-//           backgroundColor: "#007AFF",
-//           paddingHorizontal: 30,
-//           paddingVertical: 15,
-//           borderRadius: 8,
-//         }}
-//         onPress={handleUpdate}
-//       >
-//         <Text
-//           style={{
-//             color: "#fff",
-//             fontSize: 16,
-//             fontWeight: "bold",
-//           }}
-//         >
-//           Update Now
-//         </Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
-
 export const UpdateScreen = ({ message }) => {
   const handleUpdate = () => {
     const url =
