@@ -2,7 +2,8 @@
   "build": {
     "preview": {
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "latest"
       },
       "ios": {
         "simulator": true
@@ -11,7 +12,8 @@
     },
     "preview2": {
       "android": {
-        "gradleCommand": ":app:assembleRelease"
+        "gradleCommand": ":app:assembleRelease",
+        "image": "latest"
       },
       "channel": "preview2"
     },
@@ -20,6 +22,10 @@
       "channel": "preview3"
     },
     "production": {
+      "android": {
+        "buildType": "aab",
+        "image": "latest"
+      },
       "ios": {
         "credentialsSource": "remote",
         "image": "macos-sonoma-14.6-xcode-16.0",

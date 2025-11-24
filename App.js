@@ -248,10 +248,6 @@ export const NavigationScreen = () => {
 
   const { updateInfo } = useUpdateChecker();
 
-  console.log({
-    tyyyy: updateInfo,
-  });
-
   let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
 
   const isRunner =
@@ -491,10 +487,6 @@ export const useUpdateChecker = (checkInterval = 60000) => {
 
   const version = Constants.expoConfig?.version;
   let url = `${API_BASEURL}checkversion?version=${version}`;
-
-  console.log({
-    iiiiii: version,
-  });
 
   const checkForUpdates = async () => {
     try {

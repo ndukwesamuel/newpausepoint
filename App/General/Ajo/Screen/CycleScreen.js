@@ -1,4 +1,4 @@
-// import React, { useState, useEffect } from "react";
+// import React, { useState } from "react";
 // import {
 //   View,
 //   Text,
@@ -12,7 +12,6 @@
 // } from "react-native";
 // import { useNavigation, useRoute } from "@react-navigation/native";
 // import { Ionicons } from "@expo/vector-icons";
-// // import { useFetchData_v2, useMutateData } from "./path-to-your-hooks"; // Update this path
 // import { useSelector } from "react-redux";
 // import { useFetchData_v2, useMutateData } from "../../../../hooks/Requestv2";
 // import { useFetchData } from "../../../../hooks/Request";
@@ -20,7 +19,6 @@
 // const CycleScreen = () => {
 //   const navigation = useNavigation();
 //   const route = useRoute();
-//   //   const { groupId } = route.params;
 //   const { _id: groupId, contributionAmount } = route.params.groupId;
 //   const maindata = route.params.groupId;
 
@@ -35,6 +33,7 @@
 //   const [paymentModal, setPaymentModal] = useState(false);
 //   const [payoutModal, setPayoutModal] = useState(false);
 //   const [processingPayment, setProcessingPayment] = useState(false);
+//   const [refreshing, setRefreshing] = useState(false);
 
 //   // Fetch current cycle
 //   const {
@@ -77,11 +76,16 @@
 //     tyuu: walletData,
 //   });
 
-//   // Payment mutation
+//   const currentCycle = currentCycleData?.data;
+//   const cycleHistory = cycleHistoryData?.data || [];
+//   const userWallet = walletData?.data;
+//   const loading = loadingCurrentCycle || loadingHistory;
+
+//   // Payment mutation - only create if we have a cycle ID
 //   const paymentMutation = useMutateData(
-//     `api/v1/esusu/cycle/${currentCycleData?.data?._id}/pay`,
+//     currentCycle?._id ? `api/v1/esusu/cycle/${currentCycle._id}/pay` : "dummy",
 //     "POST",
-//     [`currentCycle-${groupId}`, "userWallet"],
+//     [`currentCycle-${groupId}`, "wallet"],
 //     {
 //       onSuccess: () => {
 //         Alert.alert("Success", "Payment successful!", [
@@ -104,18 +108,20 @@
 //     }
 //   );
 
-//   // Payout mutation
+//   // Payout mutation - only create if we have a cycle ID
 //   const payoutMutation = useMutateData(
-//     `api/v1/esusu/cycle/${currentCycleData?.data?._id}/process-payout`,
+//     currentCycle?._id
+//       ? `api/v1/esusu/cycle/${currentCycle._id}/process-payout`
+//       : "dummy",
 //     "POST",
 //     [`currentCycle-${groupId}`, `cycleHistory-${groupId}`],
 //     {
 //       onSuccess: () => {
 //         Alert.alert(
 //           "Success",
-//           `Payout of ₦${formatAmount(
-//             currentCycleData?.data?.payoutAmount
-//           )} sent to ${currentCycleData?.data?.payoutRecipient?.name}!`,
+//           `Payout of ₦${formatAmount(currentCycle?.payoutAmount)} sent to ${
+//             currentCycle?.payoutRecipient?.name
+//           }!`,
 //           [
 //             {
 //               text: "OK",
@@ -137,12 +143,6 @@
 //     }
 //   );
 
-//   const currentCycle = currentCycleData?.data;
-//   const cycleHistory = cycleHistoryData?.data || [];
-//   const userWallet = walletData?.data;
-//   const loading = loadingCurrentCycle || loadingHistory;
-//   const [refreshing, setRefreshing] = useState(false);
-
 //   const onRefresh = async () => {
 //     setRefreshing(true);
 //     await Promise.all([
@@ -154,6 +154,11 @@
 //   };
 
 //   const handlePayContribution = async () => {
+//     if (!currentCycle?._id) {
+//       Alert.alert("Error", "Unable to process payment. Please try again.");
+//       return;
+//     }
+
 //     setPaymentModal(false);
 //     setProcessingPayment(true);
 
@@ -161,17 +166,26 @@
 //       await paymentMutation.mutateAsync({
 //         paymentMethod: "wallet",
 //       });
+//     } catch (error) {
+//       console.error("Payment error:", error);
 //     } finally {
 //       setProcessingPayment(false);
 //     }
 //   };
 
 //   const handleProcessPayout = async () => {
+//     if (!currentCycle?._id) {
+//       Alert.alert("Error", "Unable to process payout. Please try again.");
+//       return;
+//     }
+
 //     setPayoutModal(false);
 //     setProcessingPayment(true);
 
 //     try {
 //       await payoutMutation.mutateAsync({});
+//     } catch (error) {
+//       console.error("Payout error:", error);
 //     } finally {
 //       setProcessingPayment(false);
 //     }
@@ -229,18 +243,121 @@
 //   };
 
 //   const isAdmin = () => {
-//     // Replace with actual admin check logic
-//     // Check if current user is the group creator
-//     return true; // Temporary
+//     if (!maindata || !currentUserId) return false;
+//     return (
+//       maindata.creator?._id === currentUserId ||
+//       maindata.creator === currentUserId
+//     );
 //   };
+
+//   // const renderPaymentModal = () => {
+//   //   const contribution = getUserContribution();
+//   //   if (!contribution) return null;
+
+//   //   const amountInNaira = contribution.amount;
+//   //   // Wallet balance is already in Naira, not kobo
+//   //   const walletBalanceInNaira = userWallet ? userWallet.balance : 0;
+//   //   const hasEnoughBalance = walletBalanceInNaira >= amountInNaira;
+
+//   //   return (
+//   //     <Modal
+//   //       visible={paymentModal}
+//   //       transparent
+//   //       animationType="slide"
+//   //       onRequestClose={() => setPaymentModal(false)}
+//   //     >
+//   //       <View style={styles.modalOverlay}>
+//   //         <View style={styles.modalContent}>
+//   //           <Text style={styles.modalTitle}>Pay Contribution</Text>
+
+//   //           <View style={styles.modalSection}>
+//   //             <Text style={styles.modalLabel}>Amount</Text>
+//   //             <Text style={styles.modalAmount}>
+//   //               ₦{formatAmount(amountInNaira)}
+//   //             </Text>
+//   //           </View>
+
+//   //           <View style={styles.modalSection}>
+//   //             <Text style={styles.modalLabel}>Payment Method</Text>
+//   //             <View style={styles.paymentMethodCard}>
+//   //               <Ionicons name="wallet" size={24} color="#8B5CF6" />
+//   //               <Text style={styles.paymentMethodText}>Wallet</Text>
+//   //             </View>
+//   //           </View>
+
+//   //           <View style={styles.modalSection}>
+//   //             <Text style={styles.modalLabel}>Wallet Balance</Text>
+//   //             <Text
+//   //               style={[
+//   //                 styles.modalBalance,
+//   //                 !hasEnoughBalance && styles.modalBalanceInsufficient,
+//   //               ]}
+//   //             >
+//   //               ₦{formatAmount(walletBalanceInNaira)}{" "}
+//   //               {hasEnoughBalance ? "✓" : "⚠️"}
+//   //             </Text>
+//   //           </View>
+
+//   //           {hasEnoughBalance && (
+//   //             <View style={styles.modalSection}>
+//   //               <Text style={styles.modalLabel}>After Payment</Text>
+//   //               <Text style={styles.modalBalanceAfter}>
+//   //                 ₦{formatAmount(walletBalanceInNaira - amountInNaira)}
+//   //               </Text>
+//   //             </View>
+//   //           )}
+
+//   //           {!hasEnoughBalance && (
+//   //             <View style={styles.warningBox}>
+//   //               <Ionicons name="warning" size={20} color="#F59E0B" />
+//   //               <Text style={styles.warningText}>
+//   //                 Insufficient wallet balance. Please fund your wallet first.
+//   //               </Text>
+//   //             </View>
+//   //           )}
+
+//   //           <View style={styles.modalButtons}>
+//   //             <TouchableOpacity
+//   //               style={styles.modalCancelButton}
+//   //               onPress={() => setPaymentModal(false)}
+//   //             >
+//   //               <Text style={styles.modalCancelText}>Cancel</Text>
+//   //             </TouchableOpacity>
+//   //             <TouchableOpacity
+//   //               style={[
+//   //                 styles.modalPayButton,
+//   //                 !hasEnoughBalance && styles.modalPayButtonDisabled,
+//   //               ]}
+//   //               onPress={handlePayContribution}
+//   //               disabled={!hasEnoughBalance || processingPayment}
+//   //             >
+//   //               <Text style={styles.modalPayText}>Pay Now</Text>
+//   //             </TouchableOpacity>
+//   //           </View>
+//   //         </View>
+//   //       </View>
+//   //     </Modal>
+//   //   );
+//   // };
 
 //   const renderPaymentModal = () => {
 //     const contribution = getUserContribution();
 //     if (!contribution) return null;
 
 //     const amountInNaira = contribution.amount;
-//     const walletBalanceInNaira = userWallet ? userWallet.balance / 100 : 0;
+
+//     // ✅ Wallet balance is stored in kobo, convert to Naira
+//     const walletBalanceInKobo = userWallet?.balance || 0;
+//     const walletBalanceInNaira = walletBalanceInKobo / 100;
+
 //     const hasEnoughBalance = walletBalanceInNaira >= amountInNaira;
+
+//     console.log({
+//       amountInNaira,
+//       walletBalanceInKobo,
+//       walletBalanceInNaira,
+//       hasEnoughBalance,
+//     });
 
 //     return (
 //       <Modal
@@ -314,7 +431,11 @@
 //                 onPress={handlePayContribution}
 //                 disabled={!hasEnoughBalance || processingPayment}
 //               >
-//                 <Text style={styles.modalPayText}>Pay Now</Text>
+//                 {processingPayment ? (
+//                   <ActivityIndicator color="#FFFFFF" />
+//                 ) : (
+//                   <Text style={styles.modalPayText}>Pay Now</Text>
+//                 )}
 //               </TouchableOpacity>
 //             </View>
 //           </View>
@@ -322,7 +443,6 @@
 //       </Modal>
 //     );
 //   };
-
 //   const renderPayoutModal = () => {
 //     if (!currentCycle) return null;
 
@@ -779,28 +899,6 @@
 //     fontSize: 14,
 //     color: "#6B7280",
 //   },
-//   header: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     paddingHorizontal: 16,
-//     paddingTop: 60,
-//     paddingBottom: 16,
-//     backgroundColor: "#FFFFFF",
-//     borderBottomWidth: 1,
-//     borderBottomColor: "#E5E7EB",
-//   },
-//   backButton: {
-//     padding: 8,
-//   },
-//   headerTitle: {
-//     fontSize: 18,
-//     fontWeight: "600",
-//     color: "#111827",
-//   },
-//   headerSpacer: {
-//     width: 40,
-//   },
 //   tabBar: {
 //     flexDirection: "row",
 //     backgroundColor: "#FFFFFF",
@@ -943,22 +1041,435 @@
 //     shadowRadius: 4,
 //     elevation: 3,
 //   },
-//   //   sectionTitle: {
-//   //     fontSize: 16,
-//   //     fontWeight: "600",
-//   //     color: "#111827",
-//   //     marginBottom: 16,
+//   sectionTitle: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#111827",
+//     marginBottom: 16,
+//   },
+//   payoutInfo: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//   },
+//   //   payoutRecipientAvatar: {
+//   //     width: 56,
+//   //     height:
 
-// //   sectionTitle: {
-// //     fontSize: 16,
-// //     fontWeight: "600",
-// //     color: "#111827",
-// //     marginBottom: 16,
-// //   },
-// //   payoutInfo: {
-// //     flexDirection: "row",
-// //     alignItems: "center",
-// //   },
+//   payoutRecipientAvatar: {
+//     width: 56,
+//     height: 56,
+//     borderRadius: 28,
+//     backgroundColor: "#8B5CF6",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     marginRight: 16,
+//   },
+//   avatarText: {
+//     fontSize: 24,
+//     fontWeight: "bold",
+//     color: "#FFFFFF",
+//   },
+//   payoutDetails: {
+//     flex: 1,
+//   },
+//   payoutRecipientName: {
+//     fontSize: 18,
+//     fontWeight: "600",
+//     color: "#111827",
+//     marginBottom: 4,
+//   },
+//   payoutAmount: {
+//     fontSize: 14,
+//     color: "#6B7280",
+//   },
+//   dueDateCard: {
+//     backgroundColor: "#FFFFFF",
+//     borderRadius: 16,
+//     padding: 20,
+//     marginBottom: 16,
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 4,
+//     elevation: 3,
+//   },
+//   dueDateInfo: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     flex: 1,
+//   },
+//   dueDateText: {
+//     marginLeft: 12,
+//   },
+//   dueDateLabel: {
+//     fontSize: 12,
+//     color: "#6B7280",
+//     marginBottom: 4,
+//   },
+//   dueDateValue: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#111827",
+//   },
+//   daysRemaining: {
+//     alignItems: "center",
+//     paddingLeft: 16,
+//     borderLeftWidth: 1,
+//     borderLeftColor: "#E5E7EB",
+//   },
+//   daysNumber: {
+//     fontSize: 32,
+//     fontWeight: "bold",
+//     color: "#8B5CF6",
+//   },
+//   daysLabel: {
+//     fontSize: 12,
+//     color: "#6B7280",
+//   },
+//   statusSection: {
+//     marginBottom: 16,
+//   },
+//   contributionCard: {
+//     backgroundColor: "#FFFFFF",
+//     borderRadius: 12,
+//     padding: 16,
+//     marginBottom: 12,
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 1 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 2,
+//     elevation: 2,
+//   },
+//   contributionLeft: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     flex: 1,
+//   },
+//   contributionAvatar: {
+//     width: 48,
+//     height: 48,
+//     borderRadius: 24,
+//     backgroundColor: "#E5E7EB",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     marginRight: 12,
+//   },
+//   contributionAvatarPaid: {
+//     backgroundColor: "#D1FAE5",
+//   },
+//   contributionAvatarText: {
+//     fontSize: 18,
+//     fontWeight: "bold",
+//     color: "#6B7280",
+//   },
+//   contributionInfo: {
+//     flex: 1,
+//   },
+//   contributionNameRow: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginBottom: 4,
+//   },
+//   contributionName: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#111827",
+//     marginRight: 8,
+//   },
+//   youBadge: {
+//     backgroundColor: "#EDE9FE",
+//     paddingHorizontal: 8,
+//     paddingVertical: 2,
+//     borderRadius: 8,
+//   },
+//   youText: {
+//     fontSize: 10,
+//     fontWeight: "600",
+//     color: "#8B5CF6",
+//   },
+//   contributionAmount: {
+//     fontSize: 14,
+//     fontWeight: "500",
+//     color: "#6B7280",
+//     marginBottom: 2,
+//   },
+//   contributionDate: {
+//     fontSize: 12,
+//     color: "#9CA3AF",
+//   },
+//   contributionRight: {
+//     marginLeft: 12,
+//   },
+//   paidBadge: {
+//     width: 32,
+//     height: 32,
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+//   unpaidBadge: {
+//     width: 32,
+//     height: 32,
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+//   actionSection: {
+//     marginBottom: 16,
+//   },
+//   payButton: {
+//     backgroundColor: "#8B5CF6",
+//     borderRadius: 12,
+//     paddingVertical: 16,
+//     flexDirection: "row",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     shadowColor: "#8B5CF6",
+//     shadowOffset: { width: 0, height: 4 },
+//     shadowOpacity: 0.3,
+//     shadowRadius: 8,
+//     elevation: 5,
+//   },
+//   payButtonText: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#FFFFFF",
+//     marginLeft: 8,
+//   },
+//   paidNotice: {
+//     backgroundColor: "#D1FAE5",
+//     borderRadius: 12,
+//     padding: 16,
+//     flexDirection: "row",
+//     alignItems: "center",
+//   },
+//   paidNoticeText: {
+//     fontSize: 14,
+//     fontWeight: "500",
+//     color: "#065F46",
+//     marginLeft: 12,
+//   },
+//   payoutButton: {
+//     backgroundColor: "#10B981",
+//     borderRadius: 12,
+//     paddingVertical: 16,
+//     flexDirection: "row",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     shadowColor: "#10B981",
+//     shadowOffset: { width: 0, height: 4 },
+//     shadowOpacity: 0.3,
+//     shadowRadius: 8,
+//     elevation: 5,
+//   },
+//   payoutButtonText: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#FFFFFF",
+//     marginLeft: 8,
+//   },
+//   readyNotice: {
+//     backgroundColor: "#FEF3C7",
+//     borderRadius: 12,
+//     padding: 16,
+//     flexDirection: "row",
+//     alignItems: "center",
+//   },
+//   readyNoticeText: {
+//     fontSize: 14,
+//     fontWeight: "500",
+//     color: "#92400E",
+//     marginLeft: 12,
+//     flex: 1,
+//   },
+//   historyCard: {
+//     backgroundColor: "#FFFFFF",
+//     borderRadius: 16,
+//     padding: 20,
+//     marginBottom: 16,
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 4,
+//     elevation: 3,
+//   },
+//   historyHeader: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     marginBottom: 16,
+//     paddingBottom: 16,
+//     borderBottomWidth: 1,
+//     borderBottomColor: "#E5E7EB",
+//   },
+//   historyTitle: {
+//     fontSize: 18,
+//     fontWeight: "600",
+//     color: "#111827",
+//   },
+//   historyStatusBadge: {
+//     paddingHorizontal: 12,
+//     paddingVertical: 6,
+//     borderRadius: 12,
+//   },
+//   historyStatusCompleted: {
+//     backgroundColor: "#E5E7EB",
+//   },
+//   historyStatusActive: {
+//     backgroundColor: "#FEF3C7",
+//   },
+//   historyStatusText: {
+//     fontSize: 12,
+//     fontWeight: "600",
+//     color: "#111827",
+//   },
+//   historyDetails: {
+//     gap: 12,
+//   },
+//   historyRow: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//   },
+//   historyLabel: {
+//     fontSize: 14,
+//     color: "#6B7280",
+//   },
+//   historyValue: {
+//     fontSize: 14,
+//     fontWeight: "600",
+//     color: "#111827",
+//   },
+//   modalOverlay: {
+//     flex: 1,
+//     backgroundColor: "rgba(0, 0, 0, 0.5)",
+//     justifyContent: "flex-end",
+//   },
+//   modalContent: {
+//     backgroundColor: "#FFFFFF",
+//     borderTopLeftRadius: 24,
+//     borderTopRightRadius: 24,
+//     padding: 24,
+//     maxHeight: "80%",
+//   },
+//   modalTitle: {
+//     fontSize: 20,
+//     fontWeight: "bold",
+//     color: "#111827",
+//     marginBottom: 24,
+//   },
+//   modalSection: {
+//     marginBottom: 20,
+//   },
+//   modalLabel: {
+//     fontSize: 12,
+//     color: "#6B7280",
+//     marginBottom: 8,
+//     textTransform: "uppercase",
+//     letterSpacing: 0.5,
+//   },
+//   modalAmount: {
+//     fontSize: 32,
+//     fontWeight: "bold",
+//     color: "#111827",
+//   },
+//   paymentMethodCard: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     backgroundColor: "#F9FAFB",
+//     borderRadius: 12,
+//     padding: 16,
+//     borderWidth: 2,
+//     borderColor: "#8B5CF6",
+//   },
+//   paymentMethodText: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#111827",
+//     marginLeft: 12,
+//   },
+//   modalBalance: {
+//     fontSize: 24,
+//     fontWeight: "600",
+//     color: "#10B981",
+//   },
+//   modalBalanceInsufficient: {
+//     color: "#EF4444",
+//   },
+//   modalBalanceAfter: {
+//     fontSize: 20,
+//     fontWeight: "600",
+//     color: "#6B7280",
+//   },
+//   modalRecipient: {
+//     fontSize: 20,
+//     fontWeight: "600",
+//     color: "#111827",
+//     marginBottom: 4,
+//   },
+//   modalRecipientEmail: {
+//     fontSize: 14,
+//     color: "#6B7280",
+//   },
+//   warningBox: {
+//     backgroundColor: "#FEF3C7",
+//     borderRadius: 12,
+//     padding: 16,
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginBottom: 20,
+//   },
+//   warningText: {
+//     fontSize: 14,
+//     color: "#92400E",
+//     marginLeft: 12,
+//     flex: 1,
+//   },
+//   modalButtons: {
+//     flexDirection: "row",
+//     gap: 12,
+//   },
+//   modalCancelButton: {
+//     flex: 1,
+//     backgroundColor: "#F9FAFB",
+//     borderRadius: 12,
+//     paddingVertical: 16,
+//     alignItems: "center",
+//   },
+//   modalCancelText: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#6B7280",
+//   },
+//   modalPayButton: {
+//     flex: 1,
+//     backgroundColor: "#8B5CF6",
+//     borderRadius: 12,
+//     paddingVertical: 16,
+//     alignItems: "center",
+//   },
+//   modalPayButtonDisabled: {
+//     backgroundColor: "#D1D5DB",
+//   },
+//   modalPayText: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: "#FFFFFF",
+//   },
+//   modalPayoutButton: {
+//     flex: 1,
+//     backgroundColor: "#10B981",
+//     borderRadius: 12,
+//     paddingVertical: 16,
+//     alignItems: "center",
+//   },
+// });
+
+// export default CycleScreen;
 
 import React, { useState } from "react";
 import {
@@ -1011,7 +1522,7 @@ const CycleScreen = () => {
   );
 
   console.log({
-    zzztyuu: currentCycleData,
+    currentCycleResponse: currentCycleData,
   });
 
   // Fetch cycle history
@@ -1035,7 +1546,7 @@ const CycleScreen = () => {
   } = useFetchData("wallet", "wallet");
 
   console.log({
-    tyuu: walletData,
+    walletResponse: walletData,
   });
 
   const currentCycle = currentCycleData?.data;
@@ -1217,9 +1728,19 @@ const CycleScreen = () => {
     if (!contribution) return null;
 
     const amountInNaira = contribution.amount;
-    // Wallet balance is already in Naira, not kobo
-    const walletBalanceInNaira = userWallet ? userWallet.balance : 0;
+
+    // ✅ Wallet balance is stored in kobo, convert to Naira
+    const walletBalanceInKobo = userWallet?.balance || 0;
+    const walletBalanceInNaira = walletBalanceInKobo / 100;
+
     const hasEnoughBalance = walletBalanceInNaira >= amountInNaira;
+
+    console.log({
+      contributionAmount: amountInNaira,
+      walletBalanceKobo: walletBalanceInKobo,
+      walletBalanceNaira: walletBalanceInNaira,
+      hasEnoughBalance: hasEnoughBalance,
+    });
 
     return (
       <Modal
@@ -1288,12 +1809,17 @@ const CycleScreen = () => {
               <TouchableOpacity
                 style={[
                   styles.modalPayButton,
-                  !hasEnoughBalance && styles.modalPayButtonDisabled,
+                  (!hasEnoughBalance || processingPayment) &&
+                    styles.modalPayButtonDisabled,
                 ]}
                 onPress={handlePayContribution}
                 disabled={!hasEnoughBalance || processingPayment}
               >
-                <Text style={styles.modalPayText}>Pay Now</Text>
+                {processingPayment ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.modalPayText}>Pay Now</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -1349,11 +1875,18 @@ const CycleScreen = () => {
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.modalPayoutButton}
+                style={[
+                  styles.modalPayoutButton,
+                  processingPayment && styles.modalPayButtonDisabled,
+                ]}
                 onPress={handleProcessPayout}
                 disabled={processingPayment}
               >
-                <Text style={styles.modalPayText}>Process Payout</Text>
+                {processingPayment ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.modalPayText}>Process Payout</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -1910,10 +2443,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  //   payoutRecipientAvatar: {
-  //     width: 56,
-  //     height:
-
   payoutRecipientAvatar: {
     width: 56,
     height: 56,
@@ -2313,6 +2842,7 @@ const styles = StyleSheet.create({
   },
   modalPayButtonDisabled: {
     backgroundColor: "#D1D5DB",
+    opacity: 0.6,
   },
   modalPayText: {
     fontSize: 16,
