@@ -22,10 +22,6 @@
       "channel": "preview3"
     },
     "production": {
-      "android": {
-        "buildType": "app-bundle",
-        "image": "latest"
-      },
       "ios": {
         "credentialsSource": "remote",
         "image": "macos-sonoma-14.6-xcode-16.0",
