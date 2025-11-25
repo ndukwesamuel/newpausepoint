@@ -9,13 +9,18 @@ import {
   RefreshControl,
   ScrollView,
   Touchable,
+  ActivityIndicator, // Added for loading states
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+// ------------------------------------------------------------------
+// UPDATED IMPORT: Use @tanstack/react-query instead of react-query
+import { useMutation } from "@tanstack/react-query";
+// ------------------------------------------------------------------
+
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -48,16 +53,13 @@ const ForumDetails = () => {
     (state) => state.UserProfileSlice
   );
 
-  console.log({
-    cccc: maindata,
-  });
-  console.log({
-    jhhhh: maindata?.forumid?._id,
-  });
   let forumid = maindata?._id;
 
   const deleteDate = () => {
-    Delete_Mutation.mutate();
+    // Check if mutation is not pending before calling mutate
+    if (!Delete_Mutation.isPending) {
+      Delete_Mutation.mutate();
+    }
   };
 
   let dataDetails = [
@@ -66,19 +68,11 @@ const ForumDetails = () => {
       title: "Delete this post",
       description: "This announcement will be deleted instantly",
       img: require("../../../assets/images/trash.png"),
-      action: () => deleteDate(), //Alert.alert("Post Deleted", "This announcement has been deleted."),
+      action: () => deleteDate(),
     },
   ];
 
-  // let forumid = 1;
-
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const { user_data } = useSelector((state) => state.AuthSlice);
 
   const navigation = useNavigation();
   const animation = useRef(null);
@@ -95,7 +89,7 @@ const ForumDetails = () => {
   };
 
   const toggleComments = () => {
-    setShowComments(!showComments); // Step 1
+    setShowComments(!showComments); // Step 2
     setNewModalVisible(true);
   };
 
@@ -103,179 +97,213 @@ const ForumDetails = () => {
     setModalVisible(!isModalVisible);
   };
 
-  // Accessing nested properties
-  // const { content, createdAt, likes, user } = forumid;
-
   const { get_my_clan_single_forum_data } = useSelector(
     (state) => state?.ForumSlice
   );
 
-  let item = {};
-
-  const handleCommentSubmit = () => {
-    // Step 4: Handle comment submission logic
-    // You can dispatch an action or perform any other logic here to submit the comment
-    // Clear the comment input after submission
-    setCommentInput("");
-  };
-
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
-    // Set the refreshing state to true
     setRefreshing(true);
-    dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-
-    // Wait for 2 seconds
-    setRefreshing(false);
+    // Ensure forumid is present before dispatching
+    if (forumid) {
+      dispatch(Get_My_Clan_Single_Forum_Fun(forumid)).finally(() =>
+        setRefreshing(false)
+      );
+    } else {
+      setRefreshing(false);
+    }
   };
 
-  console.log({
-    jjj: forumid,
-  });
   useEffect(() => {
-    // Check if forumid is available before dispatching the action
-    dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-
+    if (forumid) {
+      dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
+    }
     return () => {
-      // dispatch(reset__single_forum(null));
+      // dispatch(reset__single_forum(null)); // Assuming you want to reset state on unmount
     };
-  }, [dispatch, forumid]); // Include forumid in the dependency array
+  }, [dispatch, forumid]);
 
-  const Like_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // 1. TanStack Query useMutation for Like
+  // ------------------------------------------------------------------
+  const Like_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}forum/like/${data_info?.clanId}/${data_info?.forumid}`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.get(url, config);
     },
-    {
-      onSuccess: (success) => {
-        // Toast.show({
-        //   type: "success",
-        //   text1: " successfully ",
-        // });
+    onSuccess: (success) => {
+      // Refetch the single forum data to update the likes count
+      if (forumid) {
         dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
+      }
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message || "Failed to like post"} `,
+      });
+    },
+  });
 
-        // setTurnmodal(false);
-      },
-
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
-
-  const Delete_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // 2. TanStack Query useMutation for Delete
+  // ------------------------------------------------------------------
+  const Delete_Mutation = useMutation({
+    mutationFn: () => {
       let url = `${API_BASEURL}forum/user/${forumid}`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.delete(url, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " date deleted succesfully ",
-        });
-        // dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-        // setTurnmodal(false);
-        // navigate("")
-        navigation.goBack();
-      },
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Post deleted successfully",
+      });
+      // Optionally refetch all forums
+      dispatch(Get_My_Clan_Forum_Fun());
+      navigation.goBack();
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message || "Failed to delete post"} `,
+      });
+    },
+  });
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
-
-  const Comment_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // 3. TanStack Query useMutation for Comment
+  // ------------------------------------------------------------------
+  const Comment_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}forum/comment`;
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Comment successfully posted",
+      });
+      // Refetch the single forum data to update the comments list
+      if (forumid) {
         dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-        setNewcomment("");
+      }
+      setNewcomment(""); // Clear input
+      setNewModalVisible(false); // Close modal
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message || "Failed to post comment"} `,
+      });
+    },
+  });
 
-        // setTurnmodal(false);
-      },
-
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
+  const handleLike = () => {
+    const postData = get_my_clan_single_forum_data?.data;
+    if (postData && !Like_Mutation.isPending) {
+      Like_Mutation.mutate({
+        forumid: postData._id,
+        clanId: postData.clan,
+      });
     }
+  };
+
+  const handleCommentSubmit = () => {
+    if (newcomment.trim() && !Comment_Mutation.isPending) {
+      Comment_Mutation.mutate({
+        content: newcomment.trim(),
+        postId: get_my_clan_single_forum_data?.data?._id,
+      });
+    }
+  };
+
+  // Check if current user has already liked the post
+  const isLiked = get_my_clan_single_forum_data?.data?.likes?.includes(
+    get_user_profile_data?.user?._id
+  );
+
+  // Check if current user is the post creator
+  const isCurrentUserCreator =
+    maindata?.user === get_user_profile_data?.user?._id;
+
+  // Render function for comments (if needed for better styling/structure)
+  const renderComment = ({ comment }) => (
+    <View
+      style={{
+        marginVertical: 5,
+        paddingHorizontal: 30,
+      }}
+      key={comment._id}
+    >
+      <View
+        style={{
+          paddingHorizontal: 15,
+          backgroundColor: "#DAE4EF",
+          paddingVertical: 10,
+          borderRadius: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: "600",
+          }}
+        >
+          {comment?.user?.name}
+        </Text>
+        <Text style={{ marginTop: 2 }}>{comment?.content}</Text>
+      </View>
+    </View>
   );
 
   return (
     <ScrollView
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing || Delete_Mutation.isPending}
+          onRefresh={onRefresh}
+        />
       }
+      style={{ flex: 1 }}
     >
+      {/* Loading state for single forum data fetch */}
+      {/* Assuming Get_My_Clan_Single_Forum_Fun sets a loading state in Redux, 
+          which is not visible here but should be handled globally or locally. 
+          We handle mutation loading states below. */}
+
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
           marginVertical: 20,
-          paddingHorizontal: 20,
           paddingHorizontal: 20,
         }}
       >
@@ -286,13 +314,9 @@ const ForumDetails = () => {
             gap: 10,
           }}
         >
-          {console.log({
-            mmm: forumid,
-          })}
-
           <Image
             source={{
-              uri: maindata?.user?.photo,
+              uri: maindata?.user?.photo || "default_user_icon_url", // Provide a fallback
             }}
             style={{ width: 40, height: 40, borderRadius: 50 }}
           />
@@ -307,12 +331,11 @@ const ForumDetails = () => {
               data={formatDateandTime(
                 get_my_clan_single_forum_data?.data?.createdAt
               )}
-              // "Jane Doe - 54 mins ago"
               textstyle={{ fontSize: 12, fontWeight: "300" }}
             />
           </View>
         </View>
-        {maindata?.user === get_user_profile_data?.user?._id && (
+        {isCurrentUserCreator && (
           <TouchableOpacity
             style={{
               paddingHorizontal: 12,
@@ -320,6 +343,7 @@ const ForumDetails = () => {
               borderRadius: 6,
             }}
             onPress={toggleModal}
+            disabled={Delete_Mutation.isPending}
           >
             <Entypo name="dots-three-vertical" size={24} color="black" />
           </TouchableOpacity>
@@ -359,106 +383,56 @@ const ForumDetails = () => {
             flexDirection: "row",
             alignItems: "center",
             gap: 5,
+            opacity: Like_Mutation.isPending ? 0.6 : 1,
           }}
-          onPress={() => {
-            Like_Mutation.mutate({
-              forumid: get_my_clan_single_forum_data?.data._id,
-              clanId: get_my_clan_single_forum_data?.data?.clan,
-            });
-          }}
+          onPress={handleLike}
+          disabled={Like_Mutation.isPending}
         >
-          <AntDesign name="hearto" size={24} color="black" />
+          {isLiked ? (
+            <AntDesign name="heart" size={24} color="red" />
+          ) : (
+            <AntDesign name="hearto" size={24} color="black" />
+          )}
           <Text>
-            {get_my_clan_single_forum_data?.data?.likes?.length} Likes{" "}
+            {get_my_clan_single_forum_data?.data?.likes?.length} Likes
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={{
             flexDirection: "row",
             alignItems: "center",
             gap: 5,
           }}
-          onPress={toggleComments} // Step 2
+          onPress={toggleComments}
         >
           <AntDesign name="message1" size={24} color="black" />
           <Text>Comment </Text>
         </TouchableOpacity>
-        {/* <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-          <AntDesign name="sharealt" size={24} color="black" />
-          <Text>Share</Text>
-        </View> */}
       </View>
 
-      {/* Conditionally render comments section based on state */}
-      {/* {showComments && ( */}
-
-      {get_my_clan_single_forum_data?.data?.comments?.length === 0 ? (
-        <View style={{ paddingHorizontal: 20 }}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+      <View style={{ marginTop: 10 }}>
+        {get_my_clan_single_forum_data?.data?.comments?.length === 0 ? (
+          <View style={{ paddingHorizontal: 20, alignItems: "center" }}>
             <LottieView
               autoPlay
               ref={animation}
-              style={{
-                width: 200,
-                height: 200,
-                // backgroundColor: "#eee",
-              }}
-              // Find more Lottie files at https://lottiefiles.com/featured
+              style={{ width: 200, height: 200 }}
               source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
             />
             <Text>No Comment Available</Text>
           </View>
-          {/* You can map through the comments array and render each comment */}
-        </View>
-      ) : (
-        <View>
-          {get_my_clan_single_forum_data?.data?.comments?.map((comment) => (
-            <View
-              style={{
-                // flexDirection: "row",
-                // alignItems: "center",
-                justifyContent: "space-between",
-                marginVertical: 5,
-                paddingHorizontal: 30,
-              }}
-              key={comment._id}
-            >
-              <View
-                style={{
-                  paddingHorizontal: 20,
-                  backgroundColor: "#DAE4EF",
-                  paddingVertical: 10,
-                  borderRadius: 10,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 17,
-                  }}
-                >
-                  {comment?.user?.name}
-                </Text>
+        ) : (
+          <FlatList
+            data={get_my_clan_single_forum_data?.data?.comments}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => renderComment({ comment: item })}
+            scrollEnabled={false} // Since this is inside a ScrollView
+          />
+        )}
+      </View>
 
-                <Text>{comment?.content}</Text>
-                {/* You can map through the comments array and render each comment */}
-              </View>
-            </View>
-          ))}
-        </View>
-      )}
-
+      {/* Comment Modal */}
       <CenterReuseModals
         visible={newModalVisible}
         onClose={() => setNewModalVisible(false)}
@@ -470,94 +444,73 @@ const ForumDetails = () => {
             borderRadius: 10,
             elevation: 5,
             width: "90%",
-            height: "50%",
+            height: "auto", // Adjusted height to be flexible
+            maxHeight: "60%",
           }}
         >
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              zIndex: 10,
+            }}
+            onPress={() => setNewModalVisible(false)}
+          >
+            <MaterialIcons name="cancel" size={30} color="gray" />
+          </TouchableOpacity>
+
           <Text
             style={{
-              fontSize: 16,
-              fontWeight: "500",
-              fontFamily: "RobotoSlab-Medium",
-              color: "black",
+              fontSize: 18,
+              fontWeight: "600",
               textAlign: "center",
               marginBottom: 20,
+              marginTop: 10,
             }}
           >
             Send Comment
           </Text>
 
-          <View>
-            <CustomTextArea
-              placeholder="Enter text here..."
-              // onChangeText={setNewcomment}
-              value={newcomment}
-              // value={text}
-              onChangeText={handleTextChange}
-              style={{ width: "80%" }}
-              inputStyle={{
-                textAlignVertical: "top", // Ensures text starts from the top
-                paddingTop: 10, // Add paddingTop to control vertical padding
-                paddingBottom: 10, // Add paddingBottom to balance padding
-                backgroundColor: "#F6F8FAE5",
-                paddingHorizontal: 10,
-                paddingTop: 10, // Add paddingTop to control the vertical padding
-                paddingBottom: 10, // Add paddingBottom to balance the padding
-                height: 100,
-                borderRadius: 6,
-                fontSize: 16,
-                marginTop: 20,
-              }}
-            />
-          </View>
+          <CustomTextArea
+            placeholder="Enter comment here..."
+            value={newcomment}
+            onChangeText={handleTextChange}
+            inputStyle={{
+              textAlignVertical: "top",
+              padding: 10,
+              backgroundColor: "#F6F8FAE5",
+              height: 100,
+              borderRadius: 6,
+              fontSize: 16,
+              marginTop: 10,
+            }}
+          />
 
-          <View style={{}}>
-            <TouchableOpacity
-              style={{
-                // paddingHorizontal: 12,
-                // paddingVertical: 2,
-                // borderRadius: 6,
-                position: "relative",
-                top: -260,
-                left: 10,
-              }}
-              // onPress={toggleModal}
-              onPress={() => setNewModalVisible(false)}
-            >
-              <MaterialIcons name="cancel" size={24} color="black" />
-            </TouchableOpacity>
-            <Formbutton
-              buttonStyle={{
-                backgroundColor: "#04973C",
-                borderWidth: 1,
-                borderColor: "#04973C",
-                paddingVertical: 14,
-                alignItems: "center",
-                borderRadius: 5,
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: 10,
-                marginTop: 20,
-              }}
-              textStyle={{
-                color: "white",
-                fontWeight: "500",
-                fontSize: 14,
-                fontFamily: "RobotoSlab-Medium",
-              }}
-              data="Submit"
-              onPress={() => {
-                Comment_Mutation.mutate({
-                  content: newcomment,
-                  postId: get_my_clan_single_forum_data?.data?._id,
-                });
-              }}
-              isLoading={Comment_Mutation.isLoading}
-            />
-          </View>
+          <Formbutton
+            buttonStyle={{
+              backgroundColor: Comment_Mutation.isPending
+                ? "#90ee90"
+                : "#04973C",
+              paddingVertical: 14,
+              alignItems: "center",
+              borderRadius: 5,
+              marginTop: 20,
+            }}
+            textStyle={{
+              color: "white",
+              fontWeight: "500",
+              fontSize: 14,
+            }}
+            data="Submit Comment"
+            onPress={handleCommentSubmit}
+            // Use Comment_Mutation.isPending for TanStack Query v4/v5
+            isLoading={Comment_Mutation.isPending}
+          />
         </View>
       </CenterReuseModals>
 
-      {/* // )} */}
+      {/* Delete Confirmation Modal */}
       <ForumModal visible={isModalVisible} onClose={toggleModal}>
         <View
           style={{
@@ -566,7 +519,7 @@ const ForumDetails = () => {
             width: "100%",
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
-            height: "30%",
+            height: "auto",
           }}
         >
           {dataDetails.map((item) => (
@@ -575,26 +528,44 @@ const ForumDetails = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 marginBottom: 10,
+                paddingVertical: 10,
                 gap: 10,
+                opacity: Delete_Mutation.isPending ? 0.6 : 1,
               }}
               key={item.id}
               onPress={item.action}
+              disabled={Delete_Mutation.isPending}
             >
               <Image
-                source={item?.img} // Replace with the correct path to your image
-                style={{ width: 30, height: 30, tintColor: "black" }}
+                source={item?.img}
+                style={{ width: 30, height: 30, tintColor: "red" }}
               />
 
-              <View>
+              <View style={{ flex: 1 }}>
                 <MediumFontText
-                  data="Hide this post"
-                  textstyle={{ fontSize: 16, fontWeight: "500" }}
+                  data={item.title}
+                  textstyle={{ fontSize: 16, fontWeight: "500", color: "red" }}
                 />
 
-                <RegularFontText data="This announcement will be deleted instantly" />
+                <RegularFontText data={item.description} />
               </View>
+              {Delete_Mutation.isPending && (
+                <ActivityIndicator size="small" color="red" />
+              )}
             </TouchableOpacity>
           ))}
+          <TouchableOpacity
+            onPress={toggleModal}
+            style={{
+              marginTop: 10,
+              padding: 10,
+              alignItems: "center",
+              borderTopWidth: 1,
+              borderColor: "#eee",
+            }}
+          >
+            <Text style={{ fontSize: 16, color: "gray" }}>Cancel</Text>
+          </TouchableOpacity>
         </View>
       </ForumModal>
     </ScrollView>

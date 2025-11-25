@@ -14,12 +14,6 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
-import Toast from "react-native-toast-message";
-import * as ImagePicker from "expo-image-picker";
 
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 
@@ -113,13 +107,14 @@ const History = () => {
   const navigation = useNavigation();
   const animation = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
+  // Added dispatch to the destructuring list for completeness, though it is used below
   const { get_all_user_guest_data } = useSelector((state) => state?.GuestSlice);
 
   useEffect(() => {
     dispatch(Get_All_User_Guest_Fun());
 
     return () => {};
-  }, [dispatch]);
+  }, [dispatch]); // Added dispatch to dependency array
 
   const filteredData = get_all_user_guest_data?.userInvites?.filter((item) =>
     item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
@@ -281,6 +276,7 @@ const History = () => {
           <FlatList
             data={filteredData}
             renderItem={({ item }) => <HistoryItem itemdata={item} />}
+            keyExtractor={(item) => item.access_code + item.visitor_name} // Added a better key extractor
           />
         )}
       </View>

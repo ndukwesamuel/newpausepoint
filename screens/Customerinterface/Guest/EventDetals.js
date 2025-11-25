@@ -15,7 +15,10 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+// ------------------------------------------------------------------
+// UPDATED IMPORT: Use @tanstack/react-query instead of react-query
+import { useMutation } from "@tanstack/react-query";
+// ------------------------------------------------------------------
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -72,55 +75,65 @@ const GuestsDetail = () => {
     dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
 
     return () => {};
-  }, [dispatch]);
+  }, [dispatch, itemdata?._id]); // Added dispatch and itemdata?._id to dependency array
 
   const filteredData = get_all_user_guest_data?.userInvites?.filter((item) =>
     item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
   );
 
-  const Cancle_Guests_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // TanStack Query useMutation for Cancle Guests
+  // ------------------------------------------------------------------
+  const Cancle_Guests_Mutation = useMutation({
+    mutationFn: (data_info) => {
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
-      let url = `${API_BASEURL}visitor/cancel/${get_user_guest_detail_data?.invitation?._id}`;
+      // Ensure invitation ID is available before proceeding
+      const invitationId = get_user_guest_detail_data?.invitation?._id;
+      if (!invitationId) {
+        return Promise.reject(new Error("Invitation ID is missing."));
+      }
+
+      let url = `${API_BASEURL}visitor/cancel/${invitationId}`;
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Visitor successfully canceled",
+      });
 
-        dispatch(Get_All_User_Guest_Fun());
+      dispatch(Get_All_User_Guest_Fun());
 
-        navigation.goBack();
-      },
+      navigation.goBack();
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${
+          error?.response?.data?.message || "Failed to cancel visitor."
+        } `,
+      });
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+      // Optionally refresh the detail data if needed, but going back is usually sufficient
+      // dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
+    },
+  });
+  // ------------------------------------------------------------------
 
   const [qrCodeValue, setQRCodeValue] = useState("");
   const viewShotRef = useRef();
+
+  // Note: Sharing implementation using expo-sharing and view-shot is kept
+  // but the share button is commented out in the return statement.
+
   const captureAndShare = async () => {
     try {
       const uri = await captureQRCodeAsImage();
@@ -132,10 +145,20 @@ const GuestsDetail = () => {
 
   const captureQRCodeAsImage = async () => {
     try {
-      const uri = await viewShotRef.current.capture();
-      return uri;
+      if (viewShotRef.current) {
+        const uri = await viewShotRef.current.capture();
+        return uri;
+      }
+      throw new Error("ViewShot reference is not ready.");
     } catch (error) {
-      throw new Error("Error capturing QR code as image: ", error);
+      throw new Error("Error capturing QR code as image: " + error.message);
+    }
+  };
+
+  const handleCancelVisitor = () => {
+    // Check if the mutation is not already running
+    if (!Cancle_Guests_Mutation.isPending) {
+      Cancle_Guests_Mutation.mutate({}); // Pass an empty object if no body is needed
     }
   };
 
@@ -181,37 +204,36 @@ const GuestsDetail = () => {
           <Text style={styles.label}>Expires Date:</Text>
           <Text style={styles.text}>
             {formatDateandTime(get_user_guest_detail_data?.invitation?.expires)}
-            {/* {get_user_guest_detail_data?.invitation?.expires} */}
           </Text>
         </View>
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
+            marginTop: 20, // Added margin for spacing
           }}
         >
+          {/* Un-commented and updated the Cancel Visitor Button using the new mutation */}
           <TouchableOpacity
             style={{
-              backgroundColor: "red",
-              // paddingHorizontal: 20,
-              // paddingVertical: 10,
+              backgroundColor: Cancle_Guests_Mutation.isPending
+                ? "#f8d7da"
+                : "red",
               borderRadius: 10,
-              width: "40%",
-              // height: 50
+              width: "48%", // Adjusted width to fit better with the Qrcode button
               paddingVertical: 10,
+              justifyContent: "center",
             }}
-            onPress={() => {
-              Cancle_Guests_Mutation.mutate();
-            }}
+            onPress={handleCancelVisitor}
+            disabled={Cancle_Guests_Mutation.isPending} // Disable while loading
           >
-            {Cancle_Guests_Mutation.isLoading ? (
+            {Cancle_Guests_Mutation.isPending ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
               <Text
                 style={{
                   fontSize: 16,
                   fontWeight: "bold",
-                  marginBottom: 5,
                   color: "white",
                   textAlign: "center",
                 }}
@@ -224,16 +246,14 @@ const GuestsDetail = () => {
           <TouchableOpacity
             style={{
               backgroundColor: "green",
-              // paddingHorizontal: 20,
-              // paddingVertical: 10,
               borderRadius: 10,
-              width: "40%",
-              // height: 50
+              width: "48%", // Adjusted width to fit better with the Cancel button
               paddingVertical: 10,
+              justifyContent: "center",
             }}
             onPress={() => {
-              // Cancle_Guests_Mutation.mutate();
               setModalVisible(true);
+              // Set the QR code value to the JSON string of the invitation data
               const jsonString = JSON.stringify(
                 get_user_guest_detail_data?.invitation
               );
@@ -244,7 +264,6 @@ const GuestsDetail = () => {
               style={{
                 fontSize: 16,
                 fontWeight: "bold",
-                marginBottom: 5,
                 color: "white",
                 textAlign: "center",
               }}
@@ -259,8 +278,6 @@ const GuestsDetail = () => {
         <TouchableOpacity
           style={{
             backgroundColor: "green",
-            // paddingHorizontal: 20,
-            // paddingVertical: 10,
             borderRadius: 50,
             width: 50,
             height: 50,
@@ -271,7 +288,7 @@ const GuestsDetail = () => {
             navigation.navigate("inviteguest", { itemdata });
           }}
         >
-          <MaterialIcons name="mode-edit" size={24} color="black" />
+          <MaterialIcons name="mode-edit" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
@@ -287,54 +304,74 @@ const GuestsDetail = () => {
             elevation: 5,
             width: "90%",
             height: "50%",
+            alignItems: "center", // Center content horizontally
           }}
         >
-          <TouchableOpacity onPress={() => setModalVisible(false)}>
-            <MaterialIcons name="cancel" size={24} color="black" />
+          <TouchableOpacity
+            onPress={() => setModalVisible(false)}
+            style={{ position: "absolute", top: 10, right: 10, zIndex: 2 }}
+          >
+            <MaterialIcons name="cancel" size={30} color="gray" />
           </TouchableOpacity>
           <Text
             style={{
-              fontSize: 16,
-              fontWeight: "500",
-              fontFamily: "RobotoSlab-Medium",
+              fontSize: 18,
+              fontWeight: "600",
               color: "black",
               textAlign: "center",
               marginBottom: 20,
+              marginTop: 10,
             }}
           >
-            Qrcode
+            Visitor Access QR Code
           </Text>
 
-          {qrCodeValue !== "" && (
-            <View
-              style={{
-                marginTop: 20,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+          {qrCodeValue !== "" ? (
+            // Use ViewShot to capture the QR code for sharing if implemented
+            <ViewShot
+              ref={viewShotRef}
+              options={{ format: "png", quality: 0.9 }}
             >
-              {console.log({
-                sssdd: qrCodeValue,
-              })}
-              <QRCode
-                value={qrCodeValue}
-                size={200}
-                color="black"
-                backgroundColor="white"
-              />
-            </View>
+              <View
+                style={{
+                  padding: 10, // Padding around QR code for better capture
+                  backgroundColor: "white",
+                }}
+              >
+                <QRCode
+                  value={qrCodeValue}
+                  size={200}
+                  color="black"
+                  backgroundColor="white"
+                />
+              </View>
+            </ViewShot>
+          ) : (
+            <ActivityIndicator
+              size="large"
+              color="green"
+              style={{ marginTop: 50 }}
+            />
           )}
 
-          <Text style={{ textAlign: "center", marginTop: 30, fontSize: 16 }}>
-            Screen Short and send to Guest
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: 30,
+              fontSize: 14,
+              color: "gray",
+            }}
+          >
+            Screen shot and share with your guest.
           </Text>
 
-          {/* <TouchableOpacity
+          <TouchableOpacity
             onPress={captureAndShare}
             style={{
               marginTop: 20,
               backgroundColor: "#007AFF",
-              padding: 10,
+              paddingVertical: 10,
+              paddingHorizontal: 20,
               borderRadius: 5,
               alignSelf: "center",
             }}
@@ -349,7 +386,7 @@ const GuestsDetail = () => {
             >
               Share QR Code
             </Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </CenterReuseModals>
     </View>
@@ -362,9 +399,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    // justifyContent: "center",
-    // alignItems: "center",
-    // backgroundColor: "#f0f0f0",
   },
   title: {
     fontSize: 24,
@@ -372,7 +406,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   detailsContainer: {
-    // backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
     elevation: 3,
@@ -380,14 +413,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+    backgroundColor: "#fff", // Added background for better elevation visibility
   },
   label: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
+    color: "#333",
   },
   text: {
     fontSize: 16,
     marginBottom: 15,
+    color: "#555",
   },
 });

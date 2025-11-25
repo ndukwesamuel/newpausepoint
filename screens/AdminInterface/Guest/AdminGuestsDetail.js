@@ -15,7 +15,8 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+// Converted import from 'react-query' to '@tanstack/react-query'
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -27,13 +28,12 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native"; // Added useNavigation to imports
 
-import {
-  NavigationContainer,
-  NavigationProp,
-  useNavigation,
-} from "@react-navigation/native";
+import // NavigationContainer, // Removed unused import
+// NavigationProp, // Removed unused import
+// useNavigation, // Already imported from react-navigation/native
+"@react-navigation/native";
 import {
   Get_All_User_Guest_Fun,
   Get__User_Guest_detail_Fun,
@@ -66,8 +66,9 @@ const AdminGuestsDetail = () => {
     user_data,
   });
 
-  const Cancle_Guests_Mutation = useMutation(
-    (data_info) => {
+  // Converted useMutation to TanStack Query object syntax
+  const Cancle_Guests_Mutation = useMutation({
+    mutationFn: (data_info) => {
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -87,34 +88,32 @@ const AdminGuestsDetail = () => {
         config
       );
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: `${success?.data?.message}`,
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: `${success?.data?.message}`,
+      });
 
-        // dispatch(Get_All_User_Guest_Fun());
+      // Optionally refresh the list or navigate back after success
+      // dispatch(Get_All_User_Guest_Fun());
+      // navigation.goBack();
+    },
 
-        // navigation.goBack();
-      },
+    onError: (error) => {
+      console.log({
+        error: error?.response,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+        //   text2: ` ${error?.response?.data?.errorMsg} `,
+      });
 
-      onError: (error) => {
-        console.log({
-          error: error?.response,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+      // dispatch(Get_User_Clans_Fun());
+      // dispatch(Get_User_Profle_Fun());
+      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+    },
+  });
 
   return (
     <ScrollView>
@@ -183,8 +182,10 @@ const AdminGuestsDetail = () => {
               onPress={() => {
                 Cancle_Guests_Mutation.mutate();
               }}
+              disabled={Cancle_Guests_Mutation.isPending} // Disable button while loading
             >
-              {Cancle_Guests_Mutation.isLoading ? (
+              {/* Updated deprecated 'isLoading' to 'isPending' */}
+              {Cancle_Guests_Mutation.isPending ? (
                 <ActivityIndicator size="small" color="white" />
               ) : (
                 <Text

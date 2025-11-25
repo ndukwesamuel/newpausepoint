@@ -1,10 +1,11 @@
 import {
+  // Updated imports from 'react-query' to '@tanstack/react-query'
   useQuery,
   useMutation,
   useQueryClient,
   UseQueryOptions,
   UseMutationOptions,
-} from "react-query";
+} from "@tanstack/react-query";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { useSelector } from "react-redux";
 
@@ -36,13 +37,13 @@ interface ApiRequestParams {
 }
 
 // Constants
-// const API_URL = process.env.EXPO_PUBLIC_API_URL_v2; // "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/";
-const API_URL = "https://communist-carla-pausepoint-fb082012.koyeb.app/"; //process.env.EXPO_PUBLIC_API_URL;
+const API_URL = "https://communist-carla-pausepoint-fb082012.koyeb.app/";
 
 console.log({ apiUrl: API_URL });
 
 // Fetch function for GET requests
 const fetchData = async ({ queryKey }: any) => {
+  // queryKey structure: [queryKeyName, url, token]
   const [, url, token] = queryKey;
 
   try {
@@ -71,6 +72,7 @@ const fetchData = async ({ queryKey }: any) => {
 export const useFetchData_v2 = (
   url: string,
   queryKey: string,
+  // Note: UseQueryOptions comes from @tanstack/react-query now
   options: Omit<UseQueryOptions<any, Error>, "queryKey" | "queryFn"> = {}
 ) => {
   const { user_data } = useSelector((state: RootState) => state.AuthSlice);
@@ -78,72 +80,15 @@ export const useFetchData_v2 = (
 
   console.log({ token, url });
 
-  return useQuery([queryKey, url, token], fetchData, {
+  // useQuery signature remains the same
+  return useQuery({
+    queryKey: [queryKey, url, token],
+    queryFn: fetchData,
     enabled: !!token,
     retry: false,
     ...options,
   });
 };
-
-// API request function for mutations
-// const apiRequest = async ({ url, method, data, token }: ApiRequestParams) => {
-//   if (!token) throw new Error("Token is missing");
-
-//   try {
-//     const config: AxiosRequestConfig = {
-//       url: `${API_URL}${url}`,
-//       method,
-//       data,
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//     };
-
-//     const response = await axios(config);
-//     console.log("API Response:", response.data);
-//     return response.data;
-//   } catch (error) {
-//     const axiosError = error as AxiosError<ApiErrorResponse>;
-//     console.error("API Error:", axiosError.response);
-//     throw new Error(
-//       axiosError.response
-//       // axiosError.response?.data?.error ||
-//       //   axiosError.response?.data?.message ||
-//       //   "API request failed"
-//     );
-//   }
-// };
-
-// API request function for mutations
-// const apiRequest = async ({ url, method, data, token }: ApiRequestParams) => {
-//   if (!token) throw new Error("Token is missing");
-
-//   try {
-//     const config: AxiosRequestConfig = {
-//       url: `${API_URL}${url}`,
-//       method,
-//       data,
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//     };
-
-//     const response = await axios(config);
-//     console.log("API Response:", response.data);
-//     return response.data;
-//   } catch (error) {
-//     const axiosError = error as AxiosError<ApiErrorResponse>;
-//     console.error("API Error:", axiosError.response?.data);
-
-//     // Extract error message from validation errors
-//     const errorData = axiosError.response?.data;
-//     let errorMessage = "API request failed";
-
-//     throw new Error(errorData);
-//   }
-// };
 
 // API request function for mutations
 const apiRequest = async ({ url, method, data, token }: ApiRequestParams) => {
@@ -182,17 +127,23 @@ export const useMutateData = (
   url: string,
   method: "POST" | "PUT" | "PATCH" | "DELETE",
   queryKey?: string | string[],
+  // UseMutationOptions comes from @tanstack/react-query now
   options?: Omit<UseMutationOptions<any, Error, any>, "mutationFn">
 ) => {
   const { user_data } = useSelector((state: RootState) => state.AuthSlice);
   const token = user_data?.token || "";
   const queryClient = useQueryClient();
 
-  return useMutation((data) => apiRequest({ url, method, data, token }), {
+  // useMutation signature remains the same, but now uses the object syntax internally
+  return useMutation({
+    mutationFn: (data) => apiRequest({ url, method, data, token }),
     onSuccess: (data) => {
       console.log("Mutation Successful", { data });
       if (queryKey) {
-        queryClient.invalidateQueries(queryKey);
+        // queryClient.invalidateQueries uses a different signature in v4/v5
+        const invalidateKey =
+          typeof queryKey === "string" ? [queryKey] : queryKey;
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
       }
     },
     onError: (error) => {
@@ -239,25 +190,27 @@ export const useFormDataMutate = (
   url: string,
   method: "POST" | "PUT" | "PATCH",
   queryKey?: string | string[],
+  // UseMutationOptions comes from @tanstack/react-query now
   options?: Omit<UseMutationOptions<any, Error, any>, "mutationFn">
 ) => {
   const { user_data } = useSelector((state: RootState) => state.AuthSlice);
   const token = user_data?.token || "";
   const queryClient = useQueryClient();
 
-  return useMutation(
-    (data) => formDataApiRequest({ url, method, data, token }),
-    {
-      onSuccess: (data) => {
-        console.log("Mutation Successful", { data });
-        if (queryKey) {
-          queryClient.invalidateQueries(queryKey);
-        }
-      },
-      onError: (error) => {
-        console.error("Mutation Error:", error.message);
-      },
-      ...options,
-    }
-  );
+  return useMutation({
+    mutationFn: (data) => formDataApiRequest({ url, method, data, token }),
+    onSuccess: (data) => {
+      console.log("Mutation Successful", { data });
+      if (queryKey) {
+        // queryClient.invalidateQueries uses a different signature in v4/v5
+        const invalidateKey =
+          typeof queryKey === "string" ? [queryKey] : queryKey;
+        queryClient.invalidateQueries({ queryKey: invalidateKey });
+      }
+    },
+    onError: (error) => {
+      console.error("Mutation Error:", error.message);
+    },
+    ...options,
+  });
 };

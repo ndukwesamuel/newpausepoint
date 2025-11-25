@@ -1,8 +1,7 @@
-import { useQuery } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
-import { useMutation, useQueryClient } from "react-query";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 console.log({
@@ -38,8 +37,6 @@ const fetchData = async ({ queryKey }) => {
 
 // Hook for fetching data
 export const useFetchData = (url, queryKey, options = {}) => {
-  //   const { user } = useSelector((state) => state?.reducer?.AuthSlice);
-
   const {
     user_data,
     user_isError,
@@ -55,23 +52,18 @@ export const useFetchData = (url, queryKey, options = {}) => {
     url,
   });
 
-  return useQuery([queryKey, url, token], fetchData, {
+  return useQuery({
+    queryKey: [queryKey, url, token],
+    queryFn: fetchData,
     enabled: !!token, // Prevent query from running without a token
     retry: false, // Prevent endless retries if there's an error
     ...options,
   });
 };
 
-// import axios from "axios";
-// import { useSelector } from "react-redux";
-
-// const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-
 // Function to handle API requests
 const apiRequest = async ({ url, method, data, token }) => {
   if (!token) throw new Error("Token is missing");
-
-  // console.log({ccc: url, method, data, token});
 
   try {
     const response = await axios({
@@ -102,10 +94,11 @@ export const useMutateData = (url, method, queryKey) => {
   const token = user_data?.token;
   const queryClient = useQueryClient();
 
-  return useMutation((data) => apiRequest({ url, method, data, token }), {
+  return useMutation({
+    mutationFn: (data) => apiRequest({ url, method, data, token }),
     onSuccess: (data) => {
       console.log("Mutation Successful", { data });
-      queryClient.invalidateQueries(queryKey); // Refresh data
+      queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
     },
     onError: (error) => {
       console.error("Mutation Error:", error);
@@ -140,16 +133,14 @@ export const formdatauseMutateData = (url, method, queryKey) => {
   const token = user_data?.token;
   const queryClient = useQueryClient();
 
-  return useMutation(
-    (data) => formdataapiRequest({ url, method, data, token }),
-    {
-      onSuccess: (data) => {
-        console.log("Mutation Successful", { data });
-        queryClient.invalidateQueries(queryKey); // Refresh data
-      },
-      onError: (error) => {
-        console.error("Mutation Error:", error.message);
-      },
-    }
-  );
+  return useMutation({
+    mutationFn: (data) => formdataapiRequest({ url, method, data, token }),
+    onSuccess: (data) => {
+      console.log("Mutation Successful", { data });
+      queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
+    },
+    onError: (error) => {
+      console.error("Mutation Error:", error.message);
+    },
+  });
 };

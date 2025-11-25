@@ -52,7 +52,7 @@ const reducers = combineReducers({
   UtilitisSlice: UtilitisSlice,
 
   authSlice: authSlice,
-  socketSlice: socketSlice,
+  // socketSlice: socketSlice,
 });
 
 const persistConfig = {

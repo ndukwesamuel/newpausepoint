@@ -22,7 +22,6 @@ import {
 import UploadFile from "../../../components/UserHome/UploadFile";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { useMutation } from "react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -82,45 +81,45 @@ const CreateAnnouncement = () => {
     setText(newText);
   };
 
-  const Create_Forum_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}forum/admin-announcement`;
+  // const Create_Forum_Mutation = useMutation(
+  //   (data_info) => {
+  //     let url = `${API_BASEURL}forum/admin-announcement`;
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  //     const config = {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Accept: "application/json",
+  //         //   "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${user_data?.token}`,
+  //       },
+  //     };
 
-      return axios.post(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Post Created  successfully ",
-        });
-        // dispatch(
-        //   Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting)
-        // );
-        dispatch(Admin_Get_My_Clan_Announcement_Fun({}));
+  //     return axios.post(url, data_info, config);
+  //   },
+  //   {
+  //     onSuccess: (success) => {
+  //       Toast.show({
+  //         type: "success",
+  //         text1: "Post Created  successfully ",
+  //       });
+  //       // dispatch(
+  //       //   Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting)
+  //       // );
+  //       dispatch(Admin_Get_My_Clan_Announcement_Fun({}));
 
-        navigation.goBack();
-        // setTurnmodal(false);
-      },
+  //       navigation.goBack();
+  //       // setTurnmodal(false);
+  //     },
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
+  //     onError: (error) => {
+  //       Toast.show({
+  //         type: "error",
+  //         text1: `${error?.response?.data?.message} `,
+  //         //   text2: ` ${error?.response?.data?.errorMsg} `,
+  //       });
+  //     },
+  //   }
+  // );
   return (
     <AppScreen>
       <KeyboardAvoidingView

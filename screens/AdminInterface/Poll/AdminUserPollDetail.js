@@ -9,7 +9,8 @@ import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import { useMutation } from "react-query";
+// Converted import from 'react-query' to '@tanstack/react-query'
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -34,10 +35,11 @@ const AdminUserPollDetail = () => {
     }, {});
     setOptionCounts(counts);
     return () => {};
-  }, []);
+  }, [itemdata?.votes]); // Added itemdata?.votes to dependency array
 
-  const Poll_Mutation = useMutation(
-    (data_info) => {
+  // Converted useMutation to TanStack Query object syntax
+  const Poll_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}poll/${itemdata?._id}`;
 
       const config = {
@@ -51,30 +53,31 @@ const AdminUserPollDetail = () => {
 
       return axios.delete(url, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Post Deleted  successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Post Deleted successfully ",
+      });
 
-        dispatch(Get_All_Polls_Fun());
+      dispatch(Get_All_Polls_Fun());
 
-        navigation.goBack();
-      },
+      navigation.goBack();
+    },
 
-      onError: (error) => {
-        console.log({
-          aaa: error?.response,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
+    onError: (error) => {
+      console.log({
+        aaa: error?.response,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+        //   text2: ` ${error?.response?.data?.errorMsg} `,
+      });
+    },
+  });
+
+  // Renamed Poll_Mutation.isLoading to Poll_Mutation.isPending where used in JSX
+
   // const { item } = route.params as { item: any };
   return (
     <View style={styles.container}>
@@ -93,12 +96,14 @@ const AdminUserPollDetail = () => {
           // navigation.navigate("guestsdetail", { itemdata });
 
           onPress={() => Poll_Mutation.mutate()}
+          disabled={Poll_Mutation.isPending} // Disable button while loading
         >
           <AntDesign name="delete" size={24} color="red" />
         </TouchableOpacity>
       </View>
 
-      {Poll_Mutation?.isLoading && (
+      {/* Used isPending for loading state */}
+      {Poll_Mutation?.isPending && (
         <ActivityIndicator size="large" color="green" />
       )}
       <View

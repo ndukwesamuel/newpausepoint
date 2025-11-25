@@ -14,7 +14,6 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 
 import { useNavigation } from "@react-navigation/native";
-import { useQueryClient } from "react-query"; // Import useQueryClient for retries
 // import { useFetchData } from "../../hooks/Request"; // Assuming this path is correct
 import { useDispatch, useSelector } from "react-redux";
 import { useFetchData } from "../../../hooks/Request";
@@ -25,7 +24,6 @@ import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 // useFetchData
 const GuestErrands = () => {
   const navigation = useNavigation();
-  const queryClient = useQueryClient(); // Initialize query client
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
   const {

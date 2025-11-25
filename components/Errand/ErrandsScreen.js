@@ -13,22 +13,20 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 
 import { useNavigation } from "@react-navigation/native";
-import { useQueryClient } from "react-query"; // Import useQueryClient for retries
+import { useQueryClient } from "@tanstack/react-query"; // CHANGED: Import useQueryClient from TanStack
 import { useFetchData } from "../../hooks/Request"; // Assuming this path is correct
 import { useDispatch, useSelector } from "react-redux";
 import { Get_User_Clans_Fun } from "../../Redux/UserSide/ClanSlice";
 import ScreenWrapper from "../shared/ScreenWrapper";
+
 const ErrandsScreen = () => {
   const navigation = useNavigation();
   const queryClient = useQueryClient(); // Initialize query client
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
-  // const {
-  //   data: getallErrand,
-  //   isLoading: isLoadinggetallErrand,
-  //   error: iserrorgetallErrand,
-  // } = useFetchData(`api/v1/guesterrand`, "errand");
-
+  // The custom hook useFetchData is assumed to be using useQuery internally,
+  // and the destructuring properties (data, isLoading, error, isFetching, refetch)
+  // are compatible with both react-query v4/v5.
   const {
     data: getallErrand,
     isLoading: isLoadinggetallErrand,
@@ -49,6 +47,7 @@ const ErrandsScreen = () => {
       case "picked_up":
         return "#2196F3"; // Blue
       case "completed":
+      case "delivered": // Added a common delivery status just in case
         return "#4CAF50"; // Green
       case "cancelled":
         return "#F44336"; // Red
@@ -138,7 +137,10 @@ const ErrandsScreen = () => {
           Error: {iserrorgetallErrand.message || "Failed to fetch data."}
         </Text>
         <TouchableOpacity
-          onPress={() => queryClient.invalidateQueries("errand")}
+          // CHANGED: Use TanStack Query v5 object syntax for invalidateQueries
+          onPress={() =>
+            queryClient.invalidateQueries({ queryKey: ["errand"] })
+          }
         >
           <Text style={styles.retryButton}>Tap to Retry</Text>
         </TouchableOpacity>

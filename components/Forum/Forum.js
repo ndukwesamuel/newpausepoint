@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Get_My_Clan_Forum_Fun } from "../../Redux/UserSide/ForumSlice";
 import { formatDate, formatDateandTime } from "../../utils/DateTime";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query"; // CHANGED: Updated import for TanStack Query v5
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -57,8 +57,17 @@ const Forum = () => {
     setRefreshing(false);
   };
 
-  const Like_Mutation = useMutation(
-    (data_info) => {
+  const {
+    user_data,
+    user_isError,
+    user_isSuccess,
+    user_isLoading,
+    user_message,
+  } = useSelector((state) => state.AuthSlice);
+
+  // CHANGED: Refactored useMutation to TanStack Query v5 syntax
+  const Like_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}forum/like/${data_info?.clanId}/${data_info?.forumid}`;
 
       const config = {
@@ -72,36 +81,27 @@ const Forum = () => {
 
       return axios.get(url, config);
     },
-    {
-      onSuccess: (success) => {
-        // Toast.show({
-        //   type: "success",
-        //   text1: " successfully ",
-        // });
-        dispatch(Get_My_Clan_Forum_Fun());
-        // setTurnmodal(false);
-      },
+    onSuccess: (success) => {
+      // Toast.show({
+      //   type: "success",
+      //   text1: " successfully ",
+      // });
+      dispatch(Get_My_Clan_Forum_Fun());
+      // setTurnmodal(false);
+    },
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+        //   text2: ` ${error?.response?.data?.errorMsg} `,
+      });
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+      // dispatch(Get_User_Clans_Fun());
+      // dispatch(Get_User_Profle_Fun());
+      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+    },
+  });
 
   const { get_my_clan_forum_data, get_my_clan_forum_message } = useSelector(
     (state) => state.ForumSlice
@@ -155,24 +155,7 @@ const Forum = () => {
                 </View>
               )}
 
-              {get_my_clan_forum_message && (
-                <View
-                  style={{ alignItems: "center", justifyContent: "center" }}
-                >
-                  <LottieView
-                    autoPlay
-                    ref={animation}
-                    style={{
-                      width: 200,
-                      height: 200,
-                      // backgroundColor: "#eee",
-                    }}
-                    // Find more Lottie files at https://lottiefiles.com/featured
-                    source={require("../../assets/Lottie/notFund.json")}
-                  />
-                  <Text>{get_my_clan_forum_message}</Text>
-                </View>
-              )}
+              {/* Removed duplicate LottieView block */}
 
               <FlatList
                 data={get_my_clan_forum_data?.forums}

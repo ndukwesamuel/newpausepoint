@@ -26,7 +26,6 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 
-import { useMutation } from "react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { useNavigation } from "@react-navigation/native";
@@ -76,42 +75,42 @@ const ForgottenPasswod = ({}) => {
     setInputValue(text);
   };
 
-  const Forget_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}forgot-password`;
+  // const Forget_Mutation = useMutation(
+  //   (data_info) => {
+  //     let url = `${API_BASEURL}forgot-password`;
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  //     const config = {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Accept: "application/json",
+  //         //   "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${user_data?.token}`,
+  //       },
+  //     };
 
-      return axios.post(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: `${success?.data?.message}`,
-        });
+  //     return axios.post(url, data_info, config);
+  //   },
+  //   {
+  //     onSuccess: (success) => {
+  //       Toast.show({
+  //         type: "success",
+  //         text1: `${success?.data?.message}`,
+  //       });
 
-        dispatch(authScreenChange("CREATEPASSWORD"));
-      },
+  //       dispatch(authScreenChange("CREATEPASSWORD"));
+  //     },
 
-      onError: (error) => {
-        console.log({
-          nnnnnnn: error?.response?.data,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.error} `,
-        });
-      },
-    }
-  );
+  //     onError: (error) => {
+  //       console.log({
+  //         nnnnnnn: error?.response?.data,
+  //       });
+  //       Toast.show({
+  //         type: "error",
+  //         text1: `${error?.response?.data?.error} `,
+  //       });
+  //     },
+  //   }
+  // );
   return (
     <AppScreen>
       <KeyboardAvoidingView
@@ -167,7 +166,7 @@ const ForgottenPasswod = ({}) => {
               onPress={() => {
                 dispatch(setOtpEmail(email));
 
-                Forget_Mutation.mutate({ email });
+                // Forget_Mutation.mutate({ email });
               }}
               isLoading={Forget_Mutation.isLoading}
             />

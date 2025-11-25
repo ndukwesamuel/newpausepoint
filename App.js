@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-native";
 import Onboading from "./components/Onboard/Onboading ";
-import AppNavigation, { RootStackParamList } from "./navigation/AppNavigation";
+// import AppNavigation, { RootStackParamList } from "./navigation/AppNavigation";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import * as Notifications from "expo-notifications";
@@ -27,7 +27,7 @@ import { persistor, store } from "./Redux/store";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Onboarding from "./components/Onboard/Onboading ";
 import LoginScreen from "./screens/LoginScreen";
 import {

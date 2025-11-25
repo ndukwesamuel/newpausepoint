@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "1.7.0",
+    "version": "1.7.1",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -48,7 +48,8 @@
         }
       ],
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-web-browser"
     ],
     "ios": {
       "supportsTablet": false,
@@ -63,7 +64,7 @@
       "runtimeVersion": "1.0.0"
     },
     "android": {
-      "versionCode": 51,
+      "versionCode": 52,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

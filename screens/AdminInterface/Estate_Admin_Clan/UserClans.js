@@ -20,7 +20,10 @@ import {
 } from "../../../Redux/UserSide/ClanSlice";
 import { Get_User_Profle_Fun } from "../../../Redux/UserSide/UserProfileSlice";
 
-import { useMutation } from "react-query";
+// ------------------------------------------------------------------
+// UPDATED IMPORT: Use @tanstack/react-query instead of react-query
+import { useMutation } from "@tanstack/react-query";
+// ------------------------------------------------------------------
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -35,15 +38,16 @@ import { reset_isOnboarding } from "../../../Redux/DontwantToResetSlice";
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
 
 // Replace this with the correct API endpoint for fetching user clans
-const API_ENDPOINT = "https://your-api-endpoint.com/user-clans";
+const API_ENDPOINT = "https://your-api-endpoint.com/user-clans"; // Note: This constant is unused in the original logic but kept for context
 
 const UserClans = () => {
   // State to store the list of user clans
   const [userClans, setUserClans] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeButton, setActiveButton] = useState("Member"); // Initialize with 'Social' as the active button
+  const [activeButton, setActiveButton] = useState("Member"); // Initialize with 'Member'
   const animation = useRef(null);
   const [turnmodal, setTurnmodal] = useState(false);
+  const [memberToApprove, setMemberToApprove] = useState(null); // State to hold the member being processed
 
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -59,346 +63,325 @@ const UserClans = () => {
     (clan) => clan?.status !== "approved"
   );
 
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const { user_data } = useSelector((state) => state.AuthSlice);
 
   const { get_user_profile_data } = useSelector(
     (state) => state?.UserProfileSlice
   );
-  //   Get_User_Clans_Fun
-
-  // Effect to fetch user clans when the component mounts
 
   const effectFunction = () => {
     dispatch(Get_User_Clans_Fun());
     dispatch(Get_User_Profle_Fun());
     dispatch(Get_all_clan_User_Is_adminIN_Fun());
-    dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+    // Only dispatch if AdmincurrentClanMeeting is present to avoid unnecessary calls
+    if (get_user_profile_data?.AdmincurrentClanMeeting) {
+      dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+    }
   };
 
   useEffect(() => {
-    dispatch(Get_User_Clans_Fun());
-    dispatch(Get_User_Profle_Fun());
-    dispatch(Get_all_clan_User_Is_adminIN_Fun());
-    dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+    // Initial fetch of data
+    effectFunction();
+
+    // Re-fetch Get_Single_clan if the profile data updates with the Admin current clan
+    if (get_user_profile_data?.AdmincurrentClanMeeting) {
+      dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+    }
 
     return () => {};
-  }, [dispatch]);
+  }, [dispatch, get_user_profile_data?.AdmincurrentClanMeeting]);
 
-  const SelectCLan_Mutation = useMutation(
-    (data_info) => {
+  const getAuthConfig = () => ({
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${user_data?.token}`,
+    },
+  });
+
+  // ------------------------------------------------------------------
+  // 1. TanStack Query useMutation for User Clan Select/Deselect (Join/Leave)
+  // ------------------------------------------------------------------
+  const SelectCLan_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}clan/select_user_clan/${data_info?.id}`;
+      const config = getAuthConfig();
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      if (data_info?.method == "GET") {
+      if (data_info?.method === "GET") {
         return axios.get(url, config);
       }
-
-      if (data_info?.method == "DELETE") {
+      if (data_info?.method === "DELETE") {
         return axios.delete(url, config);
       }
+      return Promise.reject(new Error("Invalid method provided."));
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Request To Join Estate successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Estate membership successfully updated",
+      });
 
-        dispatch(Get_User_Clans_Fun());
-        dispatch(Get_User_Profle_Fun());
-        dispatch(Get_all_clan_User_Is_adminIN_Fun());
-        dispatch(reset_login());
-        dispatch(reset_isOnboarding());
-      },
+      // Refetch relevant data and trigger app reset flow
+      dispatch(Get_User_Clans_Fun());
+      dispatch(Get_User_Profle_Fun());
+      dispatch(Get_all_clan_User_Is_adminIN_Fun());
+      // The original code used to reset login/onboarding, maintaining this flow:
+      dispatch(reset_login());
+      dispatch(reset_isOnboarding());
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${
+          error?.response?.data?.message || "Failed to update membership"
+        }`,
+      });
+      // Refresh data on error to ensure consistency
+      dispatch(Get_User_Clans_Fun());
+      dispatch(Get_User_Profle_Fun());
+      dispatch(Get_all_clan_User_Is_adminIN_Fun());
+    },
+  });
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-        dispatch(Get_User_Clans_Fun());
-        dispatch(Get_User_Profle_Fun());
-        dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
-
-  const Estate_admin_SelectCLan_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // 2. TanStack Query useMutation for Admin Clan Select/Deselect (Join/Leave Admin Role)
+  // ------------------------------------------------------------------
+  const Estate_admin_SelectCLan_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}clan/select_Admin_clan/${data_info?.id}`;
+      const config = getAuthConfig();
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      if (data_info?.method == "GET") {
+      if (data_info?.method === "GET") {
         return axios.get(url, config);
       }
-
-      if (data_info?.method == "DELETE") {
+      if (data_info?.method === "DELETE") {
         return axios.delete(url, config);
       }
+      return Promise.reject(new Error("Invalid method provided."));
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Request To Join Estate successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Admin Estate successfully updated",
+      });
 
-        dispatch(Get_User_Clans_Fun());
-        dispatch(Get_User_Profle_Fun());
-        dispatch(Get_all_clan_User_Is_adminIN_Fun());
-        dispatch(reset_login());
-        dispatch(reset_isOnboarding());
-      },
+      // Refetch relevant data and trigger app reset flow
+      dispatch(Get_User_Clans_Fun());
+      dispatch(Get_User_Profle_Fun());
+      dispatch(Get_all_clan_User_Is_adminIN_Fun());
+      // The original code used to reset login/onboarding, maintaining this flow:
+      dispatch(reset_login());
+      dispatch(reset_isOnboarding());
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${
+          error?.response?.data?.message || "Failed to update admin role"
+        }`,
+      });
+      // Refresh data on error to ensure consistency
+      dispatch(Get_User_Clans_Fun());
+      dispatch(Get_User_Profle_Fun());
+      dispatch(Get_all_clan_User_Is_adminIN_Fun());
+    },
+  });
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        dispatch(Get_User_Clans_Fun());
-        dispatch(Get_User_Profle_Fun());
-        dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
-
-  const ApproveMember_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // 3. TanStack Query useMutation for Approving/Rejecting/Suspending Member
+  // ------------------------------------------------------------------
+  const ApproveMember_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+      const config = getAuthConfig();
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Request To Join Estate successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Member status successfully updated",
+      });
+
+      // Refetch single clan data to update the unapproved list
+      if (get_user_profile_data?.AdmincurrentClanMeeting) {
         dispatch(
           Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting)
         );
-
-        setTurnmodal(false);
-      },
-
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+      }
+      setTurnmodal(false); // Close the decision modal
+      setMemberToApprove(null); // Clear the selected member
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${
+          error?.response?.data?.message || "Failed to update member status"
+        }`,
+      });
+      // Do not close modal on error, allow user to retry
+    },
+  });
 
   const onRefresh = () => {
     // Set the refreshing state to true
     setRefreshing(true);
     effectFunction();
 
-    // Wait for 2 seconds
-    setRefreshing(false);
+    // Set refreshing to false after a short delay (or wait for dispatch completion in real app)
+    setTimeout(() => setRefreshing(false), 1500);
   };
 
-  // Render item function for FlatList
-  const renderClanItem = ({ item }) => (
-    <View
-      style={{
-        marginVertical: 10,
-        marginHorizontal: 20,
-        padding: 10,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      {console.log({
-        item,
-      })}
-      <View style={{ width: "75%" }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item?.name}</Text>
-        <Text>{item?.description}</Text>
-        <Text>Creator: {item?.email}</Text>
-        <Text>Status: {item?.status}</Text>
-      </View>
+  const handleDecideMember = (item) => {
+    setMemberToApprove(item);
+    setTurnmodal(true);
+  };
 
-      <TouchableOpacity
-        // onPress={() => {
-        //   setSelectedClan(item);
-        //   setIsModalVisible(true);
-        // }}
+  const handleApproveAction = (status) => {
+    if (!memberToApprove || ApproveMember_Mutation.isPending) return;
+
+    ApproveMember_Mutation.mutate({
+      clanId: get_user_profile_data?.AdmincurrentClanMeeting,
+      memberId: memberToApprove?.user?._id,
+      approvalStatus: status,
+    });
+  };
+
+  // Render item function for FlatList (Member View)
+  const renderClanItem = ({ item }) => {
+    const isCurrentlySelected =
+      get_user_profile_data?.currentClanMeeting?._id === item?._id;
+    const isLoading = SelectCLan_Mutation.isPending;
+
+    return (
+      <View
         style={{
-          backgroundColor: "green",
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          borderRadius: 10,
+          marginVertical: 10,
+          marginHorizontal: 20,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: "#ccc",
+          borderRadius: 8,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
-        onPress={
-          get_user_profile_data?.currentClanMeeting?._id === item?._id
-            ? () => {
-                SelectCLan_Mutation.mutate({
-                  method: "DELETE",
-
-                  id: item?._id,
-                });
-                // dispatch(Get_User_Profle_Fun());
-              }
-            : () => {
-                SelectCLan_Mutation.mutate({
-                  method: "GET",
-
-                  id: item?._id,
-                });
-              }
-        }
       >
-        {SelectCLan_Mutation.isLoading ? (
-          <ActivityIndicator size="small" color="white" />
-        ) : (
-          <View>
-            {get_user_profile_data?.currentClanMeeting?._id === item?._id ? (
-              <Text style={{ color: "white" }}>Leave</Text>
-            ) : (
-              <Text style={{ color: "white" }}>Join</Text>
-            )}
-          </View>
-        )}
-      </TouchableOpacity>
-      {/* Add more details as needed */}
-    </View>
-  );
+        <View style={{ width: "70%" }}>
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item?.name}</Text>
+          <Text>{item?.description}</Text>
+          <Text>Creator: {item?.email}</Text>
+          <Text>Status: {item?.status}</Text>
+        </View>
 
-  const AdminrenderClanItem = ({ item }) => (
-    <View
-      style={{
-        marginVertical: 10,
-        marginHorizontal: 20,
-        padding: 10,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <View style={{ width: "75%" }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item?.name}</Text>
-        <Text>{item?.description}</Text>
-        <Text>Creator: {item?.email}</Text>
-        <Text>Status: {item?.status}</Text>
+        <TouchableOpacity
+          style={{
+            backgroundColor: isLoading ? "#90ee90" : "green",
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderRadius: 10,
+            width: "25%",
+            alignItems: "center",
+          }}
+          onPress={() => {
+            SelectCLan_Mutation.mutate({
+              method: isCurrentlySelected ? "DELETE" : "GET",
+              id: item?._id,
+            });
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={{ color: "white" }}>
+              {isCurrentlySelected ? "Leave" : "Join"}
+            </Text>
+          )}
+        </TouchableOpacity>
       </View>
+    );
+  };
 
-      <TouchableOpacity
-        // onPress={() => {
-        //   setSelectedClan(item);
-        //   setIsModalVisible(true);
-        // }}
+  // Render item function for FlatList (Admin View)
+  const AdminrenderClanItem = ({ item }) => {
+    const isCurrentlySelectedAsAdmin =
+      get_user_profile_data?.AdmincurrentClanMeeting === item?._id;
+    const isLoading = Estate_admin_SelectCLan_Mutation.isPending;
+
+    return (
+      <View
         style={{
-          backgroundColor: "green",
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          borderRadius: 10,
+          marginVertical: 10,
+          marginHorizontal: 20,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: "#ccc",
+          borderRadius: 8,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
-        onPress={
-          get_user_profile_data?.AdmincurrentClanMeeting === item?._id
-            ? () => {
-                Estate_admin_SelectCLan_Mutation.mutate({
-                  method: "DELETE",
-
-                  id: item?._id,
-                });
-                // dispatch(Get_User_Profle_Fun());
-              }
-            : () => {
-                Estate_admin_SelectCLan_Mutation.mutate({
-                  method: "GET",
-
-                  id: item?._id,
-                });
-              }
-        }
       >
-        {Estate_admin_SelectCLan_Mutation.isLoading ? (
-          <ActivityIndicator size="small" color="white" />
-        ) : (
-          <View>
-            {get_user_profile_data?.AdmincurrentClanMeeting === item?._id ? (
-              <Text style={{ color: "white" }}>Leave</Text>
-            ) : (
-              <Text style={{ color: "white" }}>Join</Text>
-            )}
-          </View>
-        )}
-      </TouchableOpacity>
-      {/* Add more details as needed */}
-    </View>
-  );
+        <View style={{ width: "70%" }}>
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item?.name}</Text>
+          <Text>{item?.description}</Text>
+          <Text>Creator: {item?.email}</Text>
+          <Text>Status: {item?.status}</Text>
+        </View>
 
+        <TouchableOpacity
+          style={{
+            backgroundColor: isLoading ? "#90ee90" : "green",
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderRadius: 10,
+            width: "25%",
+            alignItems: "center",
+          }}
+          onPress={() => {
+            Estate_admin_SelectCLan_Mutation.mutate({
+              method: isCurrentlySelectedAsAdmin ? "DELETE" : "GET",
+              id: item?._id,
+            });
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={{ color: "white" }}>
+              {isCurrentlySelectedAsAdmin ? "Leave" : "Join"}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  // Render item function for FlatList (Approve Member View)
   const ApproverenderClanItem = ({ item }) => (
     <View
       style={{
         flexDirection: "row",
-        // justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 16,
         borderWidth: 1,
         borderColor: "#ccc",
         borderRadius: 8,
         padding: 16,
+        marginHorizontal: 20,
       }}
     >
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          marginBottom: 16,
-          width: "80%",
+          width: "70%",
         }}
       >
         <Image
-          source={{ uri: item?.user?.photo }}
+          source={{ uri: item?.user?.photo || "default_avatar_uri" }}
           style={{
             width: 50,
             height: 50,
@@ -406,34 +389,14 @@ const UserClans = () => {
             marginRight: 16,
           }}
         />
-        <View
-          style={{
-            flex: 1,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "bold",
-            }}
-          >
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>
             {item?.user?.name}
           </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              color: "gray",
-            }}
-          >
+          <Text style={{ fontSize: 14, color: "gray" }}>
             {item?.user?.email}
           </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "bold",
-              color: "green", // Customize color based on status
-            }}
-          >
+          <Text style={{ fontSize: 16, fontWeight: "bold", color: "orange" }}>
             {item?.status}
           </Text>
         </View>
@@ -445,215 +408,41 @@ const UserClans = () => {
           paddingHorizontal: 20,
           paddingVertical: 10,
           borderRadius: 10,
+          width: "25%",
+          alignItems: "center",
         }}
-        onPress={() => {
-          setTurnmodal(true);
-        }}
+        onPress={() => handleDecideMember(item)}
       >
-        <View>
-          <Text style={{ color: "white" }}>decide</Text>
-        </View>
+        <Text style={{ color: "white" }}>Decide</Text>
       </TouchableOpacity>
-
-      <CenterReuseModals
-        visible={turnmodal}
-        onClose={() => setTurnmodal(false)}
-      >
-        <View
-          style={{
-            backgroundColor: "white",
-            padding: 20,
-            borderRadius: 10,
-            elevation: 5,
-            width: "80%",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "500",
-              fontFamily: "RobotoSlab-Medium",
-              color: "black",
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            Decide User Membership
-          </Text>
-
-          <TouchableOpacity
-            style={{
-              position: "absolute",
-              top: 10,
-              right: 10,
-            }}
-            onPress={() => setTurnmodal(false)}
-          >
-            <MaterialIcons name="cancel" size={24} color="black" />
-          </TouchableOpacity>
-
-          <View
-            style={{
-              // flexDirection: "row",
-              // justifyContent: "space-between",
-              // alignItems: "center",
-              gap: 40,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#04973C",
-                paddingHorizontal: 10,
-                paddingVertical: 15,
-                borderRadius: 6,
-                width: "50%",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                ApproveMember_Mutation.mutate({
-                  clanId: get_user_profile_data?.AdmincurrentClanMeeting,
-                  memberId: item?.user?._id,
-                  approvalStatus: "approved",
-                });
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: 14,
-                  fontFamily: "RobotoSlab-Medium",
-                }}
-              >
-                Approved
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#04973C",
-                paddingHorizontal: 10,
-                paddingVertical: 15,
-                borderRadius: 6,
-                width: "50%",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                ApproveMember_Mutation.mutate({
-                  clanId: get_user_profile_data?.AdmincurrentClanMeeting,
-                  memberId: item?.user?._id,
-                  approvalStatus: "pending",
-                });
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: 14,
-                  fontFamily: "RobotoSlab-Medium",
-                }}
-              >
-                Pending
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#04973C",
-                paddingHorizontal: 10,
-                paddingVertical: 15,
-                borderRadius: 6,
-                width: "50%",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                ApproveMember_Mutation.mutate({
-                  clanId: get_user_profile_data?.AdmincurrentClanMeeting,
-                  memberId: item?.user?._id,
-                  approvalStatus: "suspended",
-                });
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: 14,
-                  fontFamily: "RobotoSlab-Medium",
-                }}
-              >
-                Suspended
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#04973C",
-                paddingHorizontal: 10,
-                paddingVertical: 15,
-                borderRadius: 6,
-                width: "50%",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: 40,
-              }}
-              onPress={() => {
-                ApproveMember_Mutation.mutate({
-                  clanId: get_user_profile_data?.AdmincurrentClanMeeting,
-                  memberId: item?.user?._id,
-                  approvalStatus: "rejected",
-                });
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: 14,
-                  fontFamily: "RobotoSlab-Medium",
-                }}
-              >
-                Rejected
-              </Text>
-            </TouchableOpacity>
-          </View>
-          {ApproveMember_Mutation.isLoading && (
-            <ActivityIndicator size="Larger" color="green" />
-          )}
-        </View>
-      </CenterReuseModals>
     </View>
   );
 
   return (
     <View style={{ flex: 1, alignItems: "center" }}>
-      {refreshing && <ActivityIndicator size="large" color="#0C1401" />}
+      {/* The original code had a loading indicator outside the FlatList, which is fine */}
 
       <View
         style={{
-          //   marginVertical: 20,
           flexDirection: "row",
           justifyContent: "space-between",
           marginBottom: 20,
           borderWidth: 1,
           borderColor: "#CFCDCD",
           borderRadius: 6,
-          padding: 10,
+          padding: 5, // Slightly reduced padding for better fit
           width: "90%",
         }}
       >
+        {/* Member Button */}
         <TouchableOpacity
           style={{
             backgroundColor:
               activeButton === "Member" ? "green" : "transparent",
-            padding: 10, // Adjust the padding as needed
-            borderRadius: 5, // Add rounded corners if desired
+            padding: 10,
+            borderRadius: 5,
+            flex: 1,
+            alignItems: "center",
           }}
           onPress={() => setActiveButton("Member")}
         >
@@ -662,17 +451,20 @@ const UserClans = () => {
             textstyle={{
               fontSize: 16,
               fontWeight: "500",
-
               color: activeButton === "Member" ? "white" : "black",
             }}
           />
         </TouchableOpacity>
 
+        {/* Admin Button */}
         <TouchableOpacity
           style={{
             backgroundColor: activeButton === "Admin" ? "green" : "transparent",
-            padding: 10, // Adjust the padding as needed
-            borderRadius: 5, // Add rounded corners if desired
+            padding: 10,
+            borderRadius: 5,
+            flex: 1,
+            alignItems: "center",
+            marginHorizontal: 5, // Spacing between buttons
           }}
           onPress={() => setActiveButton("Admin")}
         >
@@ -681,18 +473,20 @@ const UserClans = () => {
             textstyle={{
               fontSize: 16,
               fontWeight: "500",
-
               color: activeButton === "Admin" ? "white" : "black",
             }}
           />
         </TouchableOpacity>
 
+        {/* Approve Member Button */}
         <TouchableOpacity
           style={{
             backgroundColor:
               activeButton === "Aprove" ? "green" : "transparent",
-            padding: 10, // Adjust the padding as needed
-            borderRadius: 5, // Add rounded corners if desired
+            padding: 10,
+            borderRadius: 5,
+            flex: 1,
+            alignItems: "center",
           }}
           onPress={() => setActiveButton("Aprove")}
         >
@@ -701,7 +495,6 @@ const UserClans = () => {
             textstyle={{
               fontSize: 16,
               fontWeight: "500",
-
               color: activeButton === "Aprove" ? "white" : "black",
             }}
           />
@@ -717,6 +510,11 @@ const UserClans = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          ListEmptyComponent={() => (
+            <View style={{ padding: 20, alignItems: "center" }}>
+              <Text>No estate memberships found.</Text>
+            </View>
+          )}
         />
       )}
 
@@ -729,6 +527,11 @@ const UserClans = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          ListEmptyComponent={() => (
+            <View style={{ padding: 20, alignItems: "center" }}>
+              <Text>You are not an administrator in any estate.</Text>
+            </View>
+          )}
         />
       )}
 
@@ -741,8 +544,114 @@ const UserClans = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          ListEmptyComponent={() => (
+            <View style={{ padding: 20, alignItems: "center" }}>
+              <Text>
+                No pending member requests in your current Admin estate.
+              </Text>
+            </View>
+          )}
         />
       )}
+
+      {/* Decision Modal */}
+      <CenterReuseModals
+        visible={turnmodal}
+        onClose={() => setTurnmodal(false)}
+      >
+        <View
+          style={{
+            backgroundColor: "white",
+            padding: 20,
+            borderRadius: 10,
+            elevation: 5,
+            width: "80%",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "600",
+              color: "black",
+              textAlign: "center",
+              marginBottom: 20,
+            }}
+          >
+            Decide User Membership
+          </Text>
+
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              zIndex: 10,
+            }}
+            onPress={() => setTurnmodal(false)}
+            disabled={ApproveMember_Mutation.isPending}
+          >
+            <MaterialIcons name="cancel" size={30} color="gray" />
+          </TouchableOpacity>
+
+          <View
+            style={{
+              gap: 15,
+              width: "100%",
+              alignItems: "center",
+            }}
+          >
+            {["approved", "pending", "suspended", "rejected"].map((status) => {
+              const statusText =
+                status.charAt(0).toUpperCase() + status.slice(1);
+              const bgColor =
+                status === "approved"
+                  ? "#04973C"
+                  : status === "pending"
+                  ? "#FFA500"
+                  : status === "suspended"
+                  ? "#FF6347"
+                  : "#DC143C";
+
+              return (
+                <TouchableOpacity
+                  key={status}
+                  style={{
+                    backgroundColor: ApproveMember_Mutation.isPending
+                      ? "#ccc"
+                      : bgColor,
+                    paddingVertical: 15,
+                    borderRadius: 6,
+                    width: "80%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => handleApproveAction(status)}
+                  disabled={ApproveMember_Mutation.isPending}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      fontWeight: "600",
+                      fontSize: 16,
+                    }}
+                  >
+                    {statusText}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {ApproveMember_Mutation.isPending && (
+            <ActivityIndicator
+              size="large"
+              color="green"
+              style={{ marginTop: 20 }}
+            />
+          )}
+        </View>
+      </CenterReuseModals>
     </View>
   );
 };

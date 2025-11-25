@@ -30,7 +30,7 @@ import {
   BottomModal,
   CenterReuseModals,
 } from "../../../components/shared/ReuseModals";
-import { useMutation } from "react-query";
+// import { useMutation } from "react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -42,36 +42,36 @@ const Myclan = ({ navigation }) => {
   const [name, setName] = useState("");
   const [text, setText] = useState("");
 
-  const Crate_Estate_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}clan`;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-      return axios.post(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Estate created successfully",
-          text2: `Waiting for Admin to Approve`,
-        });
-        setModalVisible(false);
-      },
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.error}`,
-        });
-        setModalVisible(false);
-      },
-    }
-  );
+  // const Crate_Estate_Mutation = useMutation(
+  //   (data_info) => {
+  //     let url = `${API_BASEURL}clan`;
+  //     const config = {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Accept: "application/json",
+  //         Authorization: `Bearer ${user_data?.token}`,
+  //       },
+  //     };
+  //     return axios.post(url, data_info, config);
+  //   },
+  //   {
+  //     onSuccess: (success) => {
+  //       Toast.show({
+  //         type: "success",
+  //         text1: "Estate created successfully",
+  //         text2: `Waiting for Admin to Approve`,
+  //       });
+  //       setModalVisible(false);
+  //     },
+  //     onError: (error) => {
+  //       Toast.show({
+  //         type: "error",
+  //         text1: `${error?.response?.data?.error}`,
+  //       });
+  //       setModalVisible(false);
+  //     },
+  //   }
+  // );
 
   const handleEstate = () => {
     let data = {

@@ -11,12 +11,12 @@ import {
 import React, { useState } from "react";
 import { AntDesign, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { MediumFontText, RegularFontText } from "../shared/Paragrahp";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import {
   NativeStackNavigationProp,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query"; // <--- CHANGED
 import axios from "axios";
 import Toast from "react-native-toast-message";
 
@@ -319,8 +319,9 @@ export function DeleteLAccountModal({
     DeleteAccount_Mutation.mutate();
   };
 
-  const DeleteAccount_Mutation = useMutation(
-    (data_info) => {
+  // 🚀 TanStack Query v5 Conversion
+  const DeleteAccount_Mutation = useMutation({
+    mutationFn: () => {
       let url = `${API_BASEURL}deleteAccount`;
 
       const config = {
@@ -331,39 +332,39 @@ export function DeleteLAccountModal({
         },
       };
 
+      // Since it's a GET request for deletion, the body parameter is unused,
+      // but TanStack Query's mutationFn is typically the function that returns the promise.
       return axios.get(url, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Account Deleted",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Account Deleted",
+      });
 
-        dispatch(reset_login());
-        dispatch(reset_isOnboarding());
-        dispatch(reset_Admin_Get_All_User());
-        dispatch(reset_ClanSlice());
-        dispatch(reset_EventSlice());
-        dispatch(reset_ForumSlice());
-        dispatch(reset_UserProfileSlice());
-        dispatch(reset_ProfileSlice());
-        // dispatch(Get_My_Clan_Forum_Fun());
-        // setTurnmodal(false);
-      },
+      // Dispatch all reset actions
+      dispatch(reset_login());
+      dispatch(reset_isOnboarding());
+      dispatch(reset_Admin_Get_All_User());
+      dispatch(reset_ClanSlice());
+      dispatch(reset_EventSlice());
+      dispatch(reset_ForumSlice());
+      dispatch(reset_UserProfileSlice());
+      dispatch(reset_ProfileSlice());
+    },
 
-      onError: (error) => {
-        console.log({
-          ff: error?.response?.data,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
+    onError: (error) => {
+      console.log({
+        ff: error?.response?.data,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+        //   text2: ` ${error?.response?.data?.errorMsg} `,
+      });
+    },
+  });
+
   return (
     <Modal transparent={true} animationType="slide" visible={visible}>
       <TouchableWithoutFeedback onPress={onClose}>
@@ -401,7 +402,7 @@ export function DeleteLAccountModal({
                 marginTop: 20,
               }}
             >
-              {DeleteAccount_Mutation.isLoading ? (
+              {DeleteAccount_Mutation.isPending ? ( // <--- CHANGED from isLoading to isPending
                 <ActivityIndicator size="large" color="red" />
               ) : (
                 <TouchableOpacity

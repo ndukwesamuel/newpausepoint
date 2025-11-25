@@ -40,11 +40,12 @@ import {
   Admin_Get_Single_Emergency_Report_Fun,
 } from "../../../Redux/Admin/EmergencySlice";
 import { formatDateandTime } from "../../../utils/DateTime";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
+
 export default function EmergencyDetails({}) {
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -64,7 +65,6 @@ export default function EmergencyDetails({}) {
 
   useEffect(() => {
     dispatch(Admin_Get_Single_Emergency_Report_Fun(item));
-    // Admin_Get_Single_Emergency_Report_isLoading
     return () => {};
   }, []);
 
@@ -96,17 +96,15 @@ export default function EmergencyDetails({}) {
   const usertypelist = ["All", "Active", "Banned", "Pending"];
 
   const filteredUsers = userFile.filter((user) => {
-    // if (userType === "ALL") {
-
     if (userType.toUpperCase() === "ALL") {
-      return true; // Show all users
+      return true;
     } else {
-      return user.status === userType; // Show users with selected status
+      return user.status === userType;
     }
   });
 
   const [formData, setFormData] = useState({
-    search: "", // Initialize with empty values
+    search: "",
   });
 
   const handleInputChange = (inputName, text) => {
@@ -121,10 +119,10 @@ export default function EmergencyDetails({}) {
     let statusColor = "#3DCF3A";
     let statusBackColor = "#F3FFF3";
     if (item?.status === "Banned") {
-      statusColor = "#F34357"; // Red color for 'Banned' status
+      statusColor = "#F34357";
       statusBackColor = "#FDF2F3";
     } else if (item?.status === "Pending") {
-      statusColor = "#F27F2D"; // Yellow color for 'Pending' status
+      statusColor = "#F27F2D";
       statusBackColor = "#FFF1E7";
     }
 
@@ -142,71 +140,55 @@ export default function EmergencyDetails({}) {
       </View>
     );
   };
+
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
-    // Set the refreshing state to true
     setRefreshing(true);
     dispatch(Admin_Get_Single_Emergency_Report_Fun(item));
-
-    // Wait for 2 seconds
     setRefreshing(false);
   };
 
   const makePhoneCall = () => {
-    // Alert.alert("Call Support", "Are you sure you want to call support?");
-    // Linking.openURL(
-    //   `${Admin_Get_Single_Emergency_Report?.userProfile?.phoneNumber} || 080`
-    // );
     Linking.openURL(
       `tel:${Admin_Get_Single_Emergency_Report?.userProfile?.phoneNumber}`
     );
   };
 
-  const Resolve_Mutation = useMutation(
-    (id) => {
+  const Resolve_Mutation = useMutation({
+    mutationFn: (id) => {
       let url = `${API_BASEURL}emargencyreport/resolve-emergency/${id}`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.get(url, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        dispatch(Admin_Get_Single_Emergency_Report_Fun(item));
-        dispatch(Admin_Get_ALl_Emergency_Report_Fun());
-        navigation.goBack();
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: " successfully ",
+      });
+      dispatch(Admin_Get_Single_Emergency_Report_Fun(item));
+      dispatch(Admin_Get_ALl_Emergency_Report_Fun());
+      navigation.goBack();
+    },
+    onError: (error) => {
+      console.log({
+        error: error?.response,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+      });
+    },
+  });
 
-        // setTurnmodal(false);
-      },
-
-      onError: (error) => {
-        console.log({
-          error: error?.response,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
   return (
     <ScrollView
       refreshControl={
@@ -234,7 +216,6 @@ export default function EmergencyDetails({}) {
               alignItems: "center",
             }}
           >
-            {/* import fireImage from "../../assets/images/fire.png"; */}
             <Image
               source={require("../../../assets/images/fire.png")}
               style={{ width: 38, height: 40 }}
@@ -297,8 +278,6 @@ export default function EmergencyDetails({}) {
             <RegularFontText
               data="Additional Information:"
               textstyle={{ fontSize: 14, color: "#696969", width: "30%" }}
-
-              // address
             />
             <MediumFontText
               data={Admin_Get_Single_Emergency_Report?.report?.additionalInfo}
@@ -317,11 +296,8 @@ export default function EmergencyDetails({}) {
             <RegularFontText
               data="House Address:"
               textstyle={{ fontSize: 14, color: "#696969", width: "30%" }}
-
-              // address
             />
             <MediumFontText
-              // data={Admin_Get_Single_Emergency_Report?.report?.additionalInfo}
               data={Admin_Get_Single_Emergency_Report?.report?.address}
               textstyle={{ fontSize: 14 }}
             />
@@ -352,21 +328,7 @@ export default function EmergencyDetails({}) {
               flexDirection: "row",
               gap: 20,
             }}
-          >
-            {/* <RegularFontText
-            data="Comment:"
-            textstyle={{
-              fontSize: 13,
-              color: "#696969",
-              width: "30%",
-            }}
-          />
-
-          <MediumFontText
-            data="User’s account approved and game fire ie i kk"
-            textstyle={{ fontSize: 14, width: "65%" }}
-          /> */}
-          </View>
+          ></View>
         </View>
 
         <Formbutton
@@ -379,19 +341,18 @@ export default function EmergencyDetails({}) {
             marginTop: 10,
           }}
           textStyle={{
-            color: "white", ///item?.status === "Active" ? "#F34357" : "white",
-
+            color: "white",
             fontWeight: "500",
             fontSize: 14,
             fontFamily: "RobotoSlab-Medium",
           }}
-          data="Make a call " //{item?.status === "Active" ? "Ban User" : "Reinstate User"}
+          data="Make a call "
           onPress={makePhoneCall}
         />
 
         {Admin_Get_Single_Emergency_Report?.report?.status === "pending" && (
           <Formbutton
-            isLoading={Resolve_Mutation.isLoading}
+            isLoading={Resolve_Mutation.isPending}
             buttonStyle={{
               backgroundColor: "#04973C",
               paddingVertical: 14,
@@ -401,13 +362,12 @@ export default function EmergencyDetails({}) {
               marginTop: 10,
             }}
             textStyle={{
-              color: "white", ///item?.status === "Active" ? "#F34357" : "white",
-
+              color: "white",
               fontWeight: "500",
               fontSize: 14,
               fontFamily: "RobotoSlab-Medium",
             }}
-            data="Resolve" //{item?.status === "Active" ? "Ban User" : "Reinstate User"}
+            data="Resolve"
             onPress={() => {
               Resolve_Mutation.mutate(
                 Admin_Get_Single_Emergency_Report?.report?._id
@@ -415,8 +375,6 @@ export default function EmergencyDetails({}) {
             }}
           />
         )}
-
-        {/* <EmergencyModal visible={modalVisible} onClose={closeModal} setModalFormVisible={setModalFormVisible} /> */}
 
         <Modal
           transparent={true}

@@ -29,7 +29,8 @@ import { userFile } from "../../utils/fakedata";
 import { useRoute } from "@react-navigation/native";
 import { HalfScreenModal } from "../../components/shared/ReuseableModal";
 import { Admin_Get_Single_User_Fun } from "../../Redux/Admin/UserSlice";
-import { useMutation } from "react-query";
+// Update the import to use TanStack Query
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { useDispatch, useSelector } from "react-redux";
@@ -40,6 +41,7 @@ import {
   Admin_Get_Single_Clan_Memeber_Fun,
   Get_Single_clan,
 } from "../../Redux/UserSide/ClanSlice";
+
 export default function UserDetails({ navigation }) {
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -50,16 +52,8 @@ export default function UserDetails({ navigation }) {
 
   const route = useRoute();
 
-  console.log({
-    iii: route,
-  });
-
-  // const { item } = route.params as { item: any };
-
+  // Route params extraction (simplified for readability)
   const { item } = route.params;
-  console.log({
-    item: item,
-  });
 
   const { get_user_profile_data } = useSelector(
     (state) => state?.UserProfileSlice
@@ -71,19 +65,23 @@ export default function UserDetails({ navigation }) {
 
   const { Singleuser_data } = useSelector((state) => state?.UserSlice);
 
+  const {
+    user_data,
+    // user_isError, // Removed unused variables
+    // user_isSuccess,
+    // user_isLoading,
+    // user_message,
+  } = useSelector((state) => state.AuthSlice);
+
+  // NOTE: Assuming item contains the necessary user ID to fetch details
   useEffect(() => {
-    dispatch(Admin_Get_Single_User_Fun(item));
-    dispatch(Admin_Get_Single_Clan_Memeber_Fun(item?.user?._id));
-
+    if (item) {
+      dispatch(Admin_Get_Single_User_Fun(item));
+      // Use user ID from item structure to fetch clan member details
+      dispatch(Admin_Get_Single_Clan_Memeber_Fun(item?.user?._id));
+    }
     return () => {};
-  }, []);
-
-  console.log({
-    ooo: admin_get_single_clan_memeber_data?.data?.member,
-  });
-  console.log({
-    qqqoo: admin_get_single_clan_memeber_data?.data?.userProfile,
-  });
+  }, [item, dispatch]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalformVisible, setModalFormVisible] = useState(false);
@@ -101,18 +99,11 @@ export default function UserDetails({ navigation }) {
   };
 
   const [userType, setUserType] = useState("All");
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
   const usertypelist = ["All", "Active", "Banned", "Pending"];
 
+  // Note: The logic below for filteredUsers using userFile (fakedata)
+  // and status is not used in the main render, but is kept if needed elsewhere.
   const filteredUsers = userFile.filter((user) => {
-    // if (userType === "ALL") {
-
     if (userType.toUpperCase() === "ALL") {
       return true; // Show all users
     } else {
@@ -128,140 +119,61 @@ export default function UserDetails({ navigation }) {
     setFormData({ ...formData, [inputName]: text });
   };
 
-  const RenderItem = ({ item }) => {
-    let statusColor = "#3DCF3A";
-    let statusBackColor = "#F3FFF3";
-    if (item?.status === "Banned") {
-      statusColor = "#F34357"; // Red color for 'Banned' status
-      statusBackColor = "#FDF2F3";
-    } else if (item?.status === "Pending") {
-      statusColor = "#F27F2D"; // Yellow color for 'Pending' status
-      statusBackColor = "#FFF1E7";
-    }
+  // Removed unused RenderItem and capitalizeFirstLetter functions for brevity,
+  // as they were likely used for a FlatList display not present here.
 
-    return (
-      <TouchableOpacity
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          borderWidth: 1,
-          borderColor: "#CFCDCD",
-          borderRadius: 6,
-          paddingHorizontal: 10,
-          gap: 10,
-          paddingVertical: 20,
-          marginBottom: 20,
-        }}
-        onPress={() =>
-          navigation.navigate("adminUserDetails", { data: "this" })
-        }
-      >
-        <View
-          style={{
-            borderRadius: 6,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Image
-            source={{
-              uri: "https://img.bleacherreport.net/img/images/photos/003/701/847/hi-res-c834ba050d9e72e90eca37c6b08b6fc5_crop_north.jpg?1508166325&w=3072&h=2048",
-            }}
-            style={{ width: 50, height: 50, borderRadius: 50 }}
-          />
-        </View>
-
-        <View
-          style={{
-            width: "90%",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <View style={{}}>
-            <Text
-              style={{
-                fontWeight: "500",
-                fontSize: 14,
-                fontFamily: "RobotoSlab-Medium",
-              }}
-            >
-              {item?.user?.name}
-            </Text>
-
-            <Text>{item?.user?.email}</Text>
-          </View>
-
-          <View
-            style={{ backgroundColor: statusBackColor, paddingHorizontal: 10 }}
-          >
-            <Text style={{ color: statusColor }}>{item?.status}</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  function capitalizeFirstLetter(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  const ApproveMember_Mutation = useMutation(
-    (data_info) => {
+  // --- TanStack Query Mutation for Member Approval/Suspension ---
+  const ApproveMember_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        dispatch(
-          Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting)
-        );
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "User status updated successfully",
+      });
 
-        // setTurnmodal(false);
-        setIsModalVisible(!isModalVisible);
-      },
+      // Refresh the single clan data
+      dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+      // Close the modal
+      setIsModalVisible(false);
+    },
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message || "Error updating status"}`,
+      });
+    },
+  });
 
+  // Helper function to render the status badge
   const Stattus_fuc = () => {
+    const status = admin_get_single_clan_memeber_data?.data?.member?.status;
     let statusColor = "#3DCF3A";
     let statusBackColor = "#F3FFF3";
-    if (admin_get_single_clan_memeber_data?.data?.member?.status === "Banned") {
-      statusColor = "#F34357"; // Red color for 'Banned' status
+
+    if (status === "Banned") {
+      statusColor = "#F34357"; // Red
       statusBackColor = "#FDF2F3";
-    } else if (
-      admin_get_single_clan_memeber_data?.data?.member?.status === "Pending"
-    ) {
-      statusColor = "#F27F2D"; // Yellow color for 'Pending' status
+    } else if (status === "Pending") {
+      statusColor = "#F27F2D"; // Orange
       statusBackColor = "#FFF1E7";
+    } else if (status === "suspended") {
+      // Assuming 'suspended' is the status after Banning
+      statusColor = "#F34357";
+      statusBackColor = "#FDF2F3";
     }
 
     return (
@@ -273,15 +185,27 @@ export default function UserDetails({ navigation }) {
         }}
       >
         <Text style={{ color: statusColor, textAlign: "center" }}>
-          {admin_get_single_clan_memeber_data?.data?.member?.status}
+          {status}
         </Text>
       </View>
     );
   };
 
+  // Determine if the user is currently approved (or not suspended/banned)
+  const isApproved =
+    admin_get_single_clan_memeber_data?.data?.member?.status === "approved";
+
+  // Determine the current user ID for the mutation payload
+  const memberId = admin_get_single_clan_memeber_data?.data?.member?.user?._id;
+
+  // Determine the next status for the button action
+  const nextStatus = isApproved ? "suspended" : "approved";
+  const buttonText = isApproved ? "Ban User" : "Reinstate User";
+
   return (
     <ScrollView>
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
+        {/* User Header Info (Image, Name, Email, Status) */}
         <View
           style={{
             borderRadius: 6,
@@ -316,6 +240,7 @@ export default function UserDetails({ navigation }) {
           </View>
         </View>
 
+        {/* User Details Card */}
         <View
           style={{
             borderWidth: 1,
@@ -337,25 +262,25 @@ export default function UserDetails({ navigation }) {
             <SemiBoldFontText data="User Info " textstyle={{ fontSize: 18 }} />
           </View>
 
-          {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Resident ID"
-              textstyle={{ fontSize: 13, color: "#696969" }}
-            />
-            <MediumFontText data="2340OPL56" textstyle={{ fontSize: 19 }} />
-          </View> */}
-
+          {/* Home Address */}
           <View style={{ marginBottom: 5, paddingBottom: 10 }}>
             <RegularFontText
               data="Home Address"
               textstyle={{ fontSize: 13, color: "#696969" }}
             />
             <MediumFontText
-              data={`${admin_get_single_clan_memeber_data?.data?.userProfile?.address?.street} ${admin_get_single_clan_memeber_data?.data?.userProfile?.address?.city} `}
+              data={`${
+                admin_get_single_clan_memeber_data?.data?.userProfile?.address
+                  ?.street || ""
+              } ${
+                admin_get_single_clan_memeber_data?.data?.userProfile?.address
+                  ?.city || ""
+              } `}
               textstyle={{ fontSize: 19 }}
             />
           </View>
 
+          {/* Phone Number */}
           <View style={{ marginBottom: 5, paddingBottom: 10 }}>
             <RegularFontText
               data="Phone Number"
@@ -371,12 +296,11 @@ export default function UserDetails({ navigation }) {
           </View>
         </View>
 
+        {/* Action Button (Ban/Reinstate) */}
         <Formbutton
           buttonStyle={{
-            backgroundColor:
-              item?.status === "approved" ? "#FDF2F3" : "#04973C",
-
-            borderColor: item?.status === "approved" ? "#F34357" : "",
+            backgroundColor: isApproved ? "#FDF2F3" : "#04973C",
+            borderColor: isApproved ? "#F34357" : "#04973C",
             paddingVertical: 14,
             alignItems: "center",
             borderRadius: 5,
@@ -384,22 +308,22 @@ export default function UserDetails({ navigation }) {
             marginTop: 10,
           }}
           textStyle={{
-            color: item?.status === "approved" ? "#F34357" : "white",
-
+            color: isApproved ? "#F34357" : "white",
             fontWeight: "500",
             fontSize: 14,
             fontFamily: "RobotoSlab-Medium",
           }}
-          data={item?.status === "approved" ? "Ban User" : "Reinstate User"}
-          onPress={() => setIsModalVisible(!isModalVisible)}
+          data={buttonText}
+          onPress={() => setIsModalVisible(true)}
+          isLoading={ApproveMember_Mutation.isPending}
         />
 
-        {/* <EmergencyModal visible={modalVisible} onClose={closeModal} setModalFormVisible={setModalFormVisible} /> */}
-
+        {/* Ban/Reinstate Confirmation Modal */}
         <Modal
           transparent={true}
           animationType="slide"
           visible={isModalVisible}
+          onRequestClose={toggleModal} // Good practice for Android back button
         >
           <TouchableWithoutFeedback onPress={toggleModal}>
             <View style={styles.modalContainer}>
@@ -415,12 +339,7 @@ export default function UserDetails({ navigation }) {
                   }}
                 >
                   <MediumFontText
-                    data={
-                      admin_get_single_clan_memeber_data?.data?.member
-                        ?.status === "approved"
-                        ? "Ban User "
-                        : "Reinstate User"
-                    }
+                    data={isApproved ? "Ban User " : "Reinstate User"}
                     textstyle={{
                       fontSize: 18,
                       textAlign: "center",
@@ -431,8 +350,7 @@ export default function UserDetails({ navigation }) {
 
                 <RegularFontText
                   data={
-                    admin_get_single_clan_memeber_data?.data?.member?.status ===
-                    "approved"
+                    isApproved
                       ? "Banning this user will suspend their account indefinitely, preventing further access to the system."
                       : "Reinstating this user will reactivate their account, allowing them to access the system"
                   }
@@ -442,123 +360,79 @@ export default function UserDetails({ navigation }) {
                     textAlign: "center",
                   }}
                 />
-                {admin_get_single_clan_memeber_data?.data?.member?.status ===
-                "approved" ? (
-                  <View
+
+                {/* Modal Action Buttons */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: 20,
+                  }}
+                >
+                  {/* Primary Action Button (Ban/Reinstate) */}
+                  <TouchableOpacity
                     style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 20,
+                      backgroundColor: isApproved ? "#FDF2F3" : "#04973C",
+                      paddingHorizontal: 12,
+                      paddingVertical: 12,
+                      borderRadius: 6,
+                      borderWidth: isApproved ? 1 : 0,
+                      borderColor: isApproved ? "#F34357" : "transparent",
                     }}
-                  >
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#FDF2F3",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={() => {
+                    onPress={() => {
+                      if (
+                        memberId &&
+                        get_user_profile_data?.AdmincurrentClanMeeting
+                      ) {
                         ApproveMember_Mutation.mutate({
                           clanId:
                             get_user_profile_data?.AdmincurrentClanMeeting,
-                          memberId: item?.user?._id,
-                          approvalStatus: "suspended",
+                          memberId: memberId,
+                          approvalStatus: nextStatus,
                         });
-                      }}
-                    >
-                      <RegularFontText
-                        data="Ban User"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                        }}
-                      />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#04973C",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={toggleModal}
-                    >
-                      <RegularFontText
-                        data="Cancel"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 20,
+                      } else {
+                        Toast.show({
+                          type: "error",
+                          text1: "Missing ID information.",
+                        });
+                      }
                     }}
                   >
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "white",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                        borderWidth: 1,
-                        borderColor: "#04973C",
+                    <RegularFontText
+                      data={isApproved ? "Confirm Ban" : "Confirm Reinstate"}
+                      textstyle={{
+                        fontSize: 14,
+                        fontWeight: "400",
+                        textAlign: "center",
+                        color: isApproved ? "#F34357" : "white",
                       }}
-                      onPress={toggleModal}
-                    >
-                      <RegularFontText
-                        data="Cancel"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "#04973C",
-                        }}
-                      />
-                    </TouchableOpacity>
+                    />
+                  </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#04973C",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
+                  {/* Cancel Button */}
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: isApproved ? "#04973C" : "white",
+                      paddingHorizontal: 12,
+                      paddingVertical: 12,
+                      borderRadius: 6,
+                      borderWidth: isApproved ? 0 : 1,
+                      borderColor: isApproved ? "transparent" : "#04973C",
+                    }}
+                    onPress={toggleModal}
+                  >
+                    <RegularFontText
+                      data="Cancel"
+                      textstyle={{
+                        fontSize: 14,
+                        fontWeight: "400",
+                        textAlign: "center",
+                        color: isApproved ? "white" : "#04973C",
                       }}
-                      onPress={() => {
-                        ApproveMember_Mutation.mutate({
-                          clanId:
-                            get_user_profile_data?.AdmincurrentClanMeeting,
-                          memberId:
-                            admin_get_single_clan_memeber_data?.data?.member
-                              ?.user?._id,
-                          approvalStatus: "approved",
-                        });
-                      }}
-                    >
-                      <RegularFontText
-                        data="Reinstate"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </TouchableWithoutFeedback>

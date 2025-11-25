@@ -35,43 +35,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { Login_Fun, reset_other_login } from "../Redux/AuthSlice";
 import { authScreenChange, changeauthscreen } from "../Redux/OnboardingSlice";
 import { useNavigation } from "@react-navigation/native";
-import { useMutateData } from "../hooks/Request";
-import { useMutation } from "react-query";
+// Removed unused 'useMutateData' hook import
+// import { useMutateData } from "../hooks/Request";
+// Removed commented out query import
 import Toast from "react-native-toast-message";
 import { loginUser } from "../Redux/v2/AuthSlicev2";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
-// const LoginScreen = ({}) => {
-//   const { localremember } = useSelector((state) => state?.DontwantToResetSlice);
-//   const navigation = useNavigation();
-//   const dispatch = useDispatch();
-//   const {
-//     user_data,
-//     user_isError,
-//     user_isSuccess,
-//     user_isLoading,
-//     user_message,
-//     pushtokendata,
-//   } = useSelector((state) => state.AuthSlice);
-
-//   const [inputValue, setInputValue] = useState("");
-//   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-//   const togglePasswordVisibility = () => {
-//     setIsPasswordVisible(!isPasswordVisible);
-//   };
-//   const [name, setName] = useState("");
-//   const [email, setEmail] = useState(localremember?.email || "");
-
-//   const [remember, setRemember] = useState(false);
-
-//   const [passwords, setPasswords] = useState({
-//     mainPassword: localremember?.password || "",
-//     confirmPassword: "",
-//   });
-
 const LoginScreen = ({}) => {
-  // ... (existing state and useSelector)
-
   const { localremember } = useSelector((state) => state?.DontwantToResetSlice);
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -110,47 +81,6 @@ const LoginScreen = ({}) => {
     setInputValue(text);
   };
 
-  // const Login_Mutation = useMutation(
-  //   (data_info) => {
-  //     let url = `${API_BASEURL}api/v1/user/login`;
-
-  //     console.log({
-  //       yttt: url,
-  //     });
-
-  //     const config = {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Accept: "application/json",
-  //       },
-  //     };
-
-  //     return axios.post(url, data_info, config);
-  //   },
-  //   {
-  //     onSuccess: (success) => {
-  //       Toast.show({
-  //         type: "success",
-  //         text1: "OTP Sent successfully ",
-  //       });
-  //       // dispatch(Get_My_Clan_Forum_Fun());
-  //       // setTurnmodal(false);
-  //     },
-
-  //     onError: (error) => {
-  //       console.log("AXIOS ERROR", JSON.stringify(error, null, 2));
-  //       Toast.show({
-  //         type: "error",
-  //         text1: error?.response?.data?.message || "Network Error",
-  //       });
-  //     },
-  //   }
-  // );
-
-  // console.log({
-  //   vgb: Login_Mutation.isLoading,
-  // });
-
   const handleLogin = async () => {
     const value = await AsyncStorage.getItem("PushToken");
 
@@ -176,8 +106,6 @@ const LoginScreen = ({}) => {
   };
 
   useEffect(() => {
-    // This cleans up AuthSlice state when LoginScreen unmounts (though with absolute positioning, it's always mounted)
-    // It's still good practice, but less critical for the shaking issue with the new Auth component approach.
     return () => {
       dispatch(reset_other_login());
     };
@@ -268,11 +196,11 @@ const LoginScreen = ({}) => {
               </Text>
             </TouchableOpacity>
 
-            {/* Forgot password link - CORRECTED onPress */}
+            {/* Forgot password link */}
             <TouchableOpacity
-              onPress={() => dispatch(authScreenChange("FORGOTTENPASSWOD"))} // Corrected this line
+              onPress={() => dispatch(authScreenChange("FORGOTTENPASSWOD"))}
               style={{
-                marginBottom: 20, // Keep consistent with the other TouchableOpacity
+                marginBottom: 20,
               }}
             >
               <Text
@@ -308,9 +236,11 @@ const LoginScreen = ({}) => {
           <View
             style={{ height: 20, alignItems: "center", marginVertical: 15 }}
           >
+            {/* Assuming this image is a decorative 'or' separator line */}
             <Image
               source={require("../assets/images/or.png")}
               style={{ width: "80%", flex: 1 }}
+              resizeMode="contain"
             />
           </View>
 

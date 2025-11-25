@@ -22,7 +22,12 @@ import AppScreen from "../../../components/shared/AppScreen";
 import { RegularFontText } from "../../../components/shared/Paragrahp";
 import { formatDateString } from "../../../utils/DateTime";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+
+// ------------------------------------------------------------------
+// UPDATED IMPORT: Use @tanstack/react-query instead of react-query
+import { useMutation } from "@tanstack/react-query";
+// ------------------------------------------------------------------
+
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -40,13 +45,7 @@ const CreateGuests = () => {
   const navigation = useNavigation();
 
   const [selectedOption, setSelectedOption] = useState(1);
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const { user_data } = useSelector((state) => state.AuthSlice);
 
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
@@ -89,64 +88,58 @@ const CreateGuests = () => {
   };
 
   const handleDateChange = (event, selectedDate, field, type) => {
-    if (type === "date") {
-      if (selectedDate) {
-        setFormData({
-          ...formData,
-          [field]: new Date(
-            formData[field].setFullYear(
-              selectedDate.getFullYear(),
-              selectedDate.getMonth(),
-              selectedDate.getDate()
-            )
-          ),
-        });
-      }
-      if (field === "arrivalDate") {
-        setShowArrivalDatePicker(false);
-      } else {
-        setShowDepartureDatePicker(false);
-      }
+    // Hide picker after selection or dismissal
+    if (field === "arrivalDate") {
+      type === "date"
+        ? setShowArrivalDatePicker(false)
+        : setShowArrivalTimePicker(false);
     } else {
-      if (selectedDate) {
-        setFormData({
-          ...formData,
-          [field]: new Date(
-            formData[field].setHours(
-              selectedDate.getHours(),
-              selectedDate.getMinutes()
-            )
-          ),
-        });
-      }
-      if (field === "arrivalDate") {
-        setShowArrivalTimePicker(false);
-      } else {
-        setShowDepartureTimePicker(false);
-      }
+      type === "date"
+        ? setShowDepartureDatePicker(false)
+        : setShowDepartureTimePicker(false);
+    }
+
+    if (selectedDate !== undefined) {
+      setFormData((prev) => {
+        const newDate = new Date(prev[field]);
+
+        if (type === "date") {
+          newDate.setFullYear(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate()
+          );
+        } else {
+          newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes());
+        }
+
+        return {
+          ...prev,
+          [field]: newDate,
+        };
+      });
     }
   };
 
   const handleSubmit = () => {
-    if (selectedOption === 1) {
-      formData.gender = "Male";
-    } else {
-      formData.gender = "Female";
-    }
+    const genderString = selectedOption === 1 ? "Male" : "Female";
 
     Guests_Mutation.mutate({
       clan: userProfile_data?.currentClanMeeting?._id,
       arraval: formData?.arrivalDate,
       expires: formData?.departureDate,
       visitor_name: formData?.visitor_name,
-      gender: formData?.gender,
+      gender: genderString,
       phone_number: formData?.phone_number,
       location: formData?.location,
     });
   };
 
-  const Guests_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // TanStack Query useMutation
+  // ------------------------------------------------------------------
+  const Guests_Mutation = useMutation({
+    mutationFn: (data_info) => {
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -158,59 +151,72 @@ const CreateGuests = () => {
       let url;
       if (formData?.visitation_id) {
         url = `${API_BASEURL}visitor/modify/${formData?.visitation_id}`;
-
         return axios.patch(url, data_info, config);
       } else {
         url = `${API_BASEURL}visitor/generate-access-code/${data_info?.clan}`;
-
         return axios.post(url, data_info, config);
       }
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Guest invitation submitted successfully",
+      });
 
-        if (formData?.visitation_id) {
-          dispatch(Get__User_Guest_detail_Fun(formData?.visitation_id));
-        }
-        dispatch(Get_All_User_Guest_Fun());
-        navigation.goBack();
-      },
-
-      onError: (error) => {
-        console.log({
-          dfdf: error?.response?.data,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-        });
-      },
-    }
-  );
+      if (formData?.visitation_id) {
+        dispatch(Get__User_Guest_detail_Fun(formData?.visitation_id));
+      }
+      dispatch(Get_All_User_Guest_Fun());
+      navigation.goBack();
+    },
+    onError: (error) => {
+      console.log({
+        dfdf: error?.response?.data,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message || "Submission failed"} `,
+      });
+    },
+  });
+  // ------------------------------------------------------------------
 
   useEffect(() => {
-    const guestId = route.params?.itemdata;
+    const guestData = route.params?.itemdata;
 
-    if (guestId) {
+    if (guestData) {
+      // Set form data for editing an existing guest
       setFormData({
-        visitation_id: guestId?._id,
-        arrivalDate: new Date(),
-        departureDate: new Date(guestId.expires),
-        visitor_name: guestId.visitor_name,
-        gender: guestId.gender === "Male" ? 1 : 2,
-        phone_number: `${guestId.phone_number}`,
+        visitation_id: guestData?._id,
+        // Ensure dates are converted to Date objects
+        arrivalDate: new Date(guestData.arraval || Date.now()),
+        departureDate: new Date(guestData.expires || Date.now()),
+        visitor_name: guestData.visitor_name || "",
+        gender: guestData.gender === "Male" ? 1 : 2,
+        phone_number: `${guestData.phone_number || ""}`,
+        location: guestData.location || "",
       });
+      setSelectedOption(guestData.gender === "Male" ? 1 : 2);
     }
-  }, [route.params?.guestId]);
+  }, [route.params?.itemdata]); // Use itemdata from route.params
+
+  // Helper function to format date for display in input fields
+  const getFormattedDateTime = (date, mode) => {
+    if (!date) return "";
+    try {
+      const d = new Date(date);
+      return mode === "date"
+        ? d.toLocaleDateString()
+        : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      return mode === "date" ? "Select Date" : "Select Time";
+    }
+  };
 
   return (
     <AppScreen>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "10"}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -225,7 +231,6 @@ const CreateGuests = () => {
                 }
               />
             </View>
-
             <View style={{ marginBottom: 15 }}>
               <FormLabel data="Phone Number" />
               <Forminput
@@ -234,31 +239,35 @@ const CreateGuests = () => {
                 onChangeText={(value) =>
                   handleInputChange("phone_number", value)
                 }
+                keyboardType="numeric" // Added keyboard type
               />
             </View>
-
             <View style={{ marginTop: 15 }}>
               <Text>Choose an option:</Text>
-              <RadioButton
-                label="Male"
-                selected={selectedOption === 1}
-                onSelect={() => handleRadioSelect(1)}
-              />
-              <RadioButton
-                label="Female"
-                selected={selectedOption === 2}
-                onSelect={() => handleRadioSelect(2)}
-                inputStyle={styles.radioButton}
-              />
+              <View style={{ flexDirection: "row", marginTop: 5 }}>
+                <RadioButton
+                  label="Male"
+                  selected={selectedOption === 1}
+                  onSelect={() => handleRadioSelect(1)}
+                />
+                <RadioButton
+                  label="Female"
+                  selected={selectedOption === 2}
+                  onSelect={() => handleRadioSelect(2)}
+                  inputStyle={[styles.radioButton, { marginLeft: 20 }]} // Added spacing
+                />
+              </View>
             </View>
-
+            {/* Arrival Date and Time */}
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Arrival Date" />
               <TouchableOpacity
                 style={styles.dateButton}
                 onPress={() => showDatePickerModal("arrivalDate", "date")}
               >
-                <Text>{formData.arrivalDate.toLocaleDateString()}</Text>
+                <Text>
+                  {getFormattedDateTime(formData.arrivalDate, "date")}
+                </Text>
               </TouchableOpacity>
               {showArrivalDatePicker && (
                 <DateTimePicker
@@ -271,14 +280,15 @@ const CreateGuests = () => {
                 />
               )}
             </View>
-
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Arrival Time" />
               <TouchableOpacity
                 style={styles.dateButton}
                 onPress={() => showDatePickerModal("arrivalDate", "time")}
               >
-                <Text>{formData.arrivalDate.toLocaleTimeString()}</Text>
+                <Text>
+                  {getFormattedDateTime(formData.arrivalDate, "time")}
+                </Text>
               </TouchableOpacity>
               {showArrivalTimePicker && (
                 <DateTimePicker
@@ -291,14 +301,16 @@ const CreateGuests = () => {
                 />
               )}
             </View>
-
+            {/* Departure Date and Time */}
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Departure Date" />
               <TouchableOpacity
                 style={styles.dateButton}
                 onPress={() => showDatePickerModal("departureDate", "date")}
               >
-                <Text>{formData.departureDate.toLocaleDateString()}</Text>
+                <Text>
+                  {getFormattedDateTime(formData.departureDate, "date")}
+                </Text>
               </TouchableOpacity>
               {showDepartureDatePicker && (
                 <DateTimePicker
@@ -316,14 +328,15 @@ const CreateGuests = () => {
                 />
               )}
             </View>
-
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Departure Time" />
               <TouchableOpacity
                 style={styles.dateButton}
                 onPress={() => showDatePickerModal("departureDate", "time")}
               >
-                <Text>{formData.departureDate.toLocaleTimeString()}</Text>
+                <Text>
+                  {getFormattedDateTime(formData.departureDate, "time")}
+                </Text>
               </TouchableOpacity>
               {showDepartureTimePicker && (
                 <DateTimePicker
@@ -341,23 +354,23 @@ const CreateGuests = () => {
                 />
               )}
             </View>
-
-            <View style={{ marginBottom: 15 }}>
-              <FormLabel data="Location" />
+            <View style={{ marginBottom: 15, marginTop: 20 }}>
+              <FormLabel data="Location (Optional)" />
               <Forminput
                 placeholder="Enter Your Address Of invite"
                 value={formData.location}
                 onChangeText={(value) => handleInputChange("location", value)}
               />
             </View>
-
             <Formbutton
               buttonStyle={styles.submitButton}
               textStyle={styles.submitButtonText}
-              data="Submit"
+              data={formData.visitation_id ? "Update Guest" : "Create Guest"}
               onPress={handleSubmit}
-              isLoading={Guests_Mutation?.isLoading}
+              // Use Guests_Mutation.isPending for TanStack Query v4/v5
+              isLoading={Guests_Mutation.isPending}
             />
+            <View style={{ height: 40 }} /> {/* Spacer */}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -373,9 +386,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dateButton: {
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
     backgroundColor: "#F6F8FAE5",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    marginTop: 5,
   },
   submitButton: {
     backgroundColor: "#04973C",

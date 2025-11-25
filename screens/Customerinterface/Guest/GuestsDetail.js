@@ -18,7 +18,6 @@ import * as Clipboard from "expo-clipboard"; // Import the Clipboard API
 import { Share } from "react-native"; // Import the Share API
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -178,46 +177,46 @@ const GuestsDetail = () => {
     item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
   );
 
-  const Cancle_Guests_Mutation = useMutation(
-    (data_info) => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  // const Cancle_Guests_Mutation = useMutation(
+  //   (data_info) => {
+  //     const config = {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Accept: "application/json",
+  //         //   "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${user_data?.token}`,
+  //       },
+  //     };
 
-      let url = `${API_BASEURL}visitor/cancel/${get_user_guest_detail_data?.invitation?._id}`;
+  //     let url = `${API_BASEURL}visitor/cancel/${get_user_guest_detail_data?.invitation?._id}`;
 
-      return axios.post(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
+  //     return axios.post(url, data_info, config);
+  //   },
+  //   {
+  //     onSuccess: (success) => {
+  //       Toast.show({
+  //         type: "success",
+  //         text1: " successfully ",
+  //       });
 
-        dispatch(Get_All_User_Guest_Fun());
+  //       dispatch(Get_All_User_Guest_Fun());
 
-        navigation.goBack();
-      },
+  //       navigation.goBack();
+  //     },
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+  //     onError: (error) => {
+  //       Toast.show({
+  //         type: "error",
+  //         text1: `${error?.response?.data?.message} `,
+  //         //   text2: ` ${error?.response?.data?.errorMsg} `,
+  //       });
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+  //       // dispatch(Get_User_Clans_Fun());
+  //       // dispatch(Get_User_Profle_Fun());
+  //       // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+  //     },
+  //   }
+  // );
 
   const captureAndShare = async () => {
     try {

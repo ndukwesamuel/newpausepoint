@@ -9,6 +9,7 @@ import {
   Platform,
   Modal,
   TouchableWithoutFeedback,
+  ScrollView, // Added missing ScrollView import for better mobile display, although not strictly necessary for this logic
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { emergencydata } from "../../../components/Emergency/emdata";
@@ -26,11 +27,11 @@ import {
 } from "../../../components/shared/Paragrahp";
 import { MaterialIcons, AntDesign, Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+// Removed unused 'useMutation' import and related constants
+// const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+// import axios from "axios";
+// import Toast from "react-native-toast-message";
 
-import axios from "axios";
-import Toast from "react-native-toast-message";
 import {
   Formbutton,
   Forminput_Icon,
@@ -58,7 +59,7 @@ export default function AnnouncementDetails({ navigation }) {
   useEffect(() => {
     dispatch(Admin_Get_My_Clan_Announcement_Fun({}));
     return () => {};
-  }, []);
+  }, [dispatch]); // Added dispatch to dependency array
 
   const route = useRoute();
   // const { item } = route.params as { item: any };
@@ -107,7 +108,7 @@ export default function AnnouncementDetails({ navigation }) {
   const animation = useRef(null);
 
   return (
-    <View style={{ flex: 1, paddingTop: 10 }}>
+    <ScrollView style={{ flex: 1, paddingTop: 10 }}>
       <View style={{ flex: 1, paddingHorizontal: 20 }}>
         <View style={{ flex: 1, marginTop: 10 }}>
           <View style={{ flex: 1 }}>
@@ -273,7 +274,7 @@ export default function AnnouncementDetails({ navigation }) {
           </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

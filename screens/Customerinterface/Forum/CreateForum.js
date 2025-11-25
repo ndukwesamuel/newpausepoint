@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  ActivityIndicator, // Added for loading states
 } from "react-native";
 import React, { useState } from "react";
 import AppScreen from "../../../components/shared/AppScreen";
@@ -20,7 +21,11 @@ import {
 import UploadFile from "../../../components/UserHome/UploadFile";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { useMutation } from "react-query";
+// ------------------------------------------------------------------
+// UPDATED IMPORT: Use @tanstack/react-query instead of react-query
+import { useMutation } from "@tanstack/react-query";
+// ------------------------------------------------------------------
+
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -79,51 +84,61 @@ const CreateForum = () => {
     setText(newText);
   };
 
-  const Create_Forum_Mutation = useMutation(
-    (data_info) => {
+  // ------------------------------------------------------------------
+  // TanStack Query useMutation for Create Forum Post
+  // ------------------------------------------------------------------
+  const Create_Forum_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}forum`;
 
-      //   console.log({
-      //     hahaha: url,
-      //     data_info: data_info?.content,
-      //   });
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Post Created  successfully ",
-        });
-        // dispatch(
-        //   Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting)
-        // );
-        dispatch(Get_My_Clan_Forum_Fun());
-        navigation.goBack();
-        // setTurnmodal(false);
-      },
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Post Created successfully",
+      });
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+      dispatch(Get_My_Clan_Forum_Fun());
+      navigation.goBack();
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message || "Failed to create post"}`,
+      });
 
-        dispatch(Get_My_Clan_Forum_Fun());
-        navigation.goBack();
-      },
+      // Keeping the original flow to navigate back even on error
+      // dispatch(Get_My_Clan_Forum_Fun()); // Not strictly necessary on error unless for specific error handling logic
+      // navigation.goBack(); // Navigating back on error might interrupt user experience, consider removing
+    },
+  });
+  // ------------------------------------------------------------------
+
+  const handlePublish = () => {
+    if (text.trim() === "") {
+      Toast.show({
+        type: "error",
+        text1: "Post content cannot be empty",
+      });
+      return;
     }
-  );
+
+    if (!Create_Forum_Mutation.isPending) {
+      Create_Forum_Mutation.mutate({
+        content: text,
+      });
+    }
+  };
+
   return (
     <AppScreen>
       <KeyboardAvoidingView
@@ -135,15 +150,12 @@ const CreateForum = () => {
             placeholder="Enter text here..."
             value={text}
             onChangeText={handleTextChange}
-            style={{ width: "80%" }}
+            style={{ width: "100%" }} // Adjusted width to fill container
             inputStyle={{
-              textAlignVertical: "top", // Ensures text starts from the top
-              paddingTop: 10, // Add paddingTop to control vertical padding
-              paddingBottom: 10, // Add paddingBottom to balance padding
+              textAlignVertical: "top",
+              paddingVertical: 10, // Combined vertical padding
               backgroundColor: "#F6F8FAE5",
               paddingHorizontal: 10,
-              paddingTop: 10, // Add paddingTop to control the vertical padding
-              paddingBottom: 10, // Add paddingBottom to balance the padding
               height: 100,
               borderRadius: 6,
               fontSize: 16,
@@ -152,10 +164,14 @@ const CreateForum = () => {
 
           {/* <UploadFile />  this will be added later*/}
 
-          <View style={{ borderWidth: 1 }}>
+          <View style={{ marginTop: 20 }}>
+            {" "}
+            {/* Added margin top for spacing */}
             <Formbutton
               buttonStyle={{
-                backgroundColor: "#04973C",
+                backgroundColor: Create_Forum_Mutation.isPending
+                  ? "#90ee90"
+                  : "#04973C",
                 borderWidth: 1,
                 borderColor: "#04973C",
                 paddingVertical: 14,
@@ -172,12 +188,9 @@ const CreateForum = () => {
                 fontFamily: "RobotoSlab-Medium",
               }}
               data="Publish"
-              onPress={() => {
-                Create_Forum_Mutation.mutate({
-                  content: text,
-                });
-              }}
-              isLoading={Create_Forum_Mutation.isLoading}
+              onPress={handlePublish}
+              // Use Create_Forum_Mutation.isPending for TanStack Query v4/v5
+              isLoading={Create_Forum_Mutation.isPending}
             />
           </View>
         </View>

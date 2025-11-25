@@ -22,8 +22,11 @@ import {
 import AppScreen from "../../../components/shared/AppScreen";
 import { RegularFontText } from "../../../components/shared/Paragrahp";
 import { formatDateString } from "../../../utils/DateTime";
-import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+import LottieView from "lottie-react-native"; // Not used directly
+
+// --- IMPORTANT: Change this import from 'react-query' to '@tanstack/react-query' ---
+import { useMutation } from "@tanstack/react-query";
+
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -39,32 +42,27 @@ import {
   Get_All_User_Guest_Fun,
   Get__User_Guest_detail_Fun,
 } from "../../../Redux/UserSide/GuestSlice";
+
 const CreateGuests = () => {
   const route = useRoute();
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const [selectedOption, setSelectedOption] = useState(1);
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const { user_data } = useSelector((state) => state.AuthSlice);
 
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
-  console.log({
-    aaa: userProfile_data?.currentClanMeeting?._id,
-  });
+  // console.log({ aaa: userProfile_data?.currentClanMeeting?._id }); // Commented out
+
   const handleRadioSelect = (option) => {
     setSelectedOption(option);
   };
+
   const [formData, setFormData] = useState({
     visitation_id: "",
-    arrivalDate: new Date(), // Initial value is the current date and time
-    departureDate: new Date(), // Initial value is the current date and time
+    arrivalDate: new Date(),
+    departureDate: new Date(),
     visitor_name: "",
     gender: selectedOption,
     phone_number: "",
@@ -125,100 +123,90 @@ const CreateGuests = () => {
     }
   };
 
-  const handleSubmit = () => {
-    if (selectedOption === 1) {
-      formData.gender = "Male";
-    } else {
-      formData.gender = "Female";
-    }
-
-    Guests_Mutation.mutate({
-      clan: userProfile_data?.currentClanMeeting?._id,
-      arraval: formData?.arrivalDate,
-      expires: formData?.departureDate,
-      visitor_name: formData?.visitor_name,
-      gender: formData?.gender,
-      phone_number: formData?.phone_number,
-    });
-  };
-
-  console.log({
-    aaaa: userProfile_data,
-  });
-
-  const Guests_Mutation = useMutation(
-    (data_info) => {
+  // --- TanStack Query useMutation for Guests ---
+  const Guests_Mutation = useMutation({
+    mutationFn: (data_info) => {
+      // 'mutationFn' replaces the function passed directly to useMutation
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       let url;
       if (formData?.visitation_id) {
+        // Modification (PATCH)
         url = `${API_BASEURL}visitor/modify/${formData?.visitation_id}`;
-
         return axios.patch(url, data_info, config);
       } else {
+        // Creation (POST)
         url = `${API_BASEURL}visitor/generate-access-code/${data_info?.clan}`;
-
         return axios.post(url, data_info, config);
       }
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Guest record successfully processed",
+      });
 
-        if (formData?.visitation_id) {
-          dispatch(Get__User_Guest_detail_Fun(formData?.visitation_id));
-        }
-        dispatch(Get_All_User_Guest_Fun());
+      if (formData?.visitation_id) {
+        dispatch(Get__User_Guest_detail_Fun(formData?.visitation_id));
+      }
+      // Re-fetch the list of guests via Redux
+      dispatch(Get_All_User_Guest_Fun());
 
-        // setTurnmodal(false);
-        navigation.goBack();
-      },
+      navigation.goBack();
+    },
 
-      onError: (error) => {
-        console.log({
-          aaa: error?.response?.data,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+    onError: (error) => {
+      // console.log({ aaa: error?.response?.data }); // Commented out
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message}`,
+      });
+    },
+  });
+  // -------------------------------------------------------
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+  const handleSubmit = () => {
+    // Set gender based on radio button
+    const genderValue = selectedOption === 1 ? "Male" : "Female";
+
+    // Call mutation with required data
+    Guests_Mutation.mutate({
+      clan: userProfile_data?.currentClanMeeting?._id,
+      arraval: formData?.arrivalDate,
+      expires: formData?.departureDate,
+      visitor_name: formData?.visitor_name,
+      gender: genderValue,
+      phone_number: formData?.phone_number,
+    });
+  };
 
   useEffect(() => {
     // Check if there's a guest ID in the route parameters
     const guestId = route.params?.itemdata;
 
     if (guestId) {
-      // Fetch guest details using the guestId and update the form data
-      // dispatch(fetchGuestDetails(guestId)).then((guestDetails) => {
+      // Pre-fill form for modification
       setFormData({
         visitation_id: guestId?._id,
-        arrivalDate: new Date(),
+        // The original code uses new Date() for arrivalDate on edit, keeping it for consistency
+        arrivalDate: new Date(guestId.arraval),
         departureDate: new Date(guestId.expires),
         visitor_name: guestId.visitor_name,
+        // Set selectedOption for radio button
         gender: guestId.gender === "Male" ? 1 : 2,
         phone_number: `${guestId.phone_number}`,
       });
-      // });
+      // Set the radio button state too
+      setSelectedOption(guestId.gender === "Male" ? 1 : 2);
     }
-  }, [route.params?.guestId]);
+  }, [route.params?.itemdata]); // Use itemdata as the dependency
+
   return (
     <AppScreen>
       <KeyboardAvoidingView
@@ -228,7 +216,6 @@ const CreateGuests = () => {
         <View
           style={{
             paddingHorizontal: 20,
-            // paddingTop: 20,
           }}
         >
           <View style={{ marginBottom: 15 }}>
@@ -246,6 +233,7 @@ const CreateGuests = () => {
               placeholder="Phone Number"
               value={formData.phone_number}
               onChangeText={(value) => handleInputChange("phone_number", value)}
+              keyboardType="phone-pad" // Added keyboard type for phone number
             />
           </View>
 
@@ -262,38 +250,22 @@ const CreateGuests = () => {
               onSelect={() => handleRadioSelect(2)}
               inputStyle={styles.radioButton}
             />
-            {/* Add more options as needed */}
           </View>
+
+          {/* Arrival Date Picker */}
           <View style={{ marginTop: 20 }}>
             <RegularFontText data="Arrival Date" />
-            {/* Arrival Date */}
             {Platform.OS === "android" ? (
-              <>
-                <TouchableOpacity
-                  style={{
-                    // borderWidth: 1,
-                    padding: 10,
-                    borderRadius: 5,
-                    fontSize: 16,
-                    backgroundColor: "#F6F8FAE5",
-                    // opacity: 0.4
-                  }}
-                  onPress={() => showAndroidDatePicker("arrivalDate")}
-                >
-                  <Text>{formatDateString(formData.arrivalDate)}</Text>
-                </TouchableOpacity>
-              </>
+              <TouchableOpacity
+                style={styles.dateInput}
+                onPress={() => showAndroidDatePicker("arrivalDate")}
+              >
+                <Text>{formatDateString(formData.arrivalDate)}</Text>
+              </TouchableOpacity>
             ) : (
               <>
                 <TouchableOpacity
-                  style={{
-                    // borderWidth: 1,
-                    padding: 10,
-                    borderRadius: 5,
-                    fontSize: 16,
-                    backgroundColor: "#F6F8FAE5",
-                    // opacity: 0.4
-                  }}
+                  style={styles.dateInput}
                   onPress={() => showDatePickerModal("arrivalDate")}
                 >
                   <Text>{formatDateString(formData.arrivalDate)}</Text>
@@ -313,24 +285,12 @@ const CreateGuests = () => {
             )}
           </View>
 
+          {/* Departure Date Picker */}
           <View style={{ marginTop: 20 }}>
-            {/* Departure Date */}
             <RegularFontText data="Departure Date" />
             {Platform.OS === "android" ? (
-              // <Button
-              //   title="Select Departure Date"
-              //   onPress={() => showAndroidDatePicker("departureDate")}
-              // />
-
               <TouchableOpacity
-                style={{
-                  // borderWidth: 1,
-                  padding: 10,
-                  borderRadius: 5,
-                  fontSize: 16,
-                  backgroundColor: "#F6F8FAE5",
-                  // opacity: 0.4
-                }}
+                style={styles.dateInput}
                 onPress={() => showAndroidDatePicker("departureDate")}
               >
                 <Text>{formatDateString(formData.departureDate)}</Text>
@@ -338,22 +298,11 @@ const CreateGuests = () => {
             ) : (
               <>
                 <TouchableOpacity
-                  style={{
-                    // borderWidth: 1,
-                    padding: 10,
-                    borderRadius: 5,
-                    fontSize: 16,
-                    backgroundColor: "#F6F8FAE5",
-                    // opacity: 0.4
-                  }}
+                  style={styles.dateInput}
                   onPress={() => showDatePickerModal("departureDate")}
                 >
                   <Text>{formatDateString(formData.departureDate)}</Text>
                 </TouchableOpacity>
-                {/* <Button
-                  title="Select Departure Date"
-                  onPress={() => showDatePickerModal("departureDate")}
-                /> */}
                 {showDepartureDatePicker && (
                   <DateTimePicker
                     value={formData.departureDate}
@@ -382,9 +331,10 @@ const CreateGuests = () => {
               fontSize: 14,
               fontFamily: "RobotoSlab-Medium",
             }}
-            data="Submit"
+            data={
+              formData?.visitation_id ? "Update Guest" : "Generate Access Code"
+            }
             onPress={handleSubmit}
-            // icon={<AntDesign name="plus" size={24} color="white" />}
             isLoading={Guests_Mutation?.isLoading}
           />
         </View>
@@ -407,5 +357,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "lightgray",
     marginRight: 10,
+  },
+  dateInput: {
+    padding: 10,
+    borderRadius: 5,
+    fontSize: 16,
+    backgroundColor: "#F6F8FAE5",
   },
 });

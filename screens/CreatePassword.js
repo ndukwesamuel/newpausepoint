@@ -23,17 +23,16 @@ import { AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Toast from "react-native-toast-message";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-import { useNavigation } from "@react-navigation/native"; // Although useNavigation is here, we are using Redux for Auth flow
+import { useNavigation } from "@react-navigation/native";
 import { authScreenChange } from "../Redux/OnboardingSlice";
 import { setOtpEmail } from "../Redux/DontwantToResetSlice";
 
 const CreatePassword = ({}) => {
-  const navigation = useNavigation(); // This is for react-navigation stacks, not directly controlling Auth screen state
+  const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  // Get the email from Redux store that was set in the previous step
   const { otpemail } = useSelector((state) => state.DontwantToResetSlice);
 
   const [otp, setOtp] = useState("");
@@ -45,12 +44,12 @@ const CreatePassword = ({}) => {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
-  const ResetPassword_Mutation = useMutation(
-    (data_info) => {
+  const ResetPassword_Mutation = useMutation({
+    mutationFn: (data_info) => {
+      // NOTE: The URL below seems hardcoded in the original request.
+      // In a production environment, you should use API_BASEURL or a configured endpoint.
       let url =
         "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/reset-forgotten-password";
-
-      // `${API_BASEURL}reset-forgotten-password`;
 
       const config = {
         headers: {
@@ -61,27 +60,22 @@ const CreatePassword = ({}) => {
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: `${success?.data?.data}`,
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: `${success?.data?.data}`,
+      });
 
-        // On successful password reset, navigate to the LOGIN screen
-        dispatch(authScreenChange("LOGIN"));
-        // Potentially clear the otpemail from state if it's no longer needed
-        dispatch(setOtpEmail(null));
-      },
-
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.error || "Password reset failed"} `,
-        });
-      },
-    }
-  );
+      dispatch(authScreenChange("LOGIN"));
+      dispatch(setOtpEmail(null));
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.error || "Password reset failed"} `,
+      });
+    },
+  });
 
   const handleSubmit = () => {
     if (newPassword !== confirmPassword) {
@@ -118,18 +112,14 @@ const CreatePassword = ({}) => {
   return (
     <AppScreen>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"} // Use "height" for Android typically
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
           <View style={{ flex: 1 }}>
-            {/* Back button */}
             <TouchableOpacity
               style={{ marginBottom: 30 }}
               onPress={() => {
-                // When going back, navigate to the FORGOTTENPASSWOD screen
-                // or directly to LOGIN if that's the desired flow.
-                // Assuming you might want to go back to ForgottenPassword to re-enter email/OTP if needed.
                 dispatch(authScreenChange("FORGOTTENPASSWOD"));
               }}
             >
@@ -146,14 +136,12 @@ const CreatePassword = ({}) => {
               color="#8E8E8F"
             />
 
-            {/* Displaying email - useful for context */}
             <RegistraionParagraphText
               data={otpemail}
               color="#8E8E8F"
               style={{ marginBottom: 20 }}
             />
 
-            {/* OTP Input */}
             <View style={{ marginBottom: 15 }}>
               <FormLabel data="Verification Code" />
               <Forminput
@@ -164,7 +152,6 @@ const CreatePassword = ({}) => {
               />
             </View>
 
-            {/* New Password Input */}
             <View style={{ marginBottom: 15 }}>
               <FormLabel data="New Password" />
               <Forminputpassword
@@ -176,7 +163,6 @@ const CreatePassword = ({}) => {
               />
             </View>
 
-            {/* Confirm Password Input */}
             <View style={{ marginBottom: 15 }}>
               <FormLabel data="Confirm Password" />
               <Forminputpassword
@@ -189,7 +175,6 @@ const CreatePassword = ({}) => {
             </View>
           </View>
 
-          {/* Reset Password Button */}
           <View style={{}}>
             <Formbutton
               buttonStyle={{
@@ -206,7 +191,7 @@ const CreatePassword = ({}) => {
               }}
               data="Reset Password"
               onPress={handleSubmit}
-              isLoading={ResetPassword_Mutation.isLoading}
+              isLoading={ResetPassword_Mutation.isPending}
             />
           </View>
         </View>
