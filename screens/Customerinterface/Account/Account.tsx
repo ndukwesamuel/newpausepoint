@@ -8,14 +8,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ScrollView, // Import ScrollView
-  Dimensions, // Import Dimensions for screen height
+  ScrollView,
+  Linking,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-// Assuming emergencydata is still used elsewhere, kept for context
-// import { emergencydata } from "../../../components/Emergency/emdata";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppScreen from "../../../components/shared/AppScreen";
-// Assuming EmergencyModal components are still used elsewhere, kept for context
 import EmergencyModal, {
   EmergencyModalTwo,
 } from "../../../components/Emergency/Modal";
@@ -23,7 +21,6 @@ import {
   MediumFontText,
   RegularFontText,
 } from "../../../components/shared/Paragrahp";
-// Assuming these are still used elsewhere, kept for context
 import DarkModeToggle from "../../../components/Account/DarkModeToggle";
 import General from "../../../components/Account/General";
 import { DeleteAccountModal } from "../../../components/Account/Modal";
@@ -36,12 +33,7 @@ import { RootStackParamList } from "../../../navigation/AppNavigation";
 import { useDispatch, useSelector } from "react-redux";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 
-// Get screen height for proportional sizing
-const { height: screenHeight } = Dimensions.get("window");
-
-// --- START: TypeScript Types for Account Component & New Sections ---
-
-// Basic type for user profile data (adjust based on your actual Redux state)
+// TypeScript Types
 interface UserProfileData {
   photo?: string;
   user?: {
@@ -50,7 +42,6 @@ interface UserProfileData {
   phoneNumber?: string;
 }
 
-// Type for items in the existing 'data' array
 type GeneralData = {
   id: number;
   icon: string;
@@ -59,16 +50,14 @@ type GeneralData = {
   link: string;
 };
 
-// Type for an individual announcement
 interface Announcement {
   id: string;
   title: string;
-  content: string; // Could be HTML or Markdown if you want richer content
-  date: string; // e.g., "2025-06-12"
-  link?: string; // Optional link for 'Read More'
+  content: string;
+  date: string;
+  link?: string;
 }
 
-// Type for an individual advertisement
 interface Advertisement {
   id: string;
   imageUrl: string;
@@ -76,29 +65,16 @@ interface Advertisement {
   altText: string;
 }
 
-// --- END: TypeScript Types ---
-
-// --- START: Sample Data for Announcements and Advertisements ---
-
-// Sample Announcement Data
+// Sample Data
 const sampleAnnouncements: Announcement[] = [
   {
     id: "1",
     title: "Community Guidelines Refreshed",
     content:
       "We've updated our community guidelines to foster a more positive and respectful environment for everyone.",
-    // Please review them.",
     date: "2025-01-01",
     link: "https://yourplatform.com/guidelines",
   },
-  // {
-  //   id: "1",
-  //   title: "New Feature: Resident Chat!",
-  //   content:
-  //     "Connect with your neighbors instantly. We've rolled out a brand new chat feature within your estate's section.",
-  //   date: "2025-06-10",
-  //   link: "app://features/chat", // Example deep link or internal screen link
-  // },
   {
     id: "2",
     title: "Scheduled Maintenance",
@@ -112,60 +88,34 @@ const sampleAnnouncements: Announcement[] = [
     content:
       "We've implemented stronger encryption protocols to ensure your data is even safer. Read more about our commitment to security.",
     date: "2025-06-05",
-    link: "https://yourplatform.com/security-updates", // External link example
-  },
-  {
-    id: "4",
-    title: "Community Guidelines Refreshed",
-    content:
-      "We've updated our community guidelines to foster a more positive and respectful environment for everyone. Please review them.",
-    date: "2025-01-01",
-    link: "https://yourplatform.com/guidelines",
-  },
-  {
-    id: "5",
-    title: "Mobile App Performance Boost",
-    content:
-      "Experience faster load times and smoother navigation with our latest app update. Download now!",
-    date: "2025-05-28",
+    link: "https://yourplatform.com/security-updates",
   },
 ];
 
-// Sample Advertisement Data
 const sampleAdvertisements: Advertisement[] = [
   {
     id: "ad1",
     imageUrl:
-      "https://placehold.co/300x100/FF5733/FFFFFF?text=Estate+Services+Ad", // Placeholder image
+      "https://placehold.co/300x100/FF5733/FFFFFF?text=Estate+Services+Ad",
     linkUrl: "https://www.example.com/ad1",
     altText: "Advertisement for Estate Services",
   },
   {
     id: "ad2",
     imageUrl:
-      "https://placehold.co/300x100/33FF57/000000?text=Local+Business+Ad", // Placeholder image
+      "https://placehold.co/300x100/33FF57/000000?text=Local+Business+Ad",
     linkUrl: "https://www.example.com/ad2",
     altText: "Advertisement for Local Business",
   },
   {
     id: "ad3",
     imageUrl:
-      "https://placehold.co/300x100/3357FF/FFFFFF?text=Property+Management", // Placeholder image
+      "https://placehold.co/300x100/3357FF/FFFFFF?text=Property+Management",
     linkUrl: "https://www.example.com/ad3",
     altText: "Advertisement for Property Management",
   },
-  {
-    id: "ad4",
-    imageUrl:
-      "https://placehold.co/300x100/FF33A1/000000?text=Home+Maintenance", // Placeholder image
-    linkUrl: "https://www.example.com/ad4",
-    altText: "Advertisement for Home Maintenance",
-  },
 ];
 
-// --- END: Sample Data ---
-
-// Existing general data, now with type annotation
 const data: GeneralData[] = [
   {
     id: 1,
@@ -183,9 +133,7 @@ const data: GeneralData[] = [
   },
 ];
 
-// Existing new_item, now with type annotation
 let new_item: GeneralData = {
-  // Re-using GeneralData for consistency
   id: 4,
   icon: "logout-outline",
   label: "Logout",
@@ -193,13 +141,11 @@ let new_item: GeneralData = {
   link: "Logout",
 };
 
-// --- START: Account Component (now typed with React.FC) ---
 const Account: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  // Asserting the type of userProfile_data from Redux state
-  const { userProfile_data } = useSelector((state: any) => state?.ProfileSlice); // Adjust 'any' to your actual RootState type
+  const { userProfile_data } = useSelector((state: any) => state?.ProfileSlice);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [modalformVisible, setModalFormVisible] = useState<boolean>(false);
@@ -217,9 +163,7 @@ const Account: React.FC = () => {
   };
 
   const handleDarkModeToggle = (isDarkMode: boolean): void => {
-    // Add logic to handle dark mode state in your app
     console.log(`Dark Mode is ${isDarkMode ? "enabled" : "disabled"}`);
-    // You can update your app's theme or styles based on the isDarkMode state here.
   };
 
   const dispatch = useDispatch();
@@ -228,10 +172,6 @@ const Account: React.FC = () => {
     dispatch(UserProfile_data_Fun());
     return () => {};
   }, [dispatch]);
-
-  console.log({
-    s: userProfile_data,
-  });
 
   // Function to handle opening announcement links
   const handleAnnouncementPress = async (link?: string): Promise<void> => {
@@ -290,97 +230,213 @@ const Account: React.FC = () => {
     <AppScreen>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView} // Apply flex:1 here
+        style={styles.container}
       >
-        <View style={styles.headerContainer}>
-          <MediumFontText data="Account" textstyle={{ fontSize: 18 }} />
-        </View>
-
-        {/* --- Section 1: User Profile --- */}
-        <View
-          style={[
-            styles.sectionContainer,
-            {
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 20,
-              alignItems: "center",
-            },
-          ]}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Account</Text>
+          </View>
+
+          {/* Profile Card */}
           <TouchableOpacity
-            style={styles.profileSection}
+            style={styles.profileCard}
             onPress={() => navigation.navigate("PersonalInfo")}
+            activeOpacity={0.7}
           >
-            <Image
-              source={{
-                uri:
-                  (userProfile_data as UserProfileData)?.photo ||
-                  "https://placehold.co/68x68/CCCCCC/000000?text=User", // Provide fallback image
-              }}
-              style={styles.profileImage}
-            />
-            <View>
-              <MediumFontText
-                data={
-                  (userProfile_data as UserProfileData)?.user?.name ||
-                  "User Name"
-                }
-                textstyle={styles.userNameText}
-              />
-              <RegularFontText
-                data={
-                  (userProfile_data as UserProfileData)?.phoneNumber || "N/A"
-                }
-                textstyle={styles.phoneNumberText}
-              />
-              <RegularFontText
-                data={"View Profile"}
-                textstyle={{
-                  backgroundColor: "green",
-                  color: "white",
-                  paddingHorizontal: 10,
-                  paddingVertical: 2,
-                  borderRadius: 10,
-                }}
-              />
+            <View style={styles.profileContent}>
+              <View style={styles.profileImageContainer}>
+                <Image
+                  source={{
+                    uri:
+                      (userProfile_data as UserProfileData)?.photo ||
+                      "https://placehold.co/68x68/CCCCCC/000000?text=User",
+                  }}
+                  style={styles.profileImage}
+                />
+                <View style={styles.profileBadge}>
+                  <MaterialCommunityIcons
+                    name="check"
+                    size={12}
+                    color="#FFFFFF"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileName}>
+                  {(userProfile_data as UserProfileData)?.user?.name ||
+                    "User Name"}
+                </Text>
+                <Text style={styles.profilePhone}>
+                  {(userProfile_data as UserProfileData)?.phoneNumber || "N/A"}
+                </Text>
+                <View style={styles.viewProfileButton}>
+                  <Text style={styles.viewProfileText}>View Profile</Text>
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={16}
+                    color="#10B981"
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.logoutButtonContainer}>
+              <Logout item={new_item} />
             </View>
           </TouchableOpacity>
 
-          <Logout item={new_item} />
-        </View>
+          {/* General Options Card */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="cog"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>General</Text>
+            </View>
 
-        {/* --- Section 2: General Options --- */}
-        <View style={{}}>
-          <View style={styles.sectionHeaderContainer}>
-            <MediumFontText
-              data="General"
-              textstyle={styles.sectionHeaderText}
-            />
-            <View style={styles.divider} />
+            <View style={styles.generalOptionsContainer}>
+              {data?.map((item: GeneralData, index: number) => (
+                <View key={item?.id}>
+                  <General item={item} />
+                  {index < data.length - 1 && (
+                    <View style={styles.optionDivider} />
+                  )}
+                </View>
+              ))}
+            </View>
           </View>
-          <View style={styles.generalOptionsContainer}>
-            {data?.map((item: GeneralData, index: number) => (
-              <General key={item?.id} item={item} />
-            ))}
+
+          {/* Announcements Card */}
+          {sampleAnnouncements.length > 0 && (
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons
+                  name="bullhorn"
+                  size={20}
+                  color="#10B981"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.sectionTitle}>Announcements</Text>
+              </View>
+
+              {sampleAnnouncements.map((announcement, index) => (
+                <TouchableOpacity
+                  key={announcement.id}
+                  style={[
+                    styles.announcementItem,
+                    index < sampleAnnouncements.length - 1 && {
+                      marginBottom: 12,
+                    },
+                  ]}
+                  onPress={() => handleAnnouncementPress(announcement.link)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.announcementHeader}>
+                    <View style={styles.announcementIconContainer}>
+                      <MaterialCommunityIcons
+                        name="information"
+                        size={16}
+                        color="#3B82F6"
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.announcementTitle}>
+                        {announcement.title}
+                      </Text>
+                      <Text style={styles.announcementDate}>
+                        {announcement.date}
+                      </Text>
+                    </View>
+                    {announcement.link && (
+                      <MaterialCommunityIcons
+                        name="open-in-new"
+                        size={18}
+                        color="#6B7280"
+                      />
+                    )}
+                  </View>
+                  <Text style={styles.announcementContent} numberOfLines={2}>
+                    {announcement.content}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Advertisements Card */}
+          {sampleAdvertisements.length > 0 && (
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons
+                  name="advertisements"
+                  size={20}
+                  color="#10B981"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.sectionTitle}>Featured</Text>
+              </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.advertScrollContent}
+              >
+                {sampleAdvertisements.map((ad, index) => (
+                  <TouchableOpacity
+                    key={ad.id}
+                    style={[
+                      styles.advertItem,
+                      index < sampleAdvertisements.length - 1 && {
+                        marginRight: 12,
+                      },
+                    ]}
+                    onPress={() => handleAdvertPress(ad.linkUrl)}
+                    activeOpacity={0.8}
+                  >
+                    <Image
+                      source={{ uri: ad.imageUrl }}
+                      style={styles.advertImage}
+                    />
+                    <View style={styles.advertOverlay}>
+                      <MaterialCommunityIcons
+                        name="open-in-new"
+                        size={20}
+                        color="#FFFFFF"
+                      />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* Delete Account Section */}
+          <View style={styles.dangerZoneCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="alert-circle"
+                size={20}
+                color="#DC2626"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={[styles.sectionTitle, { color: "#DC2626" }]}>
+                Danger Zone
+              </Text>
+            </View>
             <DeleteLAccount item={new_item} />
           </View>
-        </View>
+        </ScrollView>
 
-        {/* --- Section 3: Announcements --- */}
-        {/*
-          // Gradual Migration: Uncomment the <View> and its contents
-          // when you are ready to introduce and type the Announcements section.
-          // Also ensure 'Announcement' interface and 'sampleAnnouncements' data
-          // are uncommented at the top of this file.
-          */}
-
-        {/* --- END: Advertisements Section --- */}
-
-        {/* Spacer before Logout/Delete Account to push them to bottom if content is short */}
-        <View style={{ flex: 1, marginBottom: 20 }} />
-
-        {/* Emergency Modal (if still needed, outside ScrollView for overlay behavior) */}
+        {/* Emergency Modal */}
         <EmergencyModalTwo
           visible={modalformVisible}
           onClose={closeFormModal}
@@ -393,156 +449,218 @@ const Account: React.FC = () => {
 export default Account;
 
 const styles = StyleSheet.create({
-  keyboardAvoidingView: {
-    flex: 1, // Ensure KeyboardAvoidingView takes full height
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
   },
-  scrollViewContent: {
-    flexGrow: 1, // Allows content to grow and push to edges for proper scrolling
-    paddingBottom: 20, // Add some padding at the bottom for spacing below actions
-  },
-  headerContainer: {
-    marginBottom: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    borderBottomColor: "#CFCDCD",
-    borderBottomWidth: 1,
-    paddingBottom: 10,
-    paddingHorizontal: 20, // Add padding to header as well
-  },
-  sectionContainer: {
-    marginBottom: 10, // Reduced margin between major sections
-    // You can add a background color or border here for visual separation of each major section
-    // backgroundColor: '#FFFFFF', // Example: white background for each section
-    // borderRadius: 10,
-    // marginHorizontal: 20, // Example: Add horizontal margin to separate sections from screen edges
-    // paddingVertical: 10,
-  },
-  profileSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 20,
-    marginBottom: 10, // Reduced internal margin
-    paddingVertical: 10, // Added vertical padding
-  },
-  profileImage: {
-    width: 68,
-    height: 68,
-    borderRadius: 50,
-  },
-  userNameText: {
-    fontSize: 18,
-    fontWeight: "500",
-  },
-  phoneNumberText: {
-    fontSize: 14,
-    fontWeight: "400",
-  },
-  sectionHeaderContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginTop: 10, // Reduced top margin for sections
-    marginBottom: 10, // Added bottom margin for header
-    paddingHorizontal: 20,
-  },
-  sectionHeaderText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  divider: {
-    borderColor: "#CFCDCD",
-    borderWidth: 0.5,
+  scrollView: {
     flex: 1,
   },
-  generalOptionsContainer: {
-    gap: 20, // Reduced gap between general options items
-    marginBottom: 20, // Reduced margin
-    paddingHorizontal: 20,
+  scrollContent: {
+    paddingBottom: 40,
   },
-  // Removed bottomDivider as it's now handled by sectionContainer margins or general layout
-  // bottomDivider: {
-  //   borderBottomColor: "#CFCDCD",
-  //   borderBottomWidth: 1,
-  //   marginBottom: 20,
-  // },
-  // --- New Styles for Announcements ---
-  announcementsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 10, // Reduced margin
-    // maxHeight: 200, // Removed maxHeight here to let FlatList content expand if scrollEnabled=false
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#111827",
+    textAlign: "center",
+    letterSpacing: 0.3,
+  },
+  profileCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 16,
+    marginTop: 20,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  profileContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  profileImageContainer: {
+    position: "relative",
+    marginRight: 16,
+  },
+  profileImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: "#10B981",
+  },
+  profileBadge: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 4,
+    letterSpacing: 0.3,
+  },
+  profilePhone: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginBottom: 8,
+  },
+  viewProfileButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#D1FAE5",
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  viewProfileText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#10B981",
+    marginRight: 4,
+    letterSpacing: 0.3,
+  },
+  logoutButtonContainer: {
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    paddingTop: 16,
+  },
+  sectionCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 0.3,
+  },
+  generalOptionsContainer: {
+    gap: 0,
+  },
+  optionDivider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginVertical: 12,
   },
   announcementItem: {
-    backgroundColor: "#e9f7ef",
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#d0eadb",
+    backgroundColor: "#F9FAFB",
+    padding: 12,
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: "#3B82F6",
+  },
+  announcementHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  announcementIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: "#DBEAFE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
   },
   announcementTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 5,
-    color: "#28a745",
-  },
-  announcementContent: {
-    fontSize: 13,
-    color: "#333",
-    marginBottom: 5,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 2,
+    letterSpacing: 0.3,
   },
   announcementDate: {
     fontSize: 11,
-    color: "#666",
-    alignSelf: "flex-end",
+    fontWeight: "500",
+    color: "#9CA3AF",
   },
-  announcementSeparator: {
-    height: 10,
+  announcementContent: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#6B7280",
+    lineHeight: 18,
+    marginLeft: 38,
   },
-  readMoreLink: {
-    fontSize: 12,
-    color: "#007bff",
-    marginTop: 5,
-    textDecorationLine: "underline",
-  },
-  noAnnouncementsText: {
-    fontSize: 14,
-    color: "#888",
-    textAlign: "center",
-    paddingVertical: 20,
-  },
-  // --- New Styles for Advertisements ---
-  advertisementsContainer: {
-    marginBottom: 20,
-    paddingHorizontal: 20,
-    // borderWidth: 2,
-    height: 200, // Fixed height for horizontal ads container
+  advertScrollContent: {
+    paddingRight: 16,
   },
   advertItem: {
-    width: 300,
-    height: 100,
-    borderRadius: 10,
+    width: 280,
+    height: 140,
+    borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#f5f5f5",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
+    backgroundColor: "#F3F4F6",
+    position: "relative",
   },
   advertImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-    borderRadius: 10,
   },
-  noAdvertsText: {
-    fontSize: 14,
-    color: "#888",
-    textAlign: "center",
-    paddingVertical: 20,
+  advertOverlay: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  bottomActionsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20, // Ensure space from the bottom of the screen
-    gap: 10, // Gap between Delete Account and Logout
+  dangerZoneCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#FEE2E2",
+    shadowColor: "#DC2626",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });

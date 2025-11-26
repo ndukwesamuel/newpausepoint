@@ -8,52 +8,102 @@ import {
   RefreshControl,
   ScrollView,
   Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-
+import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import AppScreen from "../shared/AppScreen";
 import {
   LightFontText,
   MediumFontText,
   RegularFontText,
 } from "../shared/Paragrahp";
-import { Entypo, AntDesign, MaterialIcons } from "@expo/vector-icons";
-
 import ForumModal from "./ForumModal";
+import ForumAdCard from "./ForumAdCard"; // Import the new Ad component
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { Get_My_Clan_Forum_Fun } from "../../Redux/UserSide/ForumSlice";
 import { formatDate, formatDateandTime } from "../../utils/DateTime";
 import LottieView from "lottie-react-native";
-import { useMutation } from "@tanstack/react-query"; // CHANGED: Updated import for TanStack Query v5
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
 import axios from "axios";
 import Toast from "react-native-toast-message";
-import { KeyboardAvoidingView } from "react-native";
 
-const data = [
-  { id: "1", title: "Item 1" },
-  { id: "2", title: "Item 2" },
-
-  // Add more items as needed
+// Sample Advertisement Data for Forum
+const forumAdvertisements = [
+  {
+    id: "forum_ad_1",
+    title: "Premium Estate Services",
+    subtitle: "24/7 Support Available",
+    description:
+      "Get professional maintenance and security services for your estate. Contact us today for a free consultation!",
+    imageUrl:
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/estate-services",
+  },
+  {
+    id: "forum_ad_2",
+    title: "Local Grocery Delivery",
+    subtitle: "Fresh & Fast Delivery",
+    description:
+      "Order fresh groceries and get them delivered to your doorstep within 2 hours. First order discount available!",
+    imageUrl:
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/grocery-delivery",
+  },
+  {
+    id: "forum_ad_3",
+    title: "Smart Home Installation",
+    subtitle: "Upgrade Your Living",
+    description:
+      "Transform your home with our smart home solutions. Professional installation and lifetime support included.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/smart-home",
+  },
+  {
+    id: "forum_ad_4",
+    title: "Fitness & Wellness Center",
+    subtitle: "Join Today - 50% Off",
+    description:
+      "State-of-the-art gym facilities near you. Personal trainers, yoga classes, and swimming pool access.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/fitness-center",
+  },
+  {
+    id: "forum_ad_5",
+    title: "Premium Cleaning Services",
+    subtitle: "Book Your First Clean",
+    description:
+      "Professional deep cleaning for homes and offices. Eco-friendly products and insured staff.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/cleaning",
+  },
+  {
+    id: "forum_ad_6",
+    title: "Solar Panel Installation",
+    subtitle: "Save on Energy Bills",
+    description:
+      "Switch to renewable energy with our affordable solar solutions. Government subsidies available.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/solar",
+  },
 ];
 
-// createforum
 const Forum = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const dispatch = useDispatch();
-
   const animation = useRef(null);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
-    // Set the refreshing state to true
     setRefreshing(true);
     dispatch(Get_My_Clan_Forum_Fun());
-
-    // Wait for 2 seconds
     setRefreshing(false);
   };
 
@@ -65,7 +115,6 @@ const Forum = () => {
     user_message,
   } = useSelector((state) => state.AuthSlice);
 
-  // CHANGED: Refactored useMutation to TanStack Query v5 syntax
   const Like_Mutation = useMutation({
     mutationFn: (data_info) => {
       let url = `${API_BASEURL}forum/like/${data_info?.clanId}/${data_info?.forumid}`;
@@ -74,7 +123,6 @@ const Forum = () => {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
@@ -82,24 +130,13 @@ const Forum = () => {
       return axios.get(url, config);
     },
     onSuccess: (success) => {
-      // Toast.show({
-      //   type: "success",
-      //   text1: " successfully ",
-      // });
       dispatch(Get_My_Clan_Forum_Fun());
-      // setTurnmodal(false);
     },
-
     onError: (error) => {
       Toast.show({
         type: "error",
         text1: `${error?.response?.data?.message} `,
-        //   text2: ` ${error?.response?.data?.errorMsg} `,
       });
-
-      // dispatch(Get_User_Clans_Fun());
-      // dispatch(Get_User_Profle_Fun());
-      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
     },
   });
 
@@ -117,238 +154,278 @@ const Forum = () => {
 
   useEffect(() => {
     dispatch(Get_My_Clan_Forum_Fun());
-
     return () => {};
   }, [dispatch]);
 
+  // Function to insert ads into forum posts
+  const getForumDataWithAds = () => {
+    if (!get_my_clan_forum_data?.forums) return [];
+
+    const posts = get_my_clan_forum_data.forums;
+    const dataWithAds = [];
+    let adIndex = 0;
+
+    posts.forEach((post, index) => {
+      // Add the post
+      dataWithAds.push({ type: "post", data: post });
+
+      // Add an ad after every 2 posts
+      if ((index + 1) % 2 === 0 && adIndex < forumAdvertisements.length) {
+        dataWithAds.push({
+          type: "ad",
+          data: forumAdvertisements[adIndex % forumAdvertisements.length],
+        });
+        adIndex++;
+      }
+    });
+
+    return dataWithAds;
+  };
+
+  const renderItem = ({ item }) => {
+    if (item.type === "ad") {
+      return <ForumAdCard ad={item.data} />;
+    }
+
+    // Regular post rendering
+    const post = item.data;
+    return (
+      <TouchableOpacity
+        style={styles.postCard}
+        onPress={() => navigation.navigate("forumdetail", post)}
+        activeOpacity={0.7}
+      >
+        {/* Post Header */}
+        <View style={styles.postHeader}>
+          <View style={styles.authorContainer}>
+            <View style={styles.avatarContainer}>
+              <Image
+                source={{ uri: post?.user?.photo }}
+                style={styles.avatar}
+              />
+              <View style={styles.onlineBadge} />
+            </View>
+            <View style={styles.authorInfo}>
+              <Text style={styles.authorName}>{post?.user?.name}</Text>
+              <View style={styles.timestampContainer}>
+                <MaterialCommunityIcons
+                  name="clock-outline"
+                  size={12}
+                  color="#9CA3AF"
+                  style={{ marginRight: 4 }}
+                />
+                <Text style={styles.timestamp}>
+                  {formatDateandTime(post?.createdAt)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Post Content */}
+        <Text style={styles.postContent} numberOfLines={4}>
+          {post?.content}
+        </Text>
+
+        {/* Post Actions */}
+        <View style={styles.postActions}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              Like_Mutation.mutate({
+                forumid: post?._id,
+                clanId: post?.clan,
+              });
+            }}
+            activeOpacity={0.7}
+          >
+            <View
+              style={[
+                styles.actionIconContainer,
+                { backgroundColor: "#FEE2E2" },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={
+                  post?.likes?.includes(user_data?.user?._id)
+                    ? "heart"
+                    : "heart-outline"
+                }
+                size={18}
+                color="#DC2626"
+              />
+            </View>
+            <Text style={styles.actionText}>{post?.likes?.length || 0}</Text>
+            <Text style={styles.actionLabel}>Likes</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              navigation.navigate("forumdetail", post);
+            }}
+            activeOpacity={0.7}
+          >
+            <View
+              style={[
+                styles.actionIconContainer,
+                { backgroundColor: "#DBEAFE" },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="comment-outline"
+                size={18}
+                color="#3B82F6"
+              />
+            </View>
+            <Text style={styles.actionText}>{post?.comments?.length || 0}</Text>
+            <Text style={styles.actionLabel}>Comments</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.viewDetailsButton}
+            onPress={() => navigation.navigate("forumdetail", post)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.viewDetailsText}>View Details</Text>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={16}
+              color="#10B981"
+            />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <AppScreen
-      style={{
-        paddingHorizontal: 15,
-      }}
-    >
+    <AppScreen style={styles.appScreen}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{
-          flex: 1,
-        }}
+        style={styles.container}
       >
-        <View style={{ flex: 1 }}>
+        <View style={styles.content}>
           {get_user_profile_data?.currentClanMeeting?._id ? (
             <>
+              {/* Header */}
+              <View style={styles.header}>
+                <View style={styles.headerContent}>
+                  <MaterialCommunityIcons
+                    name="forum"
+                    size={24}
+                    color="#10B981"
+                  />
+                  <Text style={styles.headerTitle}>Community Forum</Text>
+                </View>
+                {get_user_profile_data?.currentClanMeeting?.name && (
+                  <Text style={styles.headerSubtitle}>
+                    {get_user_profile_data.currentClanMeeting.name}
+                  </Text>
+                )}
+              </View>
+
+              {/* Empty State with Message */}
               {get_my_clan_forum_message && (
-                <View
-                  style={{ alignItems: "center", justifyContent: "center" }}
-                >
+                <View style={styles.emptyStateContainer}>
                   <LottieView
                     autoPlay
                     ref={animation}
-                    style={{
-                      width: 200,
-                      height: 200,
-                      // backgroundColor: "#eee",
-                    }}
-                    // Find more Lottie files at https://lottiefiles.com/featured
+                    style={styles.lottieAnimation}
                     source={require("../../assets/Lottie/notFund.json")}
                   />
-                  <Text>{get_my_clan_forum_message}</Text>
+                  <Text style={styles.emptyStateText}>
+                    {get_my_clan_forum_message}
+                  </Text>
                 </View>
               )}
 
-              {/* Removed duplicate LottieView block */}
-
+              {/* Forum Posts List with Ads */}
               <FlatList
-                data={get_my_clan_forum_data?.forums}
-                keyExtractor={(item) => item._id}
+                data={getForumDataWithAds()}
+                keyExtractor={(item, index) =>
+                  item.type === "ad"
+                    ? `ad-${item.data.id}-${index}`
+                    : `post-${item.data._id}`
+                }
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.listContent}
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}
                     onRefresh={onRefresh}
+                    colors={["#10B981"]}
+                    tintColor="#10B981"
                   />
                 }
-                renderItem={({ item }) => (
-                  <View
-                    style={{
-                      flex: 1,
-
-                      borderWidth: 1,
-                      borderColor: "#CFCDCD",
-                      borderRadius: 6,
-                      padding: 10,
-                      marginBottom: 10,
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginVertical: 20,
-
-                        // paddingBottom: 20,
-                      }}
-                    >
-                      <TouchableOpacity
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 10,
-                        }}
-                        onPress={() => {
-                          navigation.navigate("forumdetail", item);
-                        }}
-                      >
-                        <Image
-                          source={{
-                            uri: item?.user?.photo,
-                          }}
-                          style={{ width: 40, height: 40, borderRadius: 50 }}
-                        />
-                        <View>
-                          <MediumFontText
-                            data={item?.user?.name}
-                            textstyle={{ fontSize: 16, fontWeight: "500" }}
-                          />
-
-                          <LightFontText
-                            data={formatDateandTime(item?.createdAt)}
-                            // "Jane Doe - 54 mins ago"
-                            textstyle={{ fontSize: 12, fontWeight: "300" }}
-                          />
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={{ paddingHorizontal: 20 }}>
-                      <RegularFontText
-                        data={item?.content}
-                        textstyle={{
-                          fontSize: 12,
-                          fontWeight: "400",
-                          textAlign: "justify",
-                        }}
-                      />
-                    </View>
-
-                    <View
-                      style={{
-                        borderWidth: 1,
-                        borderColor: "#D9D9D9",
-                        marginVertical: 10,
-                      }}
-                    />
-
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginVertical: 10,
-                        paddingHorizontal: 30,
-                      }}
-                    >
-                      <TouchableOpacity
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
-                        onPress={() => {
-                          Like_Mutation.mutate({
-                            forumid: item?._id,
-                            clanId: item?.clan,
-                          });
-                        }}
-                      >
-                        <AntDesign name="hearto" size={24} color="black" />
-                        <Text>{item?.likes?.length} Likes </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
-                        onPress={() => navigation.navigate("forumdetail", item)}
-                      >
-                        <AntDesign name="message1" size={24} color="black" />
-                        <Text>Comment</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
+                renderItem={renderItem}
                 ListEmptyComponent={
-                  <View
-                    style={{ alignItems: "center", justifyContent: "center" }}
-                  >
-                    <LottieView
-                      autoPlay
-                      ref={animation}
-                      style={{
-                        width: 200,
-                        height: 200,
-                        // backgroundColor: "#eee",
-                      }}
-                      // Find more Lottie files at https://lottiefiles.com/featured
-                      source={require("../../assets/Lottie/notFund.json")}
-                    />
-                    <Text>{get_my_clan_forum_message}</Text>
-                  </View>
+                  !get_my_clan_forum_message && (
+                    <View style={styles.emptyStateContainer}>
+                      <LottieView
+                        autoPlay
+                        ref={animation}
+                        style={styles.lottieAnimation}
+                        source={require("../../assets/Lottie/notFund.json")}
+                      />
+                      <Text style={styles.emptyStateTitle}>No Posts Yet</Text>
+                      <Text style={styles.emptyStateSubtext}>
+                        Be the first to start a conversation!
+                      </Text>
+                    </View>
+                  )
                 }
               />
 
-              <View
-                style={{ position: "absolute", right: 10, top: 10, zIndex: 1 }}
+              {/* Floating Action Button */}
+              <TouchableOpacity
+                style={styles.fab}
+                onPress={() => navigation.navigate("createforum")}
+                activeOpacity={0.8}
               >
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "green",
-                    // paddingHorizontal: 20,
-                    // paddingVertical: 10,
-                    borderRadius: 50,
-                    width: 50,
-                    height: 50,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  // navigation.navigate("guestsdetail", { itemdata });
-
-                  onPress={() => navigation.navigate("createforum")}
-                >
-                  <AntDesign
-                    name="plus"
-                    size={24}
-                    color="white"
-                    // style={{ width: 25, height: 25 }}
-                  />
-                  {/* <MaterialIcons name="mode-edit" size={24} color="black" /> */}
-                </TouchableOpacity>
-              </View>
+                <MaterialCommunityIcons name="plus" size={28} color="#FFFFFF" />
+              </TouchableOpacity>
             </>
           ) : (
             <ScrollView
-              contentContainerStyle={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              contentContainerStyle={styles.noClanContainer}
               refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#10B981"]}
+                  tintColor="#10B981"
+                />
               }
             >
-              <TouchableOpacity
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#D9D9D9",
-                  padding: 10,
-                  borderRadius: 6,
-                }}
-                onPress={() => navigation.navigate("myclan")}
-              >
-                <Text> Click join a clan </Text>
-              </TouchableOpacity>
+              <View style={styles.noClanCard}>
+                <View style={styles.noClanIconContainer}>
+                  <MaterialCommunityIcons
+                    name="account-group"
+                    size={64}
+                    color="#D1D5DB"
+                  />
+                </View>
+                <Text style={styles.noClanTitle}>Join a Community</Text>
+                <Text style={styles.noClanSubtext}>
+                  You need to join a clan to participate in the forum
+                </Text>
+                <TouchableOpacity
+                  style={styles.joinClanButton}
+                  onPress={() => navigation.navigate("myclan")}
+                  activeOpacity={0.8}
+                >
+                  <MaterialCommunityIcons
+                    name="account-multiple-plus"
+                    size={20}
+                    color="#FFFFFF"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.joinClanButtonText}>Join a Clan</Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
           )}
 
@@ -361,4 +438,269 @@ const Forum = () => {
 
 export default Forum;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  appScreen: {
+    paddingHorizontal: 0,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  content: {
+    flex: 1,
+  },
+  header: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#111827",
+    marginLeft: 10,
+    letterSpacing: 0.3,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginLeft: 34,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 100,
+  },
+  postCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  postHeader: {
+    marginBottom: 12,
+  },
+  authorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  avatarContainer: {
+    position: "relative",
+    marginRight: 12,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: "#E5E7EB",
+  },
+  onlineBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#10B981",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  authorInfo: {
+    flex: 1,
+  },
+  authorName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 2,
+    letterSpacing: 0.3,
+  },
+  timestampContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  timestamp: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#9CA3AF",
+  },
+  postContent: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#374151",
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  postActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 20,
+  },
+  actionIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 6,
+  },
+  actionText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#111827",
+    marginRight: 4,
+  },
+  actionLabel: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#6B7280",
+  },
+  viewDetailsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: "auto",
+    backgroundColor: "#D1FAE5",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  viewDetailsText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#10B981",
+    marginRight: 4,
+    letterSpacing: 0.3,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  lottieAnimation: {
+    width: 200,
+    height: 200,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginTop: 16,
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#9CA3AF",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  noClanContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+  },
+  noClanCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 32,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  noClanIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  noClanTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  noClanSubtext: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  joinClanButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#10B981",
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 16,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  joinClanButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
+  },
+});

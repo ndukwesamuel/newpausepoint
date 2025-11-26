@@ -1,278 +1,3 @@
-// import AppScreen from "../../../components/shared/AppScreen";
-// import {
-//   View,
-//   Text,
-//   Button,
-//   Platform,
-//   TouchableOpacity,
-//   KeyboardAvoidingView,
-//   ScrollView,
-//   Image,
-//   FlatList,
-//   StyleSheet,
-//   TextInput,
-//   RefreshControl,
-// } from "react-native";
-// import React, { useEffect, useRef, useState } from "react";
-// import LottieView from "lottie-react-native";
-// const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-// import axios from "axios";
-// import Toast from "react-native-toast-message";
-// import * as ImagePicker from "expo-image-picker";
-// import { MaterialIcons } from "@expo/vector-icons";
-// import { Ionicons, AntDesign } from "@expo/vector-icons";
-
-// import DateTimePicker from "@react-native-community/datetimepicker";
-
-// import { useDispatch, useSelector } from "react-redux";
-
-// import {
-//   NavigationContainer,
-//   NavigationProp,
-//   useNavigation,
-// } from "@react-navigation/native";
-// import { Get_All_User_Guest_Fun } from "../../../Redux/UserSide/GuestSlice";
-// import { formatDateandTime } from "../../../utils/DateTime";
-// import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
-// import ClickToJoinCLan from "../../../components/shared/ClickToJoinCLan";
-
-// const Guests = () => {
-//   const dispatch = useDispatch();
-//   const navigation = useNavigation();
-//   const animation = useRef(null);
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const { get_all_user_guest_data } = useSelector((state) => state?.GuestSlice);
-//   const { get_user_profile_data } = useSelector(
-//     (state) => state?.UserProfileSlice
-//   );
-//   console.log({
-//     ss: get_user_profile_data?.currentClanMeeting,
-//   });
-
-//   useEffect(() => {
-//     return () => {};
-//   }, [dispatch]);
-
-//   const filteredData = get_all_user_guest_data?.userInvites?.filter((item) =>
-//     item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
-//   );
-//   const [refreshing, setRefreshing] = useState(false);
-
-//   const onRefresh = () => {
-//     // Set the refreshing state to true
-//     setRefreshing(true);
-//     dispatch(Get_All_User_Guest_Fun());
-//     dispatch(UserProfile_data_Fun());
-
-//     // Wait for 2 seconds
-//     setRefreshing(false);
-//   };
-
-//   const HistoryItem = ({ itemdata }) => {
-//     return (
-//       <TouchableOpacity
-//         style={{
-//           flexDirection: "row",
-//           justifyContent: "space-around",
-//           borderWidth: 1,
-//           borderColor: "#CFCDCD",
-//           marginBottom: 10,
-//           paddingVertical: 10,
-//           borderRadius: 9,
-//         }}
-//         onPress={() => {
-//           navigation.navigate("guestsdetail", { itemdata });
-//         }}
-//       >
-//         <View>
-//           <Text
-//             style={{
-//               fontSize: 18,
-//               fontFamily: "RobotoSlab-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {itemdata?.access_code}
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 11,
-//               fontFamily: "RobotoSlab-Medium",
-//               fontWeight: "500",
-//             }}
-//           >
-//             Code ID
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {itemdata?.visitor_name}
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 11,
-//               fontFamily: "RobotoSlab-Medium",
-//               fontWeight: "500",
-//             }}
-//           >
-//             Visitor Name
-//           </Text>
-//         </View>
-
-//         <View>
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {formatDateandTime(itemdata?.expires)}
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 11,
-//               fontFamily: "RobotoSlab-Medium",
-//               fontWeight: "500",
-//             }}
-//           >
-//             Departure Time
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 14,
-//               fontFamily: "Inter-SemiBold",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {itemdata?.phone_number}
-//           </Text>
-
-//           <Text
-//             style={{
-//               fontSize: 11,
-//               fontFamily: "RobotoSlab-Medium",
-//               fontWeight: "500",
-//             }}
-//           >
-//             Phone Number
-//           </Text>
-//         </View>
-//       </TouchableOpacity>
-//     );
-//   };
-
-//   return (
-//     <AppScreen>
-//       {get_user_profile_data?.currentClanMeeting ? (
-//         <View
-//           style={{
-//             flex: 1,
-//             justifyContent: "center",
-//             paddingHorizontal: 20,
-//           }}
-//         >
-//           <TextInput
-//             style={{
-//               height: 40,
-//               borderColor: "gray",
-//               borderWidth: 1,
-//               marginBottom: 10,
-//               paddingLeft: 10,
-//             }}
-//             placeholder="Search by Visitor Name"
-//             value={searchQuery}
-//             onChangeText={(text) => setSearchQuery(text)}
-//           />
-
-//           <View
-//             style={{ position: "absolute", right: 20, top: 320, zIndex: 1 }}
-//           >
-//             <TouchableOpacity
-//               style={{
-//                 backgroundColor: "green",
-//                 // paddingHorizontal: 20,
-//                 // paddingVertical: 10,
-//                 borderRadius: 50,
-//                 width: 50,
-//                 height: 50,
-//                 justifyContent: "center",
-//                 alignItems: "center",
-//               }}
-//               // navigation.navigate("guestsdetail", { itemdata });
-
-//               onPress={() => navigation.navigate("inviteguest")}
-//             >
-//               <MaterialIcons name="mode-edit" size={24} color="black" />
-//             </TouchableOpacity>
-//           </View>
-
-//           {filteredData?.length === 0 ? (
-//             <View
-//               style={{
-//                 flex: 1,
-//                 justifyContent: "center",
-//                 alignItems: "center",
-//               }}
-//             >
-//               <LottieView
-//                 autoPlay
-//                 ref={animation}
-//                 style={{
-//                   width: 200,
-//                   height: 200,
-//                 }}
-//                 // Find more Lottie files at https://lottiefiles.com/featured
-//                 source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
-//               />
-//             </View>
-//           ) : (
-//             <FlatList
-//               data={filteredData}
-//               showsHorizontalScrollIndicator={false}
-//               showsVerticalScrollIndicator={false}
-//               refreshControl={
-//                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-//               }
-//               renderItem={({ item }) => <HistoryItem itemdata={item} />}
-//             />
-//           )}
-//         </View>
-//       ) : (
-//         <ScrollView
-//           contentContainerStyle={{
-//             flex: 1,
-//             justifyContent: "center",
-//             alignItems: "center",
-//           }}
-//           refreshControl={
-//             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-//           }
-//         >
-//           <ClickToJoinCLan />
-//           <Text style={{ fontSize: 18 }}>
-//             Join a clan to see a guest list and invite guests.
-//           </Text>
-//         </ScrollView>
-//       )}
-//     </AppScreen>
-//   );
-// };
-
-// export default Guests;
-
-// const styles = StyleSheet.create({});
-
 import AppScreen from "../../../components/shared/AppScreen";
 import {
   View,
@@ -284,6 +9,8 @@ import {
   StyleSheet,
   TextInput,
   RefreshControl,
+  Linking,
+  Alert,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
@@ -298,6 +25,71 @@ import { Get_All_User_Guest_Fun } from "../../../Redux/UserSide/GuestSlice";
 import { formatDateandTime } from "../../../utils/DateTime";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import ClickToJoinCLan from "../../../components/shared/ClickToJoinCLan";
+import GuestAdCard from "./GuestAdCard";
+// import GuestAdCard from "../../../components/Guests/GuestAdCard";
+
+// Sample Advertisement Data for Guest Screen
+const guestAdvertisements = [
+  {
+    id: "guest_ad_1",
+    title: "Smart Door Locks",
+    description:
+      "Upgrade your security with keyless entry. Perfect for managing guests!",
+    imageUrl:
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/smart-locks",
+    iconName: "lock-smart",
+  },
+  {
+    id: "guest_ad_2",
+    title: "Guest WiFi Setup",
+    description:
+      "Secure guest network installation. Keep your main network safe.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/wifi-setup",
+    iconName: "wifi",
+  },
+  {
+    id: "guest_ad_3",
+    title: "Home Security System",
+    description: "24/7 monitoring with guest access codes. Free installation!",
+    imageUrl:
+      "https://images.unsplash.com/photo-1558002038-1055907df827?w=400&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/security",
+    iconName: "shield-home",
+  },
+  {
+    id: "guest_ad_4",
+    title: "Property Management",
+    description:
+      "Professional guest management services for landlords and hosts.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/property-mgmt",
+    iconName: "home-city",
+  },
+  {
+    id: "guest_ad_5",
+    title: "Cleaning Services",
+    description:
+      "Pre and post-guest cleaning. Book your first clean at 30% off!",
+    imageUrl:
+      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/cleaning",
+    iconName: "broom",
+  },
+  {
+    id: "guest_ad_6",
+    title: "Visitor Parking Pass",
+    description:
+      "Digital parking passes for your guests. Easy setup, instant delivery.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=400&q=80",
+    linkUrl: "https://www.pausepoint.net/", // "https://www.example.com/parking",
+    iconName: "car",
+  },
+];
 
 const Guests = () => {
   const dispatch = useDispatch();
@@ -324,6 +116,30 @@ const Guests = () => {
     dispatch(Get_All_User_Guest_Fun());
     dispatch(UserProfile_data_Fun());
     setRefreshing(false);
+  };
+
+  // Function to insert ads into guest list (every 3 guests)
+  const getGuestDataWithAds = () => {
+    if (!filteredData || filteredData.length === 0) return [];
+
+    const dataWithAds = [];
+    let adIndex = 0;
+
+    filteredData.forEach((guest, index) => {
+      // Add the guest
+      dataWithAds.push({ type: "guest", data: guest });
+
+      // Add an ad after every 3 guests
+      if ((index + 1) % 3 === 0 && adIndex < guestAdvertisements.length) {
+        dataWithAds.push({
+          type: "ad",
+          data: guestAdvertisements[adIndex % guestAdvertisements.length],
+        });
+        adIndex++;
+      }
+    });
+
+    return dataWithAds;
   };
 
   const HistoryItem = ({ itemdata }) => {
@@ -402,6 +218,15 @@ const Guests = () => {
     );
   };
 
+  const renderItem = ({ item }) => {
+    if (item.type === "ad") {
+      return <GuestAdCard ad={item.data} />;
+    }
+
+    // Regular guest rendering
+    return <HistoryItem itemdata={item.data} />;
+  };
+
   return (
     <AppScreen>
       {get_user_profile_data?.currentClanMeeting ? (
@@ -455,7 +280,7 @@ const Guests = () => {
               </View>
             </View>
 
-            {/* Guest List Section */}
+            {/* Guest List Section with Ads */}
             <View style={styles.guestListCard}>
               <View style={styles.sectionHeader}>
                 <MaterialCommunityIcons
@@ -484,10 +309,14 @@ const Guests = () => {
                 </View>
               ) : (
                 <FlatList
-                  data={filteredData}
+                  data={getGuestDataWithAds()}
+                  keyExtractor={(item, index) =>
+                    item.type === "ad"
+                      ? `ad-${item.data.id}-${index}`
+                      : `guest-${item.data._id || index}`
+                  }
                   showsHorizontalScrollIndicator={false}
                   showsVerticalScrollIndicator={false}
-                  // scrollEnabled={false}
                   refreshControl={
                     <RefreshControl
                       refreshing={refreshing}
@@ -495,15 +324,13 @@ const Guests = () => {
                       tintColor="#10B981"
                     />
                   }
-                  renderItem={({ item }) => <HistoryItem itemdata={item} />}
-                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={renderItem}
                 />
               )}
             </View>
           </View>
 
           {/* Floating Action Button */}
-
           <View
             style={{ position: "absolute", right: 20, top: 320, zIndex: 1 }}
           >
