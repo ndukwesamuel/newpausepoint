@@ -31,6 +31,8 @@ const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 import { useNavigation } from "@react-navigation/native";
 import { authScreenChange } from "../Redux/OnboardingSlice";
 import { setOtpEmail } from "../Redux/DontwantToResetSlice";
+// Import useMutation from TanStack Query
+import { useMutation } from "@tanstack/react-query";
 
 const ForgottenPasswod = ({}) => {
   const navigation = useNavigation();
@@ -45,10 +47,7 @@ const ForgottenPasswod = ({}) => {
   const [email, setEmail] = useState("");
   const {
     user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
+    // Removed unused user_isError, user_isSuccess, user_isLoading, user_message
   } = useSelector((state) => state.AuthSlice);
 
   const [remember, setRemember] = useState(false);
@@ -75,42 +74,43 @@ const ForgottenPasswod = ({}) => {
     setInputValue(text);
   };
 
-  // const Forget_Mutation = useMutation(
-  //   (data_info) => {
-  //     let url = `${API_BASEURL}forgot-password`;
+  // Convert to TanStack Query's object-based useMutation syntax
+  const Forget_Mutation = useMutation({
+    mutationFn: (data_info) => {
+      let url = `${API_BASEURL}forgot-password`;
 
-  //     const config = {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Accept: "application/json",
-  //         //   "Content-Type": "multipart/form-data",
-  //         Authorization: `Bearer ${user_data?.token}`,
-  //       },
-  //     };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${user_data?.token}`,
+        },
+      };
 
-  //     return axios.post(url, data_info, config);
-  //   },
-  //   {
-  //     onSuccess: (success) => {
-  //       Toast.show({
-  //         type: "success",
-  //         text1: `${success?.data?.message}`,
-  //       });
+      // Assuming data_info is { email: 'user@example.com' }
+      return axios.post(url, data_info, config);
+    },
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: `${success?.data?.message}`,
+      });
 
-  //       dispatch(authScreenChange("CREATEPASSWORD"));
-  //     },
+      // Dispatch action to change screen after successful request
+      dispatch(authScreenChange("CREATEPASSWORD"));
+    },
 
-  //     onError: (error) => {
-  //       console.log({
-  //         nnnnnnn: error?.response?.data,
-  //       });
-  //       Toast.show({
-  //         type: "error",
-  //         text1: `${error?.response?.data?.error} `,
-  //       });
-  //     },
-  //   }
-  // );
+    onError: (error) => {
+      console.log({
+        nnnnnnn: error?.response?.data,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.error} `,
+      });
+    },
+  });
+
   return (
     <AppScreen>
       <KeyboardAvoidingView
@@ -129,7 +129,7 @@ const ForgottenPasswod = ({}) => {
               <AntDesign name="arrowleft" size={28} color="black" />
             </TouchableOpacity>
 
-            <RegistraionHeadersText data="Forgotten Passwod  " textStyle={{}} />
+            <RegistraionHeadersText data="Forgotten Passwod" textStyle={{}} />
 
             <View style={{ flexDirection: "row", gap: 10, marginBottom: 30 }}>
               <RegistraionParagraphText
@@ -144,6 +144,8 @@ const ForgottenPasswod = ({}) => {
                 placeholder="Enter your email"
                 onChangeText={setEmail}
                 value={email}
+                keyboardType="email-address" // Added keyboard type for email
+                autoCapitalize="none" // Ensure email is not auto-capitalized
               />
             </View>
           </View>
@@ -166,7 +168,8 @@ const ForgottenPasswod = ({}) => {
               onPress={() => {
                 dispatch(setOtpEmail(email));
 
-                // Forget_Mutation.mutate({ email });
+                // Call the mutation with the email
+                Forget_Mutation.mutate({ email });
               }}
               isLoading={Forget_Mutation.isLoading}
             />

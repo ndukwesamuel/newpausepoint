@@ -30,50 +30,79 @@ import {
   BottomModal,
   CenterReuseModals,
 } from "../../../components/shared/ReuseModals";
-// import { useMutation } from "react-query";
+// *** CHANGE: Import useMutation from @tanstack/react-query ***
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 import axios from "axios";
 import Toast from "react-native-toast-message";
 
+// Define the expected mutation data structure
+/**
+ * @typedef {{ name: string, description: string }} EstateCreationData
+ */
+
 const Myclan = ({ navigation }) => {
   const { user_data, user_isLoading } = useSelector((state) => state.AuthSlice);
 
+  // Modal for creating a new clan/estate
   const [isModalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
 
-  // const Crate_Estate_Mutation = useMutation(
-  //   (data_info) => {
-  //     let url = `${API_BASEURL}clan`;
-  //     const config = {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Accept: "application/json",
-  //         Authorization: `Bearer ${user_data?.token}`,
-  //       },
-  //     };
-  //     return axios.post(url, data_info, config);
-  //   },
-  //   {
-  //     onSuccess: (success) => {
-  //       Toast.show({
-  //         type: "success",
-  //         text1: "Estate created successfully",
-  //         text2: `Waiting for Admin to Approve`,
-  //       });
-  //       setModalVisible(false);
-  //     },
-  //     onError: (error) => {
-  //       Toast.show({
-  //         type: "error",
-  //         text1: `${error?.response?.data?.error}`,
-  //       });
-  //       setModalVisible(false);
-  //     },
-  //   }
-  // );
+  /**
+   * Mutation function to create a new estate.
+   * @param {EstateCreationData} data_info - The name and description for the new estate.
+   * @returns {Promise<import('axios').AxiosResponse>} The Axios response.
+   */
+  const createEstateRequest = async (data_info) => {
+    let url = `${API_BASEURL}clan`;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${user_data?.token}`,
+      },
+    };
+    return axios.post(url, data_info, config);
+  };
+
+  // *** TANSTACK QUERY MUTATION IMPLEMENTATION ***
+  const Crate_Estate_Mutation = useMutation({
+    mutationFn: createEstateRequest,
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Estate created successfully",
+        text2: `Waiting for Admin to Approve`,
+      });
+      setModalVisible(false);
+      setName("");
+      setText("");
+      // Optionally invalidate a query for the list of my clans here if needed
+      // queryClient.invalidateQueries(['myClans']);
+    },
+    onError: (error) => {
+      /** @type {import('axios').AxiosError} */
+      const axiosError = error;
+      const errorMessage =
+        axiosError?.response?.data?.error || "An unexpected error occurred.";
+
+      Toast.show({
+        type: "error",
+        text1: errorMessage,
+      });
+    },
+  });
+  // *** END TANSTACK QUERY MUTATION IMPLEMENTATION ***
 
   const handleEstate = () => {
+    if (!name.trim() || !text.trim()) {
+      Toast.show({
+        type: "info",
+        text1: "Please provide both name and description.",
+      });
+      return;
+    }
     let data = {
       name: name,
       description: text,
@@ -81,63 +110,132 @@ const Myclan = ({ navigation }) => {
     Crate_Estate_Mutation.mutate(data);
   };
 
+  // Destructure isLoading from the mutation
+  const { isLoading: isCreatingEstate } = Crate_Estate_Mutation;
+
   return (
     <AppScreen>
-      <View style={styles.container}>
-        {/* Your Estates Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons name="location-city" size={24} color="#3498db" />
-            <MediumFontText
-              data="All Communities You Live In"
-              textstyle={styles.sectionTitle}
-            />
-          </View>
-          <RegularFontText
-            data="Join, where modern luxury meets timeless charm. Enjoy exquisite residences, world-class amenities, and a sense of community in a secure, exclusive environment"
-            textstyle={styles.sectionDescription}
-          />
-          <TouchableOpacity
-            onPress={() => navigation.navigate("alluserclan")}
-            style={styles.primaryButton}
-          >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.container}>
+          {/* Your Estates Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="location-city" size={24} color="#3498db" />
+              <MediumFontText
+                data="All Communities You Live In"
+                textstyle={styles.sectionTitle}
+              />
+            </View>
             <RegularFontText
-              data="View All Communities"
-              textstyle={styles.buttonText}
+              data="Join, where modern luxury meets timeless charm. Enjoy exquisite residences, world-class amenities, and a sense of community in a secure, exclusive environment"
+              textstyle={styles.sectionDescription}
             />
-            <MaterialIcons name="arrow-forward" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("alluserclan")}
+              style={styles.primaryButton}
+            >
+              <RegularFontText
+                data="View All Communities"
+                textstyle={styles.buttonText}
+              />
+              <MaterialIcons name="arrow-forward" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
 
-        {/* Join Community Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons
-              name="account-group"
-              size={24}
-              color="#e74c3c"
+          {/* Join Community Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="account-group"
+                size={24}
+                color="#e74c3c"
+              />
+              <MediumFontText
+                data="Join A Community"
+                textstyle={styles.sectionTitle}
+              />
+            </View>
+            <RegularFontText
+              data="Connect with neighbors and enjoy shared amenities. Find your perfect community that matches your lifestyle and preferences."
+              textstyle={styles.sectionDescription}
             />
-            <MediumFontText
-              data="Join A Community"
-              textstyle={styles.sectionTitle}
-            />
+            <TouchableOpacity
+              onPress={() => navigation.navigate("joinclan")}
+              style={[styles.primaryButton, { backgroundColor: "#e74c3c" }]}
+            >
+              <RegularFontText
+                data="Explore Communities"
+                textstyle={styles.buttonText}
+              />
+              <MaterialIcons name="search" size={20} color="white" />
+            </TouchableOpacity>
           </View>
-          <RegularFontText
-            data="Connect with neighbors and enjoy shared amenities. Find your perfect community that matches your lifestyle and preferences."
-            textstyle={styles.sectionDescription}
+
+          {/* Create Community Section (Assuming this is what the modal is for) */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <AntDesign name="pluscircle" size={24} color="#27ae60" />
+              <MediumFontText
+                data="Create New Community"
+                textstyle={styles.sectionTitle}
+              />
+            </View>
+            <RegularFontText
+              data="Can't find your estate? Register it here and let the admin approve it."
+              textstyle={styles.sectionDescription}
+            />
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              style={[styles.primaryButton, { backgroundColor: "#27ae60" }]}
+            >
+              <RegularFontText
+                data="Create Community"
+                textstyle={styles.buttonText}
+              />
+              <MaterialIcons
+                name="add-circle-outline"
+                size={20}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Modal for creating a new estate/clan */}
+      <BottomModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Create New Estate/Clan</Text>
+          <Forminput
+            placeholder="Estate/Clan Name"
+            value={name}
+            onChangeText={setName}
+          />
+          <CustomTextArea
+            placeholder="Description (Max 150 words)"
+            value={text}
+            onChangeText={setText}
+            numberOfLines={5}
           />
           <TouchableOpacity
-            onPress={() => navigation.navigate("joinclan")}
-            style={[styles.primaryButton, { backgroundColor: "#e74c3c" }]}
+            onPress={handleEstate}
+            style={styles.modalButton}
+            disabled={isCreatingEstate}
           >
-            <RegularFontText
-              data="Explore Communities"
-              textstyle={styles.buttonText}
-            />
-            <MaterialIcons name="search" size={20} color="white" />
+            {isCreatingEstate ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <RegularFontText
+                data="Submit For Approval"
+                textstyle={styles.modalButtonText}
+              />
+            )}
           </TouchableOpacity>
         </View>
-      </View>
+      </BottomModal>
     </AppScreen>
   );
 };
@@ -145,8 +243,9 @@ const Myclan = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    // paddingVertical: 40,
+    paddingVertical: 20, // Added paddingVertical
     backgroundColor: "#f5f5f5",
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -201,6 +300,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     marginRight: 10,
+  },
+  modalContent: {
+    padding: 20,
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#2c3e50",
   },
   modalButton: {
     backgroundColor: "#3498db",

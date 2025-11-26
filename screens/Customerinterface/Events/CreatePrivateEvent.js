@@ -1,396 +1,409 @@
-// import {
-//   View,
-//   Text,
-//   Button,
-//   Platform,
-//   TouchableOpacity,
-//   KeyboardAvoidingView,
-//   ScrollView,
-//   Image,
-// } from "react-native";
-// import React, { useState } from "react";
-// import { useMutation } from "react-query";
-// const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import {
+  View,
+  Text,
+  Button,
+  Platform,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
+  Image,
+} from "react-native";
+import React, { useState } from "react";
+// *** CHANGE: Import useMutation from @tanstack/react-query ***
+import { useMutation } from "@tanstack/react-query";
+const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
-// import axios from "axios";
-// import Toast from "react-native-toast-message";
-// import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+import Toast from "react-native-toast-message";
+import * as ImagePicker from "expo-image-picker";
 
-// import { Ionicons, AntDesign } from "@expo/vector-icons";
-// import AppScreen from "../../../components/shared/AppScreen";
-// import {
-//   CustomTextArea,
-//   Formbutton,
-//   Forminput,
-//   RadioButton,
-// } from "../../../components/shared/InputForm";
-// import DateTimePicker from "@react-native-community/datetimepicker";
-// import {
-//   MediumFontText,
-//   RegularFontText,
-// } from "../../../components/shared/Paragrahp";
-// import { useDispatch, useSelector } from "react-redux";
-// import { formatDate, formatDateString } from "../../../utils/DateTime";
-// import { splitStringToArray } from "../../../utils";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
+import AppScreen from "../../../components/shared/AppScreen";
+import {
+  CustomTextArea,
+  Formbutton,
+  Forminput,
+  RadioButton,
+} from "../../../components/shared/InputForm";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  MediumFontText,
+  RegularFontText,
+} from "../../../components/shared/Paragrahp";
+import { useDispatch, useSelector } from "react-redux";
+import { formatDate, formatDateString } from "../../../utils/DateTime";
+import { splitStringToArray } from "../../../utils";
 
-// import {
-//   NavigationContainer,
-//   NavigationProp,
-//   useNavigation,
-// } from "@react-navigation/native";
-// const CreatePrivateEvent = () => {
-//   const dispatch = useDispatch();
-//   const navigation = useNavigation();
+import {
+  NavigationContainer,
+  NavigationProp,
+  useNavigation,
+} from "@react-navigation/native";
 
-//   const {
-//     user_data,
-//     user_isError,
-//     user_isSuccess,
-//     user_isLoading,
-//     user_message,
-//   } = useSelector((state) => state.AuthSlice);
+/**
+ * @typedef {FormData} PrivateEventCreationFormData
+ */
 
-//   const [eventname, setEventname] = useState("");
-//   const [eventcountry, setEventcountry] = useState("");
-//   const [eventlocatiion, setEventlocatiion] = useState("");
-//   const [numberofguest, setNumberofguest] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [description, setDescription] = useState("");
-//   const [startDate, setStartDate] = useState(new Date());
-//   const [endDate, setEndDate] = useState(new Date());
-//   const [showStartPicker, setShowStartPicker] = useState(false);
-//   const [showEndPicker, setShowEndPicker] = useState(false);
+const CreatePrivateEvent = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
-//   const onStartChange = (event, selectedDate) => {
-//     const currentDate = selectedDate || startDate;
-//     setShowStartPicker(Platform.OS === "ios");
-//     setStartDate(currentDate);
-//   };
+  const {
+    user_data,
+    user_isError,
+    user_isSuccess,
+    user_isLoading,
+    user_message,
+  } = useSelector((state) => state.AuthSlice);
 
-//   const onEndChange = (event, selectedDate) => {
-//     const currentDate = selectedDate || endDate;
-//     setShowEndPicker(Platform.OS === "ios");
-//     setEndDate(currentDate);
-//   };
+  const [eventname, setEventname] = useState("");
+  const [eventcountry, setEventcountry] = useState(""); // Not used in form
+  const [eventlocatiion, setEventlocatiion] = useState("");
+  const [numberofguest, setNumberofguest] = useState("");
+  const [email, setEmail] = useState(""); // List of guest emails
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
-//   const toggleStartPicker = () => {
-//     setShowStartPicker(!showStartPicker);
-//   };
+  const onStartChange = (event, selectedDate) => {
+    const currentDate = selectedDate || startDate;
+    setShowStartPicker(Platform.OS === "ios");
+    setStartDate(currentDate);
+  };
 
-//   const toggleEndPicker = () => {
-//     setShowEndPicker(!showEndPicker);
-//   };
+  const onEndChange = (event, selectedDate) => {
+    const currentDate = selectedDate || endDate;
+    setShowEndPicker(Platform.OS === "ios");
+    setEndDate(currentDate);
+  };
 
-//   const [selectedOption, setSelectedOption] = useState(1);
-//   const handleRadioSelect = (option) => {
-//     setSelectedOption(option);
-//   };
+  const toggleStartPicker = () => {
+    setShowStartPicker(!showStartPicker);
+  };
 
-//   const [free_event, setFree_event] = useState(true);
+  const toggleEndPicker = () => {
+    setShowEndPicker(!showEndPicker);
+  };
 
-//   const [profileImage, setProfileImage] = useState("");
+  // State for radio buttons (selectedOption) is defined but not used in form
+  const [selectedOption, setSelectedOption] = useState(1);
+  const handleRadioSelect = (option) => {
+    setSelectedOption(option);
+  };
 
-//   const [picFile, setPicFile] = useState(null);
+  // State for free_event is defined but not used in form
+  const [free_event, setFree_event] = useState(true);
 
-//   const pickImage = async () => {
-//     let result = await ImagePicker.launchImageLibraryAsync({
-//       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-//       allowsEditing: true,
-//       aspect: [4, 3],
-//       quality: 1,
-//     });
+  const [profileImage, setProfileImage] = useState("");
+  const [picFile, setPicFile] = useState(null);
 
-//     if (!result.cancelled) {
-//       setProfileImage(result.uri);
-//       setPicFile(result.uri);
-//       // Handle the image upload and profile update here
-//       // You may want to send the image to a server and update the user's profile data
-//     }
-//   };
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-//   const handlesubmit = () => {
-//     let event_date = formatDate(startDate);
-//     let start_event_data = startDate.toISOString();
-//     let end_event_data = endDate.toISOString();
-//     let newemal = email;
-//     const formData = new FormData();
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+      setPicFile(result.assets[0].uri);
+    }
+  };
 
-//     formData.append("title", eventname);
-//     formData.append("description", description);
-//     formData.append("event_date", event_date);
-//     formData.append("start_time", start_event_data);
-//     formData.append("end_time", end_event_data);
-//     formData.append("number_of_guests", numberofguest);
-//     formData.append("venue", eventlocatiion);
-//     formData.append("add_guests", newemal);
+  const handlesubmit = () => {
+    // --- Validation (Highly recommended before mutation) ---
+    if (
+      !eventname.trim() ||
+      !description.trim() ||
+      !eventlocatiion.trim() ||
+      !numberofguest.trim()
+    ) {
+      Toast.show({
+        type: "error",
+        text1: "Please fill out all required fields.",
+      });
+      return;
+    }
+    // --------------------------------------------------------
 
-//     // Assuming picFile is an object with a uri property representing the file path
-//     if (picFile) {
-//       const uri = picFile;
-//       const type = "image/jpeg"; // Adjust the type based on the file type
-//       const name = "photo.jpg"; // Adjust the name as needed
-//       formData.append("photo", { uri, type, name });
-//     }
+    let event_date = formatDate(startDate);
+    let start_event_data = startDate.toISOString();
+    let end_event_data = endDate.toISOString();
+    let newemal = email; // Guest emails list
 
-//     Create_Private_Event_Mutation.mutate(formData);
-//   };
+    const formData = new FormData();
 
-//   const Create_Private_Event_Mutation = useMutation(
-//     (data_info) => {
-//       let url = `${API_BASEURL}create-event`;
+    formData.append("title", eventname);
+    formData.append("description", description);
+    formData.append("event_date", event_date); // Note: API might prefer ISO string for date/time fields
+    formData.append("start_time", start_event_data);
+    formData.append("end_time", end_event_data);
+    formData.append("number_of_guests", numberofguest);
+    formData.append("venue", eventlocatiion);
+    // Assuming 'add_guests' takes a comma-separated string of emails
+    formData.append("add_guests", newemal);
 
-//       const config = {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//           Authorization: `Bearer ${user_data?.token}`,
-//         },
-//       };
+    // Append the file
+    if (picFile) {
+      const uri = picFile;
+      const filename = uri.split("/").pop();
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : "image";
 
-//       return axios.post(url, data_info, config);
-//     },
-//     {
-//       onSuccess: (success) => {
-//         Toast.show({
-//           type: "success",
-//           text1: "Event created successfully!",
-//         });
-//         navigation.goBack();
-//       },
+      formData.append("photo", {
+        uri,
+        type,
+        name: filename,
+      });
+    }
 
-//       onError: (error) => {
-//         Toast.show({
-//           type: "error",
-//           text1: `${error?.response?.data?.error}`,
-//           // text2: 'Toast message',
-//         });
-//       },
-//     }
-//   );
+    Create_Private_Event_Mutation.mutate(formData);
+  };
 
-//   return (
-//     <View style={{ backgroundColor: "white", flex: 1 }}>
-//       {/* <KeyboardAvoidingView
-//           behavior={Platform.OS === "ios" ? "padding" : "height"}
-//           style={{ flex: 1 }}
-//         > */}
+  // *** TANSTACK QUERY MUTATION IMPLEMENTATION ***
+  /**
+   * @param {PrivateEventCreationFormData} data_info - The FormData object.
+   * @returns {Promise<import('axios').AxiosResponse>} The Axios response.
+   */
+  const createPrivateEventRequest = async (data_info) => {
+    let url = `${API_BASEURL}create-event`; // This URL seems generic; check if a specific private event URL exists
 
-//       <View style={{ flex: 1, padding: 20 }}>
-//         <KeyboardAvoidingView
-//           behavior="padding"
-//           keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-//           style={{ flex: 1, backgroundColor: "white" }}
-//         >
-//           <ScrollView
-//             style={{ flex: 1 }}
-//             contentContainerStyle={{ flexGrow: 1 }}
-//             keyboardShouldPersistTaps="handled" // or "always"
-//           >
-//             <View style={{ flex: 1, gap: 25 }}>
-//               <MediumFontText data="Event Name" />
+    const config = {
+      headers: {
+        // Crucially, when using FormData, let Axios and the browser/RN handle the 'Content-Type': 'multipart/form-data'
+        Authorization: `Bearer ${user_data?.token}`,
+      },
+    };
 
-//               <Forminput
-//                 placeholder="Event Name"
-//                 onChangeText={setEventname}
-//                 value={eventname}
-//               />
+    return axios.post(url, data_info, config);
+  };
 
-//               <MediumFontText data="Event Descripttion" />
+  const Create_Private_Event_Mutation = useMutation({
+    mutationFn: createPrivateEventRequest,
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Event created successfully! Guests will be invited.",
+      });
+      // You may want to dispatch a refresh action here if you have a list of events
+      navigation.goBack();
+    },
 
-//               <CustomTextArea
-//                 placeholder="Enter text here..."
-//                 value={description}
-//                 onChangeText={setDescription}
-//                 // onChangeText={handleTextChange}
-//                 style={{ width: "80%" }}
-//                 inputStyle={{
-//                   backgroundColor: "#F6F8FAE5",
-//                   paddingHorizontal: 10,
-//                   paddingVertical: 20,
-//                   height: 100,
-//                   padding: 10,
-//                   borderRadius: 6,
-//                   fontSize: 16,
-//                 }}
-//               />
-//               {/* <MediumFontText data="Country" />
+    onError: (error) => {
+      /** @type {import('axios').AxiosError} */
+      const axiosError = error;
+      const errorMessage =
+        axiosError?.response?.data?.error || "Failed to create private event.";
 
-//               <Forminput
-//                 placeholder="Event Country and State"
-//                 onChangeText={setEventcountry}
-//                 value={eventcountry}
-//               /> */}
+      Toast.show({
+        type: "error",
+        text1: errorMessage,
+      });
+    },
+  });
+  // *** END TANSTACK QUERY MUTATION IMPLEMENTATION ***
 
-//               <View
-//                 style={{
-//                   flexDirection: "row",
-//                   alignItems: "center",
-//                   gap: 10,
-//                   // justifyContent: "center",
-//                 }}
-//               >
-//                 <TouchableOpacity
-//                   style={{
-//                     width: 200,
-//                     height: 200,
-//                     borderRadius: 100,
-//                     alignItems: "center",
-//                     justifyContent: "center",
-//                     borderWidth: 1,
-//                     borderColor: "black",
-//                   }}
-//                   onPress={pickImage}
-//                 >
-//                   <Image
-//                     // className="w-40 h-40 rounded-full"
-//                     style={{ width: 200, height: 200 }}
-//                     source={{
-//                       uri:
-//                         profileImage ||
-//                         "https://encrypted-tbn2.gstatic.com/licensed-image?q=tbn:ANd9GcSO9Xd_NJYU1FU2u886CDMp-pX-nffkmg_h0yhAKgLWCltFmAbQnt_nGdpEPgQZMZzw1k_pGxWjlD3U_Yk",
-//                     }}
-//                     //   style={{ width: 200, height: 200, borderRadius: 100 }}
-//                   />
-//                 </TouchableOpacity>
-
-//                 <MediumFontText data="Event Flyer" />
-//               </View>
-
-//               <MediumFontText data="Event Time" />
-//               <View>
-//                 <RegularFontText data="Start Date" />
-//                 <TouchableOpacity
-//                   style={{
-//                     // borderWidth: 1,
-//                     padding: 10,
-//                     borderRadius: 5,
-//                     fontSize: 16,
-//                     backgroundColor: "#F6F8FAE5",
-//                     // opacity: 0.4
-//                   }}
-//                   onPress={toggleStartPicker}
-//                 >
-//                   <Text>{formatDateString(startDate)}</Text>
-//                 </TouchableOpacity>
-//                 {/* <Text>{startDate.toDateString()}</Text> */}
-
-//                 {showStartPicker && (
-//                   <DateTimePicker
-//                     testID="startDateTimePicker"
-//                     value={startDate}
-//                     mode="datetime"
-//                     is24Hour={true}
-//                     display="spinner"
-//                     onChange={onStartChange}
-//                   />
-//                 )}
-//               </View>
-
-//               <View>
-//                 <RegularFontText data="End Date" />
-
-//                 <TouchableOpacity
-//                   style={{
-//                     // borderWidth: 1,
-//                     padding: 10,
-//                     borderRadius: 5,
-//                     fontSize: 16,
-//                     backgroundColor: "#F6F8FAE5",
-//                     // opacity: 0.4
-//                   }}
-//                   onPress={toggleEndPicker}
-//                 >
-//                   <Text>{formatDateString(endDate)}</Text>
-//                 </TouchableOpacity>
-//                 {showEndPicker && (
-//                   <DateTimePicker
-//                     testID="endDateTimePicker"
-//                     value={endDate}
-//                     mode="datetime"
-//                     is24Hour={true}
-//                     display="spinner"
-//                     onChange={onEndChange}
-//                   />
-//                 )}
-//               </View>
-
-//               <MediumFontText
-//                 data="Event Location"
-//                 textstyle={{ fontSize: 14 }}
-//               />
-//               <Forminput
-//                 placeholder="Event Location"
-//                 onChangeText={setEventlocatiion}
-//                 value={eventlocatiion}
-//               />
-
-//               <MediumFontText
-//                 data="Expected Guests Number"
-//                 textstyle={{ fontSize: 14 }}
-//               />
-//               <Forminput
-//                 placeholder="Event  Number Guests"
-//                 onChangeText={setNumberofguest}
-//                 value={numberofguest}
-//               />
-
-//               <MediumFontText
-//                 data="Enter Guests Email"
-//                 textstyle={{ fontSize: 14 }}
-//               />
-//               <CustomTextArea
-//                 placeholder="Enter text here..."
-//                 value={email}
-//                 onChangeText={setEmail}
-//                 // onChangeText={handleTextChange}
-//                 style={{ width: "80%" }}
-//                 inputStyle={{
-//                   backgroundColor: "#F6F8FAE5",
-//                   paddingHorizontal: 10,
-//                   paddingVertical: 20,
-//                   height: 200,
-//                   padding: 10,
-//                   borderRadius: 6,
-//                   fontSize: 16,
-//                 }}
-//               />
-//             </View>
-//           </ScrollView>
-//         </KeyboardAvoidingView>
-
-//         <View style={{}}>
-//           <Formbutton
-//             buttonStyle={{
-//               backgroundColor: "#04973C",
-//               paddingVertical: 14,
-//               alignItems: "center",
-//               borderRadius: 5,
-//             }}
-//             textStyle={{
-//               color: "white",
-//               fontWeight: "500",
-//               fontSize: 14,
-//               fontFamily: "RobotoSlab-Medium",
-//             }}
-//             data="Create Event"
-//             onPress={handlesubmit}
-//             icon={<AntDesign name="plus" size={24} color="white" />}
-//             isLoading={Create_Private_Event_Mutation?.isLoading}
-//           />
-//         </View>
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default CreatePrivateEvent;
-
-import { View, Text } from "react-native";
-import React from "react";
-
-export default function CreatePrivateEvent() {
   return (
-    <View>
-      <Text>CreatePrivateEvent</Text>
+    <View style={{ backgroundColor: "white", flex: 1 }}>
+      <View style={{ flex: 1, padding: 20 }}>
+        <KeyboardAvoidingView
+          behavior="padding"
+          keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+          style={{ flex: 1, backgroundColor: "white" }}
+        >
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={{ flex: 1, gap: 25 }}>
+              <MediumFontText data="Event Name" />
+
+              <Forminput
+                placeholder="Event Name"
+                onChangeText={setEventname}
+                value={eventname}
+              />
+
+              <MediumFontText data="Event Description" />
+
+              <CustomTextArea
+                placeholder="Enter text here..."
+                value={description}
+                onChangeText={setDescription}
+                inputStyle={{
+                  backgroundColor: "#F6F8FAE5",
+                  paddingHorizontal: 10,
+                  paddingVertical: 20,
+                  height: 100,
+                  padding: 10,
+                  borderRadius: 6,
+                  fontSize: 16,
+                }}
+              />
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 10,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderWidth: 1,
+                    borderColor: "lightgray",
+                    overflow: "hidden",
+                  }}
+                  onPress={pickImage}
+                >
+                  {profileImage ? (
+                    <Image
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: 10,
+                      }}
+                      source={{ uri: profileImage }}
+                    />
+                  ) : (
+                    <AntDesign name="camerao" size={30} color="gray" />
+                  )}
+                </TouchableOpacity>
+
+                <MediumFontText data="Event Flyer (Tap to select)" />
+              </View>
+
+              <MediumFontText data="Event Time" />
+              <View>
+                <RegularFontText data="Start Date & Time" />
+                <TouchableOpacity
+                  style={{
+                    padding: 10,
+                    borderRadius: 5,
+                    fontSize: 16,
+                    backgroundColor: "#F6F8FAE5",
+                    justifyContent: "center",
+                    height: 50,
+                  }}
+                  onPress={toggleStartPicker}
+                >
+                  <Text>{formatDateString(startDate)}</Text>
+                </TouchableOpacity>
+
+                {showStartPicker && (
+                  <DateTimePicker
+                    testID="startDateTimePicker"
+                    value={startDate}
+                    mode="datetime"
+                    is24Hour={true}
+                    display="spinner"
+                    onChange={onStartChange}
+                  />
+                )}
+              </View>
+
+              <View>
+                <RegularFontText data="End Date & Time" />
+
+                <TouchableOpacity
+                  style={{
+                    padding: 10,
+                    borderRadius: 5,
+                    fontSize: 16,
+                    backgroundColor: "#F6F8FAE5",
+                    justifyContent: "center",
+                    height: 50,
+                  }}
+                  onPress={toggleEndPicker}
+                >
+                  <Text>{formatDateString(endDate)}</Text>
+                </TouchableOpacity>
+                {showEndPicker && (
+                  <DateTimePicker
+                    testID="endDateTimePicker"
+                    value={endDate}
+                    mode="datetime"
+                    is24Hour={true}
+                    display="spinner"
+                    onChange={onEndChange}
+                  />
+                )}
+              </View>
+
+              <MediumFontText
+                data="Event Location"
+                textstyle={{ fontSize: 14 }}
+              />
+              <Forminput
+                placeholder="Event Location"
+                onChangeText={setEventlocatiion}
+                value={eventlocatiion}
+              />
+
+              <MediumFontText
+                data="Expected Guests Number"
+                textstyle={{ fontSize: 14 }}
+              />
+              <Forminput
+                placeholder="Event Number Guests"
+                onChangeText={setNumberofguest}
+                value={numberofguest}
+                keyboardType="numeric"
+              />
+
+              <MediumFontText
+                data="Enter Guests Email (one per line, or comma separated)"
+                textstyle={{ fontSize: 14 }}
+              />
+              <CustomTextArea
+                placeholder="Enter guest emails here..."
+                value={email}
+                onChangeText={setEmail}
+                inputStyle={{
+                  backgroundColor: "#F6F8FAE5",
+                  paddingHorizontal: 10,
+                  paddingVertical: 20,
+                  height: 150, // Reduced height slightly
+                  padding: 10,
+                  borderRadius: 6,
+                  fontSize: 16,
+                }}
+              />
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        <View style={{ marginTop: 10 }}>
+          <Formbutton
+            buttonStyle={{
+              backgroundColor: "#04973C",
+              paddingVertical: 14,
+              alignItems: "center",
+              borderRadius: 5,
+            }}
+            textStyle={{
+              color: "white",
+              fontWeight: "500",
+              fontSize: 16,
+            }}
+            data="Create Event"
+            onPress={handlesubmit}
+            icon={<AntDesign name="plus" size={20} color="white" />}
+            isLoading={Create_Private_Event_Mutation.isLoading}
+          />
+        </View>
+      </View>
     </View>
   );
-}
+};
+
+export default CreatePrivateEvent;

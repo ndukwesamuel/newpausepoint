@@ -327,29 +327,66 @@ const WalletScreen = ({}) => {
       }}
     >
       <View style={styles.container}>
+        {/* MODERNIZED WALLET CARD */}
         <View
           style={{
-            backgroundColor: "green",
-            borderRadius: 10,
-            padding: 15,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 5,
+            backgroundColor: "#10B981",
+            borderRadius: 20,
+            padding: 24,
+            shadowColor: "#10B981",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 8,
+            overflow: "hidden",
           }}
         >
+          {/* Decorative circles for depth */}
+          <View
+            style={{
+              position: "absolute",
+              top: -30,
+              right: -30,
+              width: 120,
+              height: 120,
+              borderRadius: 60,
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+            }}
+          />
+          <View
+            style={{
+              position: "absolute",
+              bottom: -20,
+              left: -20,
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: "rgba(255, 255, 255, 0.08)",
+            }}
+          />
+
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 15,
+              marginBottom: 20,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <MaterialCommunityIcons
+                name="wallet"
+                size={20}
+                color="rgba(255, 255, 255, 0.9)"
+                style={{ marginRight: 8 }}
+              />
               <Text
-                style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "500" }}
+                style={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontSize: 13,
+                  fontWeight: "500",
+                  letterSpacing: 0.5,
+                }}
               >
                 Available Balance
               </Text>
@@ -358,8 +395,10 @@ const WalletScreen = ({}) => {
                 onPress={handleReloadWallet}
                 disabled={isLoading}
                 style={{
-                  marginLeft: 10,
-                  padding: 5,
+                  marginLeft: 12,
+                  padding: 6,
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  borderRadius: 8,
                 }}
               >
                 {isLoading ? (
@@ -367,7 +406,7 @@ const WalletScreen = ({}) => {
                 ) : (
                   <MaterialCommunityIcons
                     name="reload"
-                    size={20}
+                    size={18}
                     color="#FFFFFF"
                   />
                 )}
@@ -382,66 +421,117 @@ const WalletScreen = ({}) => {
               alignItems: "center",
             }}
           >
-            <Text
-              style={{
-                color: "#FFFFFF",
-                fontSize: 18,
-                fontWeight: "bold",
-              }}
-            >
-              ₦ {data?.balance?.toFixed(2) || "0.00"}
-            </Text>
+            <View>
+              <Text
+                style={{
+                  color: "#FFFFFF",
+                  fontSize: 32,
+                  fontWeight: "700",
+                  letterSpacing: 0.5,
+                }}
+              >
+                ₦{data?.balance?.toFixed(2) || "0.00"}
+              </Text>
+              <Text
+                style={{
+                  color: "rgba(255, 255, 255, 0.7)",
+                  fontSize: 12,
+                  marginTop: 4,
+                }}
+              >
+                Tap reload to refresh
+              </Text>
+            </View>
 
             <TouchableOpacity
               style={{
                 backgroundColor: "#FFFFFF",
                 paddingHorizontal: 20,
-                paddingVertical: 10,
-                borderRadius: 20,
+                paddingVertical: 12,
+                borderRadius: 25,
+                flexDirection: "row",
+                alignItems: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
               }}
               onPress={() => navigation.navigate("FundWallet")}
             >
-              <Text style={{ color: "#00D09E", fontWeight: "600" }}>
-                + Add Money
+              <MaterialCommunityIcons
+                name="plus"
+                size={18}
+                color="#10B981"
+                style={{ marginRight: 6 }}
+              />
+              <Text
+                style={{
+                  color: "#10B981",
+                  fontWeight: "700",
+                  fontSize: 14,
+                  letterSpacing: 0.3,
+                }}
+              >
+                Add Money
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Quick Actions */}
+        {/* Bills Payment - Modernized */}
         <View
           style={{
-            marginTop: 20,
+            marginTop: 24,
             marginBottom: 20,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: "#8E8E93",
+            backgroundColor: "#FFFFFF",
+            padding: 16,
+            borderRadius: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 8,
+            elevation: 3,
           }}
         >
-          <Text
+          <View
             style={{
-              fontSize: 14,
-              fontWeight: "bold",
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 16,
             }}
           >
-            Bills Payment
-          </Text>
+            <MaterialCommunityIcons
+              name="flash"
+              size={20}
+              color="#10B981"
+              style={{ marginRight: 8 }}
+            />
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "700",
+                color: "#1F2937",
+                letterSpacing: 0.3,
+              }}
+            >
+              Bills Payment
+            </Text>
+          </View>
 
           <View
             style={{
               flexDirection: "row",
               flexWrap: "wrap",
               justifyContent: "space-between",
-              marginTop: 10,
             }}
           >
-            {/* Row 1 */}
+            {/* Electricity */}
             <TouchableOpacity
               style={{
-                width: "23%",
+                width: "30%",
                 alignItems: "center",
-                marginBottom: 20,
+                marginBottom: 16,
               }}
               onPress={() =>
                 navigation.navigate("UtilityPayment", {
@@ -449,90 +539,102 @@ const WalletScreen = ({}) => {
                 })
               }
             >
-              <View style={{ position: "relative" }}>
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    backgroundColor: "#4CAF50",
-                    borderRadius: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <Icon name="electric-bolt" size={30} color="white" />
-                </View>
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  backgroundColor: "#FEF3C7",
+                  borderRadius: 16,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <Icon name="electric-bolt" size={28} color="#F59E0B" />
               </View>
               <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
+                style={{
+                  fontSize: 12,
+                  color: "#374151",
+                  textAlign: "center",
+                  fontWeight: "500",
+                }}
               >
                 Electricity
               </Text>
             </TouchableOpacity>
 
+            {/* Esusu */}
             <TouchableOpacity
               style={{
-                width: "23%",
+                width: "30%",
                 alignItems: "center",
-                marginBottom: 20,
+                marginBottom: 16,
               }}
               onPress={() => navigation.navigate("EsusuLandingScreen")}
             >
-              <View style={{ position: "relative" }}>
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    backgroundColor: "#4CAF50",
-                    borderRadius: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <MaterialIcons name="savings" size={24} color="white" />
-                </View>
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  backgroundColor: "#DBEAFE",
+                  borderRadius: 16,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <MaterialIcons name="savings" size={26} color="#3B82F6" />
               </View>
               <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
+                style={{
+                  fontSize: 12,
+                  color: "#374151",
+                  textAlign: "center",
+                  fontWeight: "500",
+                }}
               >
                 Esusu
               </Text>
             </TouchableOpacity>
 
+            {/* Airtime */}
             <TouchableOpacity
               style={{
-                width: "23%",
+                width: "30%",
                 alignItems: "center",
-                marginBottom: 20,
+                marginBottom: 16,
               }}
               onPress={() => navigation.navigate("Airtime")}
             >
-              <View style={{ position: "relative" }}>
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    backgroundColor: "#4CAF50",
-                    borderRadius: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <AntDesign name="aliyun" size={24} color="white" />
-                  {/* <Icon name="electric-bolt" size={30} color="white" /> */}
-                </View>
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  backgroundColor: "#E0E7FF",
+                  borderRadius: 16,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <AntDesign name="aliyun" size={26} color="#6366F1" />
               </View>
               <Text
-                style={{ fontSize: 12, color: "#333", textAlign: "center" }}
+                style={{
+                  fontSize: 12,
+                  color: "#374151",
+                  textAlign: "center",
+                  fontWeight: "500",
+                }}
               >
                 Airtime
               </Text>
             </TouchableOpacity>
+          </View>
+        </View>
 
-            {/*
+        {/*
            
 
             <TouchableOpacity
@@ -589,8 +691,8 @@ const WalletScreen = ({}) => {
               </Text>
             </TouchableOpacity> */}
 
-            {/* Row 2 */}
-            {/* <TouchableOpacity
+        {/* Row 2 */}
+        {/* <TouchableOpacity
               style={{
                 width: "23%",
                 alignItems: "center",
@@ -697,35 +799,54 @@ const WalletScreen = ({}) => {
                 More
               </Text>
             </TouchableOpacity> */}
-          </View>
-        </View>
+        {/* </View>
+        </View> */}
 
-        {/* Quick Links */}
+        {/* Quick Links - Modernized */}
         <View
           style={{
             marginTop: 20,
             marginBottom: 20,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: "#8E8E93",
+            backgroundColor: "#FFFFFF",
+            padding: 16,
+            borderRadius: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 8,
+            elevation: 3,
           }}
         >
-          <Text
+          <View
             style={{
-              fontSize: 14,
-              fontWeight: "bold",
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 16,
             }}
           >
-            Quick Links
-          </Text>
+            <MaterialCommunityIcons
+              name="link-variant"
+              size={20}
+              color="#10B981"
+              style={{ marginRight: 8 }}
+            />
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "700",
+                color: "#1F2937",
+                letterSpacing: 0.3,
+              }}
+            >
+              Quick Links
+            </Text>
+          </View>
 
           <View
             style={{
               flexDirection: "row",
               flexWrap: "wrap",
               justifyContent: "space-between",
-              marginTop: 10,
             }}
           >
             {visibleQuickLinks.map((link) => {
@@ -740,23 +861,31 @@ const WalletScreen = ({}) => {
                   }}
                   onPress={() => navigation.navigate(link.route, link.params)}
                 >
-                  <View style={{ position: "relative" }}>
-                    <View
-                      style={{
-                        width: 40,
-                        height: 40,
-                        backgroundColor: link.color,
-                        borderRadius: 10,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginBottom: 8,
-                      }}
-                    >
-                      <IconComponent name={link.icon} size={20} color="white" />
-                    </View>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      backgroundColor: `${link.color}15`, // 15% opacity
+                      borderRadius: 16,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <IconComponent
+                      name={link.icon}
+                      size={24}
+                      color={link.color}
+                    />
                   </View>
                   <Text
-                    style={{ fontSize: 12, color: "#333", textAlign: "center" }}
+                    style={{
+                      fontSize: 11,
+                      color: "#374151",
+                      textAlign: "center",
+                      fontWeight: "500",
+                      lineHeight: 14,
+                    }}
                   >
                     {link.name}
                   </Text>
@@ -766,6 +895,7 @@ const WalletScreen = ({}) => {
           </View>
         </View>
 
+        {/* Modernized Utilities Modal */}
         <Modal
           visible={showUtilitiesModal}
           animationType="slide"
@@ -774,9 +904,40 @@ const WalletScreen = ({}) => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Select Utility Bill </Text>
+              {/* Modal Header */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 24,
+                  paddingBottom: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: "#F3F4F6",
+                }}
+              >
+                <Text style={styles.modalTitle}>Select Utility Bill</Text>
+                <TouchableOpacity
+                  onPress={() => setShowUtilitiesModal(false)}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: "#F3F4F6",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="close"
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
 
               <ScrollView
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                   flexDirection: "row",
                   flexWrap: "wrap",
@@ -789,51 +950,79 @@ const WalletScreen = ({}) => {
                     key={utility.id}
                     style={{
                       width: "48%",
-                      backgroundColor: utility.enabled ? "#ecf0f1" : "#f8f9fa",
-                      borderRadius: 12,
-                      padding: 15,
-                      marginBottom: 15,
+                      backgroundColor: utility.enabled ? "#FFFFFF" : "#F9FAFB",
+                      borderRadius: 16,
+                      padding: 20,
+                      marginBottom: 16,
                       alignItems: "center",
-                      borderWidth: 1,
-                      borderColor: utility.enabled ? "#3498db" : "#ecf0f1",
-                      opacity: utility.enabled ? 1 : 0.5,
+                      borderWidth: 2,
+                      borderColor: utility.enabled ? utility.color : "#E5E7EB",
+                      opacity: utility.enabled ? 1 : 0.6,
+                      shadowColor: utility.enabled ? utility.color : "#000",
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: utility.enabled ? 0.15 : 0,
+                      shadowRadius: 8,
+                      elevation: utility.enabled ? 4 : 0,
                     }}
                     disabled={!utility.enabled}
                     onPress={() =>
                       utility.enabled && handleUtilitySelect(utility.type)
                     }
                   >
-                    <utility.iconSet
-                      name={utility.icon}
-                      size={40}
-                      color={utility.color}
-                      style={{ marginBottom: 10 }}
-                    />
+                    <View
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 32,
+                        backgroundColor: utility.enabled
+                          ? `${utility.color}15`
+                          : "#F3F4F6",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginBottom: 12,
+                      }}
+                    >
+                      <utility.iconSet
+                        name={utility.icon}
+                        size={32}
+                        color={utility.enabled ? utility.color : "#9CA3AF"}
+                      />
+                    </View>
                     <Text
                       style={{
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: "600",
-                        color: "#34495e",
+                        color: utility.enabled ? "#1F2937" : "#9CA3AF",
                         textAlign: "center",
+                        marginBottom: 4,
                       }}
                     >
                       {utility.name}
                     </Text>
                     {!utility.enabled && (
-                      <Text style={{ fontSize: 12, color: "#e67e22" }}>
-                        Coming Soon
-                      </Text>
+                      <View
+                        style={{
+                          backgroundColor: "#FEF3C7",
+                          paddingHorizontal: 12,
+                          paddingVertical: 4,
+                          borderRadius: 12,
+                          marginTop: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            color: "#F59E0B",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Coming Soon
+                        </Text>
+                      </View>
                     )}
                   </TouchableOpacity>
                 ))}
               </ScrollView>
-
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowUtilitiesModal(false)}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </Modal>
