@@ -565,7 +565,7 @@ const WalletScreen = ({}) => {
             </TouchableOpacity>
 
             {/* Esusu */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 width: "30%",
                 alignItems: "center",
@@ -596,7 +596,7 @@ const WalletScreen = ({}) => {
               >
                 Esusu
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {/* Airtime */}
             <TouchableOpacity
