@@ -2,30 +2,27 @@
 // import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 // import { AntDesign } from "@expo/vector-icons";
 // import { useSelector } from "react-redux";
+// import { StyleSheet } from "react-native";
 
-// import About from "../../screens/Customerinterface/About";
-// import Account from "../../screens/Customerinterface/Account/Account";
-// import History from "../../screens/Customerinterface/Guest/History";
+// // Screens
 // import Home from "../../screens/Customerinterface/Home";
+// import Account from "../../screens/Customerinterface/Account/Account";
 // import Guests from "../../screens/Customerinterface/Guest/Guests";
 // import Neigborhood from "../../screens/Customerinterface/Neigborhood";
+// import Errand from "../../screens/Customerinterface/Errands/Errand";
+
+// // Components
 // import {
 //   CustomTabButton,
 //   Tabcomponent,
 // } from "../../components/shared/naviagetion";
-// import ClanRequiredScreen from "../../components/shared/ClanRequiredScreen";
-// import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
-// import { StyleSheet } from "react-native";
-// import Errand from "../../screens/Customerinterface/Errands/Errand";
+// import Forum from "../../components/Forum/Forum";
 
 // const Tab = createBottomTabNavigator();
 
 // const UserTabNavigation = () => {
 //   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-
-//   console.log({
-//     ccc: userProfile_data?.user?.isGuest,
-//   });
+//   const isGuest = userProfile_data?.user?.isGuest;
 
 //   return (
 //     <Tab.Navigator
@@ -42,25 +39,63 @@
 //         },
 //       }}
 //     >
-//       {userProfile_data?.user?.isGuest != true && (
+//       {/* For Non-Guests (5 tabs) */}
+//       {!isGuest && (
+//         <>
+//           <Tab.Screen
+//             name="Guests"
+//             component={Guests}
+//             options={{
+//               tabBarActiveTintColor: "#005091",
+//               headerShown: false,
+//               tabBarIcon: ({ focused }) => (
+//                 <Tabcomponent
+//                   focused={focused}
+//                   iconFocused={require("../../assets/images/guest2.png")}
+//                   iconUnfocused={require("../../assets/images/guest.png")}
+//                   label="Guests"
+//                   containerStyle={{ alignItems: "center", top: 10 }}
+//                   texttStyle={{ color: "#000000" }}
+//                 />
+//               ),
+//             }}
+//           />
+//           <Tab.Screen
+//             name="Forum"
+//             component={Forum}
+//             options={{
+//               tabBarActiveTintColor: "#005091",
+//               headerShown: false,
+//               tabBarIcon: ({ focused }) => (
+//                 <Tabcomponent
+//                   focused={focused}
+//                   iconFocused={require("../../assets/message-text2.png")}
+//                   iconUnfocused={require("../../assets/message-text.png")}
+//                   label="Forum"
+//                   containerStyle={{ alignItems: "center", top: 10 }}
+//                   texttStyle={{ color: "#000000" }}
+//                 />
+//               ),
+//             }}
+//           />
+//         </>
+//       )}
+
+//       {/* For Guests (3 tabs) - Errands comes first */}
+//       {isGuest && (
 //         <Tab.Screen
-//           name="Guests"
-//           component={Guests}
+//           name="errands"
+//           component={Errand}
 //           options={{
-//             title: "Guests",
 //             tabBarActiveTintColor: "#005091",
 //             headerShown: false,
 //             tabBarIcon: ({ focused }) => (
 //               <Tabcomponent
 //                 focused={focused}
-//                 iconFocused={require("../../assets/images/guest2.png")}
-//                 iconUnfocused={require("../../assets/images/guest.png")}
-//                 label="Guests"
-//                 containerStyle={{
-//                   alignItems: "center",
-//                   justifyContent: "center",
-//                   top: 10,
-//                 }}
+//                 iconFocused={require("../../assets/fastbike.png")}
+//                 iconUnfocused={require("../../assets/fastbike.png")}
+//                 label="Errands"
+//                 containerStyle={{ alignItems: "center", top: 10 }}
 //                 texttStyle={{ color: "#000000" }}
 //               />
 //             ),
@@ -68,60 +103,11 @@
 //         />
 //       )}
 
-//       {userProfile_data?.user?.isGuest != true && (
-//         <Tab.Screen
-//           component={Neigborhood}
-//           name="Neigborhood"
-//           options={{
-//             title: "Neigborhood",
-//             tabBarActiveTintColor: "#005091",
-//             headerShown: false,
-//             tabBarIcon: ({ focused }) => (
-//               <Tabcomponent
-//                 focused={focused}
-//                 iconFocused={require("../../assets/message-text2.png")}
-//                 iconUnfocused={require("../../assets/message-text.png")}
-//                 label="Chat"
-//                 containerStyle={{
-//                   alignItems: "center",
-//                   justifyContent: "center",
-//                   top: 10,
-//                 }}
-//                 texttStyle={{ color: "#000000" }}
-//               />
-//             ),
-//           }}
-//         />
-//       )}
-
-//       <Tab.Screen
-//         name="errands"
-//         component={Errand}
-//         options={{
-//           title: "Errands",
-//           tabBarActiveTintColor: "#005091",
-//           headerShown: false,
-//           tabBarIcon: ({ focused }) => (
-//             <Tabcomponent
-//               focused={focused}
-//               iconFocused={require("../../assets/fastbike.png")}
-//               iconUnfocused={require("../../assets/fastbike.png")}
-//               label="Errands"
-//               containerStyle={{
-//                 alignItems: "center",
-//                 justifyContent: "center",
-//                 top: 10,
-//               }}
-//               texttStyle={{ color: "#000000" }}
-//             />
-//           ),
-//         }}
-//       />
+//       {/* Home (Middle Tab) */}
 //       <Tab.Screen
 //         name="Home"
 //         component={Home}
 //         options={{
-//           title: "Home",
 //           tabBarActiveTintColor: "#005091",
 //           headerShown: false,
 //           tabBarIcon: ({ focused }) => (
@@ -135,11 +121,34 @@
 //           tabBarButton: (props) => <CustomTabButton {...props} />,
 //         }}
 //       />
+
+//       {/* For Non-Guests (5 tabs) - Errands comes after Home */}
+//       {!isGuest && (
+//         <Tab.Screen
+//           name="errands"
+//           component={Errand}
+//           options={{
+//             tabBarActiveTintColor: "#005091",
+//             headerShown: false,
+//             tabBarIcon: ({ focused }) => (
+//               <Tabcomponent
+//                 focused={focused}
+//                 iconFocused={require("../../assets/fastbike.png")}
+//                 iconUnfocused={require("../../assets/fastbike.png")}
+//                 label="Errands"
+//                 containerStyle={{ alignItems: "center", top: 10 }}
+//                 texttStyle={{ color: "#000000" }}
+//               />
+//             ),
+//           }}
+//         />
+//       )}
+
+//       {/* Account (Always Last) */}
 //       <Tab.Screen
 //         name="Account"
 //         component={Account}
 //         options={{
-//           title: "Account",
 //           tabBarActiveTintColor: "#005091",
 //           headerShown: false,
 //           tabBarIcon: ({ focused }) => (
@@ -148,11 +157,7 @@
 //               iconFocused={require("../../assets/images/Account2.png")}
 //               iconUnfocused={require("../../assets/images/Account.png")}
 //               label="Account"
-//               containerStyle={{
-//                 alignItems: "center",
-//                 justifyContent: "center",
-//                 top: 10,
-//               }}
+//               containerStyle={{ alignItems: "center", top: 10 }}
 //               texttStyle={{ color: "#000000" }}
 //             />
 //           ),
@@ -167,10 +172,7 @@
 // const styles = StyleSheet.create({
 //   shadow: {
 //     shadowColor: "#7F5DF0",
-//     shadowOffset: {
-//       width: 0,
-//       height: 10,
-//     },
+//     shadowOffset: { width: 0, height: 10 },
 //     shadowOpacity: 0.25,
 //     shadowRadius: 3.84,
 //     elevation: 5,
@@ -179,9 +181,9 @@
 
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, Text, Platform } from "react-native";
 
 // Screens
 import Home from "../../screens/Customerinterface/Home";
@@ -189,15 +191,40 @@ import Account from "../../screens/Customerinterface/Account/Account";
 import Guests from "../../screens/Customerinterface/Guest/Guests";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
 import Errand from "../../screens/Customerinterface/Errands/Errand";
-
-// Components
-import {
-  CustomTabButton,
-  Tabcomponent,
-} from "../../components/shared/naviagetion";
 import Forum from "../../components/Forum/Forum";
 
 const Tab = createBottomTabNavigator();
+
+// Custom Tab Bar Icon Component
+const TabBarIcon = ({ focused, iconName, label }) => {
+  return (
+    <View style={styles.tabItemContainer}>
+      <View
+        style={[styles.iconContainer, focused && styles.iconContainerActive]}
+      >
+        <MaterialCommunityIcons
+          name={iconName}
+          size={focused ? 26 : 24}
+          color={focused ? "#10B981" : "#6B7280"}
+        />
+      </View>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+        {label}
+      </Text>
+    </View>
+  );
+};
+
+// Custom Home Tab Icon (Center, Special)
+const HomeTabIcon = ({ focused }) => {
+  return (
+    <View style={styles.homeTabContainer}>
+      <View style={styles.homeIconWrapper}>
+        <MaterialCommunityIcons name="home" size={28} color="#FFFFFF" />
+      </View>
+    </View>
+  );
+};
 
 const UserTabNavigation = () => {
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
@@ -208,136 +235,94 @@ const UserTabNavigation = () => {
       initialRouteName="Home"
       screenOptions={{
         tabBarShowLabel: false,
-        tabBarStyle: {
-          backgroundColor: "white",
-          height: 65,
-          ...styles.shadow,
-        },
-        tabBarLabelStyle: {
-          color: "white",
-        },
+        tabBarStyle: styles.tabBar,
+        tabBarHideOnKeyboard: true,
+        headerShown: false,
       }}
     >
-      {/* For Non-Guests (5 tabs) */}
-      {!isGuest && (
+      {/* For Non-Guests - Left Side Tabs */}
+      {!isGuest ? (
         <>
+          {/* Guests Tab */}
           <Tab.Screen
             name="Guests"
             component={Guests}
             options={{
-              tabBarActiveTintColor: "#005091",
-              headerShown: false,
               tabBarIcon: ({ focused }) => (
-                <Tabcomponent
+                <TabBarIcon
                   focused={focused}
-                  iconFocused={require("../../assets/images/guest2.png")}
-                  iconUnfocused={require("../../assets/images/guest.png")}
+                  iconName="account-group"
                   label="Guests"
-                  containerStyle={{ alignItems: "center", top: 10 }}
-                  texttStyle={{ color: "#000000" }}
                 />
               ),
             }}
           />
+
+          {/* Forum Tab */}
           <Tab.Screen
             name="Forum"
             component={Forum}
             options={{
-              tabBarActiveTintColor: "#005091",
-              headerShown: false,
               tabBarIcon: ({ focused }) => (
-                <Tabcomponent
-                  focused={focused}
-                  iconFocused={require("../../assets/message-text2.png")}
-                  iconUnfocused={require("../../assets/message-text.png")}
-                  label="Forum"
-                  containerStyle={{ alignItems: "center", top: 10 }}
-                  texttStyle={{ color: "#000000" }}
-                />
+                <TabBarIcon focused={focused} iconName="forum" label="Forum" />
               ),
             }}
           />
         </>
-      )}
-
-      {/* For Guests (3 tabs) - Errands comes first */}
-      {isGuest && (
+      ) : (
+        /* For Guests - Errands on Left */
         <Tab.Screen
-          name="errands"
+          name="ErrandsLeft"
           component={Errand}
           options={{
-            tabBarActiveTintColor: "#005091",
-            headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <Tabcomponent
+              <TabBarIcon
                 focused={focused}
-                iconFocused={require("../../assets/fastbike.png")}
-                iconUnfocused={require("../../assets/fastbike.png")}
+                iconName="bike-fast"
                 label="Errands"
-                containerStyle={{ alignItems: "center", top: 10 }}
-                texttStyle={{ color: "#000000" }}
               />
             ),
           }}
         />
       )}
 
-      {/* Home (Middle Tab) */}
+      {/* Home Tab (Center - Always Present) */}
       <Tab.Screen
         name="Home"
         component={Home}
         options={{
-          tabBarActiveTintColor: "#005091",
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <AntDesign
-              name="home"
-              size={24}
-              color="white"
-              style={{ width: 25, height: 25 }}
-            />
-          ),
-          tabBarButton: (props) => <CustomTabButton {...props} />,
+          tabBarIcon: ({ focused }) => <HomeTabIcon focused={focused} />,
         }}
       />
 
-      {/* For Non-Guests (5 tabs) - Errands comes after Home */}
+      {/* Right Side Tabs */}
       {!isGuest && (
+        /* Errands for Non-Guests */
         <Tab.Screen
-          name="errands"
+          name="Errands"
           component={Errand}
           options={{
-            tabBarActiveTintColor: "#005091",
-            headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <Tabcomponent
+              <TabBarIcon
                 focused={focused}
-                iconFocused={require("../../assets/fastbike.png")}
-                iconUnfocused={require("../../assets/fastbike.png")}
+                iconName="bike-fast"
                 label="Errands"
-                containerStyle={{ alignItems: "center", top: 10 }}
-                texttStyle={{ color: "#000000" }}
               />
             ),
           }}
         />
       )}
 
-      {/* Account (Always Last) */}
+      {/* Account Tab (Always Present) */}
       <Tab.Screen
         name="Account"
         component={Account}
         options={{
-          tabBarActiveTintColor: "#005091",
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <Tabcomponent
+            <TabBarIcon
               focused={focused}
-              iconFocused={require("../../assets/images/Account2.png")}
-              iconUnfocused={require("../../assets/images/Account.png")}
+              iconName="account-circle"
               label="Account"
-              containerStyle={{ alignItems: "center", top: 10 }}
-              texttStyle={{ color: "#000000" }}
             />
           ),
         }}
@@ -349,11 +334,76 @@ const UserTabNavigation = () => {
 export default UserTabNavigation;
 
 const styles = StyleSheet.create({
-  shadow: {
-    shadowColor: "#7F5DF0",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  tabBar: {
+    position: "absolute",
+    bottom: 20,
+    left: 16,
+    right: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    height: 70,
+    paddingBottom: 8,
+    paddingTop: 8,
+    paddingHorizontal: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
+    borderTopWidth: 0,
+  },
+  tabItemContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    paddingVertical: 4,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+    backgroundColor: "transparent",
+  },
+  iconContainerActive: {
+    backgroundColor: "#D1FAE5",
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  tabLabelActive: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#10B981",
+    letterSpacing: 0.3,
+  },
+  homeTabContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: -20,
+  },
+  homeIconWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#10B981",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
 });

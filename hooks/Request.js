@@ -4,33 +4,20 @@ import { useSelector } from "react-redux";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-console.log({
-  tytyy: apiUrl,
-});
-
-console.log({
-  uuuuu: apiUrl,
-});
-
 // Function to fetch data
 const fetchData = async ({ queryKey }) => {
   const [, url, token] = queryKey;
   // if (!token) throw new Error("Token is missing");
 
   try {
-    console.log({
-      jfjf: `${apiUrl}${url}`,
-    });
     const response = await axios.get(`${apiUrl}${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    // console.log("API Response:", response); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
-    console.error("API Fetch Error:", error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Failed to fetch data");
   }
 };
@@ -46,11 +33,6 @@ export const useFetchData = (url, queryKey, options = {}) => {
   } = useSelector((state) => state.AuthSlice);
 
   const token = user_data?.token;
-
-  console.log({
-    token,
-    url,
-  });
 
   return useQuery({
     queryKey: [queryKey, url, token],
@@ -76,10 +58,8 @@ const apiRequest = async ({ url, method, data, token }) => {
       },
     });
 
-    console.log("API Response:", response.data); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
-    console.error("API Errorss:", error.response.data);
     throw new Error(
       error.response?.data.error ||
         error.response?.data?.message ||
@@ -97,12 +77,9 @@ export const useMutateData = (url, method, queryKey) => {
   return useMutation({
     mutationFn: (data) => apiRequest({ url, method, data, token }),
     onSuccess: (data) => {
-      console.log("Mutation Successful", { data });
       queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
     },
-    onError: (error) => {
-      console.error("Mutation Error:", error);
-    },
+    onError: (error) => {},
   });
 };
 
@@ -122,7 +99,6 @@ const formdataapiRequest = async ({ url, method, data, token }) => {
 
     return response.data;
   } catch (error) {
-    console.error("API Error:", error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "API request failed");
   }
 };
@@ -136,11 +112,8 @@ export const formdatauseMutateData = (url, method, queryKey) => {
   return useMutation({
     mutationFn: (data) => formdataapiRequest({ url, method, data, token }),
     onSuccess: (data) => {
-      console.log("Mutation Successful", { data });
       queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
     },
-    onError: (error) => {
-      console.error("Mutation Error:", error.message);
-    },
+    onError: (error) => {},
   });
 };

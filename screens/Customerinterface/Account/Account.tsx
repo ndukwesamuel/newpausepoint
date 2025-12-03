@@ -131,6 +131,14 @@ const data: GeneralData[] = [
     icon_type: "AntDesign",
     link: "editPersonalInfo",
   },
+
+  {
+    id: 3,
+    icon: "history",
+    label: "Transaction History",
+    icon_type: "AntDesign",
+    link: "transactionHistory",
+  },
 ];
 
 let new_item: GeneralData = {

@@ -47,8 +47,6 @@ const fetchData = async ({ queryKey }: any) => {
   const [, url, token] = queryKey;
 
   try {
-    console.log({ endpoint: `${API_URL}${url}` });
-
     const response = await axios.get(`${API_URL}${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -75,8 +73,15 @@ export const useFetchData_v2 = (
   // Note: UseQueryOptions comes from @tanstack/react-query now
   options: Omit<UseQueryOptions<any, Error>, "queryKey" | "queryFn"> = {}
 ) => {
-  const { user_data } = useSelector((state: RootState) => state.AuthSlice);
-  const token = user_data?.token || "";
+  const { userDatav2: user_data } = useSelector(
+    (state: RootState) => state.authSlice
+  );
+
+  const token = user_data?.data?.token || "";
+
+  console.log({
+    ccccc: token,
+  });
 
   console.log({ token, url });
 

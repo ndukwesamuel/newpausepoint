@@ -68,6 +68,7 @@ import EsusuLandingScreen from "../../App/General/Ajo/Screen/EsusuLandingScreen"
 import EsusuCreateGroupScreen from "../../App/General/Ajo/Screen/EsusuCreateGroupScreen";
 import EsusuGroupDetailsScreen from "../../App/General/Ajo/Screen/EsusuGroupDetailsScreen";
 import CycleScreen from "../../App/General/Ajo/Screen/CycleScreen";
+import TransactionHistoryScreen from "../../screens/Customerinterface/TransactionHistory/Transactionhistoryscreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -178,6 +179,12 @@ export const Usernaviagetion = () => {
     {
       name: "CreatePublicEvent",
       component: CreatePublicEvent,
+      title: "Create Public Event",
+    },
+
+    {
+      name: "transactionHistory",
+      component: TransactionHistoryScreen,
       title: "Create Public Event",
     },
     {
