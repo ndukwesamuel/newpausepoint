@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "1.7.4",
+    "version": "1.7.6",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -56,15 +56,16 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos to upload profile pictures and share images.",
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "51",
+      "buildNumber": "53",
       "runtimeVersion": "1.0.0"
     },
     "android": {
-      "versionCode": 55,
+      "versionCode": 56,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

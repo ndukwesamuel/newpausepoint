@@ -44,12 +44,8 @@ const TransactionHistoryScreen = () => {
     isRefetching,
   } = useFetchData_v2("api/v1/user/all-transaction-history", "wallet");
 
-  console.log({
-    tyuu: transactions,
-  });
-
   // Filter transactions
-  const filteredTransactions = transactions.transactions?.filter(
+  const filteredTransactions = transactions?.transactions?.filter(
     (transaction) => {
       if (filterType === "all") return true;
       return transaction.type === filterType;
