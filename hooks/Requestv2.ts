@@ -37,8 +37,7 @@ interface ApiRequestParams {
 }
 
 // Constants
-// const API_URL = "https://communist-carla-pausepoint-fb082012.koyeb.app/";
-const API_URL = "https://pausepointbackend.onrender.com/"; //"https://communist-carla-pausepoint-fb082012.koyeb.app/";
+const API_URL = "https://communist-carla-pausepoint-fb082012.koyeb.app/";
 
 console.log({ apiUrl: API_URL });
 
