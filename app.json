@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "1.7.7",
+    "version": "1.7.8",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -61,11 +61,11 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "54",
+      "buildNumber": "55",
       "runtimeVersion": "1.0.0"
     },
     "android": {
-      "versionCode": 57,
+      "versionCode": 58,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

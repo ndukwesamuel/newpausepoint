@@ -58,7 +58,7 @@ import { useEffect, useCallback } from "react";
 import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
 import BillDashboard from "../../screens/Customerinterface/BillPayment/BillDashboard";
 import ElectricityPaymentScreen from "../../screens/Customerinterface/BillPayment/ElectricityPaymentScreen";
-import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
+// import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
 import Ajo from "../../App/General/Ajo/Screen/Ajo";
 
 import CreateGroupScreen from "../../App/General/Ajo/Screen/Creategroupscreen";
@@ -834,12 +834,6 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         name="UtilityPayment"
         component={BillDashboard}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
-        name="AirtimePurchase"
-        component={AirtimePurchase}
         options={{ headerShown: false }}
       />
 

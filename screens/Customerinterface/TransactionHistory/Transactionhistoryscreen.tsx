@@ -93,10 +93,10 @@ const TransactionHistoryScreen = () => {
 
   // Get icon for transaction type
   const getTransactionIcon = (type: string, details: string) => {
-    if (details.toLowerCase().includes("contribution")) {
+    if (details?.toLowerCase().includes("contribution")) {
       return { name: "hand-coin", color: "#F59E0B", bg: "#FEF3C7" };
     }
-    if (details.toLowerCase().includes("transfer")) {
+    if (details?.toLowerCase().includes("transfer")) {
       return { name: "bank-transfer", color: "#3B82F6", bg: "#DBEAFE" };
     }
     if (type === "credit") {

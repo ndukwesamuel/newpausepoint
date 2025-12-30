@@ -57,10 +57,6 @@ import RunnerNavigation from "./App/Runners/RunnerNavigation";
 import GuestNavigation from "./App/Guest/Navigation/GuestNavigation";
 import { API_CONFIG } from "./api";
 
-console.log({
-  tyuuu: API_CONFIG.BASE_URL,
-});
-
 const queryClient = new QueryClient();
 
 const Stack = createNativeStackNavigator();

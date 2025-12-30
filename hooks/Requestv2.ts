@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { useSelector } from "react-redux";
+import { API_CONFIG } from "../api";
 
 // Types
 interface AuthState {
@@ -20,8 +21,19 @@ interface AuthState {
   user_message: string;
 }
 
+interface authState {
+  user_data: {
+    token: string;
+  } | null;
+  user_isError: boolean;
+  user_isSuccess: boolean;
+  user_isLoading: boolean;
+  user_message: string;
+}
+
 interface RootState {
   AuthSlice: AuthState;
+  authSlice: authState;
 }
 
 interface ApiErrorResponse {
@@ -37,7 +49,7 @@ interface ApiRequestParams {
 }
 
 // Constants
-const API_URL = "https://communist-carla-pausepoint-fb082012.koyeb.app/";
+const API_URL = API_CONFIG.BASE_URL; //"https://communist-carla-pausepoint-fb082012.koyeb.app/";
 
 console.log({ apiUrl: API_URL });
 
@@ -128,15 +140,22 @@ const apiRequest = async ({ url, method, data, token }: ApiRequestParams) => {
   }
 };
 // Hook for mutations (POST, PUT, PATCH, DELETE)
-export const useMutateData = (
+
+export const useMutateData_v2 = (
   url: string,
-  method: "POST" | "PUT" | "PATCH" | "DELETE",
+  method: "POST" | "PUT" | "PATCH" | "DELETE" | "GET",
   queryKey?: string | string[],
   // UseMutationOptions comes from @tanstack/react-query now
   options?: Omit<UseMutationOptions<any, Error, any>, "mutationFn">
 ) => {
-  const { user_data } = useSelector((state: RootState) => state.AuthSlice);
-  const token = user_data?.token || "";
+  // const { user_data } = useSelector((state: RootState) => state.AuthSlice);
+
+  const { userDatav2: user_data } = useSelector(
+    (state: RootState) => state.authSlice
+  );
+  // const token = user_data?.token || "";
+  const token = user_data?.data?.token || "";
+
   const queryClient = useQueryClient();
 
   // useMutation signature remains the same, but now uses the object syntax internally
@@ -152,7 +171,7 @@ export const useMutateData = (
       }
     },
     onError: (error) => {
-      console.error("Mutation Error:", error);
+      console.error("Mutation Error:", error.message);
     },
     ...options,
   });

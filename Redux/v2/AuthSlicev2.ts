@@ -113,8 +113,9 @@ const loginService = async (
     const response = await axios.post<userDatav2>(
       url,
       {
-        email: "support@pausepoint.net",
-        password: "123456789",
+        email: credentials.email, // "support@pausepoint.net",
+        password: credentials.password, //"123456789",
+        // pushToken: credentials.pushToken,
       },
       {
         timeout: 10000,
@@ -129,33 +130,20 @@ const loginService = async (
       await AsyncStorage.setItem("userDatav2", JSON.stringify(response.data));
     }
 
+    console.log({
+      yuiii: response.data,
+    });
+
     return response.data;
   } catch (error) {
+    console.log({
+      iiiiifff: error,
+    });
+
     const errorMessage = extractErrorMessage(error);
     throw errorMessage;
   }
 };
-
-// ============================================================================
-// ASYNC THUNKS
-// ============================================================================
-
-// export const loginUser = createAsyncThunk;
-// userDatav2,
-//   LoginCredentials,
-//   { rejectValue: string } >
-//     ("auth/loginUser",
-//     async (credentials, thunkAPI) => {
-//       try {
-//         const userDatav2 = await loginService(credentials);
-//         showSuccessToast("Welcome back!");
-//         return userDatav2;
-//       } catch (error) {
-//         const errorMessage = extractErrorMessage(error);
-//         showErrorToast(errorMessage);
-//         return thunkAPI.rejectWithValue(errorMessage);
-//       }
-//     });
 
 export const loginUser = createAsyncThunk<
   userDatav2,

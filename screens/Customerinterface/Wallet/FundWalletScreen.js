@@ -21,6 +21,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFetchData } from "../../../hooks/Request";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import { useFetchData_v2 } from "../../../hooks/Requestv2";
+import { API_CONFIG } from "../../../api";
+import Bank from "./Bank";
 
 const FundWalletScreen = ({ navigation }) => {
   // State for Paystack payment
@@ -63,17 +65,6 @@ const FundWalletScreen = ({ navigation }) => {
     error: virtualAccountError,
     refetch: refetchVirtualAccount,
   } = useFetchData("api/v3/bank/singleUser", "virtual-account");
-
-  const {
-    data: get_user_info,
-    isLoading: isLoadingget_user_info,
-    error: isErrorget_user_info,
-    refetch: refetchget_user_info,
-  } = useFetchData_v2("api/v1/user", "getuser");
-
-  console.log({
-    tttyy: get_user_info,
-  });
 
   // Calculate transaction fee for Paystack
   const calculateFee = useCallback((amount) => {
@@ -322,19 +313,6 @@ const FundWalletScreen = ({ navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Current Balance Display */}
-        {walletData?.balance !== undefined && (
-          <View style={styles.balanceCard}>
-            <View style={styles.balanceContent}>
-              <Icon name="account-balance-wallet" size={48} color="green" />
-              <Text style={styles.balanceLabel}>Current Balance</Text>
-              <Text style={styles.balanceAmount}>
-                ₦{walletData.balance.toLocaleString()}
-              </Text>
-            </View>
-          </View>
-        )}
-
         {/* Funding Method Selection */}
         <View style={styles.methodSelectionContainer}>
           <Text style={styles.methodSelectionTitle}>Choose Funding Method</Text>
@@ -507,108 +485,119 @@ const FundWalletScreen = ({ navigation }) => {
         )}
 
         {/* Bank Transfer Section */}
-        {/* {fundingMethod === "transfer" && virtualAccountData?.data && (
-          <View style={styles.virtualAccountCard}>
-            <TouchableOpacity
-              style={styles.virtualAccountHeader}
-              onPress={() =>
-                setIsVirtualAccountExpanded(!isVirtualAccountExpanded)
-              }
-              activeOpacity={0.7}
-            >
-              <Icon name="account-balance" size={24} color="#4CAF50" />
-              <Text style={styles.virtualAccountTitle}>
-                Your Virtual Account
-              </Text>
-              <Icon
-                name={
-                  isVirtualAccountExpanded
-                    ? "keyboard-arrow-up"
-                    : "keyboard-arrow-down"
-                }
-                size={24}
-                color="#666"
-                style={{ marginLeft: "auto" }}
-              />
-            </TouchableOpacity>
 
-            {isVirtualAccountExpanded && (
-              <View style={styles.virtualAccountDetails}>
-                <View style={styles.accountDetailRow}>
-                  <Text style={styles.accountDetailLabel}>Account Name:</Text>
-                  <TouchableOpacity
-                    style={styles.copyButton}
-                    onPress={() =>
-                      handleCopyToClipboard(
-                        virtualAccountData?.data?.accountName
-                      )
-                    }
-                  >
-                    <Text style={styles.accountDetailValue}>
-                      {virtualAccountData?.data?.accountName}
-                    </Text>
-                    <Icon
-                      name="content-copy"
-                      size={16}
-                      color="#666"
-                      style={styles.copyIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.accountDetailRow}>
-                  <Text style={styles.accountDetailLabel}>Account Number:</Text>
-                  <TouchableOpacity
-                    style={styles.copyButton}
-                    onPress={() =>
-                      handleCopyToClipboard(
-                        virtualAccountData?.data?.accountNumber
-                      )
-                    }
-                  >
-                    <Text style={styles.accountDetailValue}>
-                      {virtualAccountData?.data?.accountNumber}
-                    </Text>
-                    <Icon
-                      name="content-copy"
-                      size={16}
-                      color="#666"
-                      style={styles.copyIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.accountDetailRow}>
-                  <Text style={styles.accountDetailLabel}>Bank Name:</Text>
-                  <Text style={styles.accountDetailValue}>
-                    {virtualAccountData?.data?.bankName}
+        {API_CONFIG.ENV === "UAT" ? (
+          <Bank />
+        ) : (
+          <>
+            {fundingMethod === "transfer" && virtualAccountData?.data && (
+              <View style={styles.virtualAccountCard}>
+                <TouchableOpacity
+                  style={styles.virtualAccountHeader}
+                  onPress={() =>
+                    setIsVirtualAccountExpanded(!isVirtualAccountExpanded)
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Icon name="account-balance" size={24} color="#4CAF50" />
+                  <Text style={styles.virtualAccountTitle}>
+                    Your Virtual Account
                   </Text>
-                </View>
+                  <Icon
+                    name={
+                      isVirtualAccountExpanded
+                        ? "keyboard-arrow-up"
+                        : "keyboard-arrow-down"
+                    }
+                    size={24}
+                    color="#666"
+                    style={{ marginLeft: "auto" }}
+                  />
+                </TouchableOpacity>
 
-                <View style={styles.accountInfo}>
-                  <Icon name="info" size={16} color="#FF9800" />
-                  <Text style={styles.accountInfoText}>
-                    Transfer money to this account to fund your wallet
-                    automatically
-                  </Text>
-                </View>
+                {isVirtualAccountExpanded && (
+                  <View style={styles.virtualAccountDetails}>
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>
+                        Account Name:
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={() =>
+                          handleCopyToClipboard(
+                            virtualAccountData?.data?.accountName
+                          )
+                        }
+                      >
+                        <Text style={styles.accountDetailValue}>
+                          {virtualAccountData?.data?.accountName}
+                        </Text>
+                        <Icon
+                          name="content-copy"
+                          size={16}
+                          color="#666"
+                          style={styles.copyIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
 
-                <View style={styles.accountInfo}>
-                  <View style={{ marginLeft: 8 }}>
-                    <Text
-                      style={[
-                        styles.accountInfoText,
-                        { color: "#666", marginTop: 2 },
-                      ]}
-                    >
-                      ⚠️ A transaction fee of ₦250 applies per transaction.
-                    </Text>
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>
+                        Account Number:
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={() =>
+                          handleCopyToClipboard(
+                            virtualAccountData?.data?.accountNumber
+                          )
+                        }
+                      >
+                        <Text style={styles.accountDetailValue}>
+                          {virtualAccountData?.data?.accountNumber}
+                        </Text>
+                        <Icon
+                          name="content-copy"
+                          size={16}
+                          color="#666"
+                          style={styles.copyIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>Bank Name:</Text>
+                      <Text style={styles.accountDetailValue}>
+                        {virtualAccountData?.data?.bankName}
+                      </Text>
+                    </View>
+
+                    <View style={styles.accountInfo}>
+                      <Icon name="info" size={16} color="#FF9800" />
+                      <Text style={styles.accountInfoText}>
+                        Transfer money to this account to fund your wallet
+                        automatically
+                      </Text>
+                    </View>
+
+                    <View style={styles.accountInfo}>
+                      <View style={{ marginLeft: 8 }}>
+                        <Text
+                          style={[
+                            styles.accountInfoText,
+                            { color: "#666", marginTop: 2 },
+                          ]}
+                        >
+                          ⚠️ A transaction fee of ₦250 applies per transaction.
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                </View>
+                )}
               </View>
             )}
-          </View>
-        )} */}
+          </>
+        )}
       </ScrollView>
 
       {/* Enhanced Fee Modal */}
