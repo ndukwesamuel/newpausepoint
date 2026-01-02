@@ -26,10 +26,19 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { useSelector } from "react-redux";
+import OnboardingProgressCard from "../../../App/General/Ajo/Screen/Banking/OnboardingProgressCard";
+import { useFetchData_v2 } from "../../../hooks/Requestv2";
 
 // ... inside your component
 
 const WalletScreen = ({}) => {
+  const {
+    data: anchorwallte,
+    isLoading: anchorwallteIsloading,
+    error: anchorwallteIserror,
+    refetch: anchorwallterefech,
+  } = useFetchData_v2("api/v1/user/userBalance", "wallet");
+
   const {
     data,
     isLoading,
@@ -37,6 +46,19 @@ const WalletScreen = ({}) => {
     refetch: refetchWallet,
   } = useFetchData("wallet", "wallet");
 
+  const mainBalance = anchorwallte?.availableBalance / 100 + data?.balance;
+  // console.log({
+  //   tyuu: anchorwallte,
+  //   errr: typeof data?.balance,
+  // });
+
+  // console.log({
+  //   tyuu: anchorwallte?.availableBalance,
+  //   balanceValue: data?.balance,
+  //   balanceType: typeof data?.balance, // Will show "number", "string", "object", etc.
+  //   // isInteger: Number.isInteger(data?.balance), // Will show true/false if it's an integer
+  //   // isNumber: typeof data?.balance === 'number', // Will show true/false
+  // });
   const [isVirtualAccountExpanded, setIsVirtualAccountExpanded] =
     useState(false);
   const {
@@ -430,7 +452,8 @@ const WalletScreen = ({}) => {
                   letterSpacing: 0.5,
                 }}
               >
-                ₦{data?.balance?.toFixed(2) || "0.00"}
+                {/* ₦{data?.balance?.toFixed(2) || "0.00"} */}₦
+                {mainBalance || "0.00"}
               </Text>
               <Text
                 style={{
@@ -478,6 +501,8 @@ const WalletScreen = ({}) => {
             </TouchableOpacity>
           </View>
         </View>
+
+        <OnboardingProgressCard />
 
         {/* Bills Payment - Modernized */}
         <View

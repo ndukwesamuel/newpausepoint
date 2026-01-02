@@ -70,6 +70,10 @@ import EsusuGroupDetailsScreen from "../../App/General/Ajo/Screen/EsusuGroupDeta
 import CycleScreen from "../../App/General/Ajo/Screen/CycleScreen";
 import TransactionHistoryScreen from "../../screens/Customerinterface/TransactionHistory/Transactionhistoryscreen";
 import TransactionDetailScreen from "../../screens/Customerinterface/TransactionHistory/Transactiondetailscreen";
+import VerficationScreen from "../../App/General/Ajo/Screen/Banking/VerficationScreen";
+import CreateBankAccount from "../../App/General/Ajo/Screen/Banking/CreateBankAccount";
+import KYCForm from "../../App/General/Ajo/Screen/Banking/KYCForm";
+import CreateDepositAccount from "../../App/General/Ajo/Screen/Banking/CreateDepositAccount";
 
 const Stack = createNativeStackNavigator();
 
@@ -172,6 +176,25 @@ export const Usernaviagetion = () => {
       component: WalletScreen,
       title: "Payment",
     },
+
+    {
+      name: "CreateBankAccount",
+      component: CreateBankAccount,
+      title: "CreateBankAccount",
+    },
+
+    {
+      name: "KYCForm",
+      component: KYCForm,
+      title: "KYCForm",
+    },
+
+    {
+      name: "CreateDepositAccount",
+      component: CreateDepositAccount,
+      title: "CreateDepositAccount",
+    },
+
     {
       name: "duedetails",
       component: DueDetails,
