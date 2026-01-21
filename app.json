@@ -83,9 +83,7 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "eas": {
-        "projectId": "e012faf4-1814-4ba6-986a-167a537c8ea3"
-      }
+      "eas": {}
     },
     "updates": {
       "url": "https://u.expo.dev/e012faf4-1814-4ba6-986a-167a537c8ea3"

@@ -1,3 +1,810 @@
+// import {
+//   FlatList,
+//   Image,
+//   StyleSheet,
+//   Text,
+//   View,
+//   TouchableOpacity,
+//   KeyboardAvoidingView,
+//   Platform,
+//   Modal,
+//   TouchableWithoutFeedback,
+//   ScrollView,
+// } from "react-native";
+// import React, { useEffect, useState } from "react";
+
+// import {
+//   MediumFontText,
+//   RegularFontText,
+//   SemiBoldFontText,
+// } from "../../../components/shared/Paragrahp";
+// import { AntDesign } from "@expo/vector-icons";
+
+// import { useRoute } from "@react-navigation/native";
+// // Updated useMutation import for TanStack Query
+// import { useMutation } from "@tanstack/react-query";
+// const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+
+// import { useDispatch, useSelector } from "react-redux";
+// import axios from "axios";
+// import Toast from "react-native-toast-message";
+// import AppScreen from "../../../components/shared/AppScreen";
+// import { Formbutton } from "../../../components/shared/InputForm";
+// import { userFile } from "../../../utils/fakedata";
+// import { Admin_Get_Single_User_Fun } from "../../../Redux/Admin/UserSlice";
+// import { HalfScreenModal } from "../../../components/shared/ReuseableModal";
+// import { Get_Single_clan } from "../../../Redux/UserSide/ClanSlice";
+// import QRCode from "react-native-qrcode-svg";
+// import { useFetchData } from "../../../hooks/Request";
+// import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
+// import ScreenWrapper from "../../../components/shared/ScreenWrapper";
+
+// function ViewProfile_main({ navigation }) {
+//   const dispatch = useDispatch();
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+
+//   const toggleModal = () => {
+//     setIsModalVisible(!isModalVisible);
+//   };
+
+//   let item = {};
+
+//   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
+
+//   const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
+//   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
+//     (member) => member.user.toString() === userIdToFind.toString()
+//   );
+
+//   console.log({
+//     jaja: foundMember,
+//   });
+
+//   const {
+//     data: getuserclanInfo,
+//     isLoading: isloadinggetuserclanInfo,
+//     error: iserrorgetuserclanInfo,
+//   } = useFetchData(
+//     `clan/${userProfile_data?.currentClanMeeting?._id}`,
+//     "getuserclans"
+//   );
+
+//   console.log({
+//     vv: getuserclanInfo?.data?.settings?.allowMembersToEditProfile,
+//   });
+
+//   const { get_user_profile_data } = useSelector(
+//     (state) => state?.UserProfileSlice
+//   );
+
+//   useEffect(() => {
+//     // dispatch(Admin_Get_Single_User_Fun(item));
+//     dispatch(UserProfile_data_Fun());
+
+//     return () => {};
+//   }, []);
+
+//   const [modalVisible, setModalVisible] = useState(false);
+//   const [modalformVisible, setModalFormVisible] = useState(false);
+
+//   const openModal = () => {
+//     setModalVisible(true);
+//   };
+
+//   const closeFormModal = () => {
+//     setModalFormVisible(false);
+//   };
+
+//   const closeModal = () => {
+//     setModalVisible(false);
+//   };
+
+//   const [userType, setUserType] = useState("All");
+//   const {
+//     user_data,
+//     user_isError,
+//     user_isSuccess,
+//     user_isLoading,
+//     user_message,
+//   } = useSelector((state) => state.AuthSlice);
+//   const usertypelist = ["All", "Active", "Banned", "Pending"];
+
+//   const filteredUsers = userFile.filter((user) => {
+//     // if (userType === "ALL") {
+
+//     if (userType.toUpperCase() === "ALL") {
+//       return true; // Show all users
+//     } else {
+//       return user.status === userType; // Show users with selected status
+//     }
+//   });
+
+//   const [formData, setFormData] = useState({
+//     search: "", // Initialize with empty values
+//   });
+
+//   const handleInputChange = (inputName, text) => {
+//     setFormData({ ...formData, [inputName]: text });
+//   };
+
+//   function capitalizeFirstLetter(str) {
+//     return str.charAt(0).toUpperCase() + str.slice(1);
+//   }
+
+//   // Refactored useMutation to use the modern object syntax
+//   const ApproveMember_Mutation = useMutation({
+//     mutationFn: (data_info) => {
+//       let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
+
+//       const config = {
+//         headers: {
+//           "Content-Type": "application/json",
+//           Accept: "application/json",
+//           //   "Content-Type": "multipart/form-data",
+//           Authorization: `Bearer ${user_data?.token}`,
+//         },
+//       };
+
+//       return axios.post(url, data_info, config);
+//     },
+//     onSuccess: (success) => {
+//       Toast.show({
+//         type: "success",
+//         text1: " successfully ",
+//       });
+//       dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+
+//       // setTurnmodal(false);
+//       setIsModalVisible(!isModalVisible);
+//     },
+
+//     onError: (error) => {
+//       Toast.show({
+//         type: "error",
+//         text1: `${error?.response?.data?.message} `,
+//         //   text2: ` ${error?.response?.data?.errorMsg} `,
+//       });
+
+//       // dispatch(Get_User_Clans_Fun());
+//       // dispatch(Get_User_Profle_Fun());
+//       // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+//     },
+//   });
+
+//   const jsonString = JSON.stringify(userProfile_data);
+
+//   const mainuserId = userProfile_data?.user?._id;
+//   const mainmembers = userProfile_data?.currentClanMeeting?.members;
+//   const foundermember = mainmembers?.find(
+//     (member) => member.user === mainuserId
+//   );
+
+//   return (
+//     <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
+//       <View
+//         style={{
+//           borderRadius: 6,
+//           flexDirection: "row",
+//           alignItems: "center",
+//           gap: 10,
+//         }}
+//       >
+//         <Image
+//           source={{
+//             uri: userProfile_data?.photo,
+//           }}
+//           style={{ width: 100, height: 100, borderRadius: 50 }}
+//         />
+
+//         <View style={{ flex: 1, gap: 5 }}>
+//           <SemiBoldFontText
+//             data={userProfile_data?.user?.name}
+//             textstyle={{ fontSize: 22 }}
+//           />
+//           <MediumFontText
+//             data={userProfile_data?.user?.email}
+//             textstyle={{ fontSize: 11 }}
+//           />
+//         </View>
+//       </View>
+
+//       <View
+//         style={{
+//           borderWidth: 1,
+//           borderRadius: 7,
+//           borderColor: "#2632381F",
+//           paddingHorizontal: 10,
+//           paddingVertical: 10,
+//           marginTop: 20,
+//         }}
+//       >
+//         <View
+//           style={{
+//             marginBottom: 20,
+//             borderBottomColor: "#CFCDCD",
+//             borderBottomWidth: 1,
+//             paddingBottom: 10,
+//           }}
+//         >
+//           <SemiBoldFontText data="User Info " textstyle={{ fontSize: 18 }} />
+//         </View>
+//         <View>
+//           {/* New fields added here */}
+//           {foundermember?.apartmentType && (
+//             <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//               <RegularFontText
+//                 data="Apartment Type"
+//                 textstyle={{ fontSize: 13, color: "#696969" }}
+//               />
+//               <MediumFontText
+//                 data={foundermember?.apartmentType}
+//                 textstyle={{ fontSize: 19 }}
+//               />
+//             </View>
+//           )}
+
+//           {foundermember?.houseNumber && (
+//             <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//               <RegularFontText
+//                 data="House Number"
+//                 textstyle={{ fontSize: 13, color: "#696969" }}
+//               />
+//               <MediumFontText
+//                 data={foundermember?.houseNumber}
+//                 textstyle={{ fontSize: 19 }}
+//               />
+//             </View>
+//           )}
+
+//           {foundermember?.street && (
+//             <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//               <RegularFontText
+//                 data="Street"
+//                 textstyle={{ fontSize: 13, color: "#696969" }}
+//               />
+//               <MediumFontText
+//                 data={foundermember?.street}
+//                 textstyle={{ fontSize: 19 }}
+//               />
+//             </View>
+//           )}
+
+//           {foundermember?.unitNumber && (
+//             <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//               <RegularFontText
+//                 data="Unit Number"
+//                 textstyle={{ fontSize: 13, color: "#696969" }}
+//               />
+//               <MediumFontText
+//                 data={foundermember?.unitNumber}
+//                 textstyle={{ fontSize: 19 }}
+//               />
+//             </View>
+//           )}
+//         </View>
+//         {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//           <RegularFontText
+//             data="Resident ID"
+//             textstyle={{ fontSize: 13, color: "#696969" }}
+//           />
+//           <MediumFontText data="2340OPL56" textstyle={{ fontSize: 19 }} />
+//         </View> */}
+
+//         {!getuserclanInfo?.data?.settings?.allowMembersToEditProfile && (
+//           <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//             <RegularFontText
+//               data="Home Address "
+//               textstyle={{ fontSize: 13, color: "#696969" }}
+//             />
+//             <MediumFontText
+//               data={foundermember?.homeAddress}
+//               textstyle={{ fontSize: 19 }}
+//             />
+//           </View>
+//         )}
+
+//         <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//           <RegularFontText
+//             data="Phone Number"
+//             textstyle={{ fontSize: 13, color: "#696969" }}
+//           />
+//           <MediumFontText
+//             data={foundermember?.phonenumber}
+//             textstyle={{ fontSize: 19 }}
+//           />
+//         </View>
+//         <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//           <RegularFontText
+//             data="Member Code"
+//             textstyle={{ fontSize: 13, color: "#696969" }}
+//           />
+//           <MediumFontText
+//             data={foundermember?.memberCode}
+//             textstyle={{ fontSize: 19 }}
+//           />
+//         </View>
+//       </View>
+
+//       {userProfile_data?.user?.isGuest != true && (
+//         <View
+//           style={{
+//             borderWidth: 1,
+//             borderRadius: 7,
+//             borderColor: "#2632381F",
+//             paddingHorizontal: 10,
+//             paddingVertical: 10,
+//             marginTop: 20,
+//           }}
+//         >
+//           <View
+//             style={{
+//               marginBottom: 20,
+//               borderBottomColor: "#CFCDCD",
+//               borderBottomWidth: 1,
+//               paddingBottom: 10,
+//             }}
+//           >
+//             <SemiBoldFontText data="Qr Code" textstyle={{ fontSize: 18 }} />
+//           </View>
+
+//           <View
+//             style={{
+//               marginBottom: 5,
+//               paddingBottom: 10,
+//               flexDirection: "row",
+//               gap: 20,
+//             }}
+//           >
+//             {jsonString !== "" && (
+//               <View
+//                 style={{
+//                   marginTop: 20,
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <QRCode
+//                   value={foundermember?.memberCode}
+//                   size={200}
+//                   color="black"
+//                   backgroundColor="white"
+//                 />
+//               </View>
+//             )}
+//           </View>
+
+//           <View
+//             style={{
+//               marginBottom: 5,
+//               paddingBottom: 10,
+//               flexDirection: "row",
+//               gap: 20,
+//             }}
+//           ></View>
+//         </View>
+//       )}
+
+//       <Modal transparent={true} animationType="slide" visible={isModalVisible}>
+//         <TouchableWithoutFeedback onPress={toggleModal}>
+//           <View style={styles.modalContainer}>
+//             <View style={styles.modalContent}>
+//               <View
+//                 style={{
+//                   marginBottom: 20,
+//                   flexDirection: "row",
+//                   alignItems: "center",
+//                   borderBottomColor: "#CFCDCD",
+//                   borderBottomWidth: 1,
+//                   paddingBottom: 10,
+//                 }}
+//               >
+//                 <MediumFontText
+//                   data={
+//                     item?.status === "approved" ? "Ban User " : "Reinstate User"
+//                   }
+//                   textstyle={{
+//                     fontSize: 18,
+//                     textAlign: "center",
+//                     width: "100%",
+//                   }}
+//                 />
+//               </View>
+
+//               <RegularFontText
+//                 data={
+//                   item?.status === "approved"
+//                     ? "BBanning this user will suspend their account indefinitely, preventing further access to the system."
+//                     : "Reinstating this user will reactivate their account, allowing them to access the system"
+//                 }
+//                 textstyle={{
+//                   fontSize: 14,
+//                   fontWeight: "400",
+//                   textAlign: "center",
+//                 }}
+//               />
+//               {item?.status === "approved" ? (
+//                 <View
+//                   style={{
+//                     flexDirection: "row",
+//                     justifyContent: "space-between",
+//                     alignItems: "center",
+//                     marginTop: 20,
+//                   }}
+//                 >
+//                   <TouchableOpacity
+//                     style={{
+//                       backgroundColor: "#FDF2F3",
+//                       paddingHorizontal: 12,
+//                       paddingVertical: 12,
+//                       borderRadius: 6,
+//                     }}
+//                     onPress={() => {
+//                       ApproveMember_Mutation.mutate({
+//                         clanId: get_user_profile_data?.AdmincurrentClanMeeting,
+//                         memberId: item?.user?._id,
+//                         approvalStatus: "suspended",
+//                       });
+//                     }}
+//                   >
+//                     <RegularFontText
+//                       data="Ban User"
+//                       textstyle={{
+//                         fontSize: 14,
+//                         fontWeight: "400",
+//                         textAlign: "center",
+//                       }}
+//                     />
+//                   </TouchableOpacity>
+
+//                   <TouchableOpacity
+//                     style={{
+//                       backgroundColor: "#04973C",
+//                       paddingHorizontal: 12,
+//                       paddingVertical: 12,
+//                       borderRadius: 6,
+//                     }}
+//                     onPress={toggleModal}
+//                   >
+//                     <RegularFontText
+//                       data="Cancel"
+//                       textstyle={{
+//                         fontSize: 14,
+//                         fontWeight: "400",
+//                         textAlign: "center",
+//                         color: "white",
+//                       }}
+//                     />
+//                   </TouchableOpacity>
+//                 </View>
+//               ) : (
+//                 <View
+//                   style={{
+//                     flexDirection: "row",
+//                     justifyContent: "space-between",
+//                     alignItems: "center",
+//                     marginTop: 20,
+//                   }}
+//                 >
+//                   <TouchableOpacity
+//                     style={{
+//                       backgroundColor: "white",
+//                       paddingHorizontal: 12,
+//                       paddingVertical: 12,
+//                       borderRadius: 6,
+//                       borderWidth: 1,
+//                       borderColor: "#04973C",
+//                     }}
+//                     onPress={toggleModal}
+//                   >
+//                     <RegularFontText
+//                       data="Cancel"
+//                       textstyle={{
+//                         fontSize: 14,
+//                         fontWeight: "400",
+//                         textAlign: "center",
+//                         color: "#04973C",
+//                       }}
+//                     />
+//                   </TouchableOpacity>
+
+//                   <TouchableOpacity
+//                     style={{
+//                       backgroundColor: "#04973C",
+//                       paddingHorizontal: 12,
+//                       paddingVertical: 12,
+//                       borderRadius: 6,
+//                     }}
+//                     onPress={() => {
+//                       ApproveMember_Mutation.mutate({
+//                         clanId: get_user_profile_data?.AdmincurrentClanMeeting,
+//                         memberId: item?.user?._id,
+//                         approvalStatus: "approved",
+//                       });
+//                     }}
+//                   >
+//                     <RegularFontText
+//                       data="Reinstate"
+//                       textstyle={{
+//                         fontSize: 14,
+//                         fontWeight: "400",
+//                         textAlign: "center",
+//                         color: "white",
+//                       }}
+//                     />
+//                   </TouchableOpacity>
+//                 </View>
+//               )}
+//             </View>
+//           </View>
+//         </TouchableWithoutFeedback>
+//       </Modal>
+//     </View>
+//   );
+// }
+
+// function GeneralViewProfile({ navigation }) {
+//   const dispatch = useDispatch();
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+
+//   const toggleModal = () => {
+//     setIsModalVisible(!isModalVisible);
+//   };
+
+//   let item = {};
+
+//   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
+
+//   const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
+//   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
+//     (member) => member.user.toString() === userIdToFind.toString()
+//   );
+
+//   console.log({
+//     jaja: foundMember,
+//   });
+
+//   const {
+//     data: getuserclanInfo,
+//     isLoading: isloadinggetuserclanInfo,
+//     error: iserrorgetuserclanInfo,
+//   } = useFetchData(
+//     `clan/${userProfile_data?.currentClanMeeting?._id}`,
+//     "getuserclans"
+//   );
+
+//   const {
+//     data: getuserinfo,
+//     isLoading: isloadinggetuserinfo,
+//     error: iserrorgetuserinfo,
+//   } = useFetchData(
+//     `api/v1/general/UserProfile`,
+//     // `clan/${userProfile_data?.currentClanMeeting?._id}`,
+//     "getuserinfo"
+//   );
+
+//   console.log({
+//     ddd: getuserinfo?.user,
+//   });
+
+//   console.log({
+//     vv: getuserclanInfo?.data?.settings?.allowMembersToEditProfile,
+//   });
+
+//   const { get_user_profile_data } = useSelector(
+//     (state) => state?.UserProfileSlice
+//   );
+
+//   useEffect(() => {
+//     // dispatch(Admin_Get_Single_User_Fun(item));
+//     dispatch(UserProfile_data_Fun());
+
+//     return () => {};
+//   }, []);
+
+//   const [modalVisible, setModalVisible] = useState(false);
+//   const [modalformVisible, setModalFormVisible] = useState(false);
+
+//   const openModal = () => {
+//     setModalVisible(true);
+//   };
+
+//   const closeFormModal = () => {
+//     setModalFormVisible(false);
+//   };
+
+//   const closeModal = () => {
+//     setModalVisible(false);
+//   };
+
+//   const [userType, setUserType] = useState("All");
+//   const {
+//     user_data,
+//     user_isError,
+//     user_isSuccess,
+//     user_isLoading,
+//     user_message,
+//   } = useSelector((state) => state.AuthSlice);
+//   const usertypelist = ["All", "Active", "Banned", "Pending"];
+
+//   const filteredUsers = userFile.filter((user) => {
+//     // if (userType === "ALL") {
+
+//     if (userType.toUpperCase() === "ALL") {
+//       return true; // Show all users
+//     } else {
+//       return user.status === userType; // Show users with selected status
+//     }
+//   });
+
+//   const [formData, setFormData] = useState({
+//     search: "", // Initialize with empty values
+//   });
+
+//   const handleInputChange = (inputName, text) => {
+//     setFormData({ ...formData, [inputName]: text });
+//   };
+
+//   function capitalizeFirstLetter(str) {
+//     return str.charAt(0).toUpperCase() + str.slice(1);
+//   }
+
+//   // Refactored useMutation to use the modern object syntax
+//   const ApproveMember_Mutation = useMutation({
+//     mutationFn: (data_info) => {
+//       let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
+
+//       const config = {
+//         headers: {
+//           "Content-Type": "application/json",
+//           Accept: "application/json",
+//           //   "Content-Type": "multipart/form-data",
+//           Authorization: `Bearer ${user_data?.token}`,
+//         },
+//       };
+
+//       return axios.post(url, data_info, config);
+//     },
+//     onSuccess: (success) => {
+//       Toast.show({
+//         type: "success",
+//         text1: " successfully ",
+//       });
+//       dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+
+//       // setTurnmodal(false);
+//       setIsModalVisible(!isModalVisible);
+//     },
+
+//     onError: (error) => {
+//       Toast.show({
+//         type: "error",
+//         text1: `${error?.response?.data?.message} `,
+//         //   text2: ` ${error?.response?.data?.errorMsg} `,
+//       });
+
+//       // dispatch(Get_User_Clans_Fun());
+//       // dispatch(Get_User_Profle_Fun());
+//       // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+//     },
+//   });
+
+//   const jsonString = JSON.stringify(userProfile_data);
+
+//   const mainuserId = userProfile_data?.user?._id;
+//   const mainmembers = userProfile_data?.currentClanMeeting?.members;
+//   const foundermember = mainmembers?.find(
+//     (member) => member.user === mainuserId
+//   );
+
+//   return (
+//     <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
+//       <View
+//         style={{
+//           borderRadius: 6,
+//           flexDirection: "row",
+//           alignItems: "center",
+//           gap: 10,
+//         }}
+//       >
+//         <Image
+//           source={{
+//             uri: userProfile_data?.photo,
+//           }}
+//           style={{ width: 100, height: 100, borderRadius: 50 }}
+//         />
+
+//         <View style={{ flex: 1, gap: 5 }}>
+//           <SemiBoldFontText
+//             data={userProfile_data?.user?.name}
+//             textstyle={{ fontSize: 22 }}
+//           />
+//           <MediumFontText
+//             data={userProfile_data?.user?.email}
+//             textstyle={{ fontSize: 11 }}
+//           />
+//         </View>
+//       </View>
+
+//       <View
+//         style={{
+//           borderWidth: 1,
+//           borderRadius: 7,
+//           borderColor: "#2632381F",
+//           paddingHorizontal: 10,
+//           paddingVertical: 10,
+//           marginTop: 20,
+//         }}
+//       >
+//         <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//           <RegularFontText
+//             data="Phone Number"
+//             textstyle={{ fontSize: 13, color: "#696969" }}
+//           />
+//           <MediumFontText
+//             data={getuserinfo?.user?.phoneNumber || ""}
+//             textstyle={{ fontSize: 19 }}
+//           />
+//         </View>
+
+//         <View style={{ marginBottom: 5, paddingBottom: 10 }}>
+//           <RegularFontText
+//             data="Home Address"
+//             textstyle={{ fontSize: 13, color: "#696969" }}
+//           />
+//           <MediumFontText
+//             data={`${getuserinfo?.user?.address?.street || ""}${
+//               getuserinfo?.user?.address?.street ? ", " : ""
+//             }${getuserinfo?.user?.address?.city || ""}${
+//               getuserinfo?.user?.address?.city ? ", " : ""
+//             }${getuserinfo?.user?.address?.state || ""}`}
+//             textstyle={{ fontSize: 19 }}
+//           />
+//         </View>
+//       </View>
+//     </View>
+//   );
+// }
+
+// export default function ViewProfile({ navigation }) {
+//   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
+
+//   return (
+//     <ScreenWrapper
+//       title="Personal Info"
+//       navigation={navigation}
+//       headerStyle={{
+//         backgroundColor: "white",
+//       }}
+//       // showHeader={false}
+//     >
+//       <ScrollView>
+//         {userProfile_data?.user?.isGuest === true ? (
+//           <GeneralViewProfile />
+//         ) : (
+//           <ViewProfile_main />
+//         )}
+//       </ScrollView>
+//     </ScreenWrapper>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   modalContainer: {
+//     flex: 1,
+//     justifyContent: "flex-end",
+//     alignItems: "center",
+//     backgroundColor: "rgba(0, 0, 0, 0.5)",
+//   },
+//   modalContent: {
+//     backgroundColor: "white",
+//     padding: 20,
+//     width: "100%",
+//     borderTopLeftRadius: 30,
+//     borderTopRightRadius: 30,
+//     height: "30%",
+//   },
+// });
+
 import {
   FlatList,
   Image,
@@ -18,10 +825,9 @@ import {
   RegularFontText,
   SemiBoldFontText,
 } from "../../../components/shared/Paragrahp";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useRoute } from "@react-navigation/native";
-// Updated useMutation import for TanStack Query
 import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -38,10 +844,12 @@ import QRCode from "react-native-qrcode-svg";
 import { useFetchData } from "../../../hooks/Request";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
+import { useFetchData_v2 } from "../../../hooks/Requestv2";
 
 function ViewProfile_main({ navigation }) {
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile"); // 'profile' or 'household'
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -51,15 +859,15 @@ function ViewProfile_main({ navigation }) {
 
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
 
-  const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
+  const userIdToFind = userProfile_data?.user?._id;
   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
     (member) => member.user.toString() === userIdToFind.toString()
   );
 
-  console.log({
-    jaja: foundMember,
-  });
+  // Check if user is a clan member
+  const isClanMember = !!foundMember;
 
+  // Fetch clan info
   const {
     data: getuserclanInfo,
     isLoading: isloadinggetuserclanInfo,
@@ -69,8 +877,17 @@ function ViewProfile_main({ navigation }) {
     "getuserclans"
   );
 
+  // Fetch household data using the new hook
+  const {
+    data: householdData,
+    isLoading: isLoadingHousehold,
+    error: householdError,
+  } = useFetchData_v2("api/v1/household/user", "getUserHousehold");
+
+  console.log({});
+
   console.log({
-    vv: getuserclanInfo?.data?.settings?.allowMembersToEditProfile,
+    householdData: householdData?.data,
   });
 
   const { get_user_profile_data } = useSelector(
@@ -78,60 +895,10 @@ function ViewProfile_main({ navigation }) {
   );
 
   useEffect(() => {
-    // dispatch(Admin_Get_Single_User_Fun(item));
     dispatch(UserProfile_data_Fun());
-
     return () => {};
   }, []);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalformVisible, setModalFormVisible] = useState(false);
-
-  const openModal = () => {
-    setModalVisible(true);
-  };
-
-  const closeFormModal = () => {
-    setModalFormVisible(false);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
-  const [userType, setUserType] = useState("All");
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-  const usertypelist = ["All", "Active", "Banned", "Pending"];
-
-  const filteredUsers = userFile.filter((user) => {
-    // if (userType === "ALL") {
-
-    if (userType.toUpperCase() === "ALL") {
-      return true; // Show all users
-    } else {
-      return user.status === userType; // Show users with selected status
-    }
-  });
-
-  const [formData, setFormData] = useState({
-    search: "", // Initialize with empty values
-  });
-
-  const handleInputChange = (inputName, text) => {
-    setFormData({ ...formData, [inputName]: text });
-  };
-
-  function capitalizeFirstLetter(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  // Refactored useMutation to use the modern object syntax
   const ApproveMember_Mutation = useMutation({
     mutationFn: (data_info) => {
       let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
@@ -140,7 +907,6 @@ function ViewProfile_main({ navigation }) {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
@@ -153,8 +919,6 @@ function ViewProfile_main({ navigation }) {
         text1: " successfully ",
       });
       dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
-
-      // setTurnmodal(false);
       setIsModalVisible(!isModalVisible);
     },
 
@@ -162,282 +926,357 @@ function ViewProfile_main({ navigation }) {
       Toast.show({
         type: "error",
         text1: `${error?.response?.data?.message} `,
-        //   text2: ` ${error?.response?.data?.errorMsg} `,
       });
-
-      // dispatch(Get_User_Clans_Fun());
-      // dispatch(Get_User_Profle_Fun());
-      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
     },
   });
 
   const jsonString = JSON.stringify(userProfile_data);
-
   const mainuserId = userProfile_data?.user?._id;
   const mainmembers = userProfile_data?.currentClanMeeting?.members;
   const foundermember = mainmembers?.find(
     (member) => member.user === mainuserId
   );
 
-  return (
-    <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
-      <View
-        style={{
-          borderRadius: 6,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-        }}
-      >
-        <Image
-          source={{
-            uri: userProfile_data?.photo,
-          }}
-          style={{ width: 100, height: 100, borderRadius: 50 }}
-        />
+  const {
+    user_data,
+    user_isError,
+    user_isSuccess,
+    user_isLoading,
+    user_message,
+  } = useSelector((state) => state.AuthSlice);
 
-        <View style={{ flex: 1, gap: 5 }}>
-          <SemiBoldFontText
-            data={userProfile_data?.user?.name}
-            textstyle={{ fontSize: 22 }}
+  // Tab Button Component
+  const TabButton = ({ title, isActive, onPress, icon }) => (
+    <TouchableOpacity
+      style={[styles.tabButton, isActive && styles.tabButtonActive]}
+      onPress={onPress}
+    >
+      <MaterialCommunityIcons
+        name={icon}
+        size={20}
+        color={isActive ? "#10B981" : "#6B7280"}
+        style={{ marginRight: 8 }}
+      />
+      <Text
+        style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  // Profile Tab Content
+  const ProfileTabContent = () => (
+    <View style={styles.tabContent}>
+      {/* User Info Section */}
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <MaterialCommunityIcons
+            name="account"
+            size={20}
+            color="#10B981"
+            style={{ marginRight: 8 }}
           />
+          <Text style={styles.sectionTitle}>User Information</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <RegularFontText data="Phone Number" textstyle={styles.infoLabel} />
           <MediumFontText
-            data={userProfile_data?.user?.email}
-            textstyle={{ fontSize: 11 }}
+            data={foundermember?.phonenumber || "N/A"}
+            textstyle={styles.infoValue}
           />
         </View>
-      </View>
-
-      <View
-        style={{
-          borderWidth: 1,
-          borderRadius: 7,
-          borderColor: "#2632381F",
-          paddingHorizontal: 10,
-          paddingVertical: 10,
-          marginTop: 20,
-        }}
-      >
-        <View
-          style={{
-            marginBottom: 20,
-            borderBottomColor: "#CFCDCD",
-            borderBottomWidth: 1,
-            paddingBottom: 10,
-          }}
-        >
-          <SemiBoldFontText data="User Info " textstyle={{ fontSize: 18 }} />
-        </View>
-        <View>
-          {/* New fields added here */}
-          {foundermember?.apartmentType && (
-            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-              <RegularFontText
-                data="Apartment Type"
-                textstyle={{ fontSize: 13, color: "#696969" }}
-              />
-              <MediumFontText
-                data={foundermember?.apartmentType}
-                textstyle={{ fontSize: 19 }}
-              />
-            </View>
-          )}
-
-          {foundermember?.houseNumber && (
-            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-              <RegularFontText
-                data="House Number"
-                textstyle={{ fontSize: 13, color: "#696969" }}
-              />
-              <MediumFontText
-                data={foundermember?.houseNumber}
-                textstyle={{ fontSize: 19 }}
-              />
-            </View>
-          )}
-
-          {foundermember?.street && (
-            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-              <RegularFontText
-                data="Street"
-                textstyle={{ fontSize: 13, color: "#696969" }}
-              />
-              <MediumFontText
-                data={foundermember?.street}
-                textstyle={{ fontSize: 19 }}
-              />
-            </View>
-          )}
-
-          {foundermember?.unitNumber && (
-            <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-              <RegularFontText
-                data="Unit Number"
-                textstyle={{ fontSize: 13, color: "#696969" }}
-              />
-              <MediumFontText
-                data={foundermember?.unitNumber}
-                textstyle={{ fontSize: 19 }}
-              />
-            </View>
-          )}
-        </View>
-        {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-          <RegularFontText
-            data="Resident ID"
-            textstyle={{ fontSize: 13, color: "#696969" }}
-          />
-          <MediumFontText data="2340OPL56" textstyle={{ fontSize: 19 }} />
-        </View> */}
 
         {!getuserclanInfo?.data?.settings?.allowMembersToEditProfile && (
-          <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Home Address "
-              textstyle={{ fontSize: 13, color: "#696969" }}
-            />
+          <View style={styles.infoRow}>
+            <RegularFontText data="Home Address" textstyle={styles.infoLabel} />
             <MediumFontText
-              data={foundermember?.homeAddress}
-              textstyle={{ fontSize: 19 }}
+              data={foundermember?.homeAddress || "N/A"}
+              textstyle={styles.infoValue}
             />
           </View>
         )}
 
-        <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-          <RegularFontText
-            data="Phone Number"
-            textstyle={{ fontSize: 13, color: "#696969" }}
-          />
+        <View style={styles.infoRow}>
+          <RegularFontText data="Member Code" textstyle={styles.infoLabel} />
           <MediumFontText
-            data={foundermember?.phonenumber}
-            textstyle={{ fontSize: 19 }}
-          />
-        </View>
-        <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-          <RegularFontText
-            data="Member Code"
-            textstyle={{ fontSize: 13, color: "#696969" }}
-          />
-          <MediumFontText
-            data={foundermember?.memberCode}
-            textstyle={{ fontSize: 19 }}
+            data={foundermember?.memberCode || "N/A"}
+            textstyle={styles.infoValue}
           />
         </View>
       </View>
 
-      {userProfile_data?.user?.isGuest != true && (
-        <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 7,
-            borderColor: "#2632381F",
-            paddingHorizontal: 10,
-            paddingVertical: 10,
-            marginTop: 20,
-          }}
-        >
-          <View
-            style={{
-              marginBottom: 20,
-              borderBottomColor: "#CFCDCD",
-              borderBottomWidth: 1,
-              paddingBottom: 10,
-            }}
-          >
-            <SemiBoldFontText data="Qr Code" textstyle={{ fontSize: 18 }} />
+      {/* QR Code Section */}
+      {userProfile_data?.user?.isGuest !== true && (
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons
+              name="qrcode"
+              size={20}
+              color="#10B981"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.sectionTitle}>QR Code</Text>
           </View>
 
-          <View
-            style={{
-              marginBottom: 5,
-              paddingBottom: 10,
-              flexDirection: "row",
-              gap: 20,
-            }}
-          >
-            {jsonString !== "" && (
-              <View
-                style={{
-                  marginTop: 20,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <QRCode
-                  value={foundermember?.memberCode}
-                  size={200}
-                  color="black"
-                  backgroundColor="white"
-                />
-              </View>
+          <View style={styles.qrCodeContainer}>
+            {foundermember?.memberCode && (
+              <QRCode
+                value={foundermember?.memberCode}
+                size={200}
+                color="black"
+                backgroundColor="white"
+              />
             )}
           </View>
+        </View>
+      )}
+    </View>
+  );
 
-          <View
-            style={{
-              marginBottom: 5,
-              paddingBottom: 10,
-              flexDirection: "row",
-              gap: 20,
+  // Household Tab Content
+  const HouseholdTabContent = () => {
+    if (isLoadingHousehold) {
+      return (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading household data...</Text>
+        </View>
+      );
+    }
+
+    if (householdError || !householdData?.data) {
+      return (
+        <View style={styles.emptyContainer}>
+          <MaterialCommunityIcons name="home-alert" size={48} color="#9CA3AF" />
+          <Text style={styles.emptyText}>No household data available</Text>
+        </View>
+      );
+    }
+
+    const household = householdData.data;
+
+    return (
+      <View style={styles.tabContent}>
+        {/* Household Info Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons
+              name="home"
+              size={20}
+              color="#10B981"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.sectionTitle}>Household Details</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <RegularFontText
+              data="Household Name"
+              textstyle={styles.infoLabel}
+            />
+            <MediumFontText
+              data={household.name || "N/A"}
+              textstyle={styles.infoValue}
+            />
+          </View>
+
+          <View style={styles.infoRow}>
+            <RegularFontText data="Type" textstyle={styles.infoLabel} />
+            <MediumFontText
+              data={household.type || "N/A"}
+              textstyle={styles.infoValue}
+            />
+          </View>
+
+          {household.description && (
+            <View style={styles.infoRow}>
+              <RegularFontText
+                data="Description"
+                textstyle={styles.infoLabel}
+              />
+              <MediumFontText
+                data={household.description}
+                textstyle={styles.infoValue}
+              />
+            </View>
+          )}
+
+          <View style={styles.infoRow}>
+            <RegularFontText data="Address" textstyle={styles.infoLabel} />
+            <MediumFontText
+              data={household.address || "N/A"}
+              textstyle={styles.infoValue}
+            />
+          </View>
+        </View>
+
+        {/* Estate/Clan Info Section */}
+        {householdData.clanInfo && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="office-building"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Estate Information</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <RegularFontText
+                data="Estate Name"
+                textstyle={styles.infoLabel}
+              />
+              <MediumFontText
+                data={householdData.clanInfo.name || "N/A"}
+                textstyle={styles.infoValue}
+              />
+            </View>
+
+            <View style={styles.infoRow}>
+              <RegularFontText
+                data="Estate Address"
+                textstyle={styles.infoLabel}
+              />
+              <MediumFontText
+                data={householdData.clanInfo.address || "N/A"}
+                textstyle={styles.infoValue}
+              />
+            </View>
+
+            <View style={styles.infoRow}>
+              <RegularFontText data="Contact" textstyle={styles.infoLabel} />
+              <MediumFontText
+                data={householdData.clanInfo.phonenumber || "N/A"}
+                textstyle={styles.infoValue}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* Household Members Section */}
+        {household.members && household.members.length > 0 && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="account-group"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Household Members</Text>
+            </View>
+
+            {household.members.map((member, index) => (
+              <View key={member._id || index} style={styles.memberCard}>
+                <View style={styles.memberIconContainer}>
+                  <MaterialCommunityIcons
+                    name="account"
+                    size={24}
+                    color="#10B981"
+                  />
+                </View>
+                <View style={styles.memberInfo}>
+                  <Text style={styles.memberName}>
+                    {member.user?.firstName} {member.user?.lastName}
+                  </Text>
+                  <Text style={styles.memberEmail}>{member.user?.email}</Text>
+                  <Text style={styles.memberDate}>
+                    Joined: {new Date(member.joinedAt).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <View style={styles.profileHeader}>
+          <Image
+            source={{
+              uri: userProfile_data?.photo,
             }}
-          ></View>
+            style={styles.profileImage}
+          />
+
+          <View style={styles.profileInfo}>
+            <SemiBoldFontText
+              data={userProfile_data?.user?.name}
+              textstyle={styles.profileName}
+            />
+            <MediumFontText
+              data={userProfile_data?.user?.email}
+              textstyle={styles.profileEmail}
+            />
+          </View>
+        </View>
+      </View>
+
+      {/* Tab Buttons - Only show if user is a clan member */}
+      {isClanMember && (
+        <View style={styles.tabContainer}>
+          <TabButton
+            title="Profile"
+            icon="account"
+            isActive={activeTab === "profile"}
+            onPress={() => setActiveTab("profile")}
+          />
+          <TabButton
+            title="Household"
+            icon="home"
+            isActive={activeTab === "household"}
+            onPress={() => setActiveTab("household")}
+          />
         </View>
       )}
 
+      {/* Tab Content */}
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {activeTab === "profile" ? (
+          <ProfileTabContent />
+        ) : (
+          <HouseholdTabContent />
+        )}
+      </ScrollView>
+
+      {/* Modal (keeping existing modal) */}
       <Modal transparent={true} animationType="slide" visible={isModalVisible}>
         <TouchableWithoutFeedback onPress={toggleModal}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <View
-                style={{
-                  marginBottom: 20,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  borderBottomColor: "#CFCDCD",
-                  borderBottomWidth: 1,
-                  paddingBottom: 10,
-                }}
-              >
+              <View style={styles.modalHeader}>
                 <MediumFontText
                   data={
-                    item?.status === "approved" ? "Ban User " : "Reinstate User"
+                    item?.status === "approved" ? "Ban User" : "Reinstate User"
                   }
-                  textstyle={{
-                    fontSize: 18,
-                    textAlign: "center",
-                    width: "100%",
-                  }}
+                  textstyle={styles.modalTitle}
                 />
               </View>
 
               <RegularFontText
                 data={
                   item?.status === "approved"
-                    ? "BBanning this user will suspend their account indefinitely, preventing further access to the system."
+                    ? "Banning this user will suspend their account indefinitely, preventing further access to the system."
                     : "Reinstating this user will reactivate their account, allowing them to access the system"
                 }
-                textstyle={{
-                  fontSize: 14,
-                  fontWeight: "400",
-                  textAlign: "center",
-                }}
+                textstyle={styles.modalDescription}
               />
+
               {item?.status === "approved" ? (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: 20,
-                  }}
-                >
+                <View style={styles.modalButtons}>
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: "#FDF2F3",
-                      paddingHorizontal: 12,
-                      paddingVertical: 12,
-                      borderRadius: 6,
-                    }}
+                    style={styles.modalButtonDanger}
                     onPress={() => {
                       ApproveMember_Mutation.mutate({
                         clanId: get_user_profile_data?.AdmincurrentClanMeeting,
@@ -448,72 +1287,34 @@ function ViewProfile_main({ navigation }) {
                   >
                     <RegularFontText
                       data="Ban User"
-                      textstyle={{
-                        fontSize: 14,
-                        fontWeight: "400",
-                        textAlign: "center",
-                      }}
+                      textstyle={styles.modalButtonText}
                     />
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: "#04973C",
-                      paddingHorizontal: 12,
-                      paddingVertical: 12,
-                      borderRadius: 6,
-                    }}
+                    style={styles.modalButtonPrimary}
                     onPress={toggleModal}
                   >
                     <RegularFontText
                       data="Cancel"
-                      textstyle={{
-                        fontSize: 14,
-                        fontWeight: "400",
-                        textAlign: "center",
-                        color: "white",
-                      }}
+                      textstyle={styles.modalButtonTextWhite}
                     />
                   </TouchableOpacity>
                 </View>
               ) : (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: 20,
-                  }}
-                >
+                <View style={styles.modalButtons}>
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: "white",
-                      paddingHorizontal: 12,
-                      paddingVertical: 12,
-                      borderRadius: 6,
-                      borderWidth: 1,
-                      borderColor: "#04973C",
-                    }}
+                    style={styles.modalButtonOutline}
                     onPress={toggleModal}
                   >
                     <RegularFontText
                       data="Cancel"
-                      textstyle={{
-                        fontSize: 14,
-                        fontWeight: "400",
-                        textAlign: "center",
-                        color: "#04973C",
-                      }}
+                      textstyle={styles.modalButtonTextGreen}
                     />
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={{
-                      backgroundColor: "#04973C",
-                      paddingHorizontal: 12,
-                      paddingVertical: 12,
-                      borderRadius: 6,
-                    }}
+                    style={styles.modalButtonPrimary}
                     onPress={() => {
                       ApproveMember_Mutation.mutate({
                         clanId: get_user_profile_data?.AdmincurrentClanMeeting,
@@ -524,12 +1325,7 @@ function ViewProfile_main({ navigation }) {
                   >
                     <RegularFontText
                       data="Reinstate"
-                      textstyle={{
-                        fontSize: 14,
-                        fontWeight: "400",
-                        textAlign: "center",
-                        color: "white",
-                      }}
+                      textstyle={styles.modalButtonTextWhite}
                     />
                   </TouchableOpacity>
                 </View>
@@ -554,14 +1350,10 @@ function GeneralViewProfile({ navigation }) {
 
   const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
 
-  const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
+  const userIdToFind = userProfile_data?.user?._id;
   const foundMember = userProfile_data?.currentClanMeeting?.members.find(
     (member) => member.user.toString() === userIdToFind.toString()
   );
-
-  console.log({
-    jaja: foundMember,
-  });
 
   const {
     data: getuserclanInfo,
@@ -576,47 +1368,17 @@ function GeneralViewProfile({ navigation }) {
     data: getuserinfo,
     isLoading: isloadinggetuserinfo,
     error: iserrorgetuserinfo,
-  } = useFetchData(
-    `api/v1/general/UserProfile`,
-    // `clan/${userProfile_data?.currentClanMeeting?._id}`,
-    "getuserinfo"
-  );
-
-  console.log({
-    ddd: getuserinfo?.user,
-  });
-
-  console.log({
-    vv: getuserclanInfo?.data?.settings?.allowMembersToEditProfile,
-  });
+  } = useFetchData(`api/v1/general/UserProfile`, "getuserinfo");
 
   const { get_user_profile_data } = useSelector(
     (state) => state?.UserProfileSlice
   );
 
   useEffect(() => {
-    // dispatch(Admin_Get_Single_User_Fun(item));
     dispatch(UserProfile_data_Fun());
-
     return () => {};
   }, []);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalformVisible, setModalFormVisible] = useState(false);
-
-  const openModal = () => {
-    setModalVisible(true);
-  };
-
-  const closeFormModal = () => {
-    setModalFormVisible(false);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
-  const [userType, setUserType] = useState("All");
   const {
     user_data,
     user_isError,
@@ -624,31 +1386,7 @@ function GeneralViewProfile({ navigation }) {
     user_isLoading,
     user_message,
   } = useSelector((state) => state.AuthSlice);
-  const usertypelist = ["All", "Active", "Banned", "Pending"];
 
-  const filteredUsers = userFile.filter((user) => {
-    // if (userType === "ALL") {
-
-    if (userType.toUpperCase() === "ALL") {
-      return true; // Show all users
-    } else {
-      return user.status === userType; // Show users with selected status
-    }
-  });
-
-  const [formData, setFormData] = useState({
-    search: "", // Initialize with empty values
-  });
-
-  const handleInputChange = (inputName, text) => {
-    setFormData({ ...formData, [inputName]: text });
-  };
-
-  function capitalizeFirstLetter(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  // Refactored useMutation to use the modern object syntax
   const ApproveMember_Mutation = useMutation({
     mutationFn: (data_info) => {
       let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
@@ -657,7 +1395,6 @@ function GeneralViewProfile({ navigation }) {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
@@ -670,8 +1407,6 @@ function GeneralViewProfile({ navigation }) {
         text1: " successfully ",
       });
       dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
-
-      // setTurnmodal(false);
       setIsModalVisible(!isModalVisible);
     },
 
@@ -679,88 +1414,79 @@ function GeneralViewProfile({ navigation }) {
       Toast.show({
         type: "error",
         text1: `${error?.response?.data?.message} `,
-        //   text2: ` ${error?.response?.data?.errorMsg} `,
       });
-
-      // dispatch(Get_User_Clans_Fun());
-      // dispatch(Get_User_Profle_Fun());
-      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
     },
   });
 
-  const jsonString = JSON.stringify(userProfile_data);
-
-  const mainuserId = userProfile_data?.user?._id;
-  const mainmembers = userProfile_data?.currentClanMeeting?.members;
-  const foundermember = mainmembers?.find(
-    (member) => member.user === mainuserId
-  );
-
   return (
-    <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
-      <View
-        style={{
-          borderRadius: 6,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-        }}
-      >
-        <Image
-          source={{
-            uri: userProfile_data?.photo,
-          }}
-          style={{ width: 100, height: 100, borderRadius: 50 }}
-        />
+    <View style={{ flex: 1 }}>
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <View style={styles.profileHeader}>
+          <Image
+            source={{
+              uri: userProfile_data?.photo,
+            }}
+            style={styles.profileImage}
+          />
 
-        <View style={{ flex: 1, gap: 5 }}>
-          <SemiBoldFontText
-            data={userProfile_data?.user?.name}
-            textstyle={{ fontSize: 22 }}
-          />
-          <MediumFontText
-            data={userProfile_data?.user?.email}
-            textstyle={{ fontSize: 11 }}
-          />
+          <View style={styles.profileInfo}>
+            <SemiBoldFontText
+              data={userProfile_data?.user?.name}
+              textstyle={styles.profileName}
+            />
+            <MediumFontText
+              data={userProfile_data?.user?.email}
+              textstyle={styles.profileEmail}
+            />
+          </View>
         </View>
       </View>
 
-      <View
-        style={{
-          borderWidth: 1,
-          borderRadius: 7,
-          borderColor: "#2632381F",
-          paddingHorizontal: 10,
-          paddingVertical: 10,
-          marginTop: 20,
-        }}
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-          <RegularFontText
-            data="Phone Number"
-            textstyle={{ fontSize: 13, color: "#696969" }}
-          />
-          <MediumFontText
-            data={getuserinfo?.user?.phoneNumber || ""}
-            textstyle={{ fontSize: 19 }}
-          />
-        </View>
+        <View style={styles.container}>
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="account"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>User Information</Text>
+            </View>
 
-        <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-          <RegularFontText
-            data="Home Address"
-            textstyle={{ fontSize: 13, color: "#696969" }}
-          />
-          <MediumFontText
-            data={`${getuserinfo?.user?.address?.street || ""}${
-              getuserinfo?.user?.address?.street ? ", " : ""
-            }${getuserinfo?.user?.address?.city || ""}${
-              getuserinfo?.user?.address?.city ? ", " : ""
-            }${getuserinfo?.user?.address?.state || ""}`}
-            textstyle={{ fontSize: 19 }}
-          />
+            <View style={styles.infoRow}>
+              <RegularFontText
+                data="Phone Number"
+                textstyle={styles.infoLabel}
+              />
+              <MediumFontText
+                data={getuserinfo?.user?.phoneNumber || ""}
+                textstyle={styles.infoValue}
+              />
+            </View>
+
+            <View style={styles.infoRow}>
+              <RegularFontText
+                data="Home Address"
+                textstyle={styles.infoLabel}
+              />
+              <MediumFontText
+                data={`${getuserinfo?.user?.address?.street || ""}${
+                  getuserinfo?.user?.address?.street ? ", " : ""
+                }${getuserinfo?.user?.address?.city || ""}${
+                  getuserinfo?.user?.address?.city ? ", " : ""
+                }${getuserinfo?.user?.address?.state || ""}`}
+                textstyle={styles.infoValue}
+              />
+            </View>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -775,9 +1501,8 @@ export default function ViewProfile({ navigation }) {
       headerStyle={{
         backgroundColor: "white",
       }}
-      // showHeader={false}
     >
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {userProfile_data?.user?.isGuest === true ? (
           <GeneralViewProfile />
         ) : (
@@ -789,18 +1514,272 @@ export default function ViewProfile({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  container: {
+    flex: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  headerSection: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  profileHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: "#10B981",
+  },
+  profileInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    letterSpacing: 0.3,
+  },
+  profileEmail: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  tabContainer: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  tabButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: "#F9FAFB",
+  },
+  tabButtonActive: {
+    backgroundColor: "#D1FAE5",
+  },
+  tabButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
+    letterSpacing: 0.3,
+  },
+  tabButtonTextActive: {
+    color: "#10B981",
+    fontWeight: "700",
+  },
+  tabContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+  sectionCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 0.3,
+  },
+  infoRow: {
+    marginBottom: 16,
+  },
+  infoLabel: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: "#111827",
+    fontWeight: "600",
+  },
+  qrCodeContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  memberCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  memberIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  memberInfo: {
+    flex: 1,
+  },
+  memberName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  memberEmail: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginBottom: 2,
+  },
+  memberDate: {
+    fontSize: 12,
+    color: "#9CA3AF",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+    marginTop: 12,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "flex-end",
-    alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     backgroundColor: "white",
-    padding: 20,
-    width: "100%",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    height: "30%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalHeader: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+    color: "#111827",
+    letterSpacing: 0.3,
+  },
+  modalDescription: {
+    fontSize: 14,
+    fontWeight: "400",
+    textAlign: "center",
+    color: "#6B7280",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  modalButtonDanger: {
+    flex: 1,
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalButtonPrimary: {
+    flex: 1,
+    backgroundColor: "#10B981",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalButtonOutline: {
+    flex: 1,
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#10B981",
+    alignItems: "center",
+  },
+  modalButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#DC2626",
+    letterSpacing: 0.3,
+  },
+  modalButtonTextWhite: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
+  },
+  modalButtonTextGreen: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#10B981",
+    letterSpacing: 0.3,
   },
 });

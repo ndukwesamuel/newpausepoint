@@ -165,6 +165,18 @@ const WalletScreen = ({}) => {
       params: {},
       condition: !isGuest,
     },
+
+    {
+      id: 10,
+      name: "Dues",
+      icon: "apartment",
+      iconSet: MaterialIcons,
+      color: "#009688",
+      type: "amenities",
+      route: "Due",
+      params: {},
+      condition: !isGuest,
+    },
     {
       id: 3,
       name: "Emergency",
@@ -502,7 +514,7 @@ const WalletScreen = ({}) => {
           </View>
         </View>
 
-        <OnboardingProgressCard />
+        {/* <OnboardingProgressCard /> */}
 
         {/* Bills Payment - Modernized */}
         <View

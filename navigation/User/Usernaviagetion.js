@@ -74,6 +74,7 @@ import VerficationScreen from "../../App/General/Ajo/Screen/Banking/VerficationS
 import CreateBankAccount from "../../App/General/Ajo/Screen/Banking/CreateBankAccount";
 import KYCForm from "../../App/General/Ajo/Screen/Banking/KYCForm";
 import CreateDepositAccount from "../../App/General/Ajo/Screen/Banking/CreateDepositAccount";
+import HouseholdDues from "../../screens/Customerinterface/Wallet/HouseholdDues";
 
 const Stack = createNativeStackNavigator();
 
@@ -258,6 +259,12 @@ export const Usernaviagetion = () => {
       name: "amentities",
       component: Amenities,
       title: "Amenities",
+    },
+
+    {
+      name: "Due",
+      component: HouseholdDues,
+      title: "Due",
     },
 
     {
