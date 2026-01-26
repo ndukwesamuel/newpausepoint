@@ -360,9 +360,7 @@ const FundWalletScreen = ({ navigation }) => {
                   styles.methodButtonText,
                   fundingMethod === "transfer" && styles.methodButtonTextActive,
                 ]}
-              >
-                Bank Transfer kaka
-              </Text>
+              ></Text>
             </TouchableOpacity>
           </View>
         </View>
