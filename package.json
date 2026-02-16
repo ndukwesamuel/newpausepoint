@@ -1,6 +1,6 @@
 {
   "name": "pausepoint",
-  "version": "1.6.0",
+  "version": "1.8.0",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
@@ -10,7 +10,8 @@
     "build:onlineapk": "eas build -p android --profile preview ",
     "build:android": "eas build --platform android --local",
     "build:ios": "eas build --platform ios --local",
-    "build:all": "eas build --platform all --local"
+    "build:all": "eas build --platform all --local",
+    "submit:ios": "eas submit -p ios --latest"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",

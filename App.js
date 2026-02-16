@@ -10,7 +10,7 @@ import {
   AppState,
   Alert,
 } from "react-native";
-import Onboading from "./components/Onboard/Onboading ";
+import Onboading from "./components/Onboard/Onboading";
 // import AppNavigation, { RootStackParamList } from "./navigation/AppNavigation";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -28,7 +28,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Onboarding from "./components/Onboard/Onboading ";
+import Onboarding from "./components/Onboard/Onboading";
 import LoginScreen from "./screens/LoginScreen";
 import {
   NavigationContainer,
@@ -57,6 +57,8 @@ import RunnerNavigation from "./App/Runners/RunnerNavigation";
 import GuestNavigation from "./App/Guest/Navigation/GuestNavigation";
 import { API_CONFIG } from "./api";
 
+// ⭐⭐⭐ IMPORT THE INTERCEPTOR - This sets it up globally ⭐⭐⭐
+import "./hooks/axiosInterceptor"; //"./config/axiosInterceptor";
 const queryClient = new QueryClient();
 
 const Stack = createNativeStackNavigator();
@@ -283,7 +285,7 @@ export const UpdateScreen = ({ message }) => {
         : "https://play.google.com/store/apps/details?id=com.pause_point.PausePoint&hl=en";
 
     Linking.openURL(url).catch((err) =>
-      console.error("An error occurred while opening the store link", err)
+      console.error("An error occurred while opening the store link", err),
     );
   };
 
@@ -687,7 +689,7 @@ export function AppNotification() {
       "change",
       (nextAppState) => {
         appState.current = nextAppState;
-      }
+      },
     );
 
     notificationListener.current =
@@ -705,7 +707,7 @@ export function AppNotification() {
     return () => {
       if (notificationListener.current) {
         Notifications.removeNotificationSubscription(
-          notificationListener.current
+          notificationListener.current,
         );
       }
       if (responseListener.current) {

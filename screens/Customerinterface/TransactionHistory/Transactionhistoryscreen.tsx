@@ -743,10 +743,6 @@ const TransactionHistoryScreen = () => {
     refetch: refetchBank,
   } = useFetchData_v2("api/v1/user/GetBankTransaction", "bankTransactions");
 
-  console.log({
-    tyuuu: bankTransactions,
-  });
-
   // Normalize and combine transactions
   // const normalizeTransactions = () => {
   //   // Wallet transactions
@@ -834,7 +830,7 @@ const TransactionHistoryScreen = () => {
     // Combine and sort by date
     return [...walletTxns, ...bankTxns].sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   };
 
@@ -860,7 +856,7 @@ const TransactionHistoryScreen = () => {
       groups[date].push(transaction);
       return groups;
     },
-    {}
+    {},
   );
 
   // Format amount
@@ -870,7 +866,7 @@ const TransactionHistoryScreen = () => {
       {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-      }
+      },
     )}`;
   };
 
@@ -963,7 +959,7 @@ const TransactionHistoryScreen = () => {
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
                   {filteredTransactions?.filter(
-                    (t) => t.normalizedType === "credit"
+                    (t) => t.normalizedType === "credit",
                   ).length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Credits</Text>
@@ -972,7 +968,7 @@ const TransactionHistoryScreen = () => {
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
                   {filteredTransactions?.filter(
-                    (t) => t.normalizedType === "debit"
+                    (t) => t.normalizedType === "debit",
                   ).length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Debits</Text>
@@ -1122,10 +1118,10 @@ const TransactionHistoryScreen = () => {
                 {filterType === "wallet"
                   ? "You don't have any wallet transactions yet"
                   : filterType === "bank"
-                  ? "You don't have any bank transactions yet"
-                  : filterType === "credit" || filterType === "debit"
-                  ? `You don't have any ${filterType} transactions yet`
-                  : "You don't have any transactions yet"}
+                    ? "You don't have any bank transactions yet"
+                    : filterType === "credit" || filterType === "debit"
+                      ? `You don't have any ${filterType} transactions yet`
+                      : "You don't have any transactions yet"}
               </Text>
             </View>
           ) : (
@@ -1139,7 +1135,7 @@ const TransactionHistoryScreen = () => {
                   {dayTransactions.map((transaction: Transaction) => {
                     const iconData = getTransactionIcon(
                       transaction.type,
-                      transaction.details
+                      transaction.details,
                     );
                     return (
                       <TouchableOpacity
@@ -1227,8 +1223,8 @@ const TransactionHistoryScreen = () => {
                                       transaction.status === "completed"
                                         ? "#D1FAE5"
                                         : transaction.status === "pending"
-                                        ? "#FEF3C7"
-                                        : "#FEE2E2",
+                                          ? "#FEF3C7"
+                                          : "#FEE2E2",
                                   },
                                 ]}
                               >
@@ -1240,8 +1236,8 @@ const TransactionHistoryScreen = () => {
                                         transaction.status === "completed"
                                           ? "#065F46"
                                           : transaction.status === "pending"
-                                          ? "#92400E"
-                                          : "#991B1B",
+                                            ? "#92400E"
+                                            : "#991B1B",
                                     },
                                   ]}
                                 >
@@ -1267,7 +1263,7 @@ const TransactionHistoryScreen = () => {
                             {transaction.type === "credit" ? "+" : "-"}
                             {formatAmount(
                               transaction.amount,
-                              transaction.currency
+                              transaction.currency,
                             )}
                           </Text>
                           <MaterialCommunityIcons
@@ -1280,7 +1276,7 @@ const TransactionHistoryScreen = () => {
                     );
                   })}
                 </View>
-              )
+              ),
             )
           )}
         </View>

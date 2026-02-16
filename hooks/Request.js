@@ -1,3 +1,127 @@
+// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+// import axios from "axios";
+// import { useSelector } from "react-redux";
+
+// const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+// console.log({
+//   tyyy: apiUrl,
+// });
+
+// // Function to fetch data
+// const fetchData = async ({ queryKey }) => {
+//   const [, url, token] = queryKey;
+//   // if (!token) throw new Error("Token is missing");
+
+//   try {
+//     const response = await axios.get(`${apiUrl}${url}`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     return response.data;
+//   } catch (error) {
+//     throw new Error(error.response?.data?.message || "Failed to fetch data");
+//   }
+// };
+
+// // Hook for fetching data
+// export const useFetchData = (url, queryKey, options = {}) => {
+//   const {
+//     user_data,
+//     user_isError,
+//     user_isSuccess,
+//     user_isLoading,
+//     user_message,
+//   } = useSelector((state) => state.AuthSlice);
+
+//   const token = user_data?.token;
+
+//   return useQuery({
+//     queryKey: [queryKey, url, token],
+//     queryFn: fetchData,
+//     enabled: !!token, // Prevent query from running without a token
+//     retry: false, // Prevent endless retries if there's an error
+//     ...options,
+//   });
+// };
+
+// // Function to handle API requests
+// const apiRequest = async ({ url, method, data, token }) => {
+//   if (!token) throw new Error("Token is missing");
+
+//   try {
+//     const response = await axios({
+//       url: `${apiUrl}${url}`,
+//       method,
+//       data,
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//     });
+
+//     return response.data;
+//   } catch (error) {
+//     throw new Error(
+//       error.response?.data.error ||
+//         error.response?.data?.message ||
+//         "API request failed"
+//     );
+//   }
+// };
+
+// // Hook for making API requests (POST, UPDATE, DELETE)
+// export const useMutateData = (url, method, queryKey) => {
+//   const { user_data } = useSelector((state) => state.AuthSlice);
+//   const token = user_data?.token;
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: (data) => apiRequest({ url, method, data, token }),
+//     onSuccess: (data) => {
+//       queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
+//     },
+//     onError: (error) => {},
+//   });
+// };
+
+// const formdataapiRequest = async ({ url, method, data, token }) => {
+//   if (!token) throw new Error("Token is missing");
+
+//   try {
+//     const response = await axios({
+//       url: `${apiUrl}${url}`,
+//       method,
+//       data,
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "multipart/form-data", // 👈 force multipart
+//       },
+//     });
+
+//     return response.data;
+//   } catch (error) {
+//     throw new Error(error.response?.data?.message || "API request failed");
+//   }
+// };
+
+// // Hook for making API requests (POST, UPDATE, DELETE)
+// export const formdatauseMutateData = (url, method, queryKey) => {
+//   const { user_data } = useSelector((state) => state.AuthSlice);
+//   const token = user_data?.token;
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: (data) => formdataapiRequest({ url, method, data, token }),
+//     onSuccess: (data) => {
+//       queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
+//     },
+//     onError: (error) => {},
+//   });
+// };
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -11,7 +135,6 @@ console.log({
 // Function to fetch data
 const fetchData = async ({ queryKey }) => {
   const [, url, token] = queryKey;
-  // if (!token) throw new Error("Token is missing");
 
   try {
     const response = await axios.get(`${apiUrl}${url}`, {
@@ -22,6 +145,7 @@ const fetchData = async ({ queryKey }) => {
 
     return response.data;
   } catch (error) {
+    // ✅ Just throw the error - interceptor already handled 401/token expiration
     throw new Error(error.response?.data?.message || "Failed to fetch data");
   }
 };
@@ -41,8 +165,8 @@ export const useFetchData = (url, queryKey, options = {}) => {
   return useQuery({
     queryKey: [queryKey, url, token],
     queryFn: fetchData,
-    enabled: !!token, // Prevent query from running without a token
-    retry: false, // Prevent endless retries if there's an error
+    enabled: !!token,
+    retry: false,
     ...options,
   });
 };
@@ -64,10 +188,11 @@ const apiRequest = async ({ url, method, data, token }) => {
 
     return response.data;
   } catch (error) {
+    // ✅ Just throw the error - interceptor already handled 401/token expiration
     throw new Error(
       error.response?.data.error ||
         error.response?.data?.message ||
-        "API request failed"
+        "API request failed",
     );
   }
 };
@@ -81,7 +206,7 @@ export const useMutateData = (url, method, queryKey) => {
   return useMutation({
     mutationFn: (data) => apiRequest({ url, method, data, token }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
     },
     onError: (error) => {},
   });
@@ -97,12 +222,13 @@ const formdataapiRequest = async ({ url, method, data, token }) => {
       data,
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data", // 👈 force multipart
+        "Content-Type": "multipart/form-data",
       },
     });
 
     return response.data;
   } catch (error) {
+    // ✅ Just throw the error - interceptor already handled 401/token expiration
     throw new Error(error.response?.data?.message || "API request failed");
   }
 };
@@ -116,8 +242,26 @@ export const formdatauseMutateData = (url, method, queryKey) => {
   return useMutation({
     mutationFn: (data) => formdataapiRequest({ url, method, data, token }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [queryKey] }); // Refresh data
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
     },
     onError: (error) => {},
   });
 };
+
+// ```
+
+// ---
+
+// ## File Structure Summary
+// ```
+// your-project/
+// ├── App.tsx                           ← Import interceptor here
+// ├── config/
+// │   └── axiosInterceptor.ts          ← Create this file
+// ├── hooks/
+// │   ├── useApiService.js             ← Old hooks (cleaned up)
+// │   └── useApiService.ts             ← New v2 hooks (cleaned up)
+// ├── Redux/
+// │   └── store.ts                      ← Already exporting store ✅
+// └── components/
+//     └── Logout.tsx                    ← No changes needed

@@ -25,29 +25,6 @@ const DueDetails = () => {
     error: deleteError,
   } = useMutateData(`wallet/clan-due/${data?._id}`, "DELETE", "clan-due");
 
-  //   const {
-  //     mutate: createDue,
-  //     isLoading: ispending,
-  //     error,
-  //   } = useMutateData("wallet/clan-due", "POST", "clan-due");
-
-  // Fetch due details (replace with your API call)
-  //   useEffect(() => {
-  //     const fetchDueDetails = async () => {
-  //       try {
-  //         const response = await fetch(
-  //           `http://localhost:8070/api/v1/wallet/clan-due/${dueId}`
-  //         );
-  //         const data = await response.json();
-  //         setDueDetails(data.due);
-  //       } catch (error) {
-  //         console.error("Error fetching due details:", error);
-  //       }
-  //     };
-
-  //     fetchDueDetails();
-  //   }, [dueId]);
-
   // Handle delete due
   const handleDeleteDue = () => {
     Alert.alert("Delete Due", "Are you sure you want to delete this due?", [
@@ -67,7 +44,7 @@ const DueDetails = () => {
               onError: (error) => {
                 console.error("Error deleting due:", error.message);
               },
-            }
+            },
           );
         },
       },
@@ -78,14 +55,6 @@ const DueDetails = () => {
   const handleUpdateDue = () => {
     navigation.navigate("UpdateDue", { dueId });
   };
-
-  //   if (!dueDetails) {
-  //     return (
-  //       <View style={styles.container}>
-  //         <Text>Loading...</Text>
-  //       </View>
-  //     );
-  //   }
 
   return (
     <ScrollView style={styles.container}>

@@ -43,7 +43,7 @@ export default function Bank() {
       enabled: isVerified, // Only fetch when verified
       refetchOnMount: true,
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   // Fetch customer account with trigger in query key
@@ -59,7 +59,7 @@ export default function Bank() {
       enabled: fetchTrigger > 0,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   // Fetch deposit account with trigger in query key (for creating new deposit account flow)
@@ -75,7 +75,7 @@ export default function Bank() {
       enabled: depositFetchTrigger > 0,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   console.log({
@@ -165,7 +165,7 @@ export default function Bank() {
   // });
 
   const includedAccountNumber = includedArray.find(
-    (item) => item.type === "AccountNumber"
+    (item) => item.type === "AccountNumber",
   );
 
   const handleCheckAccount = () => {
@@ -383,9 +383,6 @@ export default function Bank() {
                             Account Number
                           </Text>
                           <Text style={styles.accountValue}>
-                            {console.log({
-                              yuuii: includedAccountNumber,
-                            })}
                             {includedAccountNumber?.attributes?.accountNumber ||
                               depositAccount?.attributes?.accountNumber ||
                               "N/A"}
@@ -436,7 +433,7 @@ export default function Bank() {
                               </Text>
                               <Text style={styles.balanceValue}>
                                 {formatCurrency(
-                                  depositAccount?.attributes?.availableBalance
+                                  depositAccount?.attributes?.availableBalance,
                                 )}
                               </Text>
                             </View>
@@ -447,7 +444,7 @@ export default function Bank() {
                               </Text>
                               <Text style={styles.balanceValue}>
                                 {formatCurrency(
-                                  depositAccount?.attributes?.ledgerBalance
+                                  depositAccount?.attributes?.ledgerBalance,
                                 )}
                               </Text>
                             </View>

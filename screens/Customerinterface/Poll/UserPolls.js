@@ -17,7 +17,6 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -43,7 +42,7 @@ const UserPolls = () => {
   const [polls, setPolls] = useState([]);
   const { get_all_poll_data } = useSelector((state) => state?.PollSlice);
   const { get_user_profile_data } = useSelector(
-    (state) => state?.UserProfileSlice
+    (state) => state?.UserProfileSlice,
   );
   const [refreshing, setRefreshing] = useState(false);
 
@@ -63,7 +62,7 @@ const UserPolls = () => {
   }, []);
 
   const filteredData = get_all_poll_data?.data?.filter((item) =>
-    item?.question?.toLowerCase().includes(searchQuery?.toLowerCase())
+    item?.question?.toLowerCase().includes(searchQuery?.toLowerCase()),
   );
 
   const HistoryItem = ({ itemdata, index }) => {

@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useDispatch, useSelector } from "react-redux";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -206,11 +205,11 @@ const CreateProduct = ({ navigation }) => {
       </View>
 
       <TouchableOpacity style={styles.buttonContainer} onPress={handleSave}>
-        {CreateVendor_Mutation.isLoading ? (
+        {/* {CreateVendor_Mutation.isLoading ? (
           <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Create Product</Text>
-        )}
+        ) : ( */}
+        <Text style={styles.buttonText}>Create Product</Text>
+        {/* // )} */}
       </TouchableOpacity>
     </ScrollView>
   );

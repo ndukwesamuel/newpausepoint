@@ -840,7 +840,7 @@ const Airtime = () => {
   const { mutate: purchaseAirtime, isPending: purchaseLoading } = useMutateData(
     "api/v1/vtu/purchase",
     "POST",
-    "airtime"
+    "airtime",
   );
 
   // Start spinning animation when loading
@@ -853,7 +853,7 @@ const Airtime = () => {
           duration: 1000,
           easing: Easing.linear,
           useNativeDriver: true,
-        })
+        }),
       ).start();
     } else {
       spinAnim.stopAnimation();
@@ -963,7 +963,7 @@ const Airtime = () => {
         "Error",
         `Minimum amount for ${
           selectedNetwork.name
-        } is ₦${selectedNetwork.min_amount.toLocaleString()}`
+        } is ₦${selectedNetwork.min_amount.toLocaleString()}`,
       );
       return;
     }
@@ -981,7 +981,7 @@ const Airtime = () => {
       [
         { text: "Cancel", style: "cancel" },
         { text: "Confirm", onPress: () => processPurchase() },
-      ]
+      ],
     );
   };
 
@@ -997,7 +997,7 @@ const Airtime = () => {
         Alert.alert(
           "Purchase Successful!",
           `₦${amount} airtime has been sent to ${phoneNumber}`,
-          [{ text: "OK", onPress: () => navigation.goBack() }]
+          [{ text: "OK", onPress: () => navigation.goBack() }],
         );
       },
       onError: (error) => {
@@ -1378,11 +1378,7 @@ const Airtime = () => {
           {purchaseLoading ? (
             <View style={styles.purchaseButtonContent}>
               <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                <MaterialCommunityIcons
-                  name="loading"
-                  size={22}
-                  color="#FFFFFF"
-                />
+                <ActivityIndicator size="small" color="white" />
               </Animated.View>
               <Text style={styles.purchaseButtonText}>Processing...</Text>
             </View>

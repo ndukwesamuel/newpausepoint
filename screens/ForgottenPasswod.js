@@ -211,6 +211,7 @@ import { useNavigation } from "@react-navigation/native";
 import { authScreenChange } from "../Redux/OnboardingSlice";
 import { setOtpEmail } from "../Redux/DontwantToResetSlice";
 import { useMutation } from "@tanstack/react-query";
+import { ActivityIndicator } from "react-native";
 
 const ForgottenPassword = ({}) => {
   const navigation = useNavigation();
@@ -364,11 +365,7 @@ const ForgottenPassword = ({}) => {
           >
             {Forget_Mutation.isPending ? (
               <View style={styles.buttonContent}>
-                <MaterialCommunityIcons
-                  name="loading"
-                  size={20}
-                  color="#FFFFFF"
-                />
+                <ActivityIndicator color="white" />
                 <Text style={styles.submitButtonText}>Sending...</Text>
               </View>
             ) : (

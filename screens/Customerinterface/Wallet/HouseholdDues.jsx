@@ -23,7 +23,7 @@ import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 
 const HouseholdDues = ({ navigation }) => {
-  const [currentScreen, setCurrentScreen] = useState("dashboard"); // dashboard, details
+  const [currentScreen, setCurrentScreen] = useState("myDues"); // "myDues" or "details"
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDue, setSelectedDue] = useState(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -42,7 +42,7 @@ const HouseholdDues = ({ navigation }) => {
   const payDues = useMutateData_v2(
     "api/v1/householdDue/user",
     "POST",
-    "getUserHouseholdDues"
+    "getUserHouseholdDues",
   );
 
   const navigateToDetails = (due) => {
@@ -61,10 +61,6 @@ const HouseholdDues = ({ navigation }) => {
       householdId: household?.household?._id || household?._id,
     };
 
-    console.log({
-      yuu: paymentData,
-    });
-
     try {
       setIsProcessingPayment(true);
 
@@ -79,26 +75,26 @@ const HouseholdDues = ({ navigation }) => {
             onPress: () => {
               // Refetch the dues data to update the list
               refetch();
-              // Navigate back to dashboard
-              navigateToDashboard();
+              // Navigate back to My Dues
+              navigateToMyDues();
             },
           },
-        ]
+        ],
       );
     } catch (error) {
       // Show error message
       Alert.alert(
         "Payment Failed",
         error?.message || "Unable to process payment. Please try again.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
     } finally {
       setIsProcessingPayment(false);
     }
   };
 
-  const navigateToDashboard = () => {
-    setCurrentScreen("dashboard");
+  const navigateToMyDues = () => {
+    setCurrentScreen("myDues");
     setSelectedDue(null);
   };
 
@@ -285,10 +281,10 @@ const HouseholdDues = ({ navigation }) => {
   };
 
   // ============================================
-  // DASHBOARD SCREEN
+  // MY DUES SCREEN (Main Screen)
   // ============================================
 
-  const DashboardScreen = () => {
+  const MyDuesScreen = () => {
     const household = duesData.households?.[0];
     const dues = household?.dues || {};
     const currentDues = dues[activeTab] || [];
@@ -484,6 +480,9 @@ const HouseholdDues = ({ navigation }) => {
           </View>
         )}
 
+        {console.log({
+          xc: selectedDue,
+        })}
         {/* Financial Details */}
         <View style={styles.detailsSection}>
           <RegularFontText
@@ -659,7 +658,7 @@ const HouseholdDues = ({ navigation }) => {
         headerStyle={{ backgroundColor: "white" }}
       >
         <View style={styles.loadingContainer}>
-          <MaterialCommunityIcons name="loading" size={48} color="#10B981" />
+          <ActivityIndicator size="large" color="#10B981" />
           <Text style={styles.loadingText}>Loading your dues...</Text>
         </View>
       </ScreenWrapper>
@@ -692,38 +691,34 @@ const HouseholdDues = ({ navigation }) => {
   }
 
   // ============================================
-  // SCREEN TITLE LOGIC
+  // SCREEN TITLE & BACK HANDLER LOGIC
   // ============================================
 
   const getScreenTitle = () => {
-    switch (currentScreen) {
-      case "details":
-        return "Due Details";
-      default:
-        return "My Dues";
+    if (currentScreen === "details") {
+      return "Due Details";
     }
+    return "My Dues";
   };
 
   const handleBackPress = () => {
     if (currentScreen === "details") {
-      navigateToDashboard();
-    } else {
-      navigation.goBack();
+      // From Details -> go back to My Dues screen
+      navigateToMyDues();
     }
   };
 
-  // ============================================
-  // RENDER CURRENT SCREEN
-  // ============================================
+  // Only show custom back handler when on details screen
+  const shouldShowCustomBack = currentScreen === "details";
 
   return (
     <ScreenWrapper
       title={getScreenTitle()}
       navigation={navigation}
       headerStyle={{ backgroundColor: "white" }}
-      onBackPress={currentScreen !== "dashboard" ? handleBackPress : undefined}
+      onBackPress={shouldShowCustomBack ? handleBackPress : undefined}
     >
-      {currentScreen === "dashboard" && <DashboardScreen />}
+      {currentScreen === "myDues" && <MyDuesScreen />}
       {currentScreen === "details" && <DetailsScreen />}
     </ScreenWrapper>
   );

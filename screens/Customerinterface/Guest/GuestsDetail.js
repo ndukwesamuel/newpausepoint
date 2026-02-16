@@ -46,7 +46,7 @@ const GuestsDetail = () => {
   const { itemdata } = route.params;
 
   const { get_user_guest_detail_data } = useSelector(
-    (state) => state?.GuestSlice
+    (state) => state?.GuestSlice,
   );
 
   const { user_data } = useSelector((state) => state.AuthSlice);
@@ -187,7 +187,7 @@ const GuestsDetail = () => {
           style: "destructive",
           onPress: () => Cancle_Guests_Mutation.mutate(),
         },
-      ]
+      ],
     );
   };
 
@@ -211,8 +211,8 @@ const GuestsDetail = () => {
     invitation?.status === "arrived"
       ? "#10B981"
       : invitation?.status === "departed"
-      ? "#6B7280"
-      : "#F59E0B";
+        ? "#6B7280"
+        : "#F59E0B";
 
   return (
     <AppScreen>
@@ -347,7 +347,7 @@ const GuestsDetail = () => {
               color="#10B981"
             />
 
-            <View style={styles.departureContainer}>
+            <View style={{}}>
               <TimelineItem
                 icon="calendar-remove"
                 label="Departed"
@@ -756,9 +756,9 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   departureContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    // flexDirection: "row",
+    // alignItems: "center",
+    // justifyContent: "space-between",
   },
   departureButton: {
     flexDirection: "row",

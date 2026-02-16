@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "1.7.8",
+    "version": "1.8.1",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -61,11 +61,11 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "55",
+      "buildNumber": "58",
       "runtimeVersion": "1.0.0"
     },
     "android": {
-      "versionCode": 58,
+      "versionCode": 61,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
@@ -83,7 +83,9 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "eas": {}
+      "eas": {
+        "projectId": "e012faf4-1814-4ba6-986a-167a537c8ea3"
+      }
     },
     "updates": {
       "url": "https://u.expo.dev/e012faf4-1814-4ba6-986a-167a537c8ea3"

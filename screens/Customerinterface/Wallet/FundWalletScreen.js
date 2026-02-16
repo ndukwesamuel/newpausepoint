@@ -32,7 +32,7 @@ const FundWalletScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // State for funding method selection
-  const [fundingMethod, setFundingMethod] = useState("paystack"); // 'paystack' or 'transfer'
+  const [fundingMethod, setFundingMethod] = useState("transfer"); // Default to 'transfer'
   const [isVirtualAccountExpanded, setIsVirtualAccountExpanded] =
     useState(true);
 
@@ -56,19 +56,28 @@ const FundWalletScreen = ({ navigation }) => {
     refetch: refetchWallet,
   } = useFetchData("wallet", "wallet");
 
-  // Fetch deposit account data for bank transfer
-  const {
-    data: depositAccountData,
-    isLoading: isLoadingDepositAccount,
-    error: depositAccountError,
-    refetch: refetchDepositAccount,
-  } = useFetchData_v2(
-    "api/v1/bank/getcustomerSingleDepositAccount",
-    "depositAccount"
-  );
+  console.log({
+    jajaj: walletData,
+  });
 
-  // Extract account details from the response
-  const accountDetails = depositAccountData?.data?.data?.[0]?.attributes;
+  // Fetch BlueSalt bank account data
+  const {
+    data: blueSaltAccountData,
+    isLoading: isLoadingBlueSalt,
+    error: blueSaltError,
+    refetch: refetchBlueSalt,
+  } = useFetchData_v2("api/v1/bluesalt", "blueSaltAccount");
+
+  console.log({
+    iiiii: blueSaltAccountData,
+  });
+
+  // Extract BlueSalt account details
+  const blueSaltAccount = blueSaltAccountData;
+
+  console.log({
+    blueSaltAccount: blueSaltAccount,
+  });
 
   // Calculate transaction fee for Paystack
   const calculateFee = useCallback((amount) => {
@@ -122,7 +131,7 @@ const FundWalletScreen = ({ navigation }) => {
             Authorization: `Bearer ${user_data?.token}`,
           },
           timeout: 30000,
-        }
+        },
       );
 
       console.log("Payment initialization response:", response.data?.data);
@@ -134,7 +143,7 @@ const FundWalletScreen = ({ navigation }) => {
       } else {
         Alert.alert(
           "Payment Error",
-          "Failed to initialize payment. Please try again."
+          "Failed to initialize payment. Please try again.",
         );
       }
     } catch (error) {
@@ -187,7 +196,7 @@ const FundWalletScreen = ({ navigation }) => {
                 navigation.goBack();
               },
             },
-          ]
+          ],
         );
         return false;
       }
@@ -221,7 +230,7 @@ const FundWalletScreen = ({ navigation }) => {
 
       return true;
     },
-    [navigation, refetchWallet]
+    [navigation, refetchWallet],
   );
 
   const handleBackFromWebView = useCallback(() => {
@@ -240,7 +249,7 @@ const FundWalletScreen = ({ navigation }) => {
             setwebviewdata(null);
           },
         },
-      ]
+      ],
     );
   }, []);
 
@@ -290,7 +299,7 @@ const FundWalletScreen = ({ navigation }) => {
             console.warn("WebView error: ", nativeEvent);
             Alert.alert(
               "WebView Error",
-              `Error loading payment page: ${nativeEvent.description}`
+              `Error loading payment page: ${nativeEvent.description}`,
             );
             setwebviewstart(false);
           }}
@@ -321,6 +330,30 @@ const FundWalletScreen = ({ navigation }) => {
         <View style={styles.methodSelectionContainer}>
           <Text style={styles.methodSelectionTitle}>Choose Funding Method</Text>
           <View style={styles.methodButtons}>
+            {/* Bank Transfer Button - LEFT */}
+            <TouchableOpacity
+              style={[
+                styles.methodButton,
+                fundingMethod === "transfer" && styles.methodButtonActive,
+              ]}
+              onPress={() => setFundingMethod("transfer")}
+            >
+              <Icon
+                name="account-balance"
+                size={24}
+                color={fundingMethod === "transfer" ? "#FFF" : "green"}
+              />
+              <Text
+                style={[
+                  styles.methodButtonText,
+                  fundingMethod === "transfer" && styles.methodButtonTextActive,
+                ]}
+              >
+                Bank Transfer
+              </Text>
+            </TouchableOpacity>
+
+            {/* Paystack Button - RIGHT */}
             <TouchableOpacity
               style={[
                 styles.methodButton,
@@ -342,28 +375,131 @@ const FundWalletScreen = ({ navigation }) => {
                 Pay with Card
               </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.methodButton,
-                fundingMethod === "transfer" && styles.methodButtonActive,
-              ]}
-              onPress={() => setFundingMethod("transfer")}
-            >
-              <Icon
-                name="account-balance"
-                size={24}
-                color={fundingMethod === "transfer" ? "#FFF" : "green"}
-              />
-              <Text
-                style={[
-                  styles.methodButtonText,
-                  fundingMethod === "transfer" && styles.methodButtonTextActive,
-                ]}
-              ></Text>
-            </TouchableOpacity>
           </View>
         </View>
+
+        {/* Bank Transfer Section */}
+        {fundingMethod === "transfer" && (
+          <>
+            {isLoadingBlueSalt ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="green" />
+                <Text style={styles.loadingText}>
+                  Loading account details...
+                </Text>
+              </View>
+            ) : blueSaltError ? (
+              <View style={styles.errorContainer}>
+                <Icon name="error-outline" size={48} color="#DC3545" />
+                <Text style={styles.errorText}>
+                  Failed to load account details
+                </Text>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={refetchBlueSalt}
+                >
+                  <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            ) : blueSaltAccount ? (
+              <View style={styles.virtualAccountCard}>
+                <TouchableOpacity
+                  style={styles.virtualAccountHeader}
+                  onPress={() =>
+                    setIsVirtualAccountExpanded(!isVirtualAccountExpanded)
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Icon name="account-balance" size={24} color="#4CAF50" />
+                  <Text style={styles.virtualAccountTitle}>
+                    Your Dedicated Account
+                  </Text>
+                  <Icon
+                    name={
+                      isVirtualAccountExpanded
+                        ? "keyboard-arrow-up"
+                        : "keyboard-arrow-down"
+                    }
+                    size={24}
+                    color="#666"
+                    style={{ marginLeft: "auto" }}
+                  />
+                </TouchableOpacity>
+
+                {isVirtualAccountExpanded && (
+                  <View style={styles.virtualAccountDetails}>
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>
+                        Account Name:
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={() =>
+                          handleCopyToClipboard(blueSaltAccount.accountName)
+                        }
+                      >
+                        <Text style={styles.accountDetailValue}>
+                          {blueSaltAccount.accountName}
+                        </Text>
+                        <Icon
+                          name="content-copy"
+                          size={16}
+                          color="#666"
+                          style={styles.copyIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>
+                        Account Number:
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={() =>
+                          handleCopyToClipboard(blueSaltAccount.accountNumber)
+                        }
+                      >
+                        <Text style={styles.accountDetailValue}>
+                          {blueSaltAccount.accountNumber}
+                        </Text>
+                        <Icon
+                          name="content-copy"
+                          size={16}
+                          color="#666"
+                          style={styles.copyIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>Bank Name:</Text>
+                      <Text style={styles.accountDetailValue}>
+                        {blueSaltAccount.bankName}
+                      </Text>
+                    </View>
+
+                    <View style={styles.accountInfo}>
+                      <Icon name="info" size={16} color="#FF9800" />
+                      <Text style={styles.accountInfoText}>
+                        Transfer any amount to this account to fund your wallet
+                        automatically. Funds reflect instantly with no fees.
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View style={styles.noAccountContainer}>
+                <Icon name="account-balance-wallet" size={48} color="#999" />
+                <Text style={styles.noAccountText}>No bank account found</Text>
+                <Text style={styles.noAccountSubtext}>
+                  Complete your onboarding to get a dedicated account
+                </Text>
+              </View>
+            )}
+          </>
+        )}
 
         {/* Paystack Payment Section */}
         {fundingMethod === "paystack" && (
@@ -483,145 +619,6 @@ const FundWalletScreen = ({ navigation }) => {
                 </View>
               )}
             </TouchableOpacity>
-          </>
-        )}
-
-        {/* Bank Transfer Section */}
-        {fundingMethod === "transfer" && (
-          <>
-            {isLoadingDepositAccount ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="green" />
-                <Text style={styles.loadingText}>
-                  Loading account details...
-                </Text>
-              </View>
-            ) : depositAccountError ? (
-              <View style={styles.errorContainer}>
-                <Icon name="error-outline" size={48} color="#DC3545" />
-                <Text style={styles.errorText}>
-                  Failed to load account details
-                </Text>
-                <TouchableOpacity
-                  style={styles.retryButton}
-                  onPress={refetchDepositAccount}
-                >
-                  <Text style={styles.retryButtonText}>Retry</Text>
-                </TouchableOpacity>
-              </View>
-            ) : accountDetails ? (
-              <View style={styles.virtualAccountCard}>
-                <TouchableOpacity
-                  style={styles.virtualAccountHeader}
-                  onPress={() =>
-                    setIsVirtualAccountExpanded(!isVirtualAccountExpanded)
-                  }
-                  activeOpacity={0.7}
-                >
-                  <Icon name="account-balance" size={24} color="#4CAF50" />
-                  <Text style={styles.virtualAccountTitle}>
-                    Your Deposit Account
-                  </Text>
-                  <Icon
-                    name={
-                      isVirtualAccountExpanded
-                        ? "keyboard-arrow-up"
-                        : "keyboard-arrow-down"
-                    }
-                    size={24}
-                    color="#666"
-                    style={{ marginLeft: "auto" }}
-                  />
-                </TouchableOpacity>
-
-                {isVirtualAccountExpanded && (
-                  <View style={styles.virtualAccountDetails}>
-                    {/* Account Status Badge */}
-                    <View style={styles.statusBadge}>
-                      <View
-                        style={[
-                          styles.statusDot,
-                          accountDetails.status === "ACTIVE" &&
-                            styles.statusDotActive,
-                        ]}
-                      />
-                      <Text style={styles.statusText}>
-                        {accountDetails.status}
-                      </Text>
-                    </View>
-
-                    <View style={styles.accountDetailRow}>
-                      <Text style={styles.accountDetailLabel}>
-                        Account Name:
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.copyButton}
-                        onPress={() =>
-                          handleCopyToClipboard(accountDetails.name)
-                        }
-                      >
-                        <Text style={styles.accountDetailValue}>
-                          {accountDetails.name}
-                        </Text>
-                        <Icon
-                          name="content-copy"
-                          size={16}
-                          color="#666"
-                          style={styles.copyIcon}
-                        />
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.accountDetailRow}>
-                      <Text style={styles.accountDetailLabel}>
-                        Account Number:
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.copyButton}
-                        onPress={() =>
-                          handleCopyToClipboard(accountDetails.accountNumber)
-                        }
-                      >
-                        <Text style={styles.accountDetailValue}>
-                          {accountDetails.accountNumber}
-                        </Text>
-                        <Icon
-                          name="content-copy"
-                          size={16}
-                          color="#666"
-                          style={styles.copyIcon}
-                        />
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.accountDetailRow}>
-                      <Text style={styles.accountDetailLabel}>Bank Name:</Text>
-                      <Text style={styles.accountDetailValue}>
-                        {accountDetails.bank.name}
-                      </Text>
-                    </View>
-
-                    <View style={styles.accountInfo}>
-                      <Icon name="info" size={16} color="#FF9800" />
-                      <Text style={styles.accountInfoText}>
-                        Transfer money to this account to fund your wallet
-                        automatically. Funds reflect instantly.
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              </View>
-            ) : (
-              <View style={styles.noAccountContainer}>
-                <Icon name="account-balance-wallet" size={48} color="#999" />
-                <Text style={styles.noAccountText}>
-                  No deposit account found
-                </Text>
-                <Text style={styles.noAccountSubtext}>
-                  Complete your onboarding to create a deposit account
-                </Text>
-              </View>
-            )}
           </>
         )}
       </ScrollView>

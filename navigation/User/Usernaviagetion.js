@@ -49,7 +49,7 @@ import DomesticDetail from "../../screens/Customerinterface/DomesticStaff/Domest
 import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
 import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
 import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
-import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
+// import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
 import Errand from "../../screens/Customerinterface/Errands/Errand";
 import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDetailScreen";
 import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
@@ -75,6 +75,8 @@ import CreateBankAccount from "../../App/General/Ajo/Screen/Banking/CreateBankAc
 import KYCForm from "../../App/General/Ajo/Screen/Banking/KYCForm";
 import CreateDepositAccount from "../../App/General/Ajo/Screen/Banking/CreateDepositAccount";
 import HouseholdDues from "../../screens/Customerinterface/Wallet/HouseholdDues";
+import CreateVirtualAccountScreen from "../../screens/Customerinterface/Wallet/CreateVirtualAccountScreen";
+import VirtualAccountScreen from "../../screens/Customerinterface/Wallet/VirtualAccountScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -95,7 +97,7 @@ const SingleScreenWithBackButton = (screenName, component, title) => {
     useEffect(() => {
       const backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
-        handleBackPress
+        handleBackPress,
       );
 
       return () => backHandler.remove();
@@ -109,7 +111,7 @@ const SingleScreenWithBackButton = (screenName, component, title) => {
     (navigation) => () => {
       navigation.goBack();
     },
-    []
+    [],
   );
 
   return {
@@ -197,11 +199,6 @@ export const Usernaviagetion = () => {
     },
 
     {
-      name: "duedetails",
-      component: DueDetails,
-      title: "Due Details",
-    },
-    {
       name: "CreatePublicEvent",
       component: CreatePublicEvent,
       title: "Create Public Event",
@@ -262,12 +259,6 @@ export const Usernaviagetion = () => {
     },
 
     {
-      name: "Due",
-      component: HouseholdDues,
-      title: "Due",
-    },
-
-    {
       name: "Airtime",
       component: Airtime,
       title: "Airtime",
@@ -287,6 +278,18 @@ export const Usernaviagetion = () => {
       name: "vendorService",
       component: VendorService,
       title: "Services",
+    },
+
+    {
+      name: "CreateVirtualAccount",
+      component: CreateVirtualAccountScreen,
+      title: "Create Virtual Account",
+    },
+
+    {
+      name: "VirtualAccountScreen",
+      component: VirtualAccountScreen,
+      title: "Virtual Account",
     },
     {
       name: "review",
@@ -441,7 +444,7 @@ export const Usernaviagetion = () => {
       />
 
       {screens.map((screen) =>
-        createScreen(screen.name, screen.component, screen.title)
+        createScreen(screen.name, screen.component, screen.title),
       )}
 
       <Stack.Screen
@@ -868,6 +871,12 @@ export const Usernaviagetion = () => {
       />
 
       <Stack.Screen
+        name="Due"
+        component={HouseholdDues}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
         name="createErrand"
         component={CreateErrandScreen}
         options={{ headerShown: false }}
@@ -877,7 +886,7 @@ export const Usernaviagetion = () => {
         {...SingleScreenWithBackButton(
           "CommentScreen",
           CommentScreen,
-          "Comments"
+          "Comments",
         )}
       />
     </Stack.Navigator>

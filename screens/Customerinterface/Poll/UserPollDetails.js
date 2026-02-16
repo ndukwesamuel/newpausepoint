@@ -14,7 +14,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -34,7 +33,7 @@ const UserPollDetails = () => {
   const { user_data } = useSelector((state) => state.AuthSlice);
   const [loading, setLoading] = useState(true);
   const { get_all_poll_data, get_single_poll_data } = useSelector(
-    (state) => state.PollSlice
+    (state) => state.PollSlice,
   );
 
   useEffect(() => {
@@ -145,7 +144,7 @@ export default UserPollDetails;
 export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const animatedValues = useRef(
-    mainoptions?.options?.map(() => new Animated.Value(0)) || []
+    mainoptions?.options?.map(() => new Animated.Value(0)) || [],
   ).current;
 
   useEffect(() => {
@@ -173,7 +172,7 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
   const getLeadingOption = () => {
     if (!mainoptions?.options || mainoptions.options.length === 0) return null;
     return mainoptions.options.reduce((prev, current) =>
-      prev.votes > current.votes ? prev : current
+      prev.votes > current.votes ? prev : current,
     );
   };
 
@@ -290,8 +289,8 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
                           backgroundColor: isLeading
                             ? "#4CAF50"
                             : isSelected
-                            ? "#4A90E2"
-                            : "#E0E0E0",
+                              ? "#4A90E2"
+                              : "#E0E0E0",
                         },
                       ]}
                     />

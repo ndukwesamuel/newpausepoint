@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -121,7 +120,7 @@ const History = () => {
   }, [dispatch]);
 
   const filteredData = get_all_user_guest_data?.userInvites?.filter((item) =>
-    item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
+    item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase()),
   );
 
   const HistoryItem = ({ itemdata }) => {

@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import Onboarding from "../components/Onboard/Onboading ";
+import Onboarding from "../components/Onboard/Onboading";
 import Registraion from "../screens/Registraion";
 import LoginScreen from "../screens/LoginScreen";
 import ForgottenPasswod from "../screens/ForgottenPasswod";

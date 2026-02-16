@@ -212,6 +212,7 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import AppScreen from "../components/shared/AppScreen";
@@ -343,7 +344,7 @@ const CreatePassword = ({}) => {
               />
             </View>
 
-            <Text style={styles.headerTitle}>Create New Password</Text>
+            <Text style={styles.headerTitle}>Create New Password </Text>
             <Text style={styles.headerSubtitle}>
               Please enter your new password, and ensure to keep it safe.
             </Text>
@@ -441,13 +442,9 @@ const CreatePassword = ({}) => {
             disabled={ResetPassword_Mutation.isPending}
             activeOpacity={0.8}
           >
-            {ResetPassword_Mutation.isPending ? (
+            {!ResetPassword_Mutation.isPending ? (
               <View style={styles.buttonContent}>
-                <MaterialCommunityIcons
-                  name="loading"
-                  size={20}
-                  color="#FFFFFF"
-                />
+                <ActivityIndicator color="white" />
                 <Text style={styles.submitButtonText}>Resetting...</Text>
               </View>
             ) : (

@@ -159,7 +159,7 @@ const ElectricityPaymentScreen = () => {
           Alert.alert("Error", error?.message || "Failed to verify meter");
           setMeterInfo(null);
         },
-      }
+      },
     );
   };
 
@@ -180,7 +180,7 @@ const ElectricityPaymentScreen = () => {
                   "Debt Paid! ✅",
                   `₦${result.data.data.debtPaid.toLocaleString()} deducted\n` +
                     `${result.data.data.unitsRepaid} units restored\n` +
-                    `Wallet: ₦${result.data.data.newWalletBalance.toLocaleString()}`
+                    `Wallet: ₦${result.data.data.newWalletBalance.toLocaleString()}`,
                 );
                 refetchStatus();
               }
@@ -189,7 +189,7 @@ const ElectricityPaymentScreen = () => {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -258,7 +258,7 @@ const ElectricityPaymentScreen = () => {
               onError: (error) => {
                 Alert.alert("Error", error.message || "Purchase failed");
               },
-            }
+            },
           );
         },
       },
@@ -274,9 +274,6 @@ const ElectricityPaymentScreen = () => {
   const handleWalletUnitsChange = (text) => {
     const numericText = text.replace(/[^0-9]/g, "");
     const num = Number(numericText) || 0;
-    console.log({
-      tyuuu: statusData,
-    });
 
     if (numericText === "" || num <= statusData.maxWalletUnits) {
       setWalletUnits(numericText);
@@ -807,7 +804,7 @@ const ElectricityPaymentScreen = () => {
                     (v, i, a) =>
                       a.indexOf(v) === i &&
                       v > 0 &&
-                      v <= (statusData.maxWalletUnits || 0)
+                      v <= (statusData.maxWalletUnits || 0),
                   )
                   .slice(0, 4)
                   .map((unit) => (
@@ -1117,8 +1114,8 @@ const ElectricityPaymentScreen = () => {
               backgroundColor: isBuying
                 ? "#9CA3AF"
                 : useEmergency
-                ? "#F59E0B"
-                : "#3B82F6",
+                  ? "#F59E0B"
+                  : "#3B82F6",
               borderRadius: 16,
               paddingVertical: 18,
               elevation: 5,
