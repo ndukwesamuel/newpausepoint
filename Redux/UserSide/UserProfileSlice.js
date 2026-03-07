@@ -3,11 +3,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+const API_BASEURL = API_CONFIG?.BASE_URL; //process.env.EXPO_PUBLIC_API_URL;
 
 import { AnyIfEmpty } from "react-redux";
 import Toast from "react-native-toast-message";
 import { handleApiError } from "../shareApi";
+import { API_CONFIG } from "../../api";
 
 // import { Alert } from "react-native";
 
@@ -31,54 +32,24 @@ export const Get_User_Profle_Fun = createAsyncThunk(
   "UserProfileSlice/Get_User_Profle_Fun",
   async (_, thunkAPI) => {
     try {
-      let mydata = thunkAPI.getState().AuthSlice.user_data;
+      let token = thunkAPI.getState().authSlice?.userDatav2?.data?.token;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${mydata?.token}`,
+          Authorization: `Bearer ${token}`,
         },
       };
 
-      const response = await axios.get(`${API_BASEURL}profile`, config);
+      const response = await axios.get(`${API_BASEURL}api/v1/user`, config);
 
       return response.data;
     } catch (error) {
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
     }
-  }
-);
-
-export const Profle_Fun = createAsyncThunk(
-  "UserProfileSlice/Profle_Fun",
-  async (_, thunkAPI) => {
-    try {
-      let mydata = thunkAPI.getState().AuthSlice.user_data;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          // Authorization: `Bearer ${mydata?.token}`,
-        },
-      };
-
-      const response = await axios.get(`https://102.89.43.151:5050`);
-      console.log({
-        uuuu: response,
-      });
-
-      return response.data;
-    } catch (error) {
-      console.log({
-        eee: error,
-      });
-      const errorMessage = handleApiError(error);
-      return thunkAPI.rejectWithValue(errorMessage);
-    }
-  }
+  },
 );
 
 export const Get_All_User_Profle_Fun = createAsyncThunk(
@@ -97,7 +68,7 @@ export const Get_All_User_Profle_Fun = createAsyncThunk(
 
       const response = await axios.get(
         `${API_BASEURL}clan/usergetMember`,
-        config
+        config,
       );
 
       console.log({
@@ -108,7 +79,7 @@ export const Get_All_User_Profle_Fun = createAsyncThunk(
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 export const UserProfileSlice = createSlice({

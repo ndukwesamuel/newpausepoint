@@ -19,7 +19,6 @@ import LottieView from "lottie-react-native";
 // UPDATED IMPORT: Use @tanstack/react-query instead of react-query
 import { useMutation } from "@tanstack/react-query";
 // ------------------------------------------------------------------
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -47,7 +46,12 @@ import QRCode from "react-native-qrcode-svg";
 import ViewShot from "react-native-view-shot";
 // import Share from "react-nat
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
+import { API_CONFIG } from "../../../api";
 
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 const GuestsDetail = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -60,7 +64,7 @@ const GuestsDetail = () => {
   const animation = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { get_all_user_guest_data, get_user_guest_detail_data } = useSelector(
-    (state) => state?.GuestSlice
+    (state) => state?.GuestSlice,
   );
 
   const {
@@ -78,7 +82,7 @@ const GuestsDetail = () => {
   }, [dispatch, itemdata?._id]); // Added dispatch and itemdata?._id to dependency array
 
   const filteredData = get_all_user_guest_data?.userInvites?.filter((item) =>
-    item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
+    item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase()),
   );
 
   // ------------------------------------------------------------------
@@ -255,7 +259,7 @@ const GuestsDetail = () => {
               setModalVisible(true);
               // Set the QR code value to the JSON string of the invitation data
               const jsonString = JSON.stringify(
-                get_user_guest_detail_data?.invitation
+                get_user_guest_detail_data?.invitation,
               );
               setQRCodeValue(jsonString);
             }}

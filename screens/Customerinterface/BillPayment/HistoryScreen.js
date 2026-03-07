@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFetchData } from "../../../hooks/Request";
 import { useNavigation } from "@react-navigation/native";
 import ReceiptPDF from "./ReceiptPDF";
+import { useFetchData_v2 } from "../../../hooks/Requestv2";
 
 const { width, height } = Dimensions.get("window");
 
@@ -31,7 +32,11 @@ export default function HistoryScreen() {
     isLoading,
     error,
     refetch, // Get refetch function from useFetchData
-  } = useFetchData("api/captain", "history_info");
+  } = useFetchData_v2("api/v1/captain/electricty", "history_info");
+
+  console.log({
+    uuuu: history_info,
+  });
 
   // Handle pull-to-refresh
   const onRefresh = React.useCallback(async () => {

@@ -15,12 +15,12 @@ import {
   Clipboard,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useDispatch, useSelector } from "react-redux";
-import { useFetchData } from "../../../hooks/Request";
-import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import { useFetchData_v2 } from "../../../hooks/Requestv2";
+import { Get_User_Profle_Fun } from "../../../Redux/UserSide/UserProfileSlice";
 
 const FundWalletScreen = ({ navigation }) => {
   // State for Paystack payment
@@ -32,33 +32,19 @@ const FundWalletScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // State for funding method selection
-  const [fundingMethod, setFundingMethod] = useState("transfer"); // Default to 'transfer'
+  const [fundingMethod, setFundingMethod] = useState("transfer");
   const [isVirtualAccountExpanded, setIsVirtualAccountExpanded] =
     useState(true);
+  const [isSafeHavenExpanded, setIsSafeHavenExpanded] = useState(true);
 
   const dispatch = useDispatch();
   const webViewRef = useRef(null);
 
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-  const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
+  const { get_user_profile_data } = useSelector(
+    (state) => state.UserProfileSlice,
+  );
 
-  // Fetch wallet data
-  const {
-    data: walletData,
-    isLoading: isLoadingData,
-    error: walletError,
-    refetch: refetchWallet,
-  } = useFetchData("wallet", "wallet");
-
-  console.log({
-    jajaj: walletData,
-  });
+  const { userDatav2 } = useSelector((state) => state.authSlice);
 
   // Fetch BlueSalt bank account data
   const {
@@ -69,15 +55,24 @@ const FundWalletScreen = ({ navigation }) => {
   } = useFetchData_v2("api/v1/bluesalt", "blueSaltAccount");
 
   console.log({
-    iiiii: blueSaltAccountData,
+    ttt: get_user_profile_data?.data?.user?._id,
+    xxx: userDatav2?.data?.token,
   });
 
-  // Extract BlueSalt account details
+  // Fetch SafeHaven virtual account data
+  const {
+    data: safeHavenAccountData,
+    isLoading: isLoadingSafeHaven,
+    error: safeHavenError,
+    refetch: refetchSafeHaven,
+  } = useFetchData_v2("api/v1/savehaven", "virtual-account");
+
+  // Extract account details
   const blueSaltAccount = blueSaltAccountData;
-
-  console.log({
-    blueSaltAccount: blueSaltAccount,
-  });
+  const hasSafeHavenAccount =
+    safeHavenAccountData?.data &&
+    Object.keys(safeHavenAccountData?.data).length > 0;
+  const safeHavenAccount = safeHavenAccountData?.data;
 
   // Calculate transaction fee for Paystack
   const calculateFee = useCallback((amount) => {
@@ -103,9 +98,9 @@ const FundWalletScreen = ({ navigation }) => {
   }, []);
 
   // Handle copy to clipboard
-  const handleCopyToClipboard = useCallback((text) => {
+  const handleCopyToClipboard = useCallback((text, label = "Text") => {
     Clipboard.setString(text);
-    Alert.alert("Copied!", "Copied to clipboard");
+    Alert.alert("Copied!", `${label} copied to clipboard`);
   }, []);
 
   // Handle Paystack payment
@@ -123,18 +118,18 @@ const FundWalletScreen = ({ navigation }) => {
         "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/wallet/fund",
         {
           amount: parseFloat(amount),
-          userid: userProfile_data?.user?._id,
+          userid: get_user_profile_data?.data?.user?._id,
         },
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user_data?.token}`,
+            // Authorization: `Bearer ${user_data?.token}`,
+            Authorization: `Bearer ${userDatav2?.data?.token}`,
+            // this token is wrong for it but we will manage
           },
           timeout: 30000,
         },
       );
-
-      console.log("Payment initialization response:", response.data?.data);
 
       if (response.data?.data) {
         setwebviewstart(true);
@@ -175,15 +170,12 @@ const FundWalletScreen = ({ navigation }) => {
   const onNavigationStateChange = useCallback(
     (navState) => {
       const { url, loading } = navState;
-      console.log("WebView Navigation State Changed:", url);
 
       if (!loading) {
         setWebviewLoading(false);
       }
 
-      // Handle Paystack redirects
       if (url.includes("https://standard.paystack.co/close")) {
-        console.log("Paystack close URL detected");
         setwebviewstart(false);
         Alert.alert(
           "Payment Completed",
@@ -192,7 +184,7 @@ const FundWalletScreen = ({ navigation }) => {
             {
               text: "OK",
               onPress: () => {
-                refetchWallet();
+                // refetchWallet();
                 navigation.goBack();
               },
             },
@@ -202,13 +194,12 @@ const FundWalletScreen = ({ navigation }) => {
       }
 
       if (url.includes("payment-success")) {
-        console.log("Success callback detected");
         setwebviewstart(false);
         Alert.alert("Success!", "Payment completed successfully!", [
           {
             text: "OK",
             onPress: () => {
-              refetchWallet();
+              // refetchWallet();
               navigation.goBack();
             },
           },
@@ -217,7 +208,6 @@ const FundWalletScreen = ({ navigation }) => {
       }
 
       if (url.includes("payment-cancel")) {
-        console.log("Cancel callback detected");
         setwebviewstart(false);
         Alert.alert("Cancelled", "Payment was cancelled.", [
           {
@@ -230,7 +220,7 @@ const FundWalletScreen = ({ navigation }) => {
 
       return true;
     },
-    [navigation, refetchWallet],
+    [navigation],
   );
 
   const handleBackFromWebView = useCallback(() => {
@@ -262,7 +252,7 @@ const FundWalletScreen = ({ navigation }) => {
   const totalAmount = parseFloat(amount || 0) + totalFee;
 
   useEffect(() => {
-    dispatch(UserProfile_data_Fun());
+    dispatch(Get_User_Profle_Fun());
     return () => {};
   }, [dispatch]);
 
@@ -330,7 +320,7 @@ const FundWalletScreen = ({ navigation }) => {
         <View style={styles.methodSelectionContainer}>
           <Text style={styles.methodSelectionTitle}>Choose Funding Method</Text>
           <View style={styles.methodButtons}>
-            {/* Bank Transfer Button - LEFT */}
+            {/* Bank Transfer Button */}
             <TouchableOpacity
               style={[
                 styles.methodButton,
@@ -353,7 +343,7 @@ const FundWalletScreen = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            {/* Paystack Button - RIGHT */}
+            {/* Paystack Button */}
             <TouchableOpacity
               style={[
                 styles.methodButton,
@@ -381,18 +371,178 @@ const FundWalletScreen = ({ navigation }) => {
         {/* Bank Transfer Section */}
         {fundingMethod === "transfer" && (
           <>
+            {/* SafeHaven Account Section */}
+            {isLoadingSafeHaven ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="green" />
+                <Text style={styles.loadingText}>
+                  Loading SafeHaven account...
+                </Text>
+              </View>
+            ) : safeHavenError ? (
+              <View style={styles.errorContainer}>
+                <Icon name="error-outline" size={48} color="#DC3545" />
+                <Text style={styles.errorText}>
+                  Failed to load SafeHaven account
+                </Text>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={refetchSafeHaven}
+                >
+                  <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            ) : !hasSafeHavenAccount ? (
+              // No SafeHaven Account - Show Create Prompt
+              <TouchableOpacity
+                style={styles.createAccountCard}
+                onPress={() => navigation.navigate("CreateVirtualAccount")}
+                activeOpacity={0.7}
+              >
+                <View style={styles.createAccountIconCircle}>
+                  <MaterialCommunityIcons
+                    name="bank-plus"
+                    size={40}
+                    color="#10B981"
+                  />
+                </View>
+                <View style={styles.createAccountContent}>
+                  <Text style={styles.createAccountTitle}>
+                    Create Safe Haven Account
+                  </Text>
+                  <Text style={styles.createAccountDescription}>
+                    Get instant funding from any bank with your dedicated
+                    account number
+                  </Text>
+                </View>
+                <Icon name="arrow-forward-ios" size={24} color="#10B981" />
+              </TouchableOpacity>
+            ) : (
+              // Has SafeHaven Account - Show Account Details
+              <View style={styles.virtualAccountCard}>
+                <TouchableOpacity
+                  style={styles.virtualAccountHeader}
+                  onPress={() => setIsSafeHavenExpanded(!isSafeHavenExpanded)}
+                  activeOpacity={0.7}
+                >
+                  <MaterialCommunityIcons
+                    name="bank"
+                    size={24}
+                    color="#10B981"
+                  />
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={styles.virtualAccountTitle}>
+                      Safe Haven Account
+                    </Text>
+                    <View style={styles.statusBadge}>
+                      <View
+                        style={[styles.statusDot, styles.statusDotActive]}
+                      />
+                      <Text style={styles.statusText}>Active</Text>
+                    </View>
+                  </View>
+                  <Icon
+                    name={
+                      isSafeHavenExpanded
+                        ? "keyboard-arrow-up"
+                        : "keyboard-arrow-down"
+                    }
+                    size={24}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+
+                {isSafeHavenExpanded && (
+                  <View style={styles.virtualAccountDetails}>
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>
+                        Account Number:
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={() =>
+                          handleCopyToClipboard(
+                            safeHavenAccount.accountNumber,
+                            "Account number",
+                          )
+                        }
+                      >
+                        <Text style={styles.accountDetailValue}>
+                          {safeHavenAccount.accountNumber}
+                        </Text>
+                        <Icon
+                          name="content-copy"
+                          size={16}
+                          color="#6366F1"
+                          style={styles.copyIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>
+                        Account Name:
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={() =>
+                          handleCopyToClipboard(
+                            safeHavenAccount.accountName,
+                            "Account name",
+                          )
+                        }
+                      >
+                        <Text style={styles.accountDetailValue}>
+                          {safeHavenAccount.accountName}
+                        </Text>
+                        <Icon
+                          name="content-copy"
+                          size={16}
+                          color="#6366F1"
+                          style={styles.copyIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>Bank Name:</Text>
+                      <Text style={styles.accountDetailValue}>
+                        {safeHavenAccount.bankName}
+                      </Text>
+                    </View>
+
+                    <View style={styles.accountDetailRow}>
+                      <Text style={styles.accountDetailLabel}>Bank Code:</Text>
+                      <Text style={styles.accountDetailValue}>
+                        {safeHavenAccount.bankCode}
+                      </Text>
+                    </View>
+
+                    <View style={styles.accountInfo}>
+                      <Icon name="info" size={16} color="#10B981" />
+                      <Text style={styles.accountInfoText}>
+                        Transfer to this account to fund your wallet instantly
+                        with no fees. Available 24/7.
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* BlueSalt Account Section (Alternative) */}
             {isLoadingBlueSalt ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="green" />
                 <Text style={styles.loadingText}>
-                  Loading account details...
+                  Loading BlueSalt account...
                 </Text>
               </View>
             ) : blueSaltError ? (
               <View style={styles.errorContainer}>
                 <Icon name="error-outline" size={48} color="#DC3545" />
                 <Text style={styles.errorText}>
-                  Failed to load account details
+                  Failed to load BlueSalt account
                 </Text>
                 <TouchableOpacity
                   style={styles.retryButton}
@@ -412,7 +562,7 @@ const FundWalletScreen = ({ navigation }) => {
                 >
                   <Icon name="account-balance" size={24} color="#4CAF50" />
                   <Text style={styles.virtualAccountTitle}>
-                    Your Dedicated Account
+                    BlueSalt Account (Alternative)
                   </Text>
                   <Icon
                     name={
@@ -435,7 +585,10 @@ const FundWalletScreen = ({ navigation }) => {
                       <TouchableOpacity
                         style={styles.copyButton}
                         onPress={() =>
-                          handleCopyToClipboard(blueSaltAccount.accountName)
+                          handleCopyToClipboard(
+                            blueSaltAccount.accountName,
+                            "Account name",
+                          )
                         }
                       >
                         <Text style={styles.accountDetailValue}>
@@ -457,7 +610,10 @@ const FundWalletScreen = ({ navigation }) => {
                       <TouchableOpacity
                         style={styles.copyButton}
                         onPress={() =>
-                          handleCopyToClipboard(blueSaltAccount.accountNumber)
+                          handleCopyToClipboard(
+                            blueSaltAccount.accountNumber,
+                            "Account number",
+                          )
                         }
                       >
                         <Text style={styles.accountDetailValue}>
@@ -489,15 +645,7 @@ const FundWalletScreen = ({ navigation }) => {
                   </View>
                 )}
               </View>
-            ) : (
-              <View style={styles.noAccountContainer}>
-                <Icon name="account-balance-wallet" size={48} color="#999" />
-                <Text style={styles.noAccountText}>No bank account found</Text>
-                <Text style={styles.noAccountSubtext}>
-                  Complete your onboarding to get a dedicated account
-                </Text>
-              </View>
-            )}
+            ) : null}
           </>
         )}
 
@@ -698,32 +846,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F9FA",
   },
-  balanceCard: {
-    backgroundColor: "#FFFFFF",
-    margin: 20,
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  balanceContent: {
-    alignItems: "center",
-  },
-  balanceLabel: {
-    fontSize: 14,
-    color: "#6C757D",
-    marginTop: 12,
-  },
-  balanceAmount: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "green",
-    marginTop: 4,
-  },
   methodSelectionContainer: {
     backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
@@ -772,6 +894,63 @@ const styles = StyleSheet.create({
   methodButtonTextActive: {
     color: "#FFFFFF",
   },
+
+  // Create Account Card Styles
+  createAccountCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: "#D1FAE5",
+    borderStyle: "dashed",
+  },
+  createAccountIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  createAccountContent: {
+    flex: 1,
+  },
+  createAccountTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 6,
+  },
+  createAccountDescription: {
+    fontSize: 13,
+    color: "#6B7280",
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  benefitsContainer: {
+    gap: 6,
+  },
+  benefitItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  benefitText: {
+    fontSize: 12,
+    color: "#10B981",
+    fontWeight: "500",
+  },
+
   inputSection: {
     backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
@@ -983,28 +1162,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  noAccountContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-    backgroundColor: "#FFF",
-    marginHorizontal: 20,
-    borderRadius: 16,
-    marginBottom: 20,
-  },
-  noAccountText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "600",
-  },
-  noAccountSubtext: {
-    marginTop: 8,
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    paddingHorizontal: 32,
-  },
 
   // Virtual Account Styles
   virtualAccountCard: {
@@ -1028,10 +1185,9 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   virtualAccountTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginLeft: 10,
-    color: "#4CAF50",
+    color: "#10B981",
   },
   virtualAccountDetails: {
     gap: 12,
@@ -1041,23 +1197,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "flex-start",
     backgroundColor: "#D1FAE5",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginBottom: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 4,
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: "#9CA3AF",
-    marginRight: 6,
+    marginRight: 4,
   },
   statusDotActive: {
     backgroundColor: "#10B981",
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     color: "#10B981",
   },
@@ -1068,7 +1224,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   accountDetailLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666",
     fontWeight: "500",
   },
@@ -1088,14 +1244,14 @@ const styles = StyleSheet.create({
   accountInfo: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#FFF3E0",
+    backgroundColor: "#ECFDF5",
     padding: 12,
     borderRadius: 8,
     marginTop: 8,
   },
   accountInfoText: {
     fontSize: 12,
-    color: "#E65100",
+    color: "#065F46",
     marginLeft: 8,
     flex: 1,
     lineHeight: 16,

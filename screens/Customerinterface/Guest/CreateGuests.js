@@ -1,3 +1,6 @@
+
+
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,9 +12,6 @@ import {
   ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-
-import { Ionicons, AntDesign } from "@expo/vector-icons";
-
 import {
   FormLabel,
   Formbutton,
@@ -20,24 +20,14 @@ import {
 } from "../../../components/shared/InputForm";
 import AppScreen from "../../../components/shared/AppScreen";
 import { RegularFontText } from "../../../components/shared/Paragrahp";
-import { formatDateString } from "../../../utils/DateTime";
-import LottieView from "lottie-react-native";
-
-// ------------------------------------------------------------------
-// UPDATED IMPORT: Use @tanstack/react-query instead of react-query
-import { useMutation } from "@tanstack/react-query";
-// ------------------------------------------------------------------
-
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
 import Toast from "react-native-toast-message";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import {
   Get_All_User_Guest_Fun,
   Get__User_Guest_detail_Fun,
 } from "../../../Redux/UserSide/GuestSlice";
+import { useMutateData_v2 } from "../../../hooks/Requestv2";
 
 const CreateGuests = () => {
   const route = useRoute();
@@ -45,14 +35,6 @@ const CreateGuests = () => {
   const navigation = useNavigation();
 
   const [selectedOption, setSelectedOption] = useState(1);
-  const { user_data } = useSelector((state) => state.AuthSlice);
-
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-
-  const handleRadioSelect = (option) => {
-    setSelectedOption(option);
-  };
-
   const [formData, setFormData] = useState({
     visitation_id: "",
     arrivalDate: new Date(),
@@ -63,19 +45,58 @@ const CreateGuests = () => {
     location: "",
   });
 
+
+
+  console.log({
+    yyyyy:route?.params?.itemdata
+  });
+  
   const [showArrivalDatePicker, setShowArrivalDatePicker] = useState(false);
   const [showArrivalTimePicker, setShowArrivalTimePicker] = useState(false);
   const [showDepartureDatePicker, setShowDepartureDatePicker] = useState(false);
   const [showDepartureTimePicker, setShowDepartureTimePicker] = useState(false);
 
-  const handleInputChange = (field, value) => {
+  // ✅ Single mutation hook for both create and update
+  const visitorMutation = useMutateData_v2(
+    "api/v1/visitor",
+    formData?.visitation_id ? "PATCH" : "POST",
+    ["visitors", "invites"],
+    {
+      onSuccess: () => {
+        Toast.show({
+          type: "success",
+          text1: formData?.visitation_id 
+            ? "Guest updated successfully" 
+            : "Guest invitation created successfully",
+        });
+
+        if (formData?.visitation_id) {
+          dispatch(Get__User_Guest_detail_Fun(formData?.visitation_id));
+        }
+        dispatch(Get_All_User_Guest_Fun());
+        navigation.goBack();
+      },
+      onError: (error: any) => {
+        Toast.show({
+          type: "error",
+          text1: error?.data?.message || "Submission failed",
+        });
+      },
+    }
+  );
+
+  const handleRadioSelect = (option: number) => {
+    setSelectedOption(option);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
     setFormData({
       ...formData,
       [field]: value,
     });
   };
 
-  const showDatePickerModal = (field, type) => {
+  const showDatePickerModal = (field: string, type: string) => {
     if (field === "arrivalDate") {
       type === "date"
         ? setShowArrivalDatePicker(true)
@@ -87,8 +108,12 @@ const CreateGuests = () => {
     }
   };
 
-  const handleDateChange = (event, selectedDate, field, type) => {
-    // Hide picker after selection or dismissal
+  const handleDateChange = (
+    event: any,
+    selectedDate: Date | undefined,
+    field: string,
+    type: string
+  ) => {
     if (field === "arrivalDate") {
       type === "date"
         ? setShowArrivalDatePicker(false)
@@ -124,71 +149,25 @@ const CreateGuests = () => {
   const handleSubmit = () => {
     const genderString = selectedOption === 1 ? "Male" : "Female";
 
-    Guests_Mutation.mutate({
-      clan: userProfile_data?.currentClanMeeting?._id,
+    const payload = {
       arraval: formData?.arrivalDate,
       expires: formData?.departureDate,
       visitor_name: formData?.visitor_name,
       gender: genderString,
       phone_number: formData?.phone_number,
       location: formData?.location,
-    });
+      ...(formData?.visitation_id && { visitorID: formData?.visitation_id }),
+    };
+
+    visitorMutation.mutate(payload);
   };
-
-  // ------------------------------------------------------------------
-  // TanStack Query useMutation
-  // ------------------------------------------------------------------
-  const Guests_Mutation = useMutation({
-    mutationFn: (data_info) => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      let url;
-      if (formData?.visitation_id) {
-        url = `${API_BASEURL}visitor/modify/${formData?.visitation_id}`;
-        return axios.patch(url, data_info, config);
-      } else {
-        url = `${API_BASEURL}visitor/generate-access-code/${data_info?.clan}`;
-        return axios.post(url, data_info, config);
-      }
-    },
-    onSuccess: (success) => {
-      Toast.show({
-        type: "success",
-        text1: "Guest invitation submitted successfully",
-      });
-
-      if (formData?.visitation_id) {
-        dispatch(Get__User_Guest_detail_Fun(formData?.visitation_id));
-      }
-      dispatch(Get_All_User_Guest_Fun());
-      navigation.goBack();
-    },
-    onError: (error) => {
-      console.log({
-        dfdf: error?.response?.data,
-      });
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message || "Submission failed"} `,
-      });
-    },
-  });
-  // ------------------------------------------------------------------
 
   useEffect(() => {
     const guestData = route.params?.itemdata;
 
     if (guestData) {
-      // Set form data for editing an existing guest
       setFormData({
         visitation_id: guestData?._id,
-        // Ensure dates are converted to Date objects
         arrivalDate: new Date(guestData.arraval || Date.now()),
         departureDate: new Date(guestData.expires || Date.now()),
         visitor_name: guestData.visitor_name || "",
@@ -198,10 +177,9 @@ const CreateGuests = () => {
       });
       setSelectedOption(guestData.gender === "Male" ? 1 : 2);
     }
-  }, [route.params?.itemdata]); // Use itemdata from route.params
+  }, [route.params?.itemdata]);
 
-  // Helper function to format date for display in input fields
-  const getFormattedDateTime = (date, mode) => {
+  const getFormattedDateTime = (date: Date, mode: string) => {
     if (!date) return "";
     try {
       const d = new Date(date);
@@ -221,6 +199,7 @@ const CreateGuests = () => {
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View style={{ paddingHorizontal: 20 }}>
+            {/* Name Input */}
             <View style={{ marginBottom: 15 }}>
               <FormLabel data="Name" />
               <Forminput
@@ -231,6 +210,8 @@ const CreateGuests = () => {
                 }
               />
             </View>
+
+            {/* Phone Number Input */}
             <View style={{ marginBottom: 15 }}>
               <FormLabel data="Phone Number" />
               <Forminput
@@ -239,9 +220,11 @@ const CreateGuests = () => {
                 onChangeText={(value) =>
                   handleInputChange("phone_number", value)
                 }
-                keyboardType="numeric" // Added keyboard type
+                keyboardType="numeric"
               />
             </View>
+
+            {/* Gender Selection */}
             <View style={{ marginTop: 15 }}>
               <Text>Choose an option:</Text>
               <View style={{ flexDirection: "row", marginTop: 5 }}>
@@ -254,11 +237,12 @@ const CreateGuests = () => {
                   label="Female"
                   selected={selectedOption === 2}
                   onSelect={() => handleRadioSelect(2)}
-                  inputStyle={[styles.radioButton, { marginLeft: 20 }]} // Added spacing
+                  inputStyle={[styles.radioButton, { marginLeft: 20 }]}
                 />
               </View>
             </View>
-            {/* Arrival Date and Time */}
+
+            {/* Arrival Date */}
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Arrival Date" />
               <TouchableOpacity
@@ -280,6 +264,8 @@ const CreateGuests = () => {
                 />
               )}
             </View>
+
+            {/* Arrival Time */}
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Arrival Time" />
               <TouchableOpacity
@@ -301,7 +287,8 @@ const CreateGuests = () => {
                 />
               )}
             </View>
-            {/* Departure Date and Time */}
+
+            {/* Departure Date */}
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Departure Date" />
               <TouchableOpacity
@@ -328,6 +315,8 @@ const CreateGuests = () => {
                 />
               )}
             </View>
+
+            {/* Departure Time */}
             <View style={{ marginTop: 20 }}>
               <RegularFontText data="Departure Time" />
               <TouchableOpacity
@@ -354,6 +343,8 @@ const CreateGuests = () => {
                 />
               )}
             </View>
+
+            {/* Location Input */}
             <View style={{ marginBottom: 15, marginTop: 20 }}>
               <FormLabel data="Location (Optional)" />
               <Forminput
@@ -362,15 +353,17 @@ const CreateGuests = () => {
                 onChangeText={(value) => handleInputChange("location", value)}
               />
             </View>
+
+            {/* Submit Button */}
             <Formbutton
               buttonStyle={styles.submitButton}
               textStyle={styles.submitButtonText}
               data={formData.visitation_id ? "Update Guest" : "Create Guest"}
               onPress={handleSubmit}
-              // Use Guests_Mutation.isPending for TanStack Query v4/v5
-              isLoading={Guests_Mutation.isPending}
+              isLoading={visitorMutation.isPending}
             />
-            <View style={{ height: 40 }} /> {/* Spacer */}
+
+            <View style={{ height: 40 }} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -407,3 +400,51 @@ const styles = StyleSheet.create({
     fontFamily: "RobotoSlab-Medium",
   },
 });
+// ```
+
+// ---
+
+// ## **What Changed:**
+
+// ### **✅ Removed:**
+// 1. ❌ Old `Guests_Mutation` useMutation hook
+// 2. ❌ Commented out old code
+// 3. ❌ Unused imports (`axios`, `API_BASEURL`)
+// 4. ❌ `createVisitorMutation` (merged into `visitorMutation`)
+
+// ### **✅ Added:**
+// 1. ✅ Single `visitorMutation` hook that handles **both create and update**
+// 2. ✅ Dynamic method: `POST` for create, `PATCH` for update
+// 3. ✅ `onSuccess` and `onError` callbacks in hook options
+// 4. ✅ `visitorID` added to payload for updates
+// 5. ✅ Clean, single source of truth
+
+// ---
+
+// ## **How It Works:**
+
+// ### **Create (No `visitation_id`):**
+// ```
+// POST /api/v1/visitor
+// {
+//   "arraval": "2026-03-06T21:25:29.300Z",
+//   "expires": "2026-03-06T21:25:29.300Z",
+//   "gender": "Male",
+//   "location": "71 bricking",
+//   "phone_number": "08056148116",
+//   "visitor_name": "Lakaka"
+// }
+// ```
+
+// ### **Update (Has `visitation_id`):**
+// ```
+// PATCH /api/v1/visitor
+// {
+//   "arraval": "2026-03-06T21:25:29.300Z",
+//   "expires": "2026-03-06T21:25:29.300Z",
+//   "gender": "Male",
+//   "location": "71 bricking",
+//   "phone_number": "08056148116",
+//   "visitor_name": "Lakaka",
+//   "visitorID": "69abb06050579d1a8051fb86"
+// }

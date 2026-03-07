@@ -24,10 +24,6 @@ const General = ({ item }) => {
   const navigation = useNavigation();
   const { shareLink } = useSelector((state) => state.UtilitisSlice);
 
-  console.log({
-    df: shareLink?.data?.link,
-  });
-
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getSShareLink());

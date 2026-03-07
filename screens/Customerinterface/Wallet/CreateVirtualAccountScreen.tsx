@@ -361,22 +361,26 @@ const CreateVirtualAccountScreen = () => {
         <View style={styles.inputRow}>
           <View style={[styles.inputContainer, { flex: 1, marginRight: 8 }]}>
             <Text style={styles.inputLabel}>First Name</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="John"
-              value={firstName}
-              onChangeText={setFirstName}
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="John"
+                value={firstName}
+                onChangeText={setFirstName}
+              />
+            </View>
           </View>
 
           <View style={[styles.inputContainer, { flex: 1, marginLeft: 8 }]}>
             <Text style={styles.inputLabel}>Last Name</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Doe"
-              value={lastName}
-              onChangeText={setLastName}
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Doe"
+                value={lastName}
+                onChangeText={setLastName}
+              />
+            </View>
           </View>
         </View>
 

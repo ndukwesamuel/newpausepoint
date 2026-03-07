@@ -1,775 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   ActivityIndicator,
-//   Alert,
-//   ScrollView,
-//   Animated,
-// } from "react-native";
-// import { useSelector } from "react-redux";
-// import { useFetchData, useMutateData } from "../../../hooks/Request";
-// import { useNavigation } from "@react-navigation/native";
-
-// const Airtime = () => {
-//   const { user } = useSelector((state) => state.AuthSlice);
-//   const navigation = useNavigation();
-
-//   const [phoneNumber, setPhoneNumber] = useState("");
-//   const [amount, setAmount] = useState("");
-//   const [selectedNetwork, setSelectedNetwork] = useState(null);
-//   const [networks, setNetworks] = useState([]);
-//   const scaleAnim = useState(new Animated.Value(1))[0];
-
-//   const MAX_AMOUNT = 50000;
-//   const SERVICE_CHARGE = 0; // No service charge for airtime
-
-//   const quickAmounts = [100, 200, 500, 1000, 2000, 5000];
-
-//   // Purchase airtime mutation
-//   const { mutate: purchaseAirtime, isLoading: purchaseLoading } = useMutateData(
-//     "api/v1/vtu/purchase",
-//     "POST",
-//     "airtime"
-//   );
-
-//   // Auto-detect network from phone number
-//   const detectNetwork = (phone) => {
-//     const firstFourDigits = phone.substring(0, 4);
-
-//     // MTN prefixes
-//     const mtnPrefixes = [
-//       "0803",
-//       "0806",
-//       "0703",
-//       "0706",
-//       "0813",
-//       "0816",
-//       "0810",
-//       "0814",
-//       "0903",
-//       "0906",
-//       "0913",
-//       "0916",
-//     ];
-//     // Airtel prefixes
-//     const airtelPrefixes = [
-//       "0802",
-//       "0808",
-//       "0708",
-//       "0812",
-//       "0701",
-//       "0902",
-//       "0907",
-//       "0912",
-//     ];
-//     // Glo prefixes
-//     const gloPrefixes = [
-//       "0805",
-//       "0807",
-//       "0705",
-//       "0815",
-//       "0811",
-//       "0905",
-//       "0915",
-//     ];
-//     // 9mobile prefixes
-//     const nineMobilePrefixes = ["0809", "0817", "0818", "0909", "0908"];
-
-//     if (mtnPrefixes.includes(firstFourDigits)) {
-//       return networks.find((n) => n.id === "mtn");
-//     } else if (airtelPrefixes.includes(firstFourDigits)) {
-//       return networks.find((n) => n.id === "airtel");
-//     } else if (gloPrefixes.includes(firstFourDigits)) {
-//       return networks.find((n) => n.id === "glo");
-//     } else if (nineMobilePrefixes.includes(firstFourDigits)) {
-//       return networks.find((n) => n.id === "9mobile");
-//     }
-//     return null;
-//   };
-
-//   const handlePhoneNumberChange = (text) => {
-//     const numericText = text.replace(/[^0-9]/g, "").slice(0, 11);
-//     setPhoneNumber(numericText);
-//   };
-
-//   const handleAmountChange = (text) => {
-//     const numericText = text.replace(/[^0-9]/g, "");
-//     if (numericText === "" || Number(numericText) <= MAX_AMOUNT) {
-//       setAmount(numericText);
-//     }
-//   };
-
-//   const handlePurchase = async () => {
-//     if (!phoneNumber) {
-//       Alert.alert("Error", "Please enter phone number");
-//       return;
-//     }
-
-//     if (phoneNumber.length !== 11) {
-//       Alert.alert("Error", "Phone number must be 11 digits");
-//       return;
-//     }
-
-//     if (!selectedNetwork) {
-//       Alert.alert("Error", "Please select a network");
-//       return;
-//     }
-
-//     if (!amount) {
-//       Alert.alert("Error", "Please enter amount");
-//       return;
-//     }
-
-//     const amountNumber = Number(amount);
-//     if (isNaN(amountNumber) || amountNumber < selectedNetwork.min_amount) {
-//       Alert.alert(
-//         "Error",
-//         `Minimum amount for ${
-//           selectedNetwork.name
-//         } is ₦${selectedNetwork.min_amount.toLocaleString()}`
-//       );
-//       return;
-//     }
-
-//     if (amountNumber > MAX_AMOUNT) {
-//       Alert.alert("Error", `Maximum amount is ₦${MAX_AMOUNT.toLocaleString()}`);
-//       return;
-//     }
-
-//     Alert.alert(
-//       "Confirm Purchase",
-//       `Buy ₦${amountNumber.toLocaleString()} ${
-//         selectedNetwork.name
-//       } airtime for ${phoneNumber}?`,
-//       [
-//         { text: "Cancel", style: "cancel" },
-//         { text: "Confirm", onPress: () => processPurchase() },
-//       ]
-//     );
-//   };
-
-//   const processPurchase = () => {
-//     const data = {
-//       phone: phoneNumber,
-//       amount: amount,
-//       network: selectedNetwork.id,
-//     };
-
-//     console.log({
-//       ccc: data,
-//     });
-
-//     purchaseAirtime(data, {
-//       onSuccess: (response) => {
-//         Alert.alert(
-//           "Purchase Successful! 🎉",
-//           `₦${amount} airtime has been sent to ${phoneNumber}`,
-//           [{ text: "OK", onPress: () => navigation.goBack() }]
-//         );
-//       },
-//       onError: (error) => {
-//         console.log({
-//           cncnc: error.message,
-//         });
-//         Alert.alert("Purchase Failed", error.message);
-//       },
-//     });
-//   };
-
-//   const getProgressPercentage = () => {
-//     if (!amount || !selectedNetwork) return 0;
-//     const numAmount = Number(amount);
-//     return Math.min((numAmount / MAX_AMOUNT) * 100, 100);
-//   };
-
-//   const getProgressColor = () => {
-//     const percentage = getProgressPercentage();
-//     if (percentage < 25) return "#3B82F6";
-//     if (percentage < 50) return "#10B981";
-//     if (percentage < 75) return "#F59E0B";
-//     return "#A855F7";
-//   };
-
-//   const isValidAmount =
-//     amount &&
-//     selectedNetwork &&
-//     Number(amount) >= selectedNetwork.min_amount &&
-//     Number(amount) <= MAX_AMOUNT;
-
-//   const networkIcons = {
-//     mtn: "📱",
-//     airtel: "📞",
-//     glo: "☎️",
-//     "9mobile": "📲",
-//   };
-
-//   const networkColors = {
-//     mtn: "#FFCC00",
-//     airtel: "#EF4444",
-//     glo: "#10B981",
-//     "9mobile": "#059669",
-//   };
-
-//   return (
-//     <ScrollView
-//       style={{ flex: 1, backgroundColor: "#F8FAFC" }}
-//       contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
-//     >
-//       {/* Header Card */}
-//       <View
-//         style={{
-//           backgroundColor: "white",
-//           borderRadius: 24,
-//           padding: 20,
-//           marginBottom: 20,
-//           shadowColor: "#000",
-//           shadowOffset: { width: 0, height: 4 },
-//           shadowOpacity: 0.1,
-//           shadowRadius: 12,
-//           elevation: 5,
-//         }}
-//       >
-//         <View
-//           style={{
-//             flexDirection: "row",
-//             alignItems: "center",
-//             marginBottom: 20,
-//           }}
-//         >
-//           <View
-//             style={{
-//               width: 48,
-//               height: 48,
-//               borderRadius: 16,
-//               backgroundColor: "#3B82F6",
-//               justifyContent: "center",
-//               alignItems: "center",
-//               marginRight: 12,
-//             }}
-//           >
-//             <Text style={{ fontSize: 24 }}>📱</Text>
-//           </View>
-//           <View style={{ flex: 1 }}>
-//             <Text
-//               style={{ fontSize: 20, fontWeight: "bold", color: "#1F2937" }}
-//             >
-//               Buy Airtime
-//             </Text>
-//             <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-//               Fast & secure airtime purchase
-//             </Text>
-//           </View>
-//         </View>
-
-//         {/* Phone Number Input */}
-//         <Text
-//           style={{
-//             fontSize: 14,
-//             fontWeight: "600",
-//             color: "#374151",
-//             marginBottom: 8,
-//           }}
-//         >
-//           📞 Phone Number
-//         </Text>
-//         <TextInput
-//           value={phoneNumber}
-//           onChangeText={handlePhoneNumberChange}
-//           placeholder="Enter 11-digit phone number"
-//           keyboardType="numeric"
-//           maxLength={11}
-//           style={{
-//             borderWidth: 2,
-//             borderColor: phoneNumber.length === 11 ? "#3B82F6" : "#E5E7EB",
-//             borderRadius: 12,
-//             paddingHorizontal: 16,
-//             paddingVertical: 12,
-//             fontSize: 16,
-//             backgroundColor: selectedNetwork ? "#EFF6FF" : "#F9FAFB",
-//             marginBottom: 8,
-//           }}
-//         />
-
-//         {phoneNumber.length > 0 && phoneNumber.length !== 11 && (
-//           <Text style={{ color: "#F59E0B", fontSize: 12, marginTop: 4 }}>
-//             ⚠️ {phoneNumber.length}/11 digits entered
-//           </Text>
-//         )}
-//       </View>
-
-//       {/* Network Selection */}
-//       <View
-//         style={{
-//           backgroundColor: "white",
-//           borderRadius: 24,
-//           padding: 20,
-//           marginBottom: 20,
-//           shadowColor: "#000",
-//           shadowOffset: { width: 0, height: 4 },
-//           shadowOpacity: 0.1,
-//           shadowRadius: 12,
-//           elevation: 5,
-//         }}
-//       >
-//         <Text
-//           style={{
-//             fontSize: 14,
-//             fontWeight: "600",
-//             color: "#374151",
-//             marginBottom: 12,
-//           }}
-//         >
-//           🌐 Select Network
-//         </Text>
-
-//         <View
-//           style={{
-//             flexDirection: "row",
-//             flexWrap: "wrap",
-//             gap: 10,
-//           }}
-//         >
-//           {[
-//             {
-//               id: "mtn",
-//               name: "MTN Nigeria",
-//               min_amount: 100,
-//             },
-//             {
-//               id: "airtel",
-//               name: "Airtel Nigeria",
-//               min_amount: 100,
-//             },
-//             {
-//               id: "glo",
-//               name: "Glo Nigeria",
-//               min_amount: 100,
-//             },
-//             {
-//               id: "9mobile",
-//               name: "9mobile",
-//               min_amount: 100,
-//             },
-//           ].map((network) => (
-//             <TouchableOpacity
-//               key={network.id}
-//               onPress={() => setSelectedNetwork(network)}
-//               style={{
-//                 flex: 1,
-//                 minWidth: "45%",
-//                 backgroundColor:
-//                   selectedNetwork?.id === network.id
-//                     ? networkColors[network.id] || "#3B82F6"
-//                     : "#F3F4F6",
-//                 borderRadius: 16,
-//                 padding: 16,
-//                 alignItems: "center",
-//                 borderWidth: 2,
-//                 borderColor:
-//                   selectedNetwork?.id === network.id
-//                     ? networkColors[network.id] || "#3B82F6"
-//                     : "#E5E7EB",
-//               }}
-//             >
-//               <Text
-//                 style={{
-//                   fontSize: 14,
-//                   fontWeight: "700",
-//                   color:
-//                     selectedNetwork?.id === network.id ? "#fff" : "#374151",
-//                   textAlign: "center",
-//                 }}
-//               >
-//                 {network.name}
-//               </Text>
-//             </TouchableOpacity>
-//           ))}
-//         </View>
-//       </View>
-
-//       {/* Selected Network Info */}
-//       {selectedNetwork && (
-//         <Animated.View
-//           style={{
-//             transform: [{ scale: scaleAnim }],
-//             backgroundColor: "#ECFDF5",
-//             borderRadius: 20,
-//             padding: 16,
-//             marginBottom: 20,
-//             borderLeftWidth: 4,
-//             borderLeftColor: networkColors[selectedNetwork.id] || "#10B981",
-//           }}
-//         >
-//           <View style={{ flexDirection: "row", alignItems: "center" }}>
-//             <View
-//               style={{
-//                 width: 40,
-//                 height: 40,
-//                 borderRadius: 20,
-//                 backgroundColor: networkColors[selectedNetwork.id] || "#10B981",
-//                 justifyContent: "center",
-//                 alignItems: "center",
-//                 marginRight: 12,
-//               }}
-//             >
-//               <Text style={{ fontSize: 20 }}>✓</Text>
-//             </View>
-//             <View style={{ flex: 1 }}>
-//               <Text
-//                 style={{
-//                   fontSize: 16,
-//                   fontWeight: "700",
-//                   color: "#065F46",
-//                 }}
-//               >
-//                 {selectedNetwork.name} Selected
-//               </Text>
-//               <Text style={{ fontSize: 13, color: "#374151", marginTop: 2 }}>
-//                 Minimum amount: ₦{selectedNetwork.min_amount.toLocaleString()}
-//               </Text>
-//             </View>
-//           </View>
-//         </Animated.View>
-//       )}
-
-//       {/* Amount Input Card */}
-//       <View
-//         style={{
-//           backgroundColor: "white",
-//           borderRadius: 24,
-//           padding: 20,
-//           marginBottom: 20,
-//           shadowColor: "#000",
-//           shadowOffset: { width: 0, height: 4 },
-//           shadowOpacity: 0.1,
-//           shadowRadius: 12,
-//           elevation: 5,
-//         }}
-//       >
-//         <Text
-//           style={{
-//             fontSize: 14,
-//             fontWeight: "600",
-//             color: "#374151",
-//             marginBottom: 8,
-//           }}
-//         >
-//           💰 Amount
-//           {selectedNetwork &&
-//             ` (₦${selectedNetwork.min_amount.toLocaleString()} - ₦${MAX_AMOUNT.toLocaleString()})`}
-//         </Text>
-
-//         <View style={{ position: "relative", marginBottom: 16 }}>
-//           <Text
-//             style={{
-//               position: "absolute",
-//               left: 16,
-//               top: 16,
-//               fontSize: 28,
-//               fontWeight: "bold",
-//               color: amount ? "#1F2937" : "#D1D5DB",
-//               zIndex: 1,
-//             }}
-//           >
-//             ₦
-//           </Text>
-//           <TextInput
-//             value={amount}
-//             onChangeText={handleAmountChange}
-//             placeholder="0"
-//             keyboardType="numeric"
-//             editable={!!selectedNetwork}
-//             style={{
-//               borderWidth: 2,
-//               borderColor: isValidAmount ? "#3B82F6" : "#E5E7EB",
-//               borderRadius: 16,
-//               paddingLeft: 48,
-//               paddingRight: 16,
-//               paddingVertical: 16,
-//               fontSize: 32,
-//               fontWeight: "bold",
-//               color: selectedNetwork ? "#1F2937" : "#9CA3AF",
-//               backgroundColor: selectedNetwork ? "#fff" : "#F9FAFB",
-//             }}
-//           />
-//         </View>
-
-//         {/* Progress Bar */}
-//         {amount && Number(amount) > 0 && selectedNetwork && (
-//           <View style={{ marginBottom: 16 }}>
-//             <View
-//               style={{
-//                 height: 12,
-//                 backgroundColor: "#E5E7EB",
-//                 borderRadius: 6,
-//                 overflow: "hidden",
-//               }}
-//             >
-//               <View
-//                 style={{
-//                   height: "100%",
-//                   width: `${getProgressPercentage()}%`,
-//                   backgroundColor: getProgressColor(),
-//                   borderRadius: 6,
-//                 }}
-//               />
-//             </View>
-//             <View
-//               style={{
-//                 flexDirection: "row",
-//                 justifyContent: "space-between",
-//                 marginTop: 8,
-//               }}
-//             >
-//               <Text style={{ fontSize: 11, color: "#6B7280" }}>
-//                 ₦{selectedNetwork.min_amount.toLocaleString()}
-//               </Text>
-//               <Text
-//                 style={{ fontSize: 12, fontWeight: "700", color: "#3B82F6" }}
-//               >
-//                 {getProgressPercentage().toFixed(0)}%
-//               </Text>
-//               <Text style={{ fontSize: 11, color: "#6B7280" }}>
-//                 ₦{MAX_AMOUNT.toLocaleString()}
-//               </Text>
-//             </View>
-//           </View>
-//         )}
-
-//         {/* Validation Message */}
-//         {amount &&
-//           selectedNetwork &&
-//           Number(amount) < selectedNetwork.min_amount && (
-//             <View
-//               style={{
-//                 backgroundColor: "#FEF3C7",
-//                 borderRadius: 12,
-//                 padding: 12,
-//                 marginBottom: 16,
-//               }}
-//             >
-//               <Text style={{ color: "#92400E", fontSize: 13 }}>
-//                 ⚠️ Minimum amount is ₦
-//                 {selectedNetwork.min_amount.toLocaleString()}
-//               </Text>
-//             </View>
-//           )}
-
-//         <View>
-//           <Text
-//             style={{
-//               fontSize: 13,
-//               fontWeight: "600",
-//               color: "#6B7280",
-//               marginBottom: 10,
-//             }}
-//           >
-//             Quick Select:
-//           </Text>
-//           <View
-//             style={{
-//               flexDirection: "row",
-//               flexWrap: "wrap",
-//               gap: 8,
-//             }}
-//           >
-//             {quickAmounts.map((quickAmount) => (
-//               <TouchableOpacity
-//                 key={quickAmount}
-//                 onPress={() => setAmount(quickAmount.toString())}
-//                 disabled={!selectedNetwork}
-//                 style={{
-//                   backgroundColor:
-//                     amount === quickAmount.toString() ? "#3B82F6" : "#F3F4F6",
-//                   borderRadius: 12,
-//                   paddingVertical: 10,
-//                   paddingHorizontal: 16,
-//                   opacity: !selectedNetwork ? 0.5 : 1,
-//                 }}
-//               >
-//                 <Text
-//                   style={{
-//                     fontSize: 13,
-//                     fontWeight: "700",
-//                     color:
-//                       amount === quickAmount.toString() ? "#fff" : "#374151",
-//                   }}
-//                 >
-//                   ₦{quickAmount.toLocaleString()}
-//                 </Text>
-//               </TouchableOpacity>
-//             ))}
-//           </View>
-//         </View>
-//       </View>
-
-//       {/* Summary Card */}
-//       {isValidAmount && (
-//         <View
-//           style={{
-//             flexDirection: "row",
-//             justifyContent: "space-between",
-//             marginBottom: 20,
-//             gap: 10,
-//           }}
-//         >
-//           <View
-//             style={{
-//               flex: 1,
-//               backgroundColor: "#EFF6FF",
-//               borderRadius: 16,
-//               padding: 16,
-//               alignItems: "center",
-//             }}
-//           >
-//             <Text style={{ fontSize: 24, marginBottom: 8 }}>
-//               {networkIcons[selectedNetwork.id]}
-//             </Text>
-//             <Text style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>
-//               Network
-//             </Text>
-//             <Text style={{ fontSize: 13, fontWeight: "700", color: "#1E40AF" }}>
-//               {selectedNetwork.name.split(" ")[0]}
-//             </Text>
-//           </View>
-//           <View
-//             style={{
-//               flex: 1,
-//               backgroundColor: "#ECFDF5",
-//               borderRadius: 16,
-//               padding: 16,
-//               alignItems: "center",
-//             }}
-//           >
-//             <Text style={{ fontSize: 24, marginBottom: 8 }}>💵</Text>
-//             <Text style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>
-//               Amount
-//             </Text>
-//             <Text style={{ fontSize: 14, fontWeight: "700", color: "#059669" }}>
-//               ₦{Number(amount).toLocaleString()}
-//             </Text>
-//           </View>
-//           <View
-//             style={{
-//               flex: 1,
-//               backgroundColor: "#F5F3FF",
-//               borderRadius: 16,
-//               padding: 16,
-//               alignItems: "center",
-//             }}
-//           >
-//             <Text style={{ fontSize: 24, marginBottom: 8 }}>📱</Text>
-//             <Text style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>
-//               To
-//             </Text>
-//             <Text
-//               style={{
-//                 fontSize: 12,
-//                 fontWeight: "700",
-//                 color: "#7C3AED",
-//               }}
-//             >
-//               {phoneNumber.substring(0, 4)}***
-//             </Text>
-//           </View>
-//         </View>
-//       )}
-
-//       {/* Purchase Button */}
-//       {selectedNetwork && isValidAmount && phoneNumber.length === 11 && (
-//         <TouchableOpacity
-//           onPress={handlePurchase}
-//           disabled={purchaseLoading}
-//           style={{
-//             backgroundColor: purchaseLoading ? "#9CA3AF" : "#3B82F6",
-//             borderRadius: 16,
-//             paddingVertical: 18,
-//             shadowColor: "#3B82F6",
-//             shadowOffset: { width: 0, height: 4 },
-//             shadowOpacity: 0.3,
-//             shadowRadius: 8,
-//             elevation: 8,
-//           }}
-//         >
-//           {purchaseLoading ? (
-//             <View
-//               style={{
-//                 flexDirection: "row",
-//                 justifyContent: "center",
-//                 alignItems: "center",
-//               }}
-//             >
-//               <ActivityIndicator color="#fff" />
-//               <Text
-//                 style={{
-//                   color: "#fff",
-//                   marginLeft: 10,
-//                   fontSize: 16,
-//                   fontWeight: "700",
-//                 }}
-//               >
-//                 Processing...
-//               </Text>
-//             </View>
-//           ) : (
-//             <Text
-//               style={{
-//                 color: "#fff",
-//                 textAlign: "center",
-//                 fontSize: 18,
-//                 fontWeight: "700",
-//               }}
-//             >
-//               📱 Buy ₦{Number(amount).toLocaleString()} Airtime
-//             </Text>
-//           )}
-//         </TouchableOpacity>
-//       )}
-
-//       {/* Helper Text */}
-//       {!selectedNetwork && (
-//         <View
-//           style={{
-//             backgroundColor: "#F9FAFB",
-//             borderRadius: 16,
-//             padding: 16,
-//             marginTop: 20,
-//           }}
-//         >
-//           <Text
-//             style={{
-//               textAlign: "center",
-//               color: "#6B7280",
-//               fontSize: 13,
-//               fontStyle: "italic",
-//             }}
-//           >
-//             💡 Enter phone number and select network to continue
-//           </Text>
-//         </View>
-//       )}
-
-//       {/* Footer Info */}
-//       <View style={{ marginTop: 20 }}>
-//         <Text
-//           style={{
-//             textAlign: "center",
-//             fontSize: 12,
-//             color: "#9CA3AF",
-//           }}
-//         >
-//           🔒 Secure payment • ⚡ Instant delivery • 🎯 24/7 support
-//         </Text>
-//       </View>
-//     </ScrollView>
-//   );
-// };
-
-// export default Airtime;
-
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -782,13 +10,16 @@ import {
   Animated,
   Easing,
   StyleSheet,
+  Image,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { useFetchData, useMutateData } from "../../../hooks/Request";
+import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const Airtime = () => {
+const Airtime = ({ route }) => {
+  const { data: categoryData } = route.params;
+
   const { user } = useSelector((state) => state.AuthSlice);
   const navigation = useNavigation();
 
@@ -801,47 +32,30 @@ const Airtime = () => {
   const spinAnim = useRef(new Animated.Value(0)).current;
 
   const MAX_AMOUNT = 50000;
-  const SERVICE_CHARGE = 0;
+  const MIN_AMOUNT = 50;
 
   const quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
-  const networks = [
-    {
-      id: "mtn",
-      name: "MTN Nigeria",
-      min_amount: 100,
-      color: "#FFCC00",
-      bgColor: "#FEF3C7",
-    },
-    {
-      id: "airtel",
-      name: "Airtel Nigeria",
-      min_amount: 100,
-      color: "#EF4444",
-      bgColor: "#FEE2E2",
-    },
-    {
-      id: "glo",
-      name: "Glo Nigeria",
-      min_amount: 100,
-      color: "#10B981",
-      bgColor: "#D1FAE5",
-    },
-    {
-      id: "9mobile",
-      name: "9mobile",
-      min_amount: 100,
-      color: "#059669",
-      bgColor: "#D1FAE5",
-    },
-  ];
+  // ✅ Fetch service categories from API
+  const { data: serviceCategories, isLoading: isLoadingCategories } =
+    useFetchData_v2(
+      `api/v1/savehaven/listServiceCategories/${categoryData._id}`,
+      `service-categories-${categoryData._id}`,
+    );
 
-  // Purchase airtime mutation
-  const { mutate: purchaseAirtime, isPending: purchaseLoading } = useMutateData(
-    "api/v1/vtu/purchase",
-    "POST",
-    "airtime",
-  );
+  console.log({
+    yyyuuuu: serviceCategories,
+  });
+
+  const networks = serviceCategories?.categories || [];
+
+  // ✅ Purchase airtime mutation
+  const { mutate: purchaseAirtime, isPending: purchaseLoading } =
+    useMutateData_v2(
+      "api/v1/savehaven/purchaseAirtime",
+      "POST",
+      "airtime-purchase",
+    );
 
   // Start spinning animation when loading
   useEffect(() => {
@@ -905,13 +119,13 @@ const Airtime = () => {
     const nineMobilePrefixes = ["0809", "0817", "0818", "0909", "0908"];
 
     if (mtnPrefixes.includes(firstFourDigits)) {
-      return networks.find((n) => n.id === "mtn");
+      return networks.find((n) => n.identifier === "MTN");
     } else if (airtelPrefixes.includes(firstFourDigits)) {
-      return networks.find((n) => n.id === "airtel");
+      return networks.find((n) => n.identifier === "AIRTEL");
     } else if (gloPrefixes.includes(firstFourDigits)) {
-      return networks.find((n) => n.id === "glo");
+      return networks.find((n) => n.identifier === "GLO");
     } else if (nineMobilePrefixes.includes(firstFourDigits)) {
-      return networks.find((n) => n.id === "9mobile");
+      return networks.find((n) => n.identifier === "ETISALAT");
     }
     return null;
   };
@@ -921,7 +135,7 @@ const Airtime = () => {
     setPhoneNumber(numericText);
 
     // Auto-detect network
-    if (numericText.length >= 4) {
+    if (numericText.length >= 4 && networks.length > 0) {
       const detected = detectNetwork(numericText);
       if (detected) {
         setSelectedNetwork(detected);
@@ -958,13 +172,8 @@ const Airtime = () => {
     }
 
     const amountNumber = Number(amount);
-    if (isNaN(amountNumber) || amountNumber < selectedNetwork.min_amount) {
-      Alert.alert(
-        "Error",
-        `Minimum amount for ${
-          selectedNetwork.name
-        } is ₦${selectedNetwork.min_amount.toLocaleString()}`,
-      );
+    if (isNaN(amountNumber) || amountNumber < MIN_AMOUNT) {
+      Alert.alert("Error", `Minimum amount is ₦${MIN_AMOUNT.toLocaleString()}`);
       return;
     }
 
@@ -986,28 +195,48 @@ const Airtime = () => {
   };
 
   const processPurchase = () => {
+    // ✅ Use correct format: categoryId, phoneNumber, amount
     const data = {
-      phone: phoneNumber,
+      categoryId: selectedNetwork._id,
+      phoneNumber: phoneNumber,
       amount: amount,
-      network: selectedNetwork.id,
     };
+
+    console.log({
+      purchaseData: data,
+    });
 
     purchaseAirtime(data, {
       onSuccess: (response) => {
+        console.log({
+          purchaseResponse: response,
+        });
+
         Alert.alert(
-          "Purchase Successful!",
-          `₦${amount} airtime has been sent to ${phoneNumber}`,
-          [{ text: "OK", onPress: () => navigation.goBack() }],
+          "Purchase Successful! 🎉",
+          `₦${amount} ${selectedNetwork.name} airtime has been sent to ${phoneNumber}`,
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.goBack(),
+            },
+          ],
         );
       },
       onError: (error) => {
-        Alert.alert("Purchase Failed", error.message);
+        console.log({
+          purchaseError: error,
+        });
+        Alert.alert(
+          "Purchase Failed",
+          error?.data?.message || error.message || "An error occurred",
+        );
       },
     });
   };
 
   const getProgressPercentage = () => {
-    if (!amount || !selectedNetwork) return 0;
+    if (!amount) return 0;
     const numAmount = Number(amount);
     return Math.min((numAmount / MAX_AMOUNT) * 100, 100);
   };
@@ -1021,13 +250,30 @@ const Airtime = () => {
   };
 
   const isValidAmount =
-    amount &&
-    selectedNetwork &&
-    Number(amount) >= selectedNetwork.min_amount &&
-    Number(amount) <= MAX_AMOUNT;
+    amount && Number(amount) >= MIN_AMOUNT && Number(amount) <= MAX_AMOUNT;
 
   const canPurchase =
     selectedNetwork && isValidAmount && phoneNumber.length === 11;
+
+  // Network colors mapping
+  const getNetworkColor = (identifier) => {
+    const colors = {
+      MTN: { color: "#FFCC00", bgColor: "#FEF3C7" },
+      AIRTEL: { color: "#EF4444", bgColor: "#FEE2E2" },
+      GLO: { color: "#10B981", bgColor: "#D1FAE5" },
+      ETISALAT: { color: "#059669", bgColor: "#D1FAE5" },
+    };
+    return colors[identifier] || { color: "#6B7280", bgColor: "#F3F4F6" };
+  };
+
+  if (isLoadingCategories) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#10B981" />
+        <Text style={styles.loadingText}>Loading networks...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -1049,9 +295,9 @@ const Airtime = () => {
             />
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Buy Airtime</Text>
+            <Text style={styles.headerTitle}>{categoryData.name}</Text>
             <Text style={styles.headerSubtitle}>
-              Fast & secure airtime purchase
+              {categoryData.description}
             </Text>
           </View>
         </View>
@@ -1122,53 +368,75 @@ const Airtime = () => {
           <Text style={styles.sectionTitle}>Select Network</Text>
         </View>
 
-        <View style={styles.networkGrid}>
-          {networks.map((network) => (
-            <TouchableOpacity
-              key={network.id}
-              onPress={() => setSelectedNetwork(network)}
-              activeOpacity={0.7}
-              style={[
-                styles.networkButton,
-                selectedNetwork?.id === network.id && {
-                  backgroundColor: network.color,
-                  borderColor: network.color,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.networkIconContainer,
-                  {
-                    backgroundColor:
-                      selectedNetwork?.id === network.id
-                        ? "rgba(255,255,255,0.3)"
-                        : network.bgColor,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="sim"
-                  size={20}
-                  color={
-                    selectedNetwork?.id === network.id
-                      ? "#FFFFFF"
-                      : network.color
-                  }
-                />
-              </View>
-              <Text
-                style={[
-                  styles.networkName,
-                  selectedNetwork?.id === network.id &&
-                    styles.networkNameSelected,
-                ]}
-              >
-                {network.name.split(" ")[0]}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {networks.length === 0 ? (
+          <View style={styles.emptyState}>
+            <MaterialCommunityIcons
+              name="alert-circle"
+              size={48}
+              color="#D1D5DB"
+            />
+            <Text style={styles.emptyStateText}>No networks available</Text>
+          </View>
+        ) : (
+          <View style={styles.networkGrid}>
+            {networks.map((network) => {
+              const networkStyle = getNetworkColor(network.identifier);
+              return (
+                <TouchableOpacity
+                  key={network._id}
+                  onPress={() => setSelectedNetwork(network)}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.networkButton,
+                    selectedNetwork?._id === network._id && {
+                      backgroundColor: networkStyle.color,
+                      borderColor: networkStyle.color,
+                    },
+                  ]}
+                >
+                  {network.logoUrl ? (
+                    <Image
+                      source={{ uri: network.logoUrl }}
+                      style={styles.networkLogo}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <View
+                      style={[
+                        styles.networkIconContainer,
+                        {
+                          backgroundColor:
+                            selectedNetwork?._id === network._id
+                              ? "rgba(255,255,255,0.3)"
+                              : networkStyle.bgColor,
+                        },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name="sim"
+                        size={20}
+                        color={
+                          selectedNetwork?._id === network._id
+                            ? "#FFFFFF"
+                            : networkStyle.color
+                        }
+                      />
+                    </View>
+                  )}
+                  <Text
+                    style={[
+                      styles.networkName,
+                      selectedNetwork?._id === network._id &&
+                        styles.networkNameSelected,
+                    ]}
+                  >
+                    {network.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </View>
 
       {/* Selected Network Info */}
@@ -1176,13 +444,19 @@ const Airtime = () => {
         <View
           style={[
             styles.selectedNetworkCard,
-            { borderLeftColor: selectedNetwork.color },
+            {
+              borderLeftColor: getNetworkColor(selectedNetwork.identifier)
+                .color,
+            },
           ]}
         >
           <View
             style={[
               styles.selectedNetworkIcon,
-              { backgroundColor: selectedNetwork.color },
+              {
+                backgroundColor: getNetworkColor(selectedNetwork.identifier)
+                  .color,
+              },
             ]}
           >
             <MaterialCommunityIcons name="check" size={18} color="#FFFFFF" />
@@ -1192,7 +466,8 @@ const Airtime = () => {
               {selectedNetwork.name} Selected
             </Text>
             <Text style={styles.selectedNetworkMin}>
-              Minimum amount: ₦{selectedNetwork.min_amount.toLocaleString()}
+              Amount: ₦{MIN_AMOUNT.toLocaleString()} - ₦
+              {MAX_AMOUNT.toLocaleString()}
             </Text>
           </View>
         </View>
@@ -1209,13 +484,10 @@ const Airtime = () => {
           />
           <Text style={styles.sectionTitle}>
             Amount
-            {selectedNetwork && (
-              <Text style={styles.amountRange}>
-                {" "}
-                (₦{selectedNetwork.min_amount.toLocaleString()} - ₦
-                {MAX_AMOUNT.toLocaleString()})
-              </Text>
-            )}
+            <Text style={styles.amountRange}>
+              {" "}
+              (₦{MIN_AMOUNT.toLocaleString()} - ₦{MAX_AMOUNT.toLocaleString()})
+            </Text>
           </Text>
         </View>
 
@@ -1258,7 +530,7 @@ const Airtime = () => {
             </View>
             <View style={styles.progressLabels}>
               <Text style={styles.progressLabelMin}>
-                ₦{selectedNetwork.min_amount.toLocaleString()}
+                ₦{MIN_AMOUNT.toLocaleString()}
               </Text>
               <Text style={styles.progressLabelPercent}>
                 {getProgressPercentage().toFixed(0)}%
@@ -1271,16 +543,14 @@ const Airtime = () => {
         )}
 
         {/* Validation Warning */}
-        {amount &&
-          selectedNetwork &&
-          Number(amount) < selectedNetwork.min_amount && (
-            <View style={styles.validationWarning}>
-              <MaterialCommunityIcons name="alert" size={16} color="#92400E" />
-              <Text style={styles.validationWarningText}>
-                Minimum amount is ₦{selectedNetwork.min_amount.toLocaleString()}
-              </Text>
-            </View>
-          )}
+        {amount && Number(amount) < MIN_AMOUNT && (
+          <View style={styles.validationWarning}>
+            <MaterialCommunityIcons name="alert" size={16} color="#92400E" />
+            <Text style={styles.validationWarningText}>
+              Minimum amount is ₦{MIN_AMOUNT.toLocaleString()}
+            </Text>
+          </View>
+        )}
 
         {/* Quick Amounts */}
         <View style={styles.quickAmountsSection}>
@@ -1328,7 +598,7 @@ const Airtime = () => {
             </View>
             <Text style={styles.summaryLabel}>Network</Text>
             <Text style={[styles.summaryValue, { color: "#1E40AF" }]}>
-              {selectedNetwork.name.split(" ")[0]}
+              {selectedNetwork.name}
             </Text>
           </View>
 
@@ -1378,7 +648,11 @@ const Airtime = () => {
           {purchaseLoading ? (
             <View style={styles.purchaseButtonContent}>
               <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                <ActivityIndicator size="small" color="white" />
+                <MaterialCommunityIcons
+                  name="loading"
+                  size={22}
+                  color="#FFFFFF"
+                />
               </Animated.View>
               <Text style={styles.purchaseButtonText}>Processing...</Text>
             </View>
@@ -1440,8 +714,6 @@ const Airtime = () => {
   );
 };
 
-export default Airtime;
-
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
@@ -1450,6 +722,19 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    padding: 40,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B7280",
   },
 
   // Header Card
@@ -1581,6 +866,16 @@ const styles = StyleSheet.create({
   },
 
   // Network Grid
+  emptyState: {
+    alignItems: "center",
+    padding: 32,
+  },
+  emptyStateText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#9CA3AF",
+  },
   networkGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1595,6 +890,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: "#E5E7EB",
+  },
+  networkLogo: {
+    width: 48,
+    height: 48,
+    marginBottom: 8,
   },
   networkIconContainer: {
     width: 44,
@@ -1876,3 +1176,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
 });
+
+export default Airtime;

@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { useFetchData } from "../../../hooks/Request";
 import {
   MaterialCommunityIcons,
   FontAwesome5,
@@ -25,13 +24,8 @@ import {
 }
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
+import SafeHavenCard from "./safehaven/SafeHavenCard";
 import { useFetchData_v2 } from "../../../hooks/Requestv2";
-import VirtualAccountCard from "./VirtualAccountCard";
-
-// 👇 IMPORT THE NEW COMPONENT
-// import VirtualAccountCard from "./VirtualAccountCard";
-
-// VirtualAccountCard
 
 const WalletScreen = ({}) => {
   const {
@@ -39,17 +33,17 @@ const WalletScreen = ({}) => {
     isLoading,
     error,
     refetch: refetchWallet,
-  } = useFetchData("wallet", "wallet");
+  } = useFetchData_v2("api/v1/wallet", "wallet");
 
-  const mainBalance = data?.balance;
+  let mainBalance = data?.balance;
 
-  const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
-  const { user_data } = useSelector((state) => state.AuthSlice);
+  const { get_user_profile_data } = useSelector(
+    (state) => state.UserProfileSlice,
+  );
+
   const { userDatav2 } = useSelector((state) => state.authSlice);
 
-  const clanIDf = userProfile_data?.currentClanMeeting?.uniqueClanID;
-  const clanID = userProfile_data?.currentClanMeeting?._id;
-  const isGuest = user_data?.user?.isGuest;
+  const isGuest = false; //  user_data?.user?.isGuest;
 
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
@@ -62,21 +56,21 @@ const WalletScreen = ({}) => {
       iconSet: Ionicons,
       color: "#2196F3",
       type: "clans",
-      route: "myclan",
+      route: "alluserclan",
       params: {},
-      condition: userDatav2.data.isInClan,
+      condition: userDatav2?.data?.isInClan,
     },
-    {
-      id: 2,
-      name: "Amenities",
-      icon: "apartment",
-      iconSet: MaterialIcons,
-      color: "#009688",
-      type: "amenities",
-      route: "amentities",
-      params: {},
-      condition: userDatav2.data.isInClan,
-    },
+    // {
+    //   id: 2,
+    //   name: "Amenities",
+    //   icon: "apartment",
+    //   iconSet: MaterialIcons,
+    //   color: "#009688",
+    //   type: "amenities",
+    //   route: "amentities",
+    //   params: {},
+    //   condition: userDatav2?.data?.isInClan,
+    // },
     {
       id: 3,
       name: "Dues",
@@ -86,52 +80,52 @@ const WalletScreen = ({}) => {
       type: "amenities",
       route: "Due",
       params: {},
-      condition: userDatav2.data.isInClan,
+      condition: userDatav2?.data?.isInClan,
     },
-    {
-      id: 4,
-      name: "Emergency",
-      icon: "emergency",
-      iconSet: MaterialIcons,
-      color: "#F44336",
-      type: "emergency",
-      route: "Emergencyscreen",
-      params: {},
-      condition: userDatav2.data.isInClan,
-    },
-    {
-      id: 5,
-      name: "Polls/Surveys",
-      icon: "poll",
-      iconSet: MaterialIcons,
-      color: "#9C27B0",
-      type: "polls",
-      route: "userpolls",
-      params: {},
-      condition: userDatav2.data.isInClan,
-    },
-    {
-      id: 6,
-      name: "Service",
-      icon: "room-service",
-      iconSet: MaterialIcons,
-      color: "#FF9800",
-      type: "service",
-      route: "service",
-      params: {},
-      condition: true,
-    },
-    {
-      id: 7,
-      name: "Marketplace",
-      icon: "store",
-      iconSet: MaterialIcons,
-      color: "#00BCD4",
-      type: "marketplace",
-      route: "Marketplace",
-      params: {},
-      condition: true,
-    },
+    // {
+    //   id: 4,
+    //   name: "Emergency",
+    //   icon: "emergency",
+    //   iconSet: MaterialIcons,
+    //   color: "#F44336",
+    //   type: "emergency",
+    //   route: "Emergencyscreen",
+    //   params: {},
+    //   condition: userDatav2?.data?.isInClan,
+    // },
+    // {
+    //   id: 5,
+    //   name: "Polls/Surveys",
+    //   icon: "poll",
+    //   iconSet: MaterialIcons,
+    //   color: "#9C27B0",
+    //   type: "polls",
+    //   route: "userpolls",
+    //   params: {},
+    //   condition: userDatav2?.data?.isInClan,
+    // },
+    // {
+    //   id: 6,
+    //   name: "Service",
+    //   icon: "room-service",
+    //   iconSet: MaterialIcons,
+    //   color: "#FF9800",
+    //   type: "service",
+    //   route: "service",
+    //   params: {},
+    //   condition: true,
+    // },
+    // {
+    //   id: 7,
+    //   name: "Marketplace",
+    //   icon: "store",
+    //   iconSet: MaterialIcons,
+    //   color: "#00BCD4",
+    //   type: "marketplace",
+    //   route: "Marketplace",
+    //   params: {},
+    //   condition: true,
+    // },
     {
       id: 8,
       name: "ICE Contacts",
@@ -141,19 +135,19 @@ const WalletScreen = ({}) => {
       type: "ice",
       route: "icecontact",
       params: {},
-      condition: !isGuest,
+      condition: true,
     },
-    {
-      id: 9,
-      name: "Domestic Staff",
-      icon: "people",
-      iconSet: MaterialIcons,
-      color: "#3F51B5",
-      type: "domestic",
-      route: "domestic",
-      params: {},
-      condition: !isGuest,
-    },
+    // {
+    //   id: 9,
+    //   name: "Domestic Staff",
+    //   icon: "people",
+    //   iconSet: MaterialIcons,
+    //   color: "#3F51B5",
+    //   type: "domestic",
+    //   route: "domestic",
+    //   params: {},
+    //   condition: userDatav2?.data?.isInClan,
+    // },
   ];
 
   const visibleQuickLinks = quickLinks.filter((link) => link.condition);
@@ -163,7 +157,6 @@ const WalletScreen = ({}) => {
     try {
       await refetchWallet();
     } catch (error) {
-      console.error("Error refreshing data:", error);
     } finally {
       setRefreshing(false);
     }
@@ -292,7 +285,7 @@ const WalletScreen = ({}) => {
                   letterSpacing: 0.5,
                 }}
               >
-                ₦{mainBalance || "0.00"}
+                ₦{mainBalance?.toFixed(2) ?? "0.00"}
               </Text>
               <Text
                 style={{
@@ -344,7 +337,7 @@ const WalletScreen = ({}) => {
         {/* ================================
             👇 ADD VIRTUAL ACCOUNT CARD HERE
         ================================ */}
-        {/*      <VirtualAccountCard /> */}
+        <SafeHavenCard />
 
         {/* ================================
             BILLS PAYMENT SECTION
@@ -434,13 +427,25 @@ const WalletScreen = ({}) => {
             </TouchableOpacity>
 
             {/* Airtime */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 width: "30%",
                 alignItems: "center",
                 marginBottom: 16,
               }}
-              onPress={() => navigation.navigate("Airtime")}
+              onPress={() =>
+                navigation.navigate("Airtime", {
+                  data: {
+                    _id: "61efaba1da92348f9dde5f6c",
+                    name: "Mobile Recharge",
+                    identifier: "AIRTIME",
+                    description: "Airtime Recharge",
+                    createdAt: "2022-01-25T07:49:53.181Z",
+                    updatedAt: "2022-01-25T07:49:53.181Z",
+                    __v: 0,
+                  },
+                })
+              }
             >
               <View
                 style={{
@@ -465,7 +470,55 @@ const WalletScreen = ({}) => {
               >
                 Airtime
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+
+            {/* <TouchableOpacity
+              style={{
+                width: "30%",
+                alignItems: "center",
+                marginBottom: 16,
+              }}
+              onPress={() =>
+                navigation.navigate("DataPurchase", {
+                  data: {
+                    _id: "61efabb2da92348f9dde5f6e",
+                    name: "DATA PURCHASE",
+                    identifier: "DATA",
+                    description: "Data bundle subscription",
+
+                    __v: 0,
+                  },
+                })
+              }
+            >
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  backgroundColor: "#E0E7FF",
+                  borderRadius: 16,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <MaterialIcons
+                  name="signal-wifi-statusbar-connected-no-internet-4"
+                  size={24}
+                  color="black"
+                />
+              </View>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#374151",
+                  textAlign: "center",
+                  fontWeight: "500",
+                }}
+              >
+                Data
+              </Text>
+            </TouchableOpacity> */}
           </View>
         </View>
 

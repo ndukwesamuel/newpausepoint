@@ -25,7 +25,7 @@ const CreateDueScreen = () => {
   const dispatch = useDispatch();
 
   const { admin_get_all_clan_memeber_data } = useSelector(
-    (state) => state?.ClanSlice
+    (state) => state?.ClanSlice,
   );
 
   // Fetch members on component mount
@@ -46,7 +46,7 @@ const CreateDueScreen = () => {
         (member) => ({
           ...member,
           selected: false, // Initialize selection status
-        })
+        }),
       );
       setMembers(membersWithSelection);
     }
@@ -54,7 +54,7 @@ const CreateDueScreen = () => {
 
   // Filter members based on search query
   const filteredMembers = members.filter((member) =>
-    member?.user?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    member?.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Handle member selection
@@ -63,8 +63,8 @@ const CreateDueScreen = () => {
       prevMembers.map((member) =>
         member.user._id === id
           ? { ...member, selected: !member.selected }
-          : member
-      )
+          : member,
+      ),
     );
   };
 
@@ -72,7 +72,7 @@ const CreateDueScreen = () => {
   const handleAssignAll = () => {
     setAssignAll(!assignAll);
     setMembers((prevMembers) =>
-      prevMembers.map((member) => ({ ...member, selected: !assignAll }))
+      prevMembers.map((member) => ({ ...member, selected: !assignAll })),
     );
   };
 
@@ -107,7 +107,7 @@ const CreateDueScreen = () => {
         onError: (error) => {
           console.error("Mutation Error:", error.message);
         },
-      }
+      },
     );
   };
 

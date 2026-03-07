@@ -100,7 +100,7 @@ const showSuccessToast = (message: string = "Login successful"): void => {
 // ============================================================================
 
 const loginService = async (
-  credentials: LoginCredentials
+  credentials: LoginCredentials,
 ): Promise<userDatav2> => {
   const url = `${API_BASE_URL}api/v1/auth/signin`;
 
@@ -122,7 +122,7 @@ const loginService = async (
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (response.data.token) {

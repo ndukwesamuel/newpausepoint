@@ -16,8 +16,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AppScreen from "../shared/AppScreen";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/AppNavigation";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
+import { API_CONFIG } from "../../api";
+
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 import { useDispatch } from "react-redux";
 import { checkOnboarding } from "../../Redux/OnboardingSlice";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -64,7 +69,7 @@ const Onboarding = ({}: any) => {
     ({ viewableItems }: { viewableItems: Array<any> }) => {
       setCurrentViewableItems(viewableItems[0].index);
     },
-    []
+    [],
   ); // Empty dependency array ensures this callback has a stable identity
   const showDoneButton = currentViewableItems === mainSlide.length - 1;
 
@@ -108,7 +113,7 @@ const Onboarding = ({}: any) => {
                 },
               },
             ],
-            { useNativeDriver: false }
+            { useNativeDriver: false },
           )}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewConfig.current} // Use the ref here

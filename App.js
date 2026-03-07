@@ -53,8 +53,6 @@ import { Linking } from "react-native";
 import { pushtokendata, reset_login } from "./Redux/AuthSlice";
 
 import * as Device from "expo-device";
-import RunnerNavigation from "./App/Runners/RunnerNavigation";
-import GuestNavigation from "./App/Guest/Navigation/GuestNavigation";
 import { API_CONFIG } from "./api";
 
 // ⭐⭐⭐ IMPORT THE INTERCEPTOR - This sets it up globally ⭐⭐⭐
@@ -120,17 +118,19 @@ export const MainScreen = ({}) => {
   const { isOnboarding } = useSelector((state) => state.OnboardingSlice);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  // const {
+  //   user_data,
+  //   user_isError,
+  //   user_isSuccess,
+  //   user_isLoading,
+  //   user_message,
+  // } = useSelector((state) => state.AuthSlice);
 
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-  const datasss = useSelector((state) => state.UserProfileSlice);
-  const isAdmin = user_data?.user?.roles?.includes("admin");
+  const { userDatav2 } = useSelector((state) => state.authSlice);
+
+  const { get_user_profile_data } = useSelector(
+    (state) => state.UserProfileSlice,
+  );
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -143,55 +143,54 @@ export const MainScreen = ({}) => {
   const [pushToken, setPushToken] = useState();
 
   useEffect(() => {
-    dispatch(UserProfile_data_Fun());
     dispatch(Get_User_Profle_Fun());
   }, [dispatch]);
 
-  useEffect(() => {
-    const backgroundSubscription =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log({ response });
-        const data = response.notification.request.content.data;
-      });
+  // useEffect(() => {
+  //   const backgroundSubscription =
+  //     Notifications.addNotificationResponseReceivedListener((response) => {
+  //       console.log({ response });
+  //       const data = response.notification.request.content.data;
+  //     });
 
-    const foregroundSubscription =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        notificationservicecode(notification?.request?.content?.data);
-      });
+  //   const foregroundSubscription =
+  //     Notifications.addNotificationReceivedListener(async (notification) => {
+  //       notificationservicecode(notification?.request?.content?.data);
+  //     });
 
-    return () => {
-      backgroundSubscription.remove();
-      foregroundSubscription.remove();
-    };
-  }, []);
+  //   return () => {
+  //     backgroundSubscription.remove();
+  //     foregroundSubscription.remove();
+  //   };
+  // }, []);
 
-  useEffect(() => {
-    const socketConnection = io(API_BASEURL, {
-      auth: {
-        token: user_data?.token,
-      },
-    });
+  // useEffect(() => {
+  //   const socketConnection = io(API_BASEURL, {
+  //     auth: {
+  //       token: user_data?.token,
+  //     },
+  //   });
 
-    socketConnection.on("onlineUser", (data) => {
-      dispatch(setOnlineUser(data));
-    });
+  //   socketConnection.on("onlineUser", (data) => {
+  //     dispatch(setOnlineUser(data));
+  //   });
 
-    dispatch(setSocketConnection(socketConnection));
+  //   dispatch(setSocketConnection(socketConnection));
 
-    return () => {
-      socketConnection.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     socketConnection.disconnect();
+  //   };
+  // }, []);
 
   return (
     <Stack.Navigator
       initialRouteName="UserNavigation"
       screenOptions={{ headerShown: false }}
     >
-      {userProfile_data?.AdmincurrentClanMeeting && (
+      {get_user_profile_data?.data?.AdmincurrentClanMeeting && (
         <Stack.Screen name="AdminTab" component={Adminnaviagetion} />
       )}
-      {!userProfile_data?.AdmincurrentClanMeeting && (
+      {!get_user_profile_data?.data?.AdmincurrentClanMeeting && (
         <Stack.Screen name="UserNavigation" component={Usernaviagetion} />
       )}
       <Stack.Screen name="CreatePassword" component={CreatePassword} />
@@ -200,61 +199,52 @@ export const MainScreen = ({}) => {
 };
 
 export const NavigationScreen = () => {
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const { userDatav2 } = useSelector((state) => state.authSlice);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    async function getNotificationPermission() {
-      const { status } = await Notifications.getPermissionsAsync();
-      if (status !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-      }
-      if (status !== "granted") {
-        return;
-      }
-      let token;
-      token = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId: Constants.expoConfig.extra.eas.projectId,
-        })
-      ).data;
+  // useEffect(() => {
+  //   async function getNotificationPermission() {
+  //     const { status } = await Notifications.getPermissionsAsync();
+  //     if (status !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //     }
+  //     if (status !== "granted") {
+  //       return;
+  //     }
+  //     let token;
+  //     token = (
+  //       await Notifications.getExpoPushTokenAsync({
+  //         projectId: Constants.expoConfig.extra.eas.projectId,
+  //       })
+  //     ).data;
 
-      await AsyncStorage.setItem("PushToken", token);
-      const value = await AsyncStorage.getItem("PushToken");
-    }
+  //     await AsyncStorage.setItem("PushToken", token);
+  //     const value = await AsyncStorage.getItem("PushToken");
+  //   }
 
-    getNotificationPermission();
-  }, [dispatch]);
+  //   getNotificationPermission();
+  // }, [dispatch]);
 
-  useEffect(() => {
-    const backgroundSubscription =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data;
-      });
+  // useEffect(() => {
+  //   const backgroundSubscription =
+  //     Notifications.addNotificationResponseReceivedListener((response) => {
+  //       const data = response.notification.request.content.data;
+  //     });
 
-    const foregroundSubscription =
-      Notifications.addNotificationReceivedListener((notification) => {
-        // Handle notification
-      });
+  //   const foregroundSubscription =
+  //     Notifications.addNotificationReceivedListener((notification) => {
+  //       // Handle notification
+  //     });
 
-    return () => {
-      backgroundSubscription.remove();
-      foregroundSubscription.remove();
-    };
-  }, []);
+  //   return () => {
+  //     backgroundSubscription.remove();
+  //     foregroundSubscription.remove();
+  //   };
+  // }, []);
 
   const { updateInfo } = useUpdateChecker();
 
   let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
-
-  const isRunner =
-    user_data?.token && user_data?.user?.roles?.includes("runner");
 
   return (
     <NavigationContainer>
@@ -262,15 +252,7 @@ export const NavigationScreen = () => {
       {forceUpdate ? (
         <UpdateScreen message={updateInfo?.message} />
       ) : (
-        <>
-          {isRunner ? (
-            <RunnerNavigation />
-          ) : user_data?.token ? (
-            <MainScreen />
-          ) : (
-            <StartScreen />
-          )}
-        </>
+        <>{userDatav2?.data?.token ? <MainScreen /> : <StartScreen />}</>
       )}
       {/* <Toast /> */}
     </NavigationContainer>

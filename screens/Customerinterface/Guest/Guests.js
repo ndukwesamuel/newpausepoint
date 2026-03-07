@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
@@ -25,8 +24,7 @@ import { formatDateandTime } from "../../../utils/DateTime";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import ClickToJoinCLan from "../../../components/shared/ClickToJoinCLan";
 import GuestAdCard from "./GuestAdCard";
-import { useFetchData } from "../../../hooks/Request";
-// import { useFetchData } from "../../../hooks/useReactQuery"; // Import the hook
+import { useFetchData_v2 } from "../../../hooks/Requestv2";
 
 // Sample Advertisement Data for Guest Screen
 const guestAdvertisements = [
@@ -104,11 +102,15 @@ const Guests = () => {
     isError: isErrorGuests,
     error: errorGuests,
     refetch: refetchGuests,
-  } = useFetchData("visitor/invites", "userGuests");
+  } = useFetchData_v2("api/v1/visitor", "userGuests");
 
   const { get_user_profile_data } = useSelector(
     (state) => state?.UserProfileSlice,
   );
+
+  console.log({
+    itititi: get_user_profile_data?.data,
+  });
 
   console.log({
     guestData: guestData,
@@ -278,7 +280,7 @@ const Guests = () => {
 
   return (
     <AppScreen>
-      {get_user_profile_data?.currentClanMeeting ? (
+      {get_user_profile_data?.data?.currentClanMeeting ? (
         <View style={styles.scrollView}>
           <View style={styles.container}>
             {/* Header Section */}
@@ -406,15 +408,16 @@ const Guests = () => {
           <View style={styles.noAccessCard}>
             <View style={styles.noAccessIconContainer}>
               <MaterialCommunityIcons
-                name="account-group-outline"
+                name="account-alert-outline"
                 size={64}
-                color="#10B981"
+                color="#EF4444"
               />
             </View>
-            <ClickToJoinCLan />
-            <Text style={styles.noAccessTitle}>Join a Clan to Continue</Text>
+
+            <Text style={styles.noAccessTitle}>Access Required</Text>
             <Text style={styles.noAccessSubtitle}>
-              You need to be part of a clan to view and manage guest invitations
+              You need to be part of a clan to view and manage guest
+              invitations. Please contact IT support for assistance.
             </Text>
           </View>
         </ScrollView>

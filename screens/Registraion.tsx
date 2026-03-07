@@ -43,7 +43,7 @@ const Registration = () => {
 
   const handlePasswordChange = (
     field: keyof Registraionprops,
-    text: string
+    text: string,
   ) => {
     setPasswords((prevPasswords) => ({
       ...prevPasswords,
@@ -92,10 +92,6 @@ const Registration = () => {
   const RegistrationMutation = useMutation({
     mutationFn: (_) => {
       let joinurl = `${API_BASEURL_v2}api/v1/auth/signup`;
-
-      console.log({
-        tttt: joinurl,
-      });
 
       let data = {
         email: email,

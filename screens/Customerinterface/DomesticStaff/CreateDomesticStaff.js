@@ -136,10 +136,9 @@ const CreateDomesticStaff = () => {
     data.append("staffName", formData.staffName);
     data.append("gender", formData.gender);
     data.append("phone", formData.phone);
-    // Format dateOfBirth to YYYY-MM-DD string
     data.append(
       "dateOfBirth",
-      formData.dateOfBirth.toISOString().split("T")[0]
+      formData.dateOfBirth.toISOString().split("T")[0],
     );
     data.append("homeAddress", formData.homeAddress);
     data.append("Role", formData.Role);

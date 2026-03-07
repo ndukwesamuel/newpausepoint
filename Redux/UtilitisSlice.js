@@ -1,6 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../api";
+
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 
 // const apiUrl = import.meta.env.VITE_API_URL;
 const initialState = {
@@ -47,7 +52,7 @@ export const getSShareLink = createAsyncThunk(
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 export const UtilitisSlice = createSlice({

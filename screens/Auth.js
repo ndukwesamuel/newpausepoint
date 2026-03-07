@@ -15,23 +15,23 @@ const Auth = () => {
   const { userlogin } = useSelector((state) => state?.OnboardingSlice);
   const ss = useSelector((state) => state.DontwantToResetSlice);
   const dispatch = useDispatch();
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  // const {
+  //   user_data,
+  //   user_isError,
+  //   user_isSuccess,
+  //   user_isLoading,
+  //   user_message,
+  // } = useSelector((state) => state.AuthSlice);
 
-  useEffect(() => {
-    // This effect ensures OTP screen is shown if login failed due to unverified email.
-    // Ensure user_message is cleared/reset appropriately after handling.
-    if (user_message === "Email Not Verified") {
-      dispatch(authScreenChange("OTP"));
-      // Consider dispatching an action here to clear user_message in AuthSlice
-      // to prevent this effect from re-firing unnecessarily if user_data changes.
-    }
-  }, [user_data, user_message, dispatch]); // Added dispatch to dependencies
+  // useEffect(() => {
+  //   // This effect ensures OTP screen is shown if login failed due to unverified email.
+  //   // Ensure user_message is cleared/reset appropriately after handling.
+  //   // if (user_message === "Email Not Verified") {
+  //   //   dispatch(authScreenChange("OTP"));
+  //   //   // Consider dispatching an action here to clear user_message in AuthSlice
+  //   //   // to prevent this effect from re-firing unnecessarily if user_data changes.
+  //   // }
+  // }, [dispatch]); // Added dispatch to dependencies
 
   return (
     <View style={styles.container}>

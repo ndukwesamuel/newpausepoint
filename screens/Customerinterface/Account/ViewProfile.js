@@ -20,26 +20,13 @@ import {
 } from "../../../components/shared/Paragrahp";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { useRoute } from "@react-navigation/native";
-import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
-import Toast from "react-native-toast-message";
-import AppScreen from "../../../components/shared/AppScreen";
-import { Formbutton } from "../../../components/shared/InputForm";
-import { userFile } from "../../../utils/fakedata";
-import { Admin_Get_Single_User_Fun } from "../../../Redux/Admin/UserSlice";
-import { HalfScreenModal } from "../../../components/shared/ReuseableModal";
-import { Get_Single_clan } from "../../../Redux/UserSide/ClanSlice";
+
 import QRCode from "react-native-qrcode-svg";
-import { useFetchData } from "../../../hooks/Request";
-import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 import { useFetchData_v2 } from "../../../hooks/Requestv2";
 
-function ViewProfile_main({ navigation }) {
+export default function ViewProfile({ navigation }) {
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("profile"); // 'profile' or 'household'
@@ -48,27 +35,14 @@ function ViewProfile_main({ navigation }) {
     setIsModalVisible(!isModalVisible);
   };
 
-  let item = {};
+  const { user } = useSelector((state) => state.authSlice?.userDatav2?.data);
 
-  const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
-
-  const userIdToFind = userProfile_data?.user?._id;
-  const foundMember = userProfile_data?.currentClanMeeting?.members.find(
-    (member) => member.user.toString() === userIdToFind.toString(),
-  );
-
-  // Check if user is a clan member
-  const isClanMember = !!foundMember;
-
-  // Fetch clan info
+  // ✅ SINGLE API CALL - Replaces all previous calls
   const {
-    data: getuserclanInfo,
-    isLoading: isloadinggetuserclanInfo,
-    error: iserrorgetuserclanInfo,
-  } = useFetchData(
-    `clan/${userProfile_data?.currentClanMeeting?._id}`,
-    "getuserclans",
-  );
+    data: userData,
+    isLoading: isLoadingUser,
+    error: userError,
+  } = useFetchData_v2("api/v1/user", "getUserUnified");
 
   // Fetch household data using the new hook
   const {
@@ -77,60 +51,33 @@ function ViewProfile_main({ navigation }) {
     error: householdError,
   } = useFetchData_v2("api/v1/household/user", "getUserHousehold");
 
-  const { get_user_profile_data } = useSelector(
-    (state) => state?.UserProfileSlice,
-  );
+  // ✅ Extract data from unified response
+  const userProfile = userData?.data;
 
-  useEffect(() => {
-    dispatch(UserProfile_data_Fun());
-    return () => {};
-  }, []);
+  const currentClan = userData?.data?.currentClanMeeting;
+  const adminClan = userData?.data?.AdmincurrentClanMeeting;
 
-  const ApproveMember_Mutation = useMutation({
-    mutationFn: (data_info) => {
-      let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
+  const household = householdData?.data;
+  // const memberInfo = userData?.data?.memberInfo;
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  const userId = userData?.data?.user; // or however the user's ID is stored
+  // const memberInfo = currentClan?.members?.find(
+  //   (member) => member.user === userId,
+  // );
 
-      return axios.post(url, data_info, config);
-    },
-    onSuccess: (success) => {
-      Toast.show({
-        type: "success",
-        text1: " successfully ",
-      });
-      dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
-      setIsModalVisible(!isModalVisible);
-    },
-
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message} `,
-      });
-    },
+  const memberInfo = currentClan?.members?.find((member) => {
+    return member.user === user.id;
   });
 
-  const jsonString = JSON.stringify(userProfile_data);
-  const mainuserId = userProfile_data?.user?._id;
-  const mainmembers = userProfile_data?.currentClanMeeting?.members;
-  const foundermember = mainmembers?.find(
-    (member) => member.user === mainuserId,
-  );
+  const photo = userData?.data?.photo;
 
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  // Determine user type
+  const isClanMember = !!currentClan;
+
+  const isAdmin = !!adminClan;
+  const isGuest = !currentClan && !adminClan;
+
+  // currentClan?.settings?.allowMembersToEditProfile
 
   // Tab Button Component
   const TabButton = ({ title, isActive, onPress, icon }) => (
@@ -164,42 +111,58 @@ function ViewProfile_main({ navigation }) {
             color="#10B981"
             style={{ marginRight: 8 }}
           />
-          <Text style={styles.sectionTitle}>User Information k</Text>
+          <Text style={styles.sectionTitle}>User Information</Text>
         </View>
 
-        {console.log({
-          fff: foundermember,
-        })}
-
+        {/* Phone Number */}
         <View style={styles.infoRow}>
           <RegularFontText data="Phone Number" textstyle={styles.infoLabel} />
           <MediumFontText
-            data={foundermember?.phonenumber || "N/A"}
+            data={memberInfo?.phonenumber || userProfile?.phoneNumber || "N/A"}
             textstyle={styles.infoValue}
           />
         </View>
 
-        {!getuserclanInfo?.data?.settings?.allowMembersToEditProfile && (
+        {/* Home Address - Only show for clan members if setting allows */}
+        {isClanMember && !currentClan?.settings?.allowMembersToEditProfile && (
           <View style={styles.infoRow}>
             <RegularFontText data="Home Address" textstyle={styles.infoLabel} />
             <MediumFontText
-              data={foundermember?.homeAddress || "N/A"}
+              data={memberInfo?.homeAddress || "N/A"}
               textstyle={styles.infoValue}
             />
           </View>
         )}
 
-        <View style={styles.infoRow}>
-          <RegularFontText data="Member Code" textstyle={styles.infoLabel} />
-          <MediumFontText
-            data={foundermember?.memberCode || "N/A"}
-            textstyle={styles.infoValue}
-          />
-        </View>
+        {/* Home Address - For guest users */}
+        {isGuest && (
+          <View style={styles.infoRow}>
+            <RegularFontText data="Home Address" textstyle={styles.infoLabel} />
+            <MediumFontText
+              data={`${userProfile?.address?.street || ""}${
+                userProfile?.address?.street ? ", " : ""
+              }${userProfile?.address?.city || ""}${
+                userProfile?.address?.city ? ", " : ""
+              }${userProfile?.address?.state || ""}`}
+              textstyle={styles.infoValue}
+            />
+          </View>
+        )}
+
+        {/* Member Code - Only for clan members */}
+        {isClanMember && (
+          <View style={styles.infoRow}>
+            <RegularFontText data="Member Code" textstyle={styles.infoLabel} />
+            <MediumFontText
+              data={memberInfo?.memberCode || "N/A"}
+              textstyle={styles.infoValue}
+            />
+          </View>
+        )}
       </View>
 
-      {/* QR Code Section */}
-      {userProfile_data?.user?.isGuest !== true && (
+      {/* QR Code Section - Only for clan members */}
+      {isClanMember && memberInfo?.memberCode && (
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <MaterialCommunityIcons
@@ -212,14 +175,12 @@ function ViewProfile_main({ navigation }) {
           </View>
 
           <View style={styles.qrCodeContainer}>
-            {foundermember?.memberCode && (
-              <QRCode
-                value={foundermember?.memberCode}
-                size={200}
-                color="black"
-                backgroundColor="white"
-              />
-            )}
+            <QRCode
+              value={memberInfo.memberCode}
+              size={200}
+              color="black"
+              backgroundColor="white"
+            />
           </View>
         </View>
       )}
@@ -228,15 +189,7 @@ function ViewProfile_main({ navigation }) {
 
   // Household Tab Content
   const HouseholdTabContent = () => {
-    if (isLoadingHousehold) {
-      return (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading household data...</Text>
-        </View>
-      );
-    }
-
-    if (householdError || !householdData?.data) {
+    if (!household) {
       return (
         <View style={styles.emptyContainer}>
           <MaterialCommunityIcons name="home-alert" size={48} color="#9CA3AF" />
@@ -244,8 +197,6 @@ function ViewProfile_main({ navigation }) {
         </View>
       );
     }
-
-    const household = householdData.data;
 
     return (
       <View style={styles.tabContent}>
@@ -303,7 +254,7 @@ function ViewProfile_main({ navigation }) {
         </View>
 
         {/* Estate/Clan Info Section */}
-        {householdData.clanInfo && (
+        {currentClan && (
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
               <MaterialCommunityIcons
@@ -321,7 +272,7 @@ function ViewProfile_main({ navigation }) {
                 textstyle={styles.infoLabel}
               />
               <MediumFontText
-                data={householdData.clanInfo.name || "N/A"}
+                data={currentClan.name || "N/A"}
                 textstyle={styles.infoValue}
               />
             </View>
@@ -332,7 +283,7 @@ function ViewProfile_main({ navigation }) {
                 textstyle={styles.infoLabel}
               />
               <MediumFontText
-                data={householdData.clanInfo.address || "N/A"}
+                data={currentClan.address || "N/A"}
                 textstyle={styles.infoValue}
               />
             </View>
@@ -340,7 +291,7 @@ function ViewProfile_main({ navigation }) {
             <View style={styles.infoRow}>
               <RegularFontText data="Contact" textstyle={styles.infoLabel} />
               <MediumFontText
-                data={householdData.clanInfo.phonenumber || "N/A"}
+                data={currentClan.phonenumber || "N/A"}
                 textstyle={styles.infoValue}
               />
             </View>
@@ -386,321 +337,96 @@ function ViewProfile_main({ navigation }) {
     );
   };
 
-  return (
-    <View style={{ flex: 1 }}>
-      {/* Header Section */}
-      <View style={styles.headerSection}>
-        <View style={styles.profileHeader}>
-          <Image
-            source={{
-              uri: userProfile_data?.photo,
-            }}
-            style={styles.profileImage}
-          />
-
-          <View style={styles.profileInfo}>
-            <SemiBoldFontText
-              data={userProfile_data?.user?.name}
-              textstyle={styles.profileName}
-            />
-            <MediumFontText
-              data={userProfile_data?.user?.email}
-              textstyle={styles.profileEmail}
-            />
-          </View>
-        </View>
-      </View>
-
-      {/* Tab Buttons - Only show if user is a clan member */}
-      {isClanMember && (
-        <View style={styles.tabContainer}>
-          <TabButton
-            title="Profile"
-            icon="account"
-            isActive={activeTab === "profile"}
-            onPress={() => setActiveTab("profile")}
-          />
-          <TabButton
-            title="Household"
-            icon="home"
-            isActive={activeTab === "household"}
-            onPress={() => setActiveTab("household")}
-          />
-        </View>
-      )}
-
-      {/* Tab Content */}
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+  // Loading state
+  if (isLoadingUser) {
+    return (
+      <ScreenWrapper
+        title="Personal Info"
+        navigation={navigation}
+        headerStyle={{ backgroundColor: "white" }}
       >
-        {activeTab === "profile" ? (
-          <ProfileTabContent />
-        ) : (
-          <HouseholdTabContent />
-        )}
-      </ScrollView>
-
-      {/* Modal (keeping existing modal) */}
-      <Modal transparent={true} animationType="slide" visible={isModalVisible}>
-        <TouchableWithoutFeedback onPress={toggleModal}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <MediumFontText
-                  data={
-                    item?.status === "approved" ? "Ban User" : "Reinstate User"
-                  }
-                  textstyle={styles.modalTitle}
-                />
-              </View>
-
-              <RegularFontText
-                data={
-                  item?.status === "approved"
-                    ? "Banning this user will suspend their account indefinitely, preventing further access to the system."
-                    : "Reinstating this user will reactivate their account, allowing them to access the system"
-                }
-                textstyle={styles.modalDescription}
-              />
-
-              {item?.status === "approved" ? (
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={styles.modalButtonDanger}
-                    onPress={() => {
-                      ApproveMember_Mutation.mutate({
-                        clanId: get_user_profile_data?.AdmincurrentClanMeeting,
-                        memberId: item?.user?._id,
-                        approvalStatus: "suspended",
-                      });
-                    }}
-                  >
-                    <RegularFontText
-                      data="Ban User"
-                      textstyle={styles.modalButtonText}
-                    />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.modalButtonPrimary}
-                    onPress={toggleModal}
-                  >
-                    <RegularFontText
-                      data="Cancel"
-                      textstyle={styles.modalButtonTextWhite}
-                    />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={styles.modalButtonOutline}
-                    onPress={toggleModal}
-                  >
-                    <RegularFontText
-                      data="Cancel"
-                      textstyle={styles.modalButtonTextGreen}
-                    />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.modalButtonPrimary}
-                    onPress={() => {
-                      ApproveMember_Mutation.mutate({
-                        clanId: get_user_profile_data?.AdmincurrentClanMeeting,
-                        memberId: item?.user?._id,
-                        approvalStatus: "approved",
-                      });
-                    }}
-                  >
-                    <RegularFontText
-                      data="Reinstate"
-                      textstyle={styles.modalButtonTextWhite}
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    </View>
-  );
-}
-
-function GeneralViewProfile({ navigation }) {
-  const dispatch = useDispatch();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
-
-  let item = {};
-
-  const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
-
-  const userIdToFind = userProfile_data?.user?._id;
-  const foundMember = userProfile_data?.currentClanMeeting?.members.find(
-    (member) => member.user.toString() === userIdToFind.toString(),
-  );
-
-  const {
-    data: getuserclanInfo,
-    isLoading: isloadinggetuserclanInfo,
-    error: iserrorgetuserclanInfo,
-  } = useFetchData(
-    `clan/${userProfile_data?.currentClanMeeting?._id}`,
-    "getuserclans",
-  );
-
-  const {
-    data: getuserinfo,
-    isLoading: isloadinggetuserinfo,
-    error: iserrorgetuserinfo,
-  } = useFetchData(`api/v1/general/UserProfile`, "getuserinfo");
-
-  const { get_user_profile_data } = useSelector(
-    (state) => state?.UserProfileSlice,
-  );
-
-  useEffect(() => {
-    dispatch(UserProfile_data_Fun());
-    return () => {};
-  }, []);
-
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-
-  const ApproveMember_Mutation = useMutation({
-    mutationFn: (data_info) => {
-      let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      return axios.post(url, data_info, config);
-    },
-    onSuccess: (success) => {
-      Toast.show({
-        type: "success",
-        text1: " successfully ",
-      });
-      dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
-      setIsModalVisible(!isModalVisible);
-    },
-
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message} `,
-      });
-    },
-  });
-
-  return (
-    <View style={{ flex: 1 }}>
-      {/* Header Section */}
-      <View style={styles.headerSection}>
-        <View style={styles.profileHeader}>
-          <Image
-            source={{
-              uri: userProfile_data?.photo,
-            }}
-            style={styles.profileImage}
-          />
-
-          <View style={styles.profileInfo}>
-            <SemiBoldFontText
-              data={userProfile_data?.user?.name}
-              textstyle={styles.profileName}
-            />
-            <MediumFontText
-              data={userProfile_data?.user?.email}
-              textstyle={styles.profileEmail}
-            />
-          </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
-      </View>
+      </ScreenWrapper>
+    );
+  }
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+  // Error state
+  if (userError) {
+    return (
+      <ScreenWrapper
+        title="Personal Info"
+        navigation={navigation}
+        headerStyle={{ backgroundColor: "white" }}
       >
-        <View style={styles.container}>
-          <View style={styles.sectionCard}>
-            <View style={styles.sectionHeader}>
-              <MaterialCommunityIcons
-                name="account"
-                size={20}
-                color="#10B981"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.sectionTitle}>User Information</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <RegularFontText
-                data="Phone Number"
-                textstyle={styles.infoLabel}
-              />
-              <MediumFontText
-                data={getuserinfo?.user?.phoneNumber || ""}
-                textstyle={styles.infoValue}
-              />
-            </View>
-
-            <View style={styles.infoRow}>
-              <RegularFontText
-                data="Home Address"
-                textstyle={styles.infoLabel}
-              />
-              <MediumFontText
-                data={`${getuserinfo?.user?.address?.street || ""}${
-                  getuserinfo?.user?.address?.street ? ", " : ""
-                }${getuserinfo?.user?.address?.city || ""}${
-                  getuserinfo?.user?.address?.city ? ", " : ""
-                }${getuserinfo?.user?.address?.state || ""}`}
-                textstyle={styles.infoValue}
-              />
-            </View>
-          </View>
+        <View style={styles.emptyContainer}>
+          <MaterialCommunityIcons
+            name="alert-circle"
+            size={48}
+            color="#DC2626"
+          />
+          <Text style={styles.emptyText}>Failed to load user data</Text>
         </View>
-      </ScrollView>
-    </View>
-  );
-}
-
-export default function ViewProfile({ navigation }) {
-  const { userProfile_data } = useSelector((state) => state?.ProfileSlice);
-  const { userDatav2 } = useSelector((state) => state?.authSlice);
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper
       title="Personal Info"
       navigation={navigation}
-      headerStyle={{
-        backgroundColor: "white",
-      }}
+      headerStyle={{ backgroundColor: "white" }}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {userDatav2?.data?.isInClan ? (
-          <ViewProfile_main />
-        ) : (
-          <GeneralViewProfile />
+      <View style={{ flex: 1 }}>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <View style={styles.profileHeader}>
+            <Image source={{ uri: photo }} style={styles.profileImage} />
+
+            <View style={styles.profileInfo}>
+              <SemiBoldFontText
+                data={userProfile?.name}
+                textstyle={styles.profileName}
+              />
+              <MediumFontText
+                data={userProfile?.email}
+                textstyle={styles.profileEmail}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Tab Buttons - Only show if user is a clan member with household */}
+        {isClanMember && household && (
+          <View style={styles.tabContainer}>
+            <TabButton
+              title="Profile"
+              icon="account"
+              isActive={activeTab === "profile"}
+              onPress={() => setActiveTab("profile")}
+            />
+            <TabButton
+              title="Household"
+              icon="home"
+              isActive={activeTab === "household"}
+              onPress={() => setActiveTab("household")}
+            />
+          </View>
         )}
-      </ScrollView>
+
+        {/* Tab Content */}
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          {activeTab === "profile" ? (
+            <ProfileTabContent />
+          ) : (
+            <HouseholdTabContent />
+          )}
+        </ScrollView>
+      </View>
     </ScreenWrapper>
   );
 }
@@ -887,91 +613,5 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontWeight: "500",
     marginTop: 12,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  modalHeader: {
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    textAlign: "center",
-    color: "#111827",
-    letterSpacing: 0.3,
-  },
-  modalDescription: {
-    fontSize: 14,
-    fontWeight: "400",
-    textAlign: "center",
-    color: "#6B7280",
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  modalButtonDanger: {
-    flex: 1,
-    backgroundColor: "#FEE2E2",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  modalButtonPrimary: {
-    flex: 1,
-    backgroundColor: "#10B981",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  modalButtonOutline: {
-    flex: 1,
-    backgroundColor: "white",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#10B981",
-    alignItems: "center",
-  },
-  modalButtonText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#DC2626",
-    letterSpacing: 0.3,
-  },
-  modalButtonTextWhite: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    letterSpacing: 0.3,
-  },
-  modalButtonTextGreen: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#10B981",
-    letterSpacing: 0.3,
   },
 });

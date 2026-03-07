@@ -21,8 +21,6 @@ import LottieView from "lottie-react-native";
 import { useMutation } from "@tanstack/react-query";
 // ------------------------------------------------------------------
 
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
 import axios from "axios";
 import Toast from "react-native-toast-message";
 
@@ -45,12 +43,18 @@ import {
   Formbutton,
   Forminput,
 } from "../../../components/shared/InputForm";
+import { API_CONFIG } from "../../../api";
+
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 
 const ForumDetails = () => {
   const maindata = useRoute()?.params;
 
   const { get_user_profile_data } = useSelector(
-    (state) => state.UserProfileSlice
+    (state) => state.UserProfileSlice,
   );
 
   let forumid = maindata?._id;
@@ -98,7 +102,7 @@ const ForumDetails = () => {
   };
 
   const { get_my_clan_single_forum_data } = useSelector(
-    (state) => state?.ForumSlice
+    (state) => state?.ForumSlice,
   );
 
   const [refreshing, setRefreshing] = useState(false);
@@ -108,7 +112,7 @@ const ForumDetails = () => {
     // Ensure forumid is present before dispatching
     if (forumid) {
       dispatch(Get_My_Clan_Single_Forum_Fun(forumid)).finally(() =>
-        setRefreshing(false)
+        setRefreshing(false),
       );
     } else {
       setRefreshing(false);
@@ -246,7 +250,7 @@ const ForumDetails = () => {
 
   // Check if current user has already liked the post
   const isLiked = get_my_clan_single_forum_data?.data?.likes?.includes(
-    get_user_profile_data?.user?._id
+    get_user_profile_data?.user?._id,
   );
 
   // Check if current user is the post creator
@@ -329,7 +333,7 @@ const ForumDetails = () => {
 
             <LightFontText
               data={formatDateandTime(
-                get_my_clan_single_forum_data?.data?.createdAt
+                get_my_clan_single_forum_data?.data?.createdAt,
               )}
               textstyle={{ fontSize: 12, fontWeight: "300" }}
             />

@@ -26,9 +26,16 @@ import { Get_My_Clan_Forum_Fun } from "../../Redux/UserSide/ForumSlice";
 import { formatDate, formatDateandTime } from "../../utils/DateTime";
 import LottieView from "lottie-react-native";
 import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 import axios from "axios";
 import Toast from "react-native-toast-message";
+
+import { API_CONFIG } from "../../api";
+import { useFetchData_v2 } from "../../hooks/Requestv2";
+
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 
 // Sample Advertisement Data for Forum
 const forumAdvertisements = [
@@ -101,19 +108,14 @@ const Forum = () => {
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
 
+  const { data: get_my_clan_forum_data, isLoading: isLoadingCategories } =
+    useFetchData_v2(`api/v1/forum`, `forum`);
+
   const onRefresh = () => {
     setRefreshing(true);
-    dispatch(Get_My_Clan_Forum_Fun());
+    // dispatch(Get_My_Clan_Forum_Fun());
     setRefreshing(false);
   };
-
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
 
   const Like_Mutation = useMutation({
     mutationFn: (data_info) => {
@@ -123,7 +125,7 @@ const Forum = () => {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
+          // Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
@@ -140,28 +142,23 @@ const Forum = () => {
     },
   });
 
-  const { get_my_clan_forum_data, get_my_clan_forum_message } = useSelector(
-    (state) => state.ForumSlice
+  const { get_my_clan_forum_message } = useSelector(
+    (state) => state.ForumSlice,
   );
 
   const { get_user_profile_data } = useSelector(
-    (state) => state.UserProfileSlice
+    (state) => state.UserProfileSlice,
   );
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
 
-  useEffect(() => {
-    dispatch(Get_My_Clan_Forum_Fun());
-    return () => {};
-  }, [dispatch]);
-
   // Function to insert ads into forum posts
   const getForumDataWithAds = () => {
-    if (!get_my_clan_forum_data?.forums) return [];
+    if (!get_my_clan_forum_data) return [];
 
-    const posts = get_my_clan_forum_data.forums;
+    const posts = get_my_clan_forum_data;
     const dataWithAds = [];
     let adIndex = 0;
 
@@ -192,7 +189,7 @@ const Forum = () => {
     return (
       <TouchableOpacity
         style={styles.postCard}
-        onPress={() => navigation.navigate("forumdetail", post)}
+        // onPress={() => navigation.navigate("forumdetail", post)}
         activeOpacity={0.7}
       >
         {/* Post Header */}
@@ -231,13 +228,13 @@ const Forum = () => {
         <View style={styles.postActions}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              Like_Mutation.mutate({
-                forumid: post?._id,
-                clanId: post?.clan,
-              });
-            }}
+            // onPress={(e) => {
+            //   e.stopPropagation();
+            //   Like_Mutation.mutate({
+            //     forumid: post?._id,
+            //     clanId: post?.clan,
+            //   });
+            // }}
             activeOpacity={0.7}
           >
             <View
@@ -247,11 +244,12 @@ const Forum = () => {
               ]}
             >
               <MaterialCommunityIcons
-                name={
-                  post?.likes?.includes(user_data?.user?._id)
-                    ? "heart"
-                    : "heart-outline"
-                }
+                // name={
+                //   post?.likes?.includes(user_data?.user?._id)
+                //     ? "heart"
+                //     : "heart-outline"
+                //  this is realy needed}
+                name="heart"
                 size={18}
                 color="#DC2626"
               />
@@ -262,10 +260,10 @@ const Forum = () => {
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              navigation.navigate("forumdetail", post);
-            }}
+            // onPress={(e) => {
+            //   e.stopPropagation();
+            //   navigation.navigate("forumdetail", post);
+            // }}
             activeOpacity={0.7}
           >
             <View
@@ -286,7 +284,7 @@ const Forum = () => {
 
           <TouchableOpacity
             style={styles.viewDetailsButton}
-            onPress={() => navigation.navigate("forumdetail", post)}
+            // onPress={() => navigation.navigate("forumdetail", post)}
             activeOpacity={0.7}
           >
             <Text style={styles.viewDetailsText}>View Details</Text>
@@ -308,7 +306,7 @@ const Forum = () => {
         style={styles.container}
       >
         <View style={styles.content}>
-          {get_user_profile_data?.currentClanMeeting?._id ? (
+          {get_user_profile_data?.data?.currentClanMeeting?._id ? (
             <>
               {/* Header */}
               <View style={styles.header}>
@@ -380,13 +378,14 @@ const Forum = () => {
               />
 
               {/* Floating Action Button */}
-              <TouchableOpacity
+              {/* pls add this when you have fix the create screen  */}
+              {/* <TouchableOpacity
                 style={styles.fab}
                 onPress={() => navigation.navigate("createforum")}
                 activeOpacity={0.8}
               >
                 <MaterialCommunityIcons name="plus" size={28} color="#FFFFFF" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </>
           ) : (
             <ScrollView

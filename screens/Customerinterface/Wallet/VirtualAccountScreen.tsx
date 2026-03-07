@@ -35,6 +35,9 @@ const VirtualAccountScreen = () => {
   // ✅ DATA AS ARRAY
   const accountDetails = virtualAccountData?.data || [];
   const hasAccount = accountDetails.length > 0;
+  console.log({
+    kakak: accountDetails,
+  });
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -103,78 +106,83 @@ const VirtualAccountScreen = () => {
       )}
 
       {/* HAS ACCOUNT(S) */}
-      {accountDetails.map((account, index) => (
-        <View key={account?._id || index} style={styles.accountContainer}>
-          {/* ACCOUNT CARD */}
-          <View style={styles.accountCard}>
-            <View style={styles.accountHeader}>
-              <MaterialCommunityIcons name="bank" size={32} color="#10B981" />
-              <View style={{ marginLeft: 12 }}>
-                <Text style={styles.bankName}>{account?.bankName}</Text>
-                <Text style={styles.statusText}>
-                  {account?.other?.status || "Active"}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Account Number</Text>
-              <TouchableOpacity
-                onPress={() =>
-                  handleCopyToClipboard(
-                    account?.accountNumber,
-                    "Account number",
-                  )
-                }
-              >
-                <Text style={styles.detailValue}>{account?.accountNumber}</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Account Name</Text>
-              <Text style={styles.detailValue}>{account?.accountName}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Bank Code</Text>
-              <Text style={styles.detailValue}>{account?.bankCode}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Account Type</Text>
-              <Text style={styles.detailValue}>
-                {account?.other?.accountType || "Current"}
+      <View style={styles.accountContainer}>
+        {/* ACCOUNT CARD */}
+        <View style={styles.accountCard}>
+          <View style={styles.accountHeader}>
+            <MaterialCommunityIcons name="bank" size={32} color="#10B981" />
+            <View style={{ marginLeft: 12 }}>
+              <Text style={styles.bankName}>{accountDetails?.bankName}</Text>
+              <Text style={styles.statusText}>
+                {accountDetails?.other?.status || "Active"}
               </Text>
             </View>
           </View>
 
-          {/* ACTIONS */}
-          <View style={styles.actionsContainer}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Account Number</Text>
             <TouchableOpacity
-              style={styles.actionButton}
               onPress={() =>
-                handleCopyToClipboard(account?.accountNumber, "Account number")
+                handleCopyToClipboard(
+                  accountDetails?.accountNumber,
+                  "Account number",
+                )
               }
             >
-              <MaterialCommunityIcons
-                name="content-copy"
-                size={20}
-                color="#6366F1"
-              />
-              <Text style={styles.actionButtonText}>Copy</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionButton, styles.shareButton]}
-              onPress={() => Alert.alert("Share", "Coming soon")}
-            >
-              <MaterialIcons name="share" size={20} color="#10B981" />
-              <Text style={styles.actionButtonText}>Share</Text>
+              <Text style={styles.detailValue}>
+                {accountDetails?.accountNumber}
+              </Text>
             </TouchableOpacity>
           </View>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Account Name</Text>
+            <Text style={styles.detailValue}>
+              {accountDetails?.accountName}
+            </Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Bank Code</Text>
+            <Text style={styles.detailValue}>{accountDetails?.bankCode}</Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Account Type</Text>
+            <Text style={styles.detailValue}>
+              {accountDetails?.other?.accountType || "Current"}
+            </Text>
+          </View>
         </View>
-      ))}
+
+        {/* ACTIONS */}
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() =>
+              handleCopyToClipboard(
+                accountDetails?.accountNumber,
+                "Account number",
+              )
+            }
+          >
+            <MaterialCommunityIcons
+              name="content-copy"
+              size={20}
+              color="#6366F1"
+            />
+            <Text style={styles.actionButtonText}>Copy</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.shareButton]}
+            onPress={() => Alert.alert("Share", "Coming soon")}
+          >
+            <MaterialIcons name="share" size={20} color="#10B981" />
+            <Text style={styles.actionButtonText}>Share</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </ScrollView>
   );
 };

@@ -3,11 +3,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { AnyIfEmpty } from "react-redux";
 import Toast from "react-native-toast-message";
 import { handleApiError } from "./shareApi";
+import { API_CONFIG } from "../api";
+
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 
 // import { Alert } from "react-native";
 
@@ -40,7 +45,7 @@ export const UserProfile_data_Fun = createAsyncThunk(
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 export const ProfileSlice = createSlice({

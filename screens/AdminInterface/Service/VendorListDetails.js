@@ -76,9 +76,6 @@ const VendorListDetails = ({ navigation }) => {
       navigation.goBack();
     },
     onError: (error) => {
-      console.log({
-        jjjjj: error?.response?.data,
-      });
       // Safely access the error message
       const errorMessage = error?.response?.data?.message || "Deletion failed";
       Toast.show({

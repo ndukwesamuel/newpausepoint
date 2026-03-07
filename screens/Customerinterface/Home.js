@@ -57,37 +57,7 @@ import Forum_Market from "../../components/shared/Forum_Market";
 import WalletScreen from "./Wallet/WalletScreen";
 
 export default function App({ navigation }) {
-  // const navigation = useNavigation();
   const [currentTab, setCurrentTab] = useState("Home");
-  // To get the curretn Status of menu ...
-  const [showMenu, setShowMenu] = useState(false);
-  const dispatch = useDispatch();
-
-  // Animated Properties...
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-
-  // Animated Properties...
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-  let user_clan_info = userProfile_data?.currentClanMeeting;
-
-  const offsetValue = useRef(new Animated.Value(0)).current;
-  // Scale Intially must be One...
-  const scaleValue = useRef(new Animated.Value(1)).current;
-  const closeButtonOffset = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    dispatch(UserProfile_data_Fun());
-
-    return () => {};
-  }, [dispatch]);
-
-  const isGuest = user_data?.user?.isGuest;
 
   return (
     <SafeAreaView

@@ -1,3 +1,5 @@
+
+
 import AppScreen from "../../../components/shared/AppScreen";
 import {
   View,
@@ -11,10 +13,7 @@ import {
 } from "react-native";
 
 import * as Clipboard from "expo-clipboard";
-import React, { useEffect, useRef, useState } from "react";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
+import React, { useRef, useState } from "react";
 import Toast from "react-native-toast-message";
 import {
   MaterialIcons,
@@ -22,9 +21,7 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 
-import { useMutation } from "@tanstack/react-query";
-
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import {
   Get_All_User_Guest_Fun,
@@ -36,6 +33,7 @@ import * as Sharing from "expo-sharing";
 import QRCode from "react-native-qrcode-svg";
 import ViewShot from "react-native-view-shot";
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
+import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 
 const GuestsDetail = () => {
   const dispatch = useDispatch();
@@ -45,84 +43,66 @@ const GuestsDetail = () => {
   const route = useRoute();
   const { itemdata } = route.params;
 
-  const { get_user_guest_detail_data } = useSelector(
-    (state) => state?.GuestSlice,
-  );
+  const {
+    data: guestData,
+    isLoading: isLoadingGuests,
+    isError: isErrorGuests,
+    error: errorGuests,
+    refetch: refetchGuests,
+  } = useFetchData_v2(`api/v1/visitor/${itemdata?._id}`, "userGuests");
 
-  const { user_data } = useSelector((state) => state.AuthSlice);
+  let invitation = guestData?.userInvites;
 
   const [qrCodeValue, setQRCodeValue] = useState("");
   const viewShotRef = useRef();
 
-  // Departure Mutation
-  const setDepartureRequest = async (data) => {
-    let url = `${API_BASEURL}api/v1/guest/modify`;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user_data?.token}`,
+  // ✅ Cancel visitor mutation
+  const cancelVisitorMutation = useMutateData_v2(
+    `api/v1/visitor/${invitation?._id}`,
+    "DELETE",
+    ["visitors", "userGuests"],
+    {
+      onSuccess: () => {
+        Toast.show({
+          type: "success",
+          text1: "Visitor cancelled successfully",
+        });
+        dispatch(Get_All_User_Guest_Fun());
+        navigation.goBack();
       },
-    };
-    return axios.patch(url, data, config);
-  };
-
-  const Set_Departure_Mutation = useMutation({
-    mutationFn: setDepartureRequest,
-    onSuccess: (response) => {
-      Toast.show({
-        type: "success",
-        text1: "Guest marked as departed",
-      });
-      dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
-    },
-    onError: (error) => {
-      const errorMessage =
-        error?.response?.data?.message || "Failed to update status";
-      Toast.show({
-        type: "error",
-        text1: errorMessage,
-      });
-    },
-  });
-
-  // Cancel Mutation
-  const cancelGuestRequest = async () => {
-    let url = `${API_BASEURL}visitor/cancel/${get_user_guest_detail_data?.invitation?._id}`;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${user_data?.token}`,
+      onError: (error: any) => {
+        Toast.show({
+          type: "error",
+          text1: error?.data?.message || "Failed to cancel visitor",
+        });
       },
-    };
-    return axios.post(url, {}, config);
-  };
+    }
+  );
 
-  const Cancle_Guests_Mutation = useMutation({
-    mutationFn: cancelGuestRequest,
-    onSuccess: () => {
-      Toast.show({
-        type: "success",
-        text1: "Visitor cancelled successfully",
-      });
-      dispatch(Get_All_User_Guest_Fun());
-      navigation.goBack();
-    },
-    onError: (error) => {
-      const errorMessage =
-        error?.response?.data?.message || "Failed to cancel visitor";
-      Toast.show({
-        type: "error",
-        text1: errorMessage,
-      });
-    },
-  });
+  // ✅ Set departure mutation
+  const setDepartureMutation = useMutateData_v2(
+    `api/v1/guest/modify`,
+    "PATCH",
+    ["userGuests"],
+    {
+      onSuccess: () => {
+        Toast.show({
+          type: "success",
+          text1: "Guest marked as departed",
+        });
+        dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
+        refetchGuests();
+      },
+      onError: (error: any) => {
+        Toast.show({
+          type: "error",
+          text1: error?.data?.message || "Failed to update status",
+        });
+      },
+    }
+  );
 
-  useEffect(() => {
-    dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
-  }, [dispatch, itemdata?._id]);
-
-  const copyAndShareAccessCode = async (accessCode) => {
+  const copyAndShareAccessCode = async (accessCode: string) => {
     const message = `Hi,\n\nHere is your one-time access code: ${accessCode}\n\nPowered by Pausepoint.net.`;
 
     await Clipboard.setStringAsync(message);
@@ -167,10 +147,10 @@ const GuestsDetail = () => {
         text: "Yes, Departed",
         onPress: () => {
           const data = {
-            invitationId: get_user_guest_detail_data.invitation._id,
+            invitationId: invitation._id,
             status: "departed",
           };
-          Set_Departure_Mutation.mutate(data);
+          setDepartureMutation.mutate(data);
         },
       },
     ]);
@@ -185,14 +165,13 @@ const GuestsDetail = () => {
         {
           text: "Yes, Cancel",
           style: "destructive",
-          onPress: () => Cancle_Guests_Mutation.mutate(),
+          onPress: () => cancelVisitorMutation.mutate({}),
         },
-      ],
+      ]
     );
   };
 
   const handleOpenQrcodeModal = () => {
-    const invitation = get_user_guest_detail_data?.invitation;
     if (!invitation) {
       Toast.show({ type: "error", text1: "Invitation data not loaded" });
       return;
@@ -206,7 +185,6 @@ const GuestsDetail = () => {
     setModalVisible(true);
   };
 
-  const invitation = get_user_guest_detail_data?.invitation;
   const statusColor =
     invitation?.status === "arrived"
       ? "#10B981"
@@ -347,7 +325,7 @@ const GuestsDetail = () => {
               color="#10B981"
             />
 
-            <View style={{}}>
+            <View>
               <TimelineItem
                 icon="calendar-remove"
                 label="Departed"
@@ -359,9 +337,9 @@ const GuestsDetail = () => {
                 <TouchableOpacity
                   style={styles.departureButton}
                   onPress={handleDeparture}
-                  disabled={Set_Departure_Mutation.isPending}
+                  disabled={setDepartureMutation.isPending}
                 >
-                  {Set_Departure_Mutation.isPending ? (
+                  {setDepartureMutation.isPending ? (
                     <ActivityIndicator size="small" color="#10B981" />
                   ) : (
                     <>
@@ -400,9 +378,9 @@ const GuestsDetail = () => {
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={handleCancelGuest}
-              disabled={Cancle_Guests_Mutation.isPending}
+              disabled={cancelVisitorMutation.isPending}
             >
-              {Cancle_Guests_Mutation.isPending ? (
+              {cancelVisitorMutation.isPending ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
@@ -755,11 +733,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#111827",
   },
-  departureContainer: {
-    // flexDirection: "row",
-    // alignItems: "center",
-    // justifyContent: "space-between",
-  },
   departureButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -768,6 +741,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
     gap: 6,
+    marginTop: 8,
   },
   departureButtonText: {
     fontSize: 13,
@@ -823,9 +797,6 @@ const styles = StyleSheet.create({
 
   // FAB
   fab: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
     width: 60,
     height: 60,
     borderRadius: 30,

@@ -514,7 +514,7 @@ export default function Bank() {
                         <TouchableOpacity
                           style={styles.primaryButton}
                           onPress={() =>
-                            navigation.navigate("CreateDepositAccount")
+                            // navigation.navigate("CreateDepositAccount")
                           }
                         >
                           <MaterialCommunityIcons

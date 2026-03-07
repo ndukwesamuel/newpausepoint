@@ -3,12 +3,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { AnyIfEmpty } from "react-redux";
 import Toast from "react-native-toast-message";
 import { handleApiError } from "../shareApi";
 import { Alert } from "react-native";
+import { API_CONFIG } from "../../api";
+
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 
 // import { Alert } from "react-native";
 
@@ -32,7 +37,12 @@ export const Get_My_Clan_Single_Forum_Fun = createAsyncThunk(
   "ForumSlice/Get_My_Clan_Single_Forum_Fun",
   async (data_id, thunkAPI) => {
     try {
-      let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
+      let token_Data = thunkAPI.getState()?.authSlice;
+
+      console.log({
+        uuuuu: token_Data,
+      });
+
       let clan_id =
         thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
           ?.currentClanMeeting?._id;
@@ -57,7 +67,7 @@ export const Get_My_Clan_Single_Forum_Fun = createAsyncThunk(
       });
       return thunkAPI.rejectWithValue(error?.response?.data?.message);
     }
-  }
+  },
 );
 
 export const Get_My_Clan_Forum_Fun = createAsyncThunk(
@@ -91,7 +101,7 @@ export const Get_My_Clan_Forum_Fun = createAsyncThunk(
       });
       return thunkAPI.rejectWithValue(error?.response?.data?.message);
     }
-  }
+  },
 );
 
 export const ForumSlice = createSlice({
@@ -100,11 +110,11 @@ export const ForumSlice = createSlice({
   reducers: {
     reset_ForumSlice: (state) => initialState,
     reset__single_forum: () => {
-      (state.get_my_clan_single_forum_data = null),
+      ((state.get_my_clan_single_forum_data = null),
         (state.get_my_clan_single_forum_isError = false),
         (state.get_my_clan_single_forum_isSuccess = false),
         (state.get_my_clan_single_forum_isLoading = false),
-        (state.get_my_clan_single_forum_message = null);
+        (state.get_my_clan_single_forum_message = null));
     },
   },
   extraReducers: (builder) => {

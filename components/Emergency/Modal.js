@@ -18,8 +18,12 @@ import { FormLabel, Formbutton, Forminput } from "../shared/InputForm";
 import { MediumFontText } from "../shared/Paragrahp";
 
 import { useMutation } from "@tanstack/react-query"; // CHANGED: Updated import for TanStack Query v5
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../../api";
 
+const API_BASEURL = API_CONFIG?.BASE_URL;
+console.log({
+  tyyy: API_BASEURL,
+});
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import LottieView from "lottie-react-native";
