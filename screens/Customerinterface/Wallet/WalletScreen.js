@@ -60,17 +60,17 @@ const WalletScreen = ({}) => {
       params: {},
       condition: userDatav2?.data?.isInClan,
     },
-    // {
-    //   id: 2,
-    //   name: "Amenities",
-    //   icon: "apartment",
-    //   iconSet: MaterialIcons,
-    //   color: "#009688",
-    //   type: "amenities",
-    //   route: "amentities",
-    //   params: {},
-    //   condition: userDatav2?.data?.isInClan,
-    // },
+    {
+      id: 2,
+      name: "Amenities",
+      icon: "apartment",
+      iconSet: MaterialIcons,
+      color: "#009688",
+      type: "amenities",
+      route: "amentities",
+      params: {},
+      condition: userDatav2?.data?.isInClan,
+    },
     {
       id: 3,
       name: "Dues",
@@ -82,28 +82,28 @@ const WalletScreen = ({}) => {
       params: {},
       condition: userDatav2?.data?.isInClan,
     },
-    // {
-    //   id: 4,
-    //   name: "Emergency",
-    //   icon: "emergency",
-    //   iconSet: MaterialIcons,
-    //   color: "#F44336",
-    //   type: "emergency",
-    //   route: "Emergencyscreen",
-    //   params: {},
-    //   condition: userDatav2?.data?.isInClan,
-    // },
-    // {
-    //   id: 5,
-    //   name: "Polls/Surveys",
-    //   icon: "poll",
-    //   iconSet: MaterialIcons,
-    //   color: "#9C27B0",
-    //   type: "polls",
-    //   route: "userpolls",
-    //   params: {},
-    //   condition: userDatav2?.data?.isInClan,
-    // },
+    {
+      id: 4,
+      name: "Emergency",
+      icon: "emergency",
+      iconSet: MaterialIcons,
+      color: "#F44336",
+      type: "emergency",
+      route: "Emergencyscreen",
+      params: {},
+      condition: userDatav2?.data?.isInClan,
+    },
+    {
+      id: 5,
+      name: "Polls/Surveys",
+      icon: "poll",
+      iconSet: MaterialIcons,
+      color: "#9C27B0",
+      type: "polls",
+      route: "userpolls",
+      params: {},
+      condition: userDatav2?.data?.isInClan,
+    },
     // {
     //   id: 6,
     //   name: "Service",
@@ -427,7 +427,7 @@ const WalletScreen = ({}) => {
             </TouchableOpacity>
 
             {/* Airtime */}
-            {/* <TouchableOpacity
+            <TouchableOpacity
               style={{
                 width: "30%",
                 alignItems: "center",
@@ -470,9 +470,9 @@ const WalletScreen = ({}) => {
               >
                 Airtime
               </Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
 
-            {/* <TouchableOpacity
+            <TouchableOpacity
               style={{
                 width: "30%",
                 alignItems: "center",
@@ -518,7 +518,7 @@ const WalletScreen = ({}) => {
               >
                 Data
               </Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
           </View>
         </View>
 

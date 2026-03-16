@@ -10,10 +10,6 @@ import Toast from "react-native-toast-message";
 import { handleApiError } from "../shareApi";
 import { API_CONFIG } from "../../api";
 
-// import { Alert } from "react-native";
-
-// let userAPi = process.env.APIBASEURL + "user/login";
-
 const initialState = {
   get_user_profile_data: null,
   get_user_profile_isError: false,

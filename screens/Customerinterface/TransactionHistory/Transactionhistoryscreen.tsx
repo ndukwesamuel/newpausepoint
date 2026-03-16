@@ -9,9 +9,10 @@
 //   RefreshControl,
 // } from "react-native";
 // import { MaterialCommunityIcons } from "@expo/vector-icons";
-// // import { useFetchData_v2 } from "./hooks/useApi";
 // import { useNavigation } from "@react-navigation/native";
 // import { useFetchData_v2 } from "../../../hooks/Requestv2";
+// // import { useFetchData_v2 } from "../../../hooks/Requestv2";
+// // useFetchData_v2
 // interface Transaction {
 //   _id: string;
 //   user: {
@@ -27,14 +28,22 @@
 //   details: string;
 //   createdAt: string;
 //   updatedAt: string;
+//   source?: "wallet" | "bank";
+//   normalizedType?: "credit" | "debit";
+//   bankData?: any;
 // }
 
 // const TransactionHistoryScreen = () => {
 //   const navigation = useNavigation();
-//   const [filterType, setFilterType] = useState<"all" | "credit" | "debit">(
-//     "all"
-//   );
 
+//   // const [filterType, setFilterType] = useState;
+//   // "all" | "wallet" | "bank" | "credit" | ("debit" > "all");
+
+//   // const [filterType, setFilterType] = useState;
+//   // "all" | "wallet" | "bank" | "credit" | ("debit" > "all");
+//   type FilterType = "all" | "wallet" | "bank" | "credit" | "debit";
+//   const [filterType, setFilterType] = useState<FilterType>("all");
+//   // Fetch wallet transactions
 //   const {
 //     data: transactions,
 //     isError,
@@ -44,15 +53,111 @@
 //     isRefetching,
 //   } = useFetchData_v2("api/v1/user/all-transaction-history", "wallet");
 
-//   // Filter transactions
-//   const filteredTransactions = transactions?.transactions?.filter(
-//     (transaction) => {
-//       if (filterType === "all") return true;
-//       return transaction.type === filterType;
-//     }
-//   );
+//   // Fetch bank transactions
+//   const {
+//     data: bankTransactions,
+//     isError: isBankError,
+//     isLoading: isBankLoading,
+//     refetch: refetchBank,
+//   } = useFetchData_v2("api/v1/user/GetBankTransaction", "bankTransactions");
 
-//   // let filteredTransactions = [];
+//   // const normalizeTransactions = () => {
+//   //   // Wallet transactions
+//   //   const walletTxns =
+//   //     transactions?.transactions?.map((tx) => ({
+//   //       ...tx,
+//   //       source: "wallet" as const,
+//   //       normalizedType: tx.type,
+//   //     })) || [];
+
+//   //   // Bank transactions - normalize to wallet structure
+//   //   const bankTxns =
+//   //     bankTransactions?.map((tx) => ({
+//   //       _id: tx.id,
+//   //       user: transactions?.transactions?.[0]?.user || {
+//   //         _id: "",
+//   //         name: "Bank Account",
+//   //         email: "",
+//   //       },
+//   //       reference: tx.id,
+//   //       amount: tx.attributes.amount,
+//   //       currency: "NGN",
+//   //       type: tx.attributes.direction === "Credit" ? "credit" : "debit",
+//   //       status: "completed" as const,
+//   //       details: tx.attributes.summary,
+//   //       createdAt: tx.attributes.createdAt,
+//   //       updatedAt: tx.attributes.createdAt,
+//   //       source: "bank" as const,
+//   //       normalizedType:
+//   //         tx.attributes.direction === "Credit" ? "credit" : "debit",
+//   //       // Keep original for detail screen
+//   //       bankData: tx,
+//   //     })) || [];
+
+//   //   // Combine and sort by date
+//   //   return [...walletTxns, ...bankTxns].sort(
+//   //     (a, b) =>
+//   //       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+//   //   );
+//   // };
+
+//   // Normalize and combine transactions
+//   const normalizeTransactions = () => {
+//     // Wallet transactions
+//     const walletTxns =
+//       transactions?.transactions?.map((tx) => ({
+//         ...tx,
+//         source: "wallet" as const,
+//         normalizedType: tx.type,
+//       })) || [];
+
+//     // Bank transactions - normalize to wallet structure
+//     const bankTxns =
+//       bankTransactions?.map((tx) => ({
+//         _id: tx.id,
+//         user: transactions?.transactions?.[0]?.user || {
+//           _id: "",
+//           name: "Bank Account",
+//           email: "",
+//         },
+//         reference: tx.id,
+//         amount: tx.attributes.amount / 100, // ✅ CONVERT KOBO TO NAIRA
+//         currency: "NGN",
+//         type: tx.attributes.direction === "Credit" ? "credit" : "debit",
+//         status: "completed" as const,
+//         details: tx.attributes.summary,
+//         createdAt: tx.attributes.createdAt,
+//         updatedAt: tx.attributes.createdAt,
+//         source: "bank" as const,
+//         normalizedType:
+//           tx.attributes.direction === "Credit" ? "credit" : "debit",
+//         // Keep original for detail screen
+//         bankData: {
+//           ...tx,
+//           attributes: {
+//             ...tx.attributes,
+//             // ✅ Also convert balance amounts for detail screen
+//             amount: tx.attributes.amount / 100,
+//             balanceBefore: tx.attributes.balanceBefore / 100,
+//             balanceAfter: tx.attributes.balanceAfter / 100,
+//           },
+//         },
+//       })) || [];
+
+//     // Combine and sort by date
+//     return [...walletTxns, ...bankTxns].sort(
+//       (a, b) =>
+//         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+//     );
+//   };
+
+//   // Filter transactions
+//   const filteredTransactions = normalizeTransactions().filter((transaction) => {
+//     if (filterType === "all") return true;
+//     if (filterType === "wallet") return transaction.source === "wallet";
+//     if (filterType === "bank") return transaction.source === "bank";
+//     return transaction.normalizedType === filterType;
+//   });
 
 //   // Group transactions by date
 //   const groupedTransactions = filteredTransactions?.reduce(
@@ -68,7 +173,7 @@
 //       groups[date].push(transaction);
 //       return groups;
 //     },
-//     {}
+//     {},
 //   );
 
 //   // Format amount
@@ -78,7 +183,7 @@
 //       {
 //         minimumFractionDigits: 2,
 //         maximumFractionDigits: 2,
-//       }
+//       },
 //     )}`;
 //   };
 
@@ -110,7 +215,13 @@
 //     navigation.navigate("TransactionDetail", { transaction });
 //   };
 
-//   if (isLoading) {
+//   // Handle refresh
+//   const handleRefresh = () => {
+//     refetch();
+//     refetchBank();
+//   };
+
+//   if (isLoading || isBankLoading) {
 //     return (
 //       <View style={styles.loadingContainer}>
 //         <ActivityIndicator size="large" color="#10B981" />
@@ -119,13 +230,13 @@
 //     );
 //   }
 
-//   if (isError) {
+//   if (isError && isBankError) {
 //     return (
 //       <View style={styles.errorContainer}>
 //         <MaterialCommunityIcons name="alert-circle" size={56} color="#DC2626" />
 //         <Text style={styles.errorText}>Failed to load transactions</Text>
 //         <Text style={styles.errorSubtext}>{error?.message}</Text>
-//         <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
+//         <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
 //           <Text style={styles.retryButtonText}>Retry</Text>
 //         </TouchableOpacity>
 //       </View>
@@ -140,7 +251,7 @@
 //         refreshControl={
 //           <RefreshControl
 //             refreshing={isRefetching}
-//             onRefresh={refetch}
+//             onRefresh={handleRefresh}
 //             tintColor="#10B981"
 //             colors={["#10B981"]}
 //           />
@@ -164,16 +275,18 @@
 //             <View style={styles.summaryStats}>
 //               <View style={styles.statItem}>
 //                 <Text style={styles.statValue}>
-//                   {filteredTransactions?.filter((t) => t.type === "credit")
-//                     .length || 0}
+//                   {filteredTransactions?.filter(
+//                     (t) => t.normalizedType === "credit",
+//                   ).length || 0}
 //                 </Text>
 //                 <Text style={styles.statLabel}>Credits</Text>
 //               </View>
 //               <View style={styles.statDivider} />
 //               <View style={styles.statItem}>
 //                 <Text style={styles.statValue}>
-//                   {filteredTransactions?.filter((t) => t.type === "debit")
-//                     .length || 0}
+//                   {filteredTransactions?.filter(
+//                     (t) => t.normalizedType === "debit",
+//                   ).length || 0}
 //                 </Text>
 //                 <Text style={styles.statLabel}>Debits</Text>
 //               </View>
@@ -217,6 +330,54 @@
 //                 </Text>
 //               </TouchableOpacity>
 
+//               <TouchableOpacity
+//                 style={[
+//                   styles.filterButton,
+//                   filterType === "wallet" && styles.filterButtonActive,
+//                 ]}
+//                 onPress={() => setFilterType("wallet")}
+//               >
+//                 <MaterialCommunityIcons
+//                   name="wallet"
+//                   size={16}
+//                   color={filterType === "wallet" ? "#FFFFFF" : "#10B981"}
+//                   style={{ marginRight: 4 }}
+//                 />
+//                 <Text
+//                   style={[
+//                     styles.filterButtonText,
+//                     filterType === "wallet" && styles.filterButtonTextActive,
+//                   ]}
+//                 >
+//                   Wallet
+//                 </Text>
+//               </TouchableOpacity>
+
+//               <TouchableOpacity
+//                 style={[
+//                   styles.filterButton,
+//                   filterType === "bank" && styles.filterButtonActive,
+//                 ]}
+//                 onPress={() => setFilterType("bank")}
+//               >
+//                 <MaterialCommunityIcons
+//                   name="bank"
+//                   size={16}
+//                   color={filterType === "bank" ? "#FFFFFF" : "#10B981"}
+//                   style={{ marginRight: 4 }}
+//                 />
+//                 <Text
+//                   style={[
+//                     styles.filterButtonText,
+//                     filterType === "bank" && styles.filterButtonTextActive,
+//                   ]}
+//                 >
+//                   Bank
+//                 </Text>
+//               </TouchableOpacity>
+//             </View>
+
+//             <View style={styles.filterButtons2}>
 //               <TouchableOpacity
 //                 style={[
 //                   styles.filterButton,
@@ -271,9 +432,13 @@
 //               <MaterialCommunityIcons name="inbox" size={80} color="#D1D5DB" />
 //               <Text style={styles.emptyStateTitle}>No Transactions Found</Text>
 //               <Text style={styles.emptyStateText}>
-//                 {filterType !== "all"
-//                   ? `You don't have any ${filterType} transactions yet`
-//                   : "You don't have any transactions yet"}
+//                 {filterType === "wallet"
+//                   ? "You don't have any wallet transactions yet"
+//                   : filterType === "bank"
+//                     ? "You don't have any bank transactions yet"
+//                     : filterType === "credit" || filterType === "debit"
+//                       ? `You don't have any ${filterType} transactions yet`
+//                       : "You don't have any transactions yet"}
 //               </Text>
 //             </View>
 //           ) : (
@@ -287,7 +452,7 @@
 //                   {dayTransactions.map((transaction: Transaction) => {
 //                     const iconData = getTransactionIcon(
 //                       transaction.type,
-//                       transaction.details
+//                       transaction.details,
 //                     );
 //                     return (
 //                       <TouchableOpacity
@@ -317,6 +482,51 @@
 //                             >
 //                               {transaction.details}
 //                             </Text>
+
+//                             {/* Source Badge */}
+//                             <View style={styles.sourceBadgeContainer}>
+//                               <View
+//                                 style={[
+//                                   styles.sourceBadge,
+//                                   {
+//                                     backgroundColor:
+//                                       transaction.source === "wallet"
+//                                         ? "#EFF6FF"
+//                                         : "#F0FDF4",
+//                                   },
+//                                 ]}
+//                               >
+//                                 <MaterialCommunityIcons
+//                                   name={
+//                                     transaction.source === "wallet"
+//                                       ? "wallet"
+//                                       : "bank"
+//                                   }
+//                                   size={10}
+//                                   color={
+//                                     transaction.source === "wallet"
+//                                       ? "#3B82F6"
+//                                       : "#10B981"
+//                                   }
+//                                 />
+//                                 <Text
+//                                   style={[
+//                                     styles.sourceBadgeText,
+//                                     {
+//                                       color:
+//                                         transaction.source === "wallet"
+//                                           ? "#1E40AF"
+//                                           : "#065F46",
+//                                     },
+//                                   ]}
+//                                 >
+//                                   {transaction.source === "wallet"
+//                                     ? "Wallet"
+//                                     : "Bank"}
+//                                 </Text>
+//                               </View>
+//                             </View>
+
 //                             <View style={styles.transactionMeta}>
 //                               <Text style={styles.transactionTime}>
 //                                 {formatTime(transaction.createdAt)}
@@ -330,8 +540,8 @@
 //                                       transaction.status === "completed"
 //                                         ? "#D1FAE5"
 //                                         : transaction.status === "pending"
-//                                         ? "#FEF3C7"
-//                                         : "#FEE2E2",
+//                                           ? "#FEF3C7"
+//                                           : "#FEE2E2",
 //                                   },
 //                                 ]}
 //                               >
@@ -343,8 +553,8 @@
 //                                         transaction.status === "completed"
 //                                           ? "#065F46"
 //                                           : transaction.status === "pending"
-//                                           ? "#92400E"
-//                                           : "#991B1B",
+//                                             ? "#92400E"
+//                                             : "#991B1B",
 //                                     },
 //                                   ]}
 //                                 >
@@ -370,7 +580,7 @@
 //                             {transaction.type === "credit" ? "+" : "-"}
 //                             {formatAmount(
 //                               transaction.amount,
-//                               transaction.currency
+//                               transaction.currency,
 //                             )}
 //                           </Text>
 //                           <MaterialCommunityIcons
@@ -383,7 +593,7 @@
 //                     );
 //                   })}
 //                 </View>
-//               )
+//               ),
 //             )
 //           )}
 //         </View>
@@ -546,6 +756,11 @@
 //   filterButtons: {
 //     flexDirection: "row",
 //     gap: 8,
+//     marginBottom: 8,
+//   },
+//   filterButtons2: {
+//     flexDirection: "row",
+//     gap: 8,
 //   },
 //   filterButton: {
 //     flex: 1,
@@ -618,6 +833,25 @@
 //     fontWeight: "600",
 //     color: "#111827",
 //     marginBottom: 4,
+//   },
+//   sourceBadgeContainer: {
+//     marginTop: 4,
+//     marginBottom: 4,
+//   },
+//   sourceBadge: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     alignSelf: "flex-start",
+//     paddingHorizontal: 6,
+//     paddingVertical: 2,
+//     borderRadius: 6,
+//     gap: 3,
+//   },
+//   sourceBadgeText: {
+//     fontSize: 9,
+//     fontWeight: "700",
+//     textTransform: "uppercase",
+//     letterSpacing: 0.5,
 //   },
 //   transactionMeta: {
 //     flexDirection: "row",
@@ -693,8 +927,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useFetchData_v2 } from "../../../hooks/Requestv2";
-// import { useFetchData_v2 } from "../../../hooks/Requestv2";
-// useFetchData_v2
+
 interface Transaction {
   _id: string;
   user: {
@@ -718,14 +951,9 @@ interface Transaction {
 const TransactionHistoryScreen = () => {
   const navigation = useNavigation();
 
-  // const [filterType, setFilterType] = useState;
-  // "all" | "wallet" | "bank" | "credit" | ("debit" > "all");
-
-  // const [filterType, setFilterType] = useState;
-  // "all" | "wallet" | "bank" | "credit" | ("debit" > "all");
-  type FilterType = "all" | "wallet" | "bank" | "credit" | "debit";
+  type FilterType = "all" | "wallet" | "credit" | "debit";
   const [filterType, setFilterType] = useState<FilterType>("all");
-  // Fetch wallet transactions
+
   const {
     data: transactions,
     isError,
@@ -735,114 +963,22 @@ const TransactionHistoryScreen = () => {
     isRefetching,
   } = useFetchData_v2("api/v1/user/all-transaction-history", "wallet");
 
-  // Fetch bank transactions
-  const {
-    data: bankTransactions,
-    isError: isBankError,
-    isLoading: isBankLoading,
-    refetch: refetchBank,
-  } = useFetchData_v2("api/v1/user/GetBankTransaction", "bankTransactions");
-
-  // Normalize and combine transactions
-  // const normalizeTransactions = () => {
-  //   // Wallet transactions
-  //   const walletTxns =
-  //     transactions?.transactions?.map((tx) => ({
-  //       ...tx,
-  //       source: "wallet" as const,
-  //       normalizedType: tx.type,
-  //     })) || [];
-
-  //   // Bank transactions - normalize to wallet structure
-  //   const bankTxns =
-  //     bankTransactions?.map((tx) => ({
-  //       _id: tx.id,
-  //       user: transactions?.transactions?.[0]?.user || {
-  //         _id: "",
-  //         name: "Bank Account",
-  //         email: "",
-  //       },
-  //       reference: tx.id,
-  //       amount: tx.attributes.amount,
-  //       currency: "NGN",
-  //       type: tx.attributes.direction === "Credit" ? "credit" : "debit",
-  //       status: "completed" as const,
-  //       details: tx.attributes.summary,
-  //       createdAt: tx.attributes.createdAt,
-  //       updatedAt: tx.attributes.createdAt,
-  //       source: "bank" as const,
-  //       normalizedType:
-  //         tx.attributes.direction === "Credit" ? "credit" : "debit",
-  //       // Keep original for detail screen
-  //       bankData: tx,
-  //     })) || [];
-
-  //   // Combine and sort by date
-  //   return [...walletTxns, ...bankTxns].sort(
-  //     (a, b) =>
-  //       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  //   );
-  // };
-
-  // Normalize and combine transactions
   const normalizeTransactions = () => {
-    // Wallet transactions
-    const walletTxns =
+    return (
       transactions?.transactions?.map((tx) => ({
         ...tx,
         source: "wallet" as const,
         normalizedType: tx.type,
-      })) || [];
-
-    // Bank transactions - normalize to wallet structure
-    const bankTxns =
-      bankTransactions?.map((tx) => ({
-        _id: tx.id,
-        user: transactions?.transactions?.[0]?.user || {
-          _id: "",
-          name: "Bank Account",
-          email: "",
-        },
-        reference: tx.id,
-        amount: tx.attributes.amount / 100, // ✅ CONVERT KOBO TO NAIRA
-        currency: "NGN",
-        type: tx.attributes.direction === "Credit" ? "credit" : "debit",
-        status: "completed" as const,
-        details: tx.attributes.summary,
-        createdAt: tx.attributes.createdAt,
-        updatedAt: tx.attributes.createdAt,
-        source: "bank" as const,
-        normalizedType:
-          tx.attributes.direction === "Credit" ? "credit" : "debit",
-        // Keep original for detail screen
-        bankData: {
-          ...tx,
-          attributes: {
-            ...tx.attributes,
-            // ✅ Also convert balance amounts for detail screen
-            amount: tx.attributes.amount / 100,
-            balanceBefore: tx.attributes.balanceBefore / 100,
-            balanceAfter: tx.attributes.balanceAfter / 100,
-          },
-        },
-      })) || [];
-
-    // Combine and sort by date
-    return [...walletTxns, ...bankTxns].sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      })) || []
     );
   };
 
-  // Filter transactions
   const filteredTransactions = normalizeTransactions().filter((transaction) => {
     if (filterType === "all") return true;
     if (filterType === "wallet") return transaction.source === "wallet";
-    if (filterType === "bank") return transaction.source === "bank";
     return transaction.normalizedType === filterType;
   });
 
-  // Group transactions by date
   const groupedTransactions = filteredTransactions?.reduce(
     (groups: any, transaction) => {
       const date = new Date(transaction.createdAt).toLocaleDateString("en-US", {
@@ -859,7 +995,6 @@ const TransactionHistoryScreen = () => {
     {},
   );
 
-  // Format amount
   const formatAmount = (amount: number, currency: string = "NGN") => {
     return `${currency === "NGN" ? "₦" : currency}${amount.toLocaleString(
       "en-US",
@@ -870,7 +1005,6 @@ const TransactionHistoryScreen = () => {
     )}`;
   };
 
-  // Format time
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString("en-US", {
       hour: "numeric",
@@ -879,7 +1013,6 @@ const TransactionHistoryScreen = () => {
     });
   };
 
-  // Get icon for transaction type
   const getTransactionIcon = (type: string, details: string) => {
     if (details?.toLowerCase().includes("contribution")) {
       return { name: "hand-coin", color: "#F59E0B", bg: "#FEF3C7" };
@@ -893,18 +1026,15 @@ const TransactionHistoryScreen = () => {
     return { name: "arrow-up-circle", color: "#DC2626", bg: "#FEE2E2" };
   };
 
-  // Navigate to detail screen
   const handleTransactionPress = (transaction: Transaction) => {
     navigation.navigate("TransactionDetail", { transaction });
   };
 
-  // Handle refresh
   const handleRefresh = () => {
     refetch();
-    refetchBank();
   };
 
-  if (isLoading || isBankLoading) {
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#10B981" />
@@ -913,7 +1043,7 @@ const TransactionHistoryScreen = () => {
     );
   }
 
-  if (isError && isBankError) {
+  if (isError) {
     return (
       <View style={styles.errorContainer}>
         <MaterialCommunityIcons name="alert-circle" size={56} color="#DC2626" />
@@ -1016,54 +1146,6 @@ const TransactionHistoryScreen = () => {
               <TouchableOpacity
                 style={[
                   styles.filterButton,
-                  filterType === "wallet" && styles.filterButtonActive,
-                ]}
-                onPress={() => setFilterType("wallet")}
-              >
-                <MaterialCommunityIcons
-                  name="wallet"
-                  size={16}
-                  color={filterType === "wallet" ? "#FFFFFF" : "#10B981"}
-                  style={{ marginRight: 4 }}
-                />
-                <Text
-                  style={[
-                    styles.filterButtonText,
-                    filterType === "wallet" && styles.filterButtonTextActive,
-                  ]}
-                >
-                  Wallet
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.filterButton,
-                  filterType === "bank" && styles.filterButtonActive,
-                ]}
-                onPress={() => setFilterType("bank")}
-              >
-                <MaterialCommunityIcons
-                  name="bank"
-                  size={16}
-                  color={filterType === "bank" ? "#FFFFFF" : "#10B981"}
-                  style={{ marginRight: 4 }}
-                />
-                <Text
-                  style={[
-                    styles.filterButtonText,
-                    filterType === "bank" && styles.filterButtonTextActive,
-                  ]}
-                >
-                  Bank
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.filterButtons2}>
-              <TouchableOpacity
-                style={[
-                  styles.filterButton,
                   filterType === "credit" && styles.filterButtonActive,
                 ]}
                 onPress={() => setFilterType("credit")}
@@ -1115,23 +1197,17 @@ const TransactionHistoryScreen = () => {
               <MaterialCommunityIcons name="inbox" size={80} color="#D1D5DB" />
               <Text style={styles.emptyStateTitle}>No Transactions Found</Text>
               <Text style={styles.emptyStateText}>
-                {filterType === "wallet"
-                  ? "You don't have any wallet transactions yet"
-                  : filterType === "bank"
-                    ? "You don't have any bank transactions yet"
-                    : filterType === "credit" || filterType === "debit"
-                      ? `You don't have any ${filterType} transactions yet`
-                      : "You don't have any transactions yet"}
+                {filterType === "credit" || filterType === "debit"
+                  ? `You don't have any ${filterType} transactions yet`
+                  : "You don't have any transactions yet"}
               </Text>
             </View>
           ) : (
             Object.entries(groupedTransactions || {}).map(
               ([date, dayTransactions]: [string, any]) => (
                 <View key={date} style={styles.transactionGroup}>
-                  {/* Date Header */}
                   <Text style={styles.dateHeader}>{date}</Text>
 
-                  {/* Transactions */}
                   {dayTransactions.map((transaction: Transaction) => {
                     const iconData = getTransactionIcon(
                       transaction.type,
@@ -1165,50 +1241,6 @@ const TransactionHistoryScreen = () => {
                             >
                               {transaction.details}
                             </Text>
-
-                            {/* Source Badge */}
-                            <View style={styles.sourceBadgeContainer}>
-                              <View
-                                style={[
-                                  styles.sourceBadge,
-                                  {
-                                    backgroundColor:
-                                      transaction.source === "wallet"
-                                        ? "#EFF6FF"
-                                        : "#F0FDF4",
-                                  },
-                                ]}
-                              >
-                                <MaterialCommunityIcons
-                                  name={
-                                    transaction.source === "wallet"
-                                      ? "wallet"
-                                      : "bank"
-                                  }
-                                  size={10}
-                                  color={
-                                    transaction.source === "wallet"
-                                      ? "#3B82F6"
-                                      : "#10B981"
-                                  }
-                                />
-                                <Text
-                                  style={[
-                                    styles.sourceBadgeText,
-                                    {
-                                      color:
-                                        transaction.source === "wallet"
-                                          ? "#1E40AF"
-                                          : "#065F46",
-                                    },
-                                  ]}
-                                >
-                                  {transaction.source === "wallet"
-                                    ? "Wallet"
-                                    : "Bank"}
-                                </Text>
-                              </View>
-                            </View>
 
                             <View style={styles.transactionMeta}>
                               <Text style={styles.transactionTime}>
@@ -1439,11 +1471,6 @@ const styles = StyleSheet.create({
   filterButtons: {
     flexDirection: "row",
     gap: 8,
-    marginBottom: 8,
-  },
-  filterButtons2: {
-    flexDirection: "row",
-    gap: 8,
   },
   filterButton: {
     flex: 1,
@@ -1517,25 +1544,6 @@ const styles = StyleSheet.create({
     color: "#111827",
     marginBottom: 4,
   },
-  sourceBadgeContainer: {
-    marginTop: 4,
-    marginBottom: 4,
-  },
-  sourceBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    gap: 3,
-  },
-  sourceBadgeText: {
-    fontSize: 9,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
   transactionMeta: {
     flexDirection: "row",
     alignItems: "center",
@@ -1566,7 +1574,6 @@ const styles = StyleSheet.create({
   transactionRight: {
     alignItems: "flex-end",
     flexDirection: "row",
-    alignItems: "center",
   },
   transactionAmount: {
     fontSize: 15,

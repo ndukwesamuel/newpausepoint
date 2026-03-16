@@ -63,6 +63,9 @@ import HouseholdDues from "../../screens/Customerinterface/Wallet/HouseholdDues"
 import CreateVirtualAccountScreen from "../../screens/Customerinterface/Wallet/CreateVirtualAccountScreen";
 import VirtualAccountScreen from "../../screens/Customerinterface/Wallet/VirtualAccountScreen";
 import DataPurchase from "../../screens/Customerinterface/BillPayment/DataPurchase";
+import AmenityDetailScreen from "../../screens/Customerinterface/Amentities/Amenitydetailscreen";
+import { MOCK_MY_REPORTS } from "../../screens/Customerinterface/Amentities/amenityData";
+import MyReportsScreen from "../../screens/Customerinterface/Amentities/Myreportsscreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -227,6 +230,18 @@ export const Usernaviagetion = () => {
     },
 
     {
+      name: "AmenityDetail",
+      component: AmenityDetailScreen,
+      title: "AmenityDetail",
+    },
+
+    {
+      name: "MyReports",
+      component: MyReportsScreen,
+      title: "MyReports",
+    },
+
+    {
       name: "Airtime",
       component: Airtime,
       title: "Airtime",
@@ -355,6 +370,7 @@ export const Usernaviagetion = () => {
           headerStyle: {
             backgroundColor: "white",
           },
+
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {

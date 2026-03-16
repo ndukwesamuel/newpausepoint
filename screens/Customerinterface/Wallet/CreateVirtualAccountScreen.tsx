@@ -300,7 +300,7 @@ const CreateVirtualAccountScreen = () => {
     <View style={styles.stepContent}>
       <View style={styles.stepHeader}>
         <MaterialIcons name="sms" size={48} color="#6366F1" />
-        <Text style={styles.stepTitle}>Enter OTP</Text>
+        <Text style={styles.stepTitle}>Enter OTP kaka</Text>
         <Text style={styles.stepDescription}>
           Enter the 6-digit code sent to your phone number ending with{" "}
           {phoneHint}
@@ -346,6 +346,147 @@ const CreateVirtualAccountScreen = () => {
     </View>
   );
 
+  // const renderStep3 = () => (
+  //   <View style={styles.stepContent}>
+  //     <View style={styles.stepHeader}>
+  //       <MaterialIcons name="person-add" size={48} color="#F59E0B" />
+  //       <Text style={styles.stepTitle}>Complete Your Profile</Text>
+  //       <Text style={styles.stepDescription}>
+  //         Provide your personal details to finalize account creation
+  //       </Text>
+  //     </View>
+
+  //     <View style={styles.formContainer}>
+  //       {/* Name Fields */}
+  //       <View style={styles.inputRow}>
+  //         <View style={[styles.inputContainer, { flex: 1, marginRight: 8 }]}>
+  //           <Text style={styles.inputLabel}>First Name</Text>
+  //           <View style={styles.inputWrapper}>
+  //             <TextInput
+  //               style={styles.textInput}
+  //               placeholder="John"
+  //               value={firstName}
+  //               onChangeText={setFirstName}
+  //             />
+  //           </View>
+  //         </View>
+
+  //         <View style={[styles.inputContainer, { flex: 1, marginLeft: 8 }]}>
+  //           <Text style={styles.inputLabel}>Last Name</Text>
+  //           <View style={styles.inputWrapper}>
+  //             <TextInput
+  //               style={styles.textInput}
+  //               placeholder="Doe"
+  //               value={lastName}
+  //               onChangeText={setLastName}
+  //             />
+  //           </View>
+  //         </View>
+  //       </View>
+
+  //       {/* Phone */}
+  //       <View style={styles.inputContainer}>
+  //         <Text style={styles.inputLabel}>Phone Number</Text>
+  //         <View style={styles.inputWrapper}>
+  //           <MaterialIcons
+  //             name="phone"
+  //             size={20}
+  //             color="#6B7280"
+  //             style={styles.inputIcon}
+  //           />
+  //           <TextInput
+  //             style={styles.textInput}
+  //             placeholder="+2348012345678"
+  //             value={phoneNumber}
+  //             onChangeText={setPhoneNumber}
+  //             keyboardType="phone-pad"
+  //           />
+  //         </View>
+  //       </View>
+
+  //       {/* Email */}
+  //       <View style={styles.inputContainer}>
+  //         <Text style={styles.inputLabel}>Email Address</Text>
+  //         <View style={styles.inputWrapper}>
+  //           <MaterialIcons
+  //             name="email"
+  //             size={20}
+  //             color="#6B7280"
+  //             style={styles.inputIcon}
+  //           />
+  //           <TextInput
+  //             style={styles.textInput}
+  //             placeholder="john@example.com"
+  //             value={email}
+  //             onChangeText={setEmail}
+  //             keyboardType="email-address"
+  //             autoCapitalize="none"
+  //           />
+  //         </View>
+  //       </View>
+
+  //       {/* Address */}
+  //       <View style={styles.inputContainer}>
+  //         <Text style={styles.inputLabel}>Street Address</Text>
+  //         <TextInput
+  //           style={styles.textInput}
+  //           placeholder="123 Main Street"
+  //           value={street}
+  //           onChangeText={setStreet}
+  //         />
+  //       </View>
+
+  //       <View style={styles.inputRow}>
+  //         <View style={[styles.inputContainer, { flex: 1, marginRight: 8 }]}>
+  //           <Text style={styles.inputLabel}>City</Text>
+  //           <TextInput
+  //             style={styles.textInput}
+  //             placeholder="Lagos"
+  //             value={city}
+  //             onChangeText={setCity}
+  //           />
+  //         </View>
+
+  //         <View style={[styles.inputContainer, { flex: 1, marginLeft: 8 }]}>
+  //           <Text style={styles.inputLabel}>State</Text>
+  //           <TextInput
+  //             style={styles.textInput}
+  //             placeholder="Lagos"
+  //             value={state}
+  //             onChangeText={setState}
+  //           />
+  //         </View>
+  //       </View>
+  //     </View>
+
+  //     <TouchableOpacity
+  //       style={[
+  //         styles.primaryButton,
+  //         isCreatingAccount && styles.buttonDisabled,
+  //       ]}
+  //       onPress={handleCreateAccount}
+  //       disabled={isCreatingAccount}
+  //     >
+  //       {isCreatingAccount ? (
+  //         <ActivityIndicator color="#FFFFFF" />
+  //       ) : (
+  //         <>
+  //           <Text style={styles.primaryButtonText}>Create Account</Text>
+  //           <MaterialIcons name="check-circle" size={20} color="#FFFFFF" />
+  //         </>
+  //       )}
+  //     </TouchableOpacity>
+
+  //     <TouchableOpacity
+  //       style={styles.secondaryButton}
+  //       onPress={() => setCurrentStep(2)}
+  //     >
+  //       <MaterialIcons name="arrow-back" size={20} color="#6366F1" />
+  //       <Text style={styles.secondaryButtonText}>Back to OTP</Text>
+  //     </TouchableOpacity>
+  //   </View>
+  // );
+
   const renderStep3 = () => (
     <View style={styles.stepContent}>
       <View style={styles.stepHeader}>
@@ -365,6 +506,7 @@ const CreateVirtualAccountScreen = () => {
               <TextInput
                 style={styles.textInput}
                 placeholder="John"
+                placeholderTextColor="#9CA3AF"
                 value={firstName}
                 onChangeText={setFirstName}
               />
@@ -377,6 +519,7 @@ const CreateVirtualAccountScreen = () => {
               <TextInput
                 style={styles.textInput}
                 placeholder="Doe"
+                placeholderTextColor="#9CA3AF"
                 value={lastName}
                 onChangeText={setLastName}
               />
@@ -395,8 +538,9 @@ const CreateVirtualAccountScreen = () => {
               style={styles.inputIcon}
             />
             <TextInput
-              style={styles.textInput}
+              style={[styles.textInput, styles.textInputWithIcon]}
               placeholder="+2348012345678"
+              placeholderTextColor="#9CA3AF"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
@@ -415,8 +559,9 @@ const CreateVirtualAccountScreen = () => {
               style={styles.inputIcon}
             />
             <TextInput
-              style={styles.textInput}
+              style={[styles.textInput, styles.textInputWithIcon]}
               placeholder="john@example.com"
+              placeholderTextColor="#9CA3AF"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -425,36 +570,52 @@ const CreateVirtualAccountScreen = () => {
           </View>
         </View>
 
-        {/* Address */}
+        {/* Street Address */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Street Address</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="123 Main Street"
-            value={street}
-            onChangeText={setStreet}
-          />
+          <View style={styles.inputWrapper}>
+            <MaterialIcons
+              name="location-on"
+              size={20}
+              color="#6B7280"
+              style={styles.inputIcon}
+            />
+            <TextInput
+              style={[styles.textInput, styles.textInputWithIcon]}
+              placeholder="123 Main Street"
+              placeholderTextColor="#9CA3AF"
+              value={street}
+              onChangeText={setStreet}
+            />
+          </View>
         </View>
 
+        {/* City + State */}
         <View style={styles.inputRow}>
           <View style={[styles.inputContainer, { flex: 1, marginRight: 8 }]}>
             <Text style={styles.inputLabel}>City</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Lagos"
-              value={city}
-              onChangeText={setCity}
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Lagos"
+                placeholderTextColor="#9CA3AF"
+                value={city}
+                onChangeText={setCity}
+              />
+            </View>
           </View>
 
           <View style={[styles.inputContainer, { flex: 1, marginLeft: 8 }]}>
             <Text style={styles.inputLabel}>State</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Lagos"
-              value={state}
-              onChangeText={setState}
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Lagos"
+                placeholderTextColor="#9CA3AF"
+                value={state}
+                onChangeText={setState}
+              />
+            </View>
           </View>
         </View>
       </View>
@@ -486,6 +647,52 @@ const CreateVirtualAccountScreen = () => {
       </TouchableOpacity>
     </View>
   );
+
+  // ── Styles to update ──────────────────────────────────────────────────────────
+  // Replace your existing inputWrapper, textInput, and inputIcon styles with these:
+
+  const updatedStyles = StyleSheet.create({
+    inputContainer: {
+      marginBottom: 16,
+    },
+    inputLabel: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: "#374151",
+      marginBottom: 6,
+      letterSpacing: 0.2,
+    },
+    inputWrapper: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "#FFFFFF",
+      borderWidth: 1.5,
+      borderColor: "#D1D5DB",
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      height: 52,
+      // shadow for depth
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    inputIcon: {
+      marginRight: 10,
+    },
+    textInput: {
+      flex: 1,
+      fontSize: 15,
+      color: "#111827",
+      fontWeight: "400",
+      height: "100%",
+      paddingVertical: 0, // prevents Android extra padding
+    },
+    textInputWithIcon: {
+      // no change needed — icon + flex handles it
+    },
+  });
 
   return (
     <KeyboardAvoidingView

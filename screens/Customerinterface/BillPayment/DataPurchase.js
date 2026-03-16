@@ -20,7 +20,6 @@ import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 const DataPurchase = ({ route }) => {
   const categoryData = route?.params?.data;
 
-  const { user } = useSelector((state) => state.AuthSlice);
   const navigation = useNavigation();
 
   const [phoneNumber, setPhoneNumber] = useState("");

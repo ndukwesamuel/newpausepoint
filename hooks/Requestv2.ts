@@ -117,15 +117,28 @@ const apiRequest = async ({ url, method, data, token }: ApiRequestParams) => {
     const response = await axios(config);
     console.log("API Response:", response.data);
     return response.data;
+    // }
+
+    // catch (error) {
+    //   const axiosError = error as AxiosError<ApiErrorResponse>;
+    //   console.error("API Error:", axiosError.response?.data);
+
+    //   // ✅ Just throw the error - interceptor already handled 401/token expiration
+    //   const errorData = axiosError.response?.data;
+    //   console.log({
+    //     yuuuu: errorData,
+    //   });
+    //   const err: any = new Error("API request failed");
+    //   err.data = errorData;
+    //   throw err;
+    // }
   } catch (error) {
     const axiosError = error as AxiosError<ApiErrorResponse>;
-    console.error("API Error:", axiosError.response?.data);
-
-    // ✅ Just throw the error - interceptor already handled 401/token expiration
     const errorData = axiosError.response?.data;
-    const err: any = new Error("API request failed");
+    const err: any = new Error(
+      errorData?.error || errorData?.message || "API request failed",
+    );
     err.data = errorData;
-
     throw err;
   }
 };

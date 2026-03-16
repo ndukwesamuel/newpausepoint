@@ -14,10 +14,9 @@ import {
   Platform,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { useFetchData, useMutateData } from "../../../hooks/Request";
 import { useNavigation } from "@react-navigation/native";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
-import { useFetchData_v2 } from "../../../hooks/Requestv2";
+import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -60,37 +59,37 @@ const ElectricityPaymentScreen = () => {
     isLoading: isLoadingStatus,
     isFetching: isFetchingStatus,
     refetch: refetchStatus,
-  } = useFetchData("api/captainv4/emergency-status-v2", "emergency-status");
+  } = useFetchData_v2(
+    "api/v1/captain/electricty/emergency-status",
+    "emergency-status",
+  );
 
   const isStatusLoading = isLoadingStatus || isFetchingStatus;
 
-  const statusData = statusResponse?.data || {
-    walletBalance: 0,
-    maxWalletUnits: 0,
-    normalPricePerUnit: 260,
-    isEligible: false,
-    hasAccount: false,
-    eligibilityProgress: {
-      current: 0,
-      required: 100000,
-      remaining: 100000,
-      percentage: 0,
-    },
-    emergency: null,
-  };
+  const statusData = statusResponse?.data;
 
   const {
     mutate: checkMeter,
     isLoading: checkMeterLoading,
     isPending: checkMeterPending,
-  } = useMutateData("api/captain/vend", "POST", "billpayment");
+  } = useMutateData_v2(
+    "api/v1/captain/electricty/QueryCustomerInfo",
+    "POST",
+    "billpayment",
+  );
+
   const checkMeterIsPending = checkMeterPending ?? checkMeterLoading;
 
   const {
     mutate: buyElectricity,
     isLoading: buyLoading,
     isPending: buyPending,
-  } = useMutateData("api/captainv4/buy/v5", "POST", "buy-electricity");
+  } = useMutateData_v2(
+    "api/v1/captain/electricty/purchase_electricty",
+    "POST",
+    "buy-electricity",
+  );
+
   const isBuying = buyPending ?? buyLoading;
 
   const {
@@ -98,7 +97,11 @@ const ElectricityPaymentScreen = () => {
     isLoading: payDebtLoading,
     isFetching: payDebtFetching,
     refetch: refetchPayDebt,
-  } = useFetchData("api/captainv4/paydebt", "pay-debt", { enabled: false });
+  } = useFetchData_v2(
+    "api/v1/captain/electricty/UserPayDeptElectricty",
+    "pay-debt",
+    { enabled: false },
+  );
   const isPayingDebt = payDebtLoading || payDebtFetching;
 
   // ==================== BENEFICIARIES ====================
@@ -325,8 +328,8 @@ const ElectricityPaymentScreen = () => {
       Alert.alert("Error", `Maximum purchase is ${MAX_UNITS} units`);
       return;
     }
-    if (totals.walletUnits > statusData.maxWalletUnits) {
-      Alert.alert("Error", `Max wallet units: ${statusData.maxWalletUnits}`);
+    if (totals?.walletUnits > statusData?.maxWalletUnits) {
+      Alert.alert("Error", `Max wallet units: ${statusData?.maxWalletUnits}`);
       return;
     }
 
@@ -337,6 +340,12 @@ const ElectricityPaymentScreen = () => {
       msg += `⚡ Emergency: ${EMERGENCY_UNITS} units = ₦${EMERGENCY_DEBT.toLocaleString()} (owed)\n`;
     msg += `🎁 Service Charge: ₦0 (100% OFF!)\n\nPay Now: ₦${totals.payNow.toLocaleString()}`;
     if (useEmergency) msg += `\nWill Owe: ₦${totals.oweAfter.toLocaleString()}`;
+
+    console.log({
+      meterId,
+      units: totals.walletUnits,
+      useEmergency,
+    });
 
     Alert.alert("Confirm", msg, [
       { text: "Cancel", style: "cancel" },
@@ -356,8 +365,14 @@ const ElectricityPaymentScreen = () => {
                 ]);
                 refetchStatus();
               },
+              // onError: (error) =>
+              //   console.log({
+              //     yuuu: error,
+              //   }),
+
               onError: (error) =>
                 Alert.alert("Error", error.message || "Purchase failed"),
+              // Alert.alert("Error", error.message || "Purchase failed"),
             },
           );
         },
@@ -374,16 +389,16 @@ const ElectricityPaymentScreen = () => {
   const handleWalletUnitsChange = (text) => {
     const numericText = text.replace(/[^0-9]/g, "");
     const num = Number(numericText) || 0;
-    if (numericText === "" || num <= statusData.maxWalletUnits)
+    if (numericText === "" || num <= statusData?.maxWalletUnits)
       setWalletUnits(numericText);
   };
 
   const totals = calculateTotals();
   const isValidPurchase =
     totals.totalUnits >= MIN_UNITS && totals.totalUnits <= MAX_UNITS;
-  const hasDebt = statusData.emergency?.hasDebt || false;
-  const canUseEmergency = statusData.emergency?.canUse || false;
-  const canPayDebt = hasDebt && statusData.walletBalance >= EMERGENCY_DEBT;
+  const hasDebt = statusData?.emergency?.hasDebt || false;
+  const canUseEmergency = statusData?.emergency?.canUse || false;
+  const canPayDebt = hasDebt && statusData?.walletBalance >= EMERGENCY_DEBT;
 
   // ==================== RENDER ====================
 
@@ -767,7 +782,7 @@ const ElectricityPaymentScreen = () => {
                   {/* ₦ {mainBalance} */}₦{mainBalance?.toFixed(2) || "0.00"}
                 </Text>
                 <Text style={{ fontSize: 11, color: "#6B7280" }}>
-                  Max {statusData.maxWalletUnits || 0} units
+                  Max {statusData?.maxWalletUnits || 0} units
                 </Text>
               </>
             )}
@@ -797,7 +812,7 @@ const ElectricityPaymentScreen = () => {
 
   const renderDebtWarning = () => {
     if (!hasDebt) return null;
-    const shortfall = EMERGENCY_DEBT - statusData.walletBalance;
+    const shortfall = EMERGENCY_DEBT - statusData?.walletBalance;
     return (
       <View
         style={{
@@ -939,8 +954,8 @@ const ElectricityPaymentScreen = () => {
         </View>
       );
     }
-    if (!statusData.isEligible) {
-      const progress = statusData.eligibilityProgress;
+    if (!statusData?.isEligible) {
+      const progress = statusData?.eligibilityProgress;
       return (
         <View
           style={{
@@ -1282,7 +1297,7 @@ const ElectricityPaymentScreen = () => {
                   textAlign: "center",
                 }}
               >
-                Max: {statusData.maxWalletUnits || 0} units
+                Max: {statusData?.maxWalletUnits || 0} units
               </Text>
               <View
                 style={{
@@ -1292,12 +1307,12 @@ const ElectricityPaymentScreen = () => {
                   gap: 8,
                 }}
               >
-                {[5, 10, 20, statusData.maxWalletUnits || 0]
+                {[5, 10, 20, statusData?.maxWalletUnits || 0]
                   .filter(
                     (v, i, a) =>
                       a.indexOf(v) === i &&
                       v > 0 &&
-                      v <= (statusData.maxWalletUnits || 0),
+                      v <= (statusData?.maxWalletUnits || 0),
                   )
                   .slice(0, 4)
                   .map((unit) => (
@@ -1332,7 +1347,7 @@ const ElectricityPaymentScreen = () => {
               </View>
             </View>
 
-            {statusData.isEligible && canUseEmergency && (
+            {statusData?.isEligible && canUseEmergency && (
               <View
                 style={{
                   backgroundColor: useEmergency ? "#FEF3C7" : "#F9FAFB",
@@ -1673,10 +1688,8 @@ const ElectricityPaymentScreen = () => {
           {renderWalletCard()}
           {renderDebtWarning()}
           {renderEmergencyStatusCard()}
-
           {renderEmptyBeneficiariesState()}
           {renderBeneficiariesList()}
-
           {renderPurchaseForm()}
 
           {!meterInfo && !hasDebt && beneficiaries.length > 0 && (

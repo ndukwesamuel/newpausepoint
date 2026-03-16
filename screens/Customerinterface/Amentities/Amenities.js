@@ -1,314 +1,493 @@
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
-
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Button,
   TextInput,
-  ActivityIndicator,
+  Animated,
+  RefreshControl,
+  StatusBar,
+  Image,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Amenitity_data_Fun } from "../../../Redux/Admin/AdminMarketSLice";
-import {
-  BottomModal,
-  CenterReuseModals,
-} from "../../../components/shared/ReuseModals";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+// import { Image } from "expo-image";
+// import ScreenWrapper from "../../components/shared/ScreenWrapper";
+import { MOCK_AMENITIES, STATUS_CONFIG, AMENITY_STATUS } from "./amenityData";
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 
-// Updated import to use the modern @tanstack/react-query
-import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+const FILTERS = ["All", "Open", "Closed", "Maintenance"];
 
-import axios from "axios";
-import Toast from "react-native-toast-message";
-
-const Amenities = () => {
-  const dispatch = useDispatch();
+const AmenitiesListScreen = () => {
   const navigation = useNavigation();
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [refreshing, setRefreshing] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
-  const [mainmodal, setMainmodal] = useState(false);
-  const { amenitity_data } = useSelector((state) => state?.AdminMarketSLice);
-  const [newAmenity, setNewAmenity] = useState("");
-  const [amenityStatus, setAmenityStatus] = useState("");
-
-  const { user_data } = useSelector((state) => state.AuthSlice);
-
-  useEffect(() => {
-    // Dispatch action to fetch amenities data
-    dispatch(Amenitity_data_Fun("all"));
-    return () => {};
-  }, []);
-
-  // Refactored CreateAmenties_Mutation to use the modern object syntax
-  const CreateAmenties_Mutation = useMutation({
-    mutationFn: (data_info) => {
-      let url = `${API_BASEURL}amenities`;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      return axios.post(url, data_info, config);
-    },
-    onSuccess: () => {
-      Toast.show({
-        type: "success",
-        text1: "Amenity created successfully",
-      });
-      setNewAmenity("");
-      setAmenityStatus("");
-      dispatch(Amenitity_data_Fun());
-      setMainmodal(false);
-    },
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message}`,
-      });
-    },
+  // ── Filter logic ──────────────────────────────────────────
+  const filtered = MOCK_AMENITIES.filter((a) => {
+    const matchSearch = a.name.toLowerCase().includes(search.toLowerCase());
+    if (activeFilter === "All") return matchSearch;
+    if (activeFilter === "Open")
+      return matchSearch && a.status === AMENITY_STATUS.OPEN;
+    if (activeFilter === "Closed")
+      return matchSearch && a.status === AMENITY_STATUS.CLOSED;
+    if (activeFilter === "Maintenance")
+      return matchSearch && a.status === AMENITY_STATUS.UNDER_MAINTENANCE;
+    return matchSearch;
   });
 
-  // Refactored DeleteAmenity_Mutation to use the modern object syntax
-  const DeleteAmenity_Mutation = useMutation({
-    mutationFn: (amenityId) => {
-      let url = `${API_BASEURL}amenities/${amenityId}`;
+  const onRefresh = () => {
+    setRefreshing(true);
+    // TODO: refetch from API
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
-      console.log({
-        url,
-      });
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      return axios.delete(url, config);
-    },
-    onSuccess: () => {
-      Toast.show({
-        type: "success",
-        text1: "Amenity deleted successfully",
-      });
-      dispatch(Amenitity_data_Fun());
-    },
-    onError: (error) => {
-      console.log({
-        ssssss: error?.response?.data,
-      });
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message}`,
-      });
-    },
+  // ── Header shrink animation ──────────────────────────────
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 60],
+    outputRange: [100, 60],
+    extrapolate: "clamp",
+  });
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 60],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
   });
 
-  const handleAddAmenity = () => {
-    if (newAmenity && amenityStatus) {
-      CreateAmenties_Mutation.mutate({
-        name: newAmenity,
-        payment: amenityStatus,
-      });
-    }
-  };
+  // ── Amenity card ─────────────────────────────────────────
+  const renderCard = ({ item, index }) => {
+    const statusCfg = STATUS_CONFIG[item.status];
 
-  const handleDeleteAmenity = (amenityId) => {
-    console.log({
-      ddd: amenityId,
-    });
-    DeleteAmenity_Mutation.mutate(amenityId);
-  };
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        // onPress={() => navigation.navigate("AmenityDetail", { amenity: item })}
+        activeOpacity={0.88}
+      >
+        {/* Image */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: item.image }}
+            style={styles.cardImage}
+            contentFit="cover"
+            transition={300}
+          />
+          {/* Status badge overlay */}
+          <View style={[styles.statusBadge, { backgroundColor: statusCfg.bg }]}>
+            <View
+              style={[styles.statusDot, { backgroundColor: statusCfg.dot }]}
+            />
+            <Text style={[styles.statusText, { color: statusCfg.text }]}>
+              {statusCfg.label}
+            </Text>
+          </View>
+        </View>
 
-  const maoldaClose = () => {
-    setMainmodal(false);
+        {/* Info */}
+        <View style={styles.cardBody}>
+          <View style={styles.cardTop}>
+            <View style={styles.iconWrap}>
+              <MaterialCommunityIcons
+                name={item.iconName}
+                size={20}
+                color="#10B981"
+              />
+            </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.cardName} numberOfLines={1}>
+                {item.name}
+              </Text>
+              <View style={styles.locationRow}>
+                <MaterialCommunityIcons
+                  name="map-marker-outline"
+                  size={13}
+                  color="#9CA3AF"
+                />
+                <Text style={styles.locationText} numberOfLines={1}>
+                  {item.location}
+                </Text>
+              </View>
+            </View>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={20}
+              color="#D1D5DB"
+            />
+          </View>
+
+          <Text style={styles.cardDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
+
+          <View style={styles.cardFooter}>
+            <MaterialCommunityIcons
+              name="clock-outline"
+              size={13}
+              color="#9CA3AF"
+            />
+            <Text style={styles.hoursText}>{item.operatingHours}</Text>
+          </View>
+
+          {/* Maintenance notice */}
+          {item.status === AMENITY_STATUS.UNDER_MAINTENANCE &&
+            item.estimatedReopenDate && (
+              <View style={styles.maintenanceBar}>
+                <MaterialCommunityIcons
+                  name="wrench-outline"
+                  size={13}
+                  color="#92400E"
+                />
+                <Text style={styles.maintenanceText}>
+                  Reopens{" "}
+                  {new Date(item.estimatedReopenDate).toLocaleDateString(
+                    undefined,
+                    {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    },
+                  )}
+                </Text>
+              </View>
+            )}
+        </View>
+      </TouchableOpacity>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      {/* Floating Action Button to add new amenity */}
-      <View style={{ position: "absolute", right: 20, bottom: 20, zIndex: 1 }}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => setMainmodal(true)}
-        >
-          <MaterialIcons name="add" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={amenitity_data?.amenities}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.amenityContainer}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.amenityName}>{item.name}</Text>
-            </View>
-            <Text style={item.payment === "Free" ? styles.free : styles.paid}>
-              {item.payment}
+    <ScreenWrapper title="Amenities" navigation={navigation} showHeader={false}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
+      <View style={styles.container}>
+        {/* ── Top header ───────────────────────── */}
+        <View style={styles.topHeader}>
+          <View>
+            <Text style={styles.headerTitle}>Amenities</Text>
+            <Text style={styles.headerSub}>
+              {
+                MOCK_AMENITIES.filter((a) => a.status === AMENITY_STATUS.OPEN)
+                  .length
+              }{" "}
+              of {MOCK_AMENITIES.length} facilities open
             </Text>
-            {/* Delete Button for each amenity (assuming admin has permission) */}
-            <TouchableOpacity
-              onPress={() => handleDeleteAmenity(item._id)}
-              style={styles.deleteButton}
-              disabled={DeleteAmenity_Mutation.isLoading}
-            >
-              <MaterialIcons name="delete" size={16} color="white" />
-            </TouchableOpacity>
           </View>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No amenities found.</Text>
-        }
-      />
-
-      {DeleteAmenity_Mutation.isLoading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#04973C" />
-          <Text style={styles.loadingText}>Deleting Amenity...</Text>
+          {/* <TouchableOpacity
+            style={styles.myReportsBtn}
+            onPress={() => navigation.navigate("MyReports")}
+          >
+            <MaterialCommunityIcons
+              name="clipboard-list-outline"
+              size={20}
+              color="#10B981"
+            />
+            <Text style={styles.myReportsBtnText}>My Reports</Text>
+          </TouchableOpacity> */}
         </View>
-      )}
 
-      {mainmodal && (
-        <BottomModal onClose={maoldaClose}>
-          <View style={{ margin: 10 }}>
-            <Text style={styles.modalTitle}>Add New Amenity</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Amenity Name (e.g., Clubhouse)"
-              value={newAmenity}
-              onChangeText={setNewAmenity}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Payment Status (e.g., Free or Paid)"
-              value={amenityStatus}
-              onChangeText={setAmenityStatus}
-            />
-          </View>
-
-          {CreateAmenties_Mutation?.isLoading ? (
-            <ActivityIndicator
-              size="large"
-              color="#04973C"
-              style={{ marginVertical: 10 }}
-            />
-          ) : (
-            <Button
-              title="Add Amenity"
-              onPress={handleAddAmenity}
-              color="#04973C" // Changed button color for consistency
-              disabled={!newAmenity || !amenityStatus}
-            />
+        {/* ── Search ───────────────────────────── */}
+        <View style={styles.searchRow}>
+          <MaterialCommunityIcons
+            name="magnify"
+            size={20}
+            color="#9CA3AF"
+            style={{ marginRight: 8 }}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search amenities..."
+            placeholderTextColor="#9CA3AF"
+            value={search}
+            onChangeText={setSearch}
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch("")}>
+              <MaterialCommunityIcons
+                name="close-circle"
+                size={18}
+                color="#9CA3AF"
+              />
+            </TouchableOpacity>
           )}
-        </BottomModal>
-      )}
-    </View>
+        </View>
+
+        {/* ── Filter chips ─────────────────────── */}
+        <View style={styles.filterRow}>
+          {FILTERS.map((f) => (
+            <TouchableOpacity
+              key={f}
+              style={[styles.chip, activeFilter === f && styles.chipActive]}
+              onPress={() => setActiveFilter(f)}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  activeFilter === f && styles.chipTextActive,
+                ]}
+              >
+                {f}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* ── List ─────────────────────────────── */}
+        <Animated.FlatList
+          data={filtered}
+          keyExtractor={(item) => item._id}
+          renderItem={renderCard}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false },
+          )}
+          scrollEventThrottle={16}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#10B981"
+            />
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyWrap}>
+              <MaterialCommunityIcons
+                name="office-building-remove"
+                size={56}
+                color="#D1D5DB"
+              />
+              <Text style={styles.emptyTitle}>No amenities found</Text>
+              <Text style={styles.emptySub}>
+                Try adjusting your search or filter
+              </Text>
+            </View>
+          }
+        />
+      </View>
+    </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: "#f5f5f5", // Light background for the screen
+  container: { flex: 1, backgroundColor: "#F9FAFB" },
+
+  topHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+    backgroundColor: "#F9FAFB",
   },
-  amenityContainer: {
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: "800",
+    color: "#111827",
+    letterSpacing: -0.5,
+  },
+  headerSub: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  myReportsBtn: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 15,
-    marginVertical: 5,
+    backgroundColor: "#D1FAE5",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
+  myReportsBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#065F46",
+  },
+
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.41,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 2,
   },
-  amenityName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: "#111827",
+    fontWeight: "500",
   },
-  free: {
-    color: "#04973C", // Brighter green for Free
-    fontWeight: "700",
-    marginRight: 10,
+
+  filterRow: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    marginBottom: 16,
+    gap: 8,
   },
-  paid: {
-    color: "#D9534F", // Red for Paid
-    fontWeight: "700",
-    marginRight: 10,
-  },
-  input: {
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 12,
-    marginBottom: 15,
-    backgroundColor: "white",
+    borderColor: "#E5E7EB",
   },
-  editButton: {
-    backgroundColor: "#04973C",
-    borderRadius: 50,
-    width: 60,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
+  chipActive: {
+    backgroundColor: "#10B981",
+    borderColor: "#10B981",
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+  chipTextActive: {
+    color: "#FFFFFF",
+  },
+
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+    gap: 16,
+  },
+
+  // Card
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  deleteButton: {
-    backgroundColor: "#D9534F",
-    borderRadius: 50,
-    width: 30,
-    height: 30,
-    marginLeft: 10,
-    justifyContent: "center",
-    alignItems: "center",
+  imageContainer: {
+    position: "relative",
   },
-  loadingOverlay: {
+  cardImage: {
+    width: "100%",
+    height: 160,
+    backgroundColor: "#F3F4F6",
+  },
+  statusBadge: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    top: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 5,
+  },
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
+
+  cardBody: {
+    padding: 16,
+  },
+  cardTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#D1FAE5",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    zIndex: 10,
   },
-  loadingText: {
+  cardName: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#111827",
+    letterSpacing: -0.2,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginTop: 2,
+  },
+  locationText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "500",
+    flex: 1,
+  },
+  cardDescription: {
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 20,
+    marginBottom: 10,
+  },
+  cardFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  hoursText: {
+    fontSize: 13,
+    color: "#9CA3AF",
+    fontWeight: "500",
+  },
+  maintenanceBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
     marginTop: 10,
-    fontSize: 16,
-    color: "#333",
+    gap: 6,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "#333",
+  maintenanceText: {
+    fontSize: 12,
+    color: "#92400E",
+    fontWeight: "600",
   },
-  emptyText: {
-    textAlign: "center",
-    marginTop: 50,
-    fontSize: 16,
-    color: "#777",
+
+  emptyWrap: {
+    alignItems: "center",
+    paddingTop: 80,
+    gap: 8,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  emptySub: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    fontWeight: "500",
   },
 });
 
-export default Amenities;
+export default AmenitiesListScreen;

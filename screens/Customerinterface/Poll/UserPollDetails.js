@@ -30,7 +30,12 @@ const UserPollDetails = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { itemdata } = useRoute()?.params;
-  const { user_data } = useSelector((state) => state.AuthSlice);
+
+  console.log({
+    yuu: itemdata,
+  });
+
+  // const { user_data } = useSelector((state) => state.AuthSlice);
   const [loading, setLoading] = useState(true);
   const { get_all_poll_data, get_single_poll_data } = useSelector(
     (state) => state.PollSlice,
@@ -40,7 +45,7 @@ const UserPollDetails = () => {
     dispatch(Get_Single_Polls_Fun(itemdata?._id));
     setLoading(false);
     return () => {};
-  }, [dispatch, Vote_Mutation]);
+  }, [dispatch]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -86,9 +91,9 @@ const UserPollDetails = () => {
   // );
 
   const castVote = (optionIndex) => {
-    Vote_Mutation.mutate({
-      optionIndex: optionIndex,
-    });
+    // Vote_Mutation.mutate({
+    //   optionIndex: optionIndex,
+    // });
   };
 
   const LoadingOverlay = () => (
@@ -128,13 +133,13 @@ const UserPollDetails = () => {
               mainoptions={get_single_poll_data?.data}
               castVote={castVote}
               totalVotes={totalVotes}
-              isVoting={Vote_Mutation?.isLoading}
+              // isVoting={Vote_Mutation?.isLoading}
             />
           </>
         )}
       </ScrollView>
 
-      {Vote_Mutation?.isLoading && <LoadingOverlay />}
+      {/* {Vote_Mutation?.isLoading && <LoadingOverlay />}/ */}
     </View>
   );
 };

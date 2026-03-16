@@ -20,7 +20,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 const Airtime = ({ route }) => {
   const { data: categoryData } = route.params;
 
-  const { user } = useSelector((state) => state.AuthSlice);
   const navigation = useNavigation();
 
   const [phoneNumber, setPhoneNumber] = useState("");
