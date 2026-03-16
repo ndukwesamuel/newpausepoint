@@ -61,7 +61,7 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "66",
+      "buildNumber": "67",
       "runtimeVersion": "1.0.0"
     },
     "android": {
