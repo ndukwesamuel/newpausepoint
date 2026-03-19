@@ -40,10 +40,6 @@ const DataPurchase = ({ route }) => {
       },
     );
 
-  console.log({
-    kakaka: serviceCategories,
-  });
-
   const networks = serviceCategories?.categories || [];
 
   // ✅ Fetch data bundles for selected network

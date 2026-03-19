@@ -706,12 +706,6 @@ export const Usernaviagetion = () => {
         options={{ headerShown: false }}
       />
 
-      {/* {
-      name: "Marketplace",
-      component: MarketPlace,
-      title: "Market Place",
-    }, */}
-
       <Stack.Screen
         name="erranddetail"
         component={ErrandDetailScreen}

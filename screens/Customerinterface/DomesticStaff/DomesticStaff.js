@@ -1,363 +1,457 @@
-import AppScreen from "../../../components/shared/AppScreen";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
-  Button,
-  Platform,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  ScrollView,
-  Image,
   FlatList,
   StyleSheet,
   TextInput,
   RefreshControl,
+  StatusBar,
+  Image,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+
 import LottieView from "lottie-react-native";
-// *** CHANGE: Import useMutation from @tanstack/react-query (or just remove if not used, but kept for consistency) ***
-import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
-import axios from "axios";
-import Toast from "react-native-toast-message";
-import * as ImagePicker from "expo-image-picker";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { useFetchData_v2 } from "../../../hooks/Requestv2";
+import { formatDate } from "../../../utils/DateTime";
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 
-import DateTimePicker from "@react-native-community/datetimepicker";
+const ROLE_COLORS = {
+  Housekeeper: { bg: "#D1FAE5", text: "#065F46" },
+  Driver: { bg: "#DBEAFE", text: "#1E40AF" },
+  Cook: { bg: "#FEF3C7", text: "#92400E" },
+  Gardener: { bg: "#FCE7F3", text: "#9D174D" },
+  Security: { bg: "#FEE2E2", text: "#991B1B" },
+  Nanny: { bg: "#EDE9FE", text: "#5B21B6" },
+};
 
-import { useDispatch, useSelector } from "react-redux";
-
-import {
-  NavigationContainer,
-  NavigationProp,
-  useNavigation,
-} from "@react-navigation/native";
-import {
-  Get_All_Domestic_Fun,
-  Get_All_User_Guest_Fun,
-} from "../../../Redux/UserSide/GuestSlice";
-import {
-  formatDate,
-  formatDateString,
-  formatDateandTime,
-} from "../../../utils/DateTime";
-import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
-import ClickToJoinCLan from "../../../components/shared/ClickToJoinCLan";
+const getRoleStyle = (role) =>
+  ROLE_COLORS[role] || { bg: "#F3F4F6", text: "#374151" };
 
 const DomesticStaff = () => {
-  const dispatch = useDispatch();
   const navigation = useNavigation();
   const animation = useRef(null);
+
+  const {
+    data: domesticData,
+    isFetching,
+    refetch,
+  } = useFetchData_v2("api/v1/domestic", "domesticStaff");
   const [searchQuery, setSearchQuery] = useState("");
-  const { get_all_domestic_data } = useSelector((state) => state?.GuestSlice);
-  const { get_user_profile_data } = useSelector(
-    (state) => state?.UserProfileSlice
+
+  console.log({
+    yyy: domesticData,
+  });
+
+  const staffList = domesticData?.domesticStaff || [];
+  const totalStaff = staffList.length;
+
+  const filteredData = staffList.filter((item) =>
+    item.staffName?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  useEffect(() => {
-    dispatch(Get_All_Domestic_Fun());
-
-    return () => {};
-  }, [dispatch]);
-
-  const filteredData = get_all_domestic_data?.domesticStaff?.filter((item) =>
-    item.staffName?.toLowerCase().includes(searchQuery?.toLowerCase())
-  );
-  const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
-    // Set the refreshing state to true
     setRefreshing(true);
-    await dispatch(Get_All_Domestic_Fun());
-    await dispatch(UserProfile_data_Fun());
-
-    // Set refreshing to false after dispatch completes (using async/await or .then())
+    await refetch();
     setRefreshing(false);
   };
 
-  const HistoryItem = ({ itemdata }) => {
+  // ── Staff card ───────────────────────────────────────────
+  const StaffCard = ({ item }) => {
+    const roleStyle = getRoleStyle(item.Role);
+
     return (
       <TouchableOpacity
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-around",
-          borderWidth: 1,
-          borderColor: "#CFCDCD",
-          marginBottom: 10,
-          paddingVertical: 10,
-          borderRadius: 9,
-        }}
-        onPress={() => {
-          navigation.navigate("guestsdetail", { itemdata });
-        }}
+        style={styles.card}
+        onPress={() =>
+          navigation.navigate("domesticDetail", { itemdata: item })
+        }
+        activeOpacity={0.85}
       >
-        <View>
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "RobotoSlab-SemiBold",
-              fontWeight: "600",
+        {/* Left — avatar */}
+        <View style={styles.avatarWrap}>
+          <Image
+            source={{ uri: item.photo }}
+            style={styles.avatar}
+            defaultSource={{
+              uri: "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg",
             }}
-          >
-            {itemdata?.access_code}
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 11,
-              fontFamily: "RobotoSlab-Medium",
-              fontWeight: "500",
-            }}
-          >
-            Code ID
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            {itemdata?.visitor_name}
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 11,
-              fontFamily: "RobotoSlab-Medium",
-              fontWeight: "500",
-            }}
-          >
-            Visitor Name
-          </Text>
+          />
+          {/* Gender dot */}
+          <View
+            style={[
+              styles.genderDot,
+              {
+                backgroundColor:
+                  item.gender === "Female" ? "#EC4899" : "#3B82F6",
+              },
+            ]}
+          />
         </View>
 
-        <View>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            {formatDateandTime(itemdata?.expires)}
-          </Text>
+        {/* Right — info */}
+        <View style={styles.cardBody}>
+          <View style={styles.cardTop}>
+            <Text style={styles.staffName} numberOfLines={1}>
+              {item.staffName}
+            </Text>
+            <View style={[styles.roleBadge, { backgroundColor: roleStyle.bg }]}>
+              <Text style={[styles.roleBadgeText, { color: roleStyle.text }]}>
+                {item.Role}
+              </Text>
+            </View>
+          </View>
 
-          <Text
-            style={{
-              fontSize: 11,
-              fontFamily: "RobotoSlab-Medium",
-              fontWeight: "500",
-            }}
-          >
-            Departure Time
-          </Text>
+          <View style={styles.infoRow}>
+            <MaterialCommunityIcons
+              name="phone-outline"
+              size={13}
+              color="#9CA3AF"
+            />
+            <Text style={styles.infoText}>{item.phone}</Text>
+          </View>
 
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "Inter-SemiBold",
-              fontWeight: "600",
-            }}
-          >
-            {itemdata?.phone_number}
-          </Text>
+          <View style={styles.infoRow}>
+            <MaterialCommunityIcons
+              name="clock-outline"
+              size={13}
+              color="#9CA3AF"
+            />
+            <Text style={styles.infoText}>{item.workingHours}</Text>
+          </View>
 
-          <Text
-            style={{
-              fontSize: 11,
-              fontFamily: "RobotoSlab-Medium",
-              fontWeight: "500",
-            }}
-          >
-            Phone Number
-          </Text>
+          <View style={styles.cardFooter}>
+            <View style={styles.codeWrap}>
+              <MaterialCommunityIcons
+                name="identifier"
+                size={12}
+                color="#6B7280"
+              />
+              <Text style={styles.codeText}>{item.staffCode}</Text>
+            </View>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={18}
+              color="#D1D5DB"
+            />
+          </View>
         </View>
       </TouchableOpacity>
     );
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() => {
-        navigation.navigate("domesticDetail", { itemdata: item });
-      }}
-    >
-      <Text style={styles.staffName}>{item.staffName}</Text>
-      <Text style={styles.staffDetails}>
-        Role: {item.Role} | Gender: {item.gender}
+  // ── Empty state ──────────────────────────────────────────
+  const EmptyState = () => (
+    <View style={styles.emptyWrap}>
+      <LottieView
+        autoPlay
+        ref={animation}
+        style={styles.lottie}
+        source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
+      />
+      <Text style={styles.emptyTitle}>
+        {searchQuery ? "No results found" : "No staff records yet"}
       </Text>
-
-      <Text style={styles.staffDetails}>
-        Phone: {item.phone} | Working Hours: {item.workingHours}
+      <Text style={styles.emptySub}>
+        {searchQuery
+          ? `No staff matching "${searchQuery}"`
+          : "Tap + to add your first domestic staff"}
       </Text>
-      <Text style={styles.staffDetails}>
-        DOB: {formatDate(item.dateOfBirth)}
-      </Text>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingVertical: 10,
-      }}
-    >
-      {get_user_profile_data?.currentClanMeeting ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            paddingHorizontal: 20,
-          }}
-        >
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search by staff name"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-
-          {/* Floating Action Button */}
-          <View style={styles.floatingButtonContainer}>
-            <TouchableOpacity
-              style={styles.floatingButton}
-              onPress={() => navigation.navigate("creatdomestic")}
-            >
-              <MaterialIcons name="add" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          {filteredData?.length === 0 && searchQuery?.length > 0 ? (
-            <View style={styles.emptyContainer}>
-              <LottieView
-                autoPlay
-                ref={animation}
-                style={{
-                  width: 200,
-                  height: 200,
-                }}
-                source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
-              />
-              <Text style={styles.emptyText}>
-                No staff found matching "{searchQuery}"
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={filteredData}
-              renderItem={renderItem}
-              keyExtractor={(item) => item._id}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-              ListEmptyComponent={() => (
-                <View style={styles.emptyContainer}>
-                  <LottieView
-                    autoPlay
-                    ref={animation}
-                    style={{
-                      width: 200,
-                      height: 200,
-                    }}
-                    source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
-                  />
-                  <Text style={styles.emptyText}>
-                    No domestic staff records found.
-                  </Text>
-                </View>
-              )}
-            />
-          )}
-        </View>
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
-          <ClickToJoinCLan />
-          <Text
-            style={{ fontSize: 18, textAlign: "center", paddingHorizontal: 20 }}
-          >
-            Join a clan to see your domestic staff list and manage access.
+    <View style={styles.container}>
+      {/* ── Page header ─────────────────────── */}
+      <View style={styles.pageHeader}>
+        <View>
+          <Text style={styles.pageTitle}>Domestic Staff</Text>
+          <Text style={styles.pageSub}>
+            {totalStaff} staff member{totalStaff !== 1 ? "s" : ""} registered
           </Text>
-        </ScrollView>
-      )}
+        </View>
+        <View style={styles.statBadge}>
+          <MaterialCommunityIcons
+            name="account-group"
+            size={16}
+            color="#10B981"
+          />
+          <Text style={styles.statBadgeText}>{totalStaff}</Text>
+        </View>
+      </View>
+
+      {/* ── Search ──────────────────────────── */}
+      <View style={styles.searchRow}>
+        <MaterialCommunityIcons
+          name="magnify"
+          size={20}
+          color="#9CA3AF"
+          style={{ marginRight: 8 }}
+        />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by name..."
+          placeholderTextColor="#9CA3AF"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <MaterialCommunityIcons
+              name="close-circle"
+              size={18}
+              color="#9CA3AF"
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* ── List ────────────────────────────── */}
+      <FlatList
+        data={filteredData}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => <StaffCard item={item} />}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={onRefresh}
+            tintColor="#10B981"
+            colors={["#10B981"]}
+          />
+        }
+        ListEmptyComponent={<EmptyState />}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+      />
+
+      {/* ── FAB ─────────────────────────────── */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate("creatdomestic")}
+        activeOpacity={0.85}
+      >
+        <MaterialCommunityIcons name="plus" size={26} color="#FFFFFF" />
+      </TouchableOpacity>
     </View>
   );
 };
 
-export default DomesticStaff;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    backgroundColor: "#F9FAFB",
+  },
+
+  // Header
+  pageHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#111827",
+    letterSpacing: -0.4,
+  },
+  pageSub: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  statBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#D1FAE5",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 5,
+  },
+  statBadgeText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#065F46",
+  },
+
+  // Search
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   searchInput: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 16,
+    flex: 1,
+    fontSize: 15,
+    color: "#111827",
+    fontWeight: "500",
   },
-  itemContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+
+  listContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 120,
+  },
+
+  // Card
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 3,
   },
+  avatarWrap: {
+    position: "relative",
+    marginRight: 14,
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "#F3F4F6",
+  },
+  genderDot: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  cardBody: {
+    flex: 1,
+  },
+  cardTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
   staffName: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    flex: 1,
+    marginRight: 8,
+  },
+  roleBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  roleBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginBottom: 3,
+  },
+  infoText: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 6,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  codeWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#F9FAFB",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  codeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#6B7280",
+    letterSpacing: 0.5,
+  },
+
+  // Empty
+  emptyWrap: {
+    alignItems: "center",
+    paddingTop: 60,
+    paddingHorizontal: 32,
+    gap: 8,
+  },
+  lottie: {
+    width: 180,
+    height: 180,
     marginBottom: 8,
   },
-  staffDetails: {
+  emptyTitle: {
+    fontSize: 19,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  emptySub: {
     fontSize: 14,
-    marginBottom: 4,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 50,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#777",
+    color: "#9CA3AF",
     textAlign: "center",
-    marginTop: 10,
+    lineHeight: 21,
+    fontWeight: "500",
   },
-  floatingButtonContainer: {
+
+  // FAB
+  fab: {
     position: "absolute",
     right: 20,
-    bottom: 20,
-    zIndex: 10, // Ensure it floats above the list
-    // Removed redundant top: 320 since we're using bottom: 20
-  },
-  floatingButton: {
-    backgroundColor: "green",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
+    bottom: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#10B981",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
 });
+
+export default DomesticStaff;

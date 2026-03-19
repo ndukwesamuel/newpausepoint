@@ -300,7 +300,7 @@ const CreateVirtualAccountScreen = () => {
     <View style={styles.stepContent}>
       <View style={styles.stepHeader}>
         <MaterialIcons name="sms" size={48} color="#6366F1" />
-        <Text style={styles.stepTitle}>Enter OTP kaka</Text>
+        <Text style={styles.stepTitle}>Enter OTP</Text>
         <Text style={styles.stepDescription}>
           Enter the 6-digit code sent to your phone number ending with{" "}
           {phoneHint}

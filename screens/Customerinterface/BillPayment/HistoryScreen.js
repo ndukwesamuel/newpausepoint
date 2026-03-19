@@ -32,7 +32,7 @@ export default function HistoryScreen() {
     isLoading,
     error,
     refetch, // Get refetch function from useFetchData
-  } = useFetchData_v2("api/v1/captain/electricty", "history_info");
+  } = useFetchData_v2("api/v1/captain/electricty_v2", "history_info");
 
   console.log({
     uuuu: history_info,

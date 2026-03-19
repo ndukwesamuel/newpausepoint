@@ -1,3 +1,1797 @@
+// import React, { useState, useEffect } from "react";
+// import {
+//   View,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   ActivityIndicator,
+//   Alert,
+//   ScrollView,
+//   Animated,
+//   Switch,
+//   Modal,
+//   KeyboardAvoidingView,
+//   Platform,
+// } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
+// import ScreenWrapper from "../../../components/shared/ScreenWrapper";
+// import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+// const BENEFICIARIES_KEY = "electricity_beneficiaries";
+
+// const ElectricityPaymentScreen = () => {
+//   const navigation = useNavigation();
+
+//   const {
+//     data,
+//     isLoading,
+//     error,
+//     refetch: refetchWallet,
+//   } = useFetchData_v2("api/v1/wallet", "wallet");
+
+//   const mainBalance = data?.balance;
+
+//   const [meterId, setMeterId] = useState("");
+//   const [walletUnits, setWalletUnits] = useState("");
+//   const [useEmergency, setUseEmergency] = useState(false);
+//   const [meterInfo, setMeterInfo] = useState(null);
+//   const scaleAnim = useState(new Animated.Value(1))[0];
+
+//   const [beneficiaries, setBeneficiaries] = useState([]);
+//   const [showSaveModal, setShowSaveModal] = useState(false);
+//   const [nickname, setNickname] = useState("");
+//   const [showBeneficiariesExpanded, setShowBeneficiariesExpanded] =
+//     useState(true);
+
+//   // ==================== GET CONFIG FROM API ====================
+//   const {
+//     data: configResponse,
+//     isLoading: isLoadingConfig,
+//     isFetching: isFetchingConfig,
+//   } = useFetchData_v2(
+//     "api/v1/captain/electricty_v2/config",
+//     "electricity-config",
+//   );
+
+//   const config = configResponse?.data;
+//   console.log({
+//     yyyy: config,
+//   });
+
+//   // ✅ ALL values from API (with fallbacks)
+//   const NORMAL_PRICE = config?.normalPricePerUnit || 260;
+//   const EMERGENCY_UNITS = config?.emergencyUnits || 38;
+//   const EMERGENCY_DEBT = config?.emergencyDebt || 10500;
+//   const MIN_UNITS = config?.minPurchaseUnits || 39;
+//   const MAX_UNITS = config?.maxPurchaseUnits || 400;
+//   const SERVICE_CHARGE = config?.serviceCharge || 0;
+//   const SERVICE_CHARGE_DISCOUNT = config?.serviceChargeDiscount || 100;
+
+//   // ==================== GET USER STATUS ====================
+//   const {
+//     data: statusResponse,
+//     isLoading: isLoadingStatus,
+//     isFetching: isFetchingStatus,
+//     refetch: refetchStatus,
+//   } = useFetchData_v2(
+//     "api/v1/captain/electricty_v2/emergency-status",
+//     "emergency-status",
+//   );
+
+//   const isStatusLoading = isLoadingStatus || isFetchingStatus;
+//   const statusData = statusResponse?.data;
+
+//   const {
+//     mutate: checkMeter,
+//     isLoading: checkMeterLoading,
+//     isPending: checkMeterPending,
+//   } = useMutateData_v2(
+//     "api/v1/captain/electricty_v2/QueryCustomerInfo",
+//     "POST",
+//     "billpayment",
+//   );
+
+//   const checkMeterIsPending = checkMeterPending ?? checkMeterLoading;
+
+//   const {
+//     mutate: buyElectricity,
+//     isLoading: buyLoading,
+//     isPending: buyPending,
+//   } = useMutateData_v2(
+//     "api/v1/captain/electricty/purchase_electricty",
+//     "POST",
+//     "buy-electricity",
+//   );
+
+//   const isBuying = buyPending ?? buyLoading;
+
+//   const {
+//     data: payDebtResponse,
+//     isLoading: payDebtLoading,
+//     isFetching: payDebtFetching,
+//     refetch: refetchPayDebt,
+//   } = useFetchData_v2(
+//     "api/v1/captain/electricty/UserPayDeptElectricty",
+//     "pay-debt",
+//     { enabled: false },
+//   );
+//   const isPayingDebt = payDebtLoading || payDebtFetching;
+
+//   // ==================== BENEFICIARIES ====================
+
+//   const loadBeneficiaries = async () => {
+//     try {
+//       const saved = await AsyncStorage.getItem(BENEFICIARIES_KEY);
+//       if (saved) setBeneficiaries(JSON.parse(saved));
+//     } catch (e) {
+//       console.error("Error loading beneficiaries:", e);
+//     }
+//   };
+
+//   const saveBeneficiaries = async (data) => {
+//     try {
+//       await AsyncStorage.setItem(BENEFICIARIES_KEY, JSON.stringify(data));
+//     } catch (e) {
+//       console.error("Error saving beneficiaries:", e);
+//       Alert.alert("Error", "Failed to save beneficiary");
+//     }
+//   };
+
+//   const addBeneficiary = async () => {
+//     if (!meterInfo) return;
+//     const exists = beneficiaries.find((b) => b.meterId === meterId);
+//     if (exists) {
+//       Alert.alert(
+//         "Already Saved",
+//         `This meter is already saved as "${exists.nickname || "Meter " + exists.meterId.slice(-4)}"`,
+//       );
+//       setShowSaveModal(false);
+//       return;
+//     }
+//     if (beneficiaries.length >= 10) {
+//       Alert.alert(
+//         "Limit Reached",
+//         "Maximum 10 beneficiaries. Delete one to add new.",
+//       );
+//       setShowSaveModal(false);
+//       return;
+//     }
+//     const newBeneficiary = {
+//       id: Date.now().toString(),
+//       meterId,
+//       nickname: nickname.trim() || "",
+//       customerName: meterInfo.Customer_name || "",
+//       customerAddress: meterInfo.Customer_address || "",
+//       lastUsed: new Date().toISOString(),
+//       createdAt: new Date().toISOString(),
+//     };
+//     const updated = [...beneficiaries, newBeneficiary];
+//     setBeneficiaries(updated);
+//     await saveBeneficiaries(updated);
+//     setShowSaveModal(false);
+//     setNickname("");
+//     Alert.alert(
+//       "✅ Saved Successfully!",
+//       `"${newBeneficiary.nickname || "Meter " + meterId.slice(-4)}" added to your saved meters.`,
+//       [{ text: "Got it!", style: "default" }],
+//     );
+//   };
+
+//   const deleteBeneficiary = async (id) => {
+//     Alert.alert("Delete Beneficiary", "Remove this beneficiary?", [
+//       { text: "Cancel", style: "cancel" },
+//       {
+//         text: "Delete",
+//         style: "destructive",
+//         onPress: async () => {
+//           const updated = beneficiaries.filter((b) => b.id !== id);
+//           setBeneficiaries(updated);
+//           await saveBeneficiaries(updated);
+//           Alert.alert("Deleted", "Beneficiary removed");
+//         },
+//       },
+//     ]);
+//   };
+
+//   const useBeneficiary = async (beneficiary) => {
+//     setMeterId(beneficiary.meterId);
+//     const updated = beneficiaries.map((b) =>
+//       b.id === beneficiary.id
+//         ? { ...b, lastUsed: new Date().toISOString() }
+//         : b,
+//     );
+//     setBeneficiaries(updated);
+//     await saveBeneficiaries(updated);
+//     checkMeter(
+//       { meterId: beneficiary.meterId },
+//       {
+//         onSuccess: (response) => {
+//           if (!response?.data || !response.data[0]) {
+//             Alert.alert("Error", "No meter information found");
+//             return;
+//           }
+//           setMeterInfo(response.data[0]);
+//           Animated.sequence([
+//             Animated.timing(scaleAnim, {
+//               toValue: 1.05,
+//               duration: 150,
+//               useNativeDriver: true,
+//             }),
+//             Animated.timing(scaleAnim, {
+//               toValue: 1,
+//               duration: 150,
+//               useNativeDriver: true,
+//             }),
+//           ]).start();
+//         },
+//         onError: (error) => {
+//           Alert.alert("Error", error?.message || "Failed to verify meter");
+//           setMeterInfo(null);
+//         },
+//       },
+//     );
+//   };
+
+//   useEffect(() => {
+//     loadBeneficiaries();
+//   }, []);
+
+//   // ==================== HELPERS ====================
+
+//   const calculateTotals = () => {
+//     const walletUnitsNum = Number(walletUnits) || 0;
+//     const emergencyUnitsNum = useEmergency ? EMERGENCY_UNITS : 0;
+//     const totalUnits = walletUnitsNum + emergencyUnitsNum;
+//     const walletCost = walletUnitsNum * NORMAL_PRICE;
+//     const emergencyCost = useEmergency ? EMERGENCY_DEBT : 0;
+//     const serviceChargeDiscount =
+//       (SERVICE_CHARGE * SERVICE_CHARGE_DISCOUNT) / 100;
+//     const serviceChargeFinal = SERVICE_CHARGE - serviceChargeDiscount;
+//     return {
+//       walletUnits: walletUnitsNum,
+//       emergencyUnits: emergencyUnitsNum,
+//       totalUnits,
+//       walletCost,
+//       emergencyCost,
+//       serviceChargeOriginal: SERVICE_CHARGE,
+//       serviceChargeDiscount,
+//       serviceChargeFinal,
+//       payNow: walletCost + serviceChargeFinal,
+//       oweAfter: emergencyCost,
+//     };
+//   };
+
+//   const handleCheckMeter = () => {
+//     if (!meterId || meterId.length !== 11 || !/^\d+$/.test(meterId)) {
+//       Alert.alert("Error", "Please enter a valid 11-digit meter ID");
+//       return;
+//     }
+//     checkMeter(
+//       { meterId },
+//       {
+//         onSuccess: (response) => {
+//           if (!response?.data || !response.data[0]) {
+//             Alert.alert("Error", "No meter information found");
+//             return;
+//           }
+//           setMeterInfo(response.data[0]);
+//           Animated.sequence([
+//             Animated.timing(scaleAnim, {
+//               toValue: 1.05,
+//               duration: 150,
+//               useNativeDriver: true,
+//             }),
+//             Animated.timing(scaleAnim, {
+//               toValue: 1,
+//               duration: 150,
+//               useNativeDriver: true,
+//             }),
+//           ]).start();
+//           Alert.alert("Success", "Meter verified! ⚡");
+//         },
+//         onError: (error) => {
+//           Alert.alert("Error", error?.message || "Failed to verify meter");
+//           setMeterInfo(null);
+//         },
+//       },
+//     );
+//   };
+
+//   const handlePayDebt = () => {
+//     Alert.alert(
+//       "Pay Debt",
+//       `Deduct ₦${EMERGENCY_DEBT.toLocaleString()} from your wallet?`,
+//       [
+//         { text: "Cancel", style: "cancel" },
+//         {
+//           text: "Pay Now",
+//           style: "destructive",
+//           onPress: async () => {
+//             try {
+//               const result = await refetchPayDebt();
+//               if (result.data?.success) {
+//                 Alert.alert(
+//                   "Debt Paid! ✅",
+//                   `₦${result.data.data.debtPaid.toLocaleString()} deducted\n` +
+//                     `${result.data.data.unitsRepaid} units restored\n` +
+//                     `Wallet: ₦${result.data.data.newWalletBalance.toLocaleString()}`,
+//                 );
+//                 refetchStatus();
+//               }
+//             } catch (error) {
+//               Alert.alert("Error", error.message || "Payment failed");
+//             }
+//           },
+//         },
+//       ],
+//     );
+//   };
+
+//   const handlePayment = () => {
+//     const totals = calculateTotals();
+//     if (!meterId || !meterInfo) {
+//       Alert.alert("Error", "Please verify the meter first");
+//       return;
+//     }
+//     if (totals.totalUnits < MIN_UNITS) {
+//       Alert.alert("Error", `Minimum purchase is ${MIN_UNITS} units`);
+//       return;
+//     }
+//     if (totals.totalUnits > MAX_UNITS) {
+//       Alert.alert("Error", `Maximum purchase is ${MAX_UNITS} units`);
+//       return;
+//     }
+//     if (totals?.walletUnits > statusData?.maxWalletUnits) {
+//       Alert.alert("Error", `Max wallet units: ${statusData?.maxWalletUnits}`);
+//       return;
+//     }
+
+//     let msg = `Buy ${totals.totalUnits} units?\n\n`;
+//     if (totals.walletUnits > 0)
+//       msg += `💰 Wallet: ${totals.walletUnits} units = ₦${totals.walletCost.toLocaleString()}\n`;
+//     if (useEmergency)
+//       msg += `⚡ Emergency: ${EMERGENCY_UNITS} units = ₦${EMERGENCY_DEBT.toLocaleString()} (owed)\n`;
+
+//     if (SERVICE_CHARGE_DISCOUNT === 100) {
+//       msg += `🎁 Service Charge: ₦0 (100% OFF!)\n`;
+//     } else {
+//       msg += `🎁 Service Charge: ₦${totals.serviceChargeFinal.toLocaleString()} (${SERVICE_CHARGE_DISCOUNT}% OFF!)\n`;
+//     }
+
+//     msg += `\nPay Now: ₦${totals.payNow.toLocaleString()}`;
+//     if (useEmergency) msg += `\nWill Owe: ₦${totals.oweAfter.toLocaleString()}`;
+
+//     Alert.alert("Confirm", msg, [
+//       { text: "Cancel", style: "cancel" },
+//       {
+//         text: "Buy",
+//         onPress: () => {
+//           buyElectricity(
+//             { meterId, units: totals.walletUnits, useEmergency },
+//             {
+//               onSuccess: (data) => {
+//                 let successMsg = `Token: ${data.data.token}\nUnits: ${data.data.totalUnits} kWh`;
+//                 if (data.data.emergencyUnits > 0)
+//                   successMsg += `\n\nDebt: ₦${data.data.emergencyAmountOwed.toLocaleString()}`;
+//                 successMsg += `\nWallet: ₦${data.data.newWalletBalance.toLocaleString()}`;
+//                 Alert.alert("Success! 🎉", successMsg, [
+//                   { text: "OK", onPress: () => navigation.goBack() },
+//                 ]);
+//                 refetchStatus();
+//               },
+//               onError: (error) =>
+//                 Alert.alert("Error", error.message || "Purchase failed"),
+//             },
+//           );
+//         },
+//       },
+//     ]);
+//   };
+
+//   const handleMeterIdChange = (text) => {
+//     const numericText = text.replace(/[^0-9]/g, "").slice(0, 11);
+//     setMeterId(numericText);
+//     if (meterInfo) setMeterInfo(null);
+//   };
+
+//   const handleWalletUnitsChange = (text) => {
+//     const numericText = text.replace(/[^0-9]/g, "");
+//     const num = Number(numericText) || 0;
+//     if (numericText === "" || num <= statusData?.maxWalletUnits)
+//       setWalletUnits(numericText);
+//   };
+
+//   const totals = calculateTotals();
+//   const isValidPurchase =
+//     totals.totalUnits >= MIN_UNITS && totals.totalUnits <= MAX_UNITS;
+//   const hasDebt = statusData?.emergency?.hasDebt || false;
+//   const canUseEmergency = statusData?.emergency?.canUse || false;
+//   const canPayDebt = hasDebt && statusData?.walletBalance >= EMERGENCY_DEBT;
+
+//   // ==================== RENDER ====================
+
+//   const renderSaveBeneficiaryModal = () => (
+//     <Modal
+//       visible={showSaveModal}
+//       transparent
+//       animationType="slide"
+//       onRequestClose={() => setShowSaveModal(false)}
+//     >
+//       <View
+//         style={{
+//           flex: 1,
+//           justifyContent: "center",
+//           alignItems: "center",
+//           backgroundColor: "rgba(0,0,0,0.5)",
+//         }}
+//       >
+//         <View
+//           style={{
+//             backgroundColor: "white",
+//             borderRadius: 20,
+//             padding: 24,
+//             width: "85%",
+//             maxWidth: 400,
+//           }}
+//         >
+//           <View
+//             style={{
+//               flexDirection: "row",
+//               alignItems: "center",
+//               marginBottom: 20,
+//             }}
+//           >
+//             <View
+//               style={{
+//                 width: 40,
+//                 height: 40,
+//                 borderRadius: 20,
+//                 backgroundColor: "#DBEAFE",
+//                 justifyContent: "center",
+//                 alignItems: "center",
+//                 marginRight: 12,
+//               }}
+//             >
+//               <MaterialCommunityIcons
+//                 name="content-save"
+//                 size={20}
+//                 color="#3B82F6"
+//               />
+//             </View>
+//             <Text style={{ fontSize: 18, fontWeight: "700", color: "#1F2937" }}>
+//               Save as Beneficiary
+//             </Text>
+//           </View>
+//           <View
+//             style={{
+//               backgroundColor: "#F9FAFB",
+//               borderRadius: 12,
+//               padding: 12,
+//               marginBottom: 16,
+//             }}
+//           >
+//             <Text style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>
+//               Meter ID
+//             </Text>
+//             <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}>
+//               ****{meterId.slice(-4)}
+//             </Text>
+//             <Text
+//               style={{
+//                 fontSize: 12,
+//                 color: "#6B7280",
+//                 marginTop: 8,
+//                 marginBottom: 4,
+//               }}
+//             >
+//               Customer
+//             </Text>
+//             <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}>
+//               {meterInfo?.Customer_name}
+//             </Text>
+//           </View>
+//           <View style={{ marginBottom: 20 }}>
+//             <Text
+//               style={{
+//                 fontSize: 13,
+//                 fontWeight: "600",
+//                 color: "#374151",
+//                 marginBottom: 8,
+//               }}
+//             >
+//               Nickname (Optional)
+//             </Text>
+//             <TextInput
+//               value={nickname}
+//               onChangeText={setNickname}
+//               placeholder="e.g., Home, Mom's House, Office"
+//               style={{
+//                 borderWidth: 2,
+//                 borderColor: "#E5E7EB",
+//                 borderRadius: 12,
+//                 paddingHorizontal: 16,
+//                 paddingVertical: 12,
+//                 fontSize: 14,
+//                 backgroundColor: "#F9FAFB",
+//               }}
+//               maxLength={30}
+//             />
+//             <Text style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+//               Give this meter a friendly name
+//             </Text>
+//           </View>
+//           <View style={{ flexDirection: "row", gap: 10 }}>
+//             <TouchableOpacity
+//               onPress={() => {
+//                 setShowSaveModal(false);
+//                 setNickname("");
+//               }}
+//               style={{
+//                 flex: 1,
+//                 backgroundColor: "#F3F4F6",
+//                 borderRadius: 12,
+//                 paddingVertical: 14,
+//                 alignItems: "center",
+//               }}
+//             >
+//               <Text
+//                 style={{ fontSize: 14, fontWeight: "600", color: "#6B7280" }}
+//               >
+//                 Cancel
+//               </Text>
+//             </TouchableOpacity>
+//             <TouchableOpacity
+//               onPress={addBeneficiary}
+//               style={{
+//                 flex: 1,
+//                 backgroundColor: "#3B82F6",
+//                 borderRadius: 12,
+//                 paddingVertical: 14,
+//                 alignItems: "center",
+//               }}
+//             >
+//               <Text style={{ fontSize: 14, fontWeight: "700", color: "#fff" }}>
+//                 💾 Save
+//               </Text>
+//             </TouchableOpacity>
+//           </View>
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+
+//   const renderEmptyBeneficiariesState = () => {
+//     if (beneficiaries.length > 0) return null;
+//     return (
+//       <View
+//         style={{
+//           backgroundColor: "#EFF6FF",
+//           borderRadius: 16,
+//           padding: 16,
+//           marginBottom: 20,
+//           borderLeftWidth: 4,
+//           borderLeftColor: "#3B82F6",
+//           flexDirection: "row",
+//           alignItems: "center",
+//         }}
+//       >
+//         <View
+//           style={{
+//             width: 36,
+//             height: 36,
+//             borderRadius: 18,
+//             backgroundColor: "#DBEAFE",
+//             justifyContent: "center",
+//             alignItems: "center",
+//             marginRight: 12,
+//             flexShrink: 0,
+//           }}
+//         >
+//           <MaterialCommunityIcons
+//             name="bookmark-multiple-outline"
+//             size={20}
+//             color="#3B82F6"
+//           />
+//         </View>
+//         <View style={{ flex: 1 }}>
+//           <Text
+//             style={{
+//               fontSize: 14,
+//               fontWeight: "700",
+//               color: "#1E40AF",
+//               marginBottom: 3,
+//             }}
+//           >
+//             💾 No saved meters yet
+//           </Text>
+//           <Text style={{ fontSize: 12, color: "#6B7280", lineHeight: 17 }}>
+//             Verify a meter below, then tap Save for quick access next time
+//           </Text>
+//         </View>
+//       </View>
+//     );
+//   };
+
+//   const renderBeneficiariesList = () => {
+//     if (beneficiaries.length === 0) return null;
+//     const sorted = [...beneficiaries].sort(
+//       (a, b) => new Date(b.lastUsed) - new Date(a.lastUsed),
+//     );
+//     return (
+//       <View
+//         style={{
+//           backgroundColor: "white",
+//           borderRadius: 20,
+//           padding: 16,
+//           marginBottom: 20,
+//           elevation: 3,
+//         }}
+//       >
+//         <TouchableOpacity
+//           onPress={() =>
+//             setShowBeneficiariesExpanded(!showBeneficiariesExpanded)
+//           }
+//           style={{
+//             flexDirection: "row",
+//             alignItems: "center",
+//             justifyContent: "space-between",
+//             marginBottom: showBeneficiariesExpanded ? 16 : 0,
+//           }}
+//         >
+//           <View style={{ flexDirection: "row", alignItems: "center" }}>
+//             <MaterialCommunityIcons
+//               name="bookmark-multiple"
+//               size={20}
+//               color="#3B82F6"
+//             />
+//             <Text
+//               style={{
+//                 fontSize: 15,
+//                 fontWeight: "700",
+//                 color: "#1F2937",
+//                 marginLeft: 8,
+//               }}
+//             >
+//               💾 Saved Meters ({beneficiaries.length})
+//             </Text>
+//           </View>
+//           <MaterialCommunityIcons
+//             name={showBeneficiariesExpanded ? "chevron-up" : "chevron-down"}
+//             size={24}
+//             color="#6B7280"
+//           />
+//         </TouchableOpacity>
+//         {showBeneficiariesExpanded &&
+//           sorted.map((beneficiary, index) => (
+//             <View
+//               key={beneficiary.id}
+//               style={{
+//                 backgroundColor: "#F9FAFB",
+//                 borderRadius: 12,
+//                 padding: 14,
+//                 marginBottom: index < sorted.length - 1 ? 10 : 0,
+//                 borderLeftWidth: 4,
+//                 borderLeftColor: "#3B82F6",
+//               }}
+//             >
+//               <View
+//                 style={{
+//                   flexDirection: "row",
+//                   justifyContent: "space-between",
+//                   alignItems: "flex-start",
+//                 }}
+//               >
+//                 <View style={{ flex: 1 }}>
+//                   <Text
+//                     style={{
+//                       fontSize: 15,
+//                       fontWeight: "700",
+//                       color: "#1F2937",
+//                       marginBottom: 4,
+//                     }}
+//                   >
+//                     {beneficiary.nickname ||
+//                       `Meter ${beneficiary.meterId.slice(-4)}`}
+//                   </Text>
+//                   <Text
+//                     style={{ fontSize: 13, color: "#374151", marginBottom: 2 }}
+//                   >
+//                     {beneficiary.customerName}
+//                   </Text>
+//                   <Text style={{ fontSize: 11, color: "#6B7280" }}>
+//                     ****{beneficiary.meterId.slice(-4)}
+//                   </Text>
+//                   <Text
+//                     style={{
+//                       fontSize: 10,
+//                       color: "#9CA3AF",
+//                       marginTop: 6,
+//                       fontStyle: "italic",
+//                     }}
+//                   >
+//                     Last used:{" "}
+//                     {new Date(beneficiary.lastUsed).toLocaleDateString()}
+//                   </Text>
+//                 </View>
+//                 <View style={{ flexDirection: "row", gap: 8 }}>
+//                   <TouchableOpacity
+//                     onPress={() => useBeneficiary(beneficiary)}
+//                     style={{
+//                       backgroundColor: "#3B82F6",
+//                       borderRadius: 8,
+//                       paddingHorizontal: 12,
+//                       paddingVertical: 8,
+//                     }}
+//                   >
+//                     <Text
+//                       style={{ fontSize: 12, fontWeight: "700", color: "#fff" }}
+//                     >
+//                       Use
+//                     </Text>
+//                   </TouchableOpacity>
+//                   <TouchableOpacity
+//                     onPress={() => deleteBeneficiary(beneficiary.id)}
+//                     style={{
+//                       backgroundColor: "#FEE2E2",
+//                       borderRadius: 8,
+//                       paddingHorizontal: 10,
+//                       paddingVertical: 8,
+//                     }}
+//                   >
+//                     <MaterialCommunityIcons
+//                       name="delete"
+//                       size={16}
+//                       color="#DC2626"
+//                     />
+//                   </TouchableOpacity>
+//                 </View>
+//               </View>
+//             </View>
+//           ))}
+//       </View>
+//     );
+//   };
+
+//   const renderWalletCard = () => (
+//     <View
+//       style={{
+//         backgroundColor: "#EFF6FF",
+//         borderRadius: 16,
+//         padding: 16,
+//         marginBottom: 20,
+//       }}
+//     >
+//       <View
+//         style={{
+//           flexDirection: "row",
+//           alignItems: "center",
+//           justifyContent: "space-between",
+//         }}
+//       >
+//         <View style={{ flexDirection: "row", alignItems: "center" }}>
+//           <Text style={{ fontSize: 24, marginRight: 12 }}>💰</Text>
+//           <View>
+//             <Text style={{ fontSize: 11, color: "#6B7280" }}>
+//               Wallet Balance
+//             </Text>
+//             {isFetchingStatus ? (
+//               <View style={{ flexDirection: "row", alignItems: "center" }}>
+//                 <ActivityIndicator size="small" color="#1E40AF" />
+//                 <Text style={{ fontSize: 14, color: "#6B7280", marginLeft: 8 }}>
+//                   Updating...
+//                 </Text>
+//               </View>
+//             ) : (
+//               <>
+//                 <Text
+//                   style={{ fontSize: 20, fontWeight: "700", color: "#1E40AF" }}
+//                 >
+//                   ₦{mainBalance?.toFixed(2) || "0.00"}
+//                 </Text>
+//                 <Text style={{ fontSize: 11, color: "#6B7280" }}>
+//                   Max {statusData?.maxWalletUnits || 0} units
+//                 </Text>
+//               </>
+//             )}
+//           </View>
+//         </View>
+//         <TouchableOpacity
+//           onPress={() => refetchStatus()}
+//           disabled={isFetchingStatus}
+//           style={{
+//             backgroundColor: isFetchingStatus ? "#9CA3AF" : "#DBEAFE",
+//             borderRadius: 8,
+//             paddingHorizontal: 12,
+//             paddingVertical: 8,
+//           }}
+//         >
+//           {isFetchingStatus ? (
+//             <ActivityIndicator size="small" color="#fff" />
+//           ) : (
+//             <Text style={{ fontSize: 12, color: "#1E40AF", fontWeight: "600" }}>
+//               Refresh
+//             </Text>
+//           )}
+//         </TouchableOpacity>
+//       </View>
+//     </View>
+//   );
+
+//   const renderDebtWarning = () => {
+//     if (!hasDebt) return null;
+//     const shortfall = EMERGENCY_DEBT - statusData?.walletBalance;
+//     return (
+//       <View
+//         style={{
+//           backgroundColor: "#FEE2E2",
+//           borderRadius: 16,
+//           padding: 20,
+//           marginBottom: 20,
+//           borderLeftWidth: 4,
+//           borderLeftColor: "#DC2626",
+//         }}
+//       >
+//         <View
+//           style={{
+//             flexDirection: "row",
+//             alignItems: "center",
+//             marginBottom: 12,
+//           }}
+//         >
+//           <Text style={{ fontSize: 24, marginRight: 10 }}>🔒</Text>
+//           <Text style={{ fontSize: 16, fontWeight: "700", color: "#DC2626" }}>
+//             Purchases Locked
+//           </Text>
+//         </View>
+//         <Text style={{ fontSize: 14, color: "#7F1D1D", marginBottom: 12 }}>
+//           Clear your ₦{EMERGENCY_DEBT.toLocaleString()} debt to continue.
+//         </Text>
+//         <View
+//           style={{
+//             backgroundColor: "#FECACA",
+//             borderRadius: 12,
+//             padding: 12,
+//             marginBottom: 16,
+//           }}
+//         >
+//           <View
+//             style={{
+//               flexDirection: "row",
+//               justifyContent: "space-between",
+//               marginBottom: 8,
+//             }}
+//           >
+//             <Text style={{ fontSize: 13, color: "#7F1D1D" }}>Debt:</Text>
+//             <Text style={{ fontSize: 13, fontWeight: "700", color: "#DC2626" }}>
+//               ₦{EMERGENCY_DEBT.toLocaleString()}
+//             </Text>
+//           </View>
+//           <View
+//             style={{
+//               flexDirection: "row",
+//               justifyContent: "space-between",
+//               marginBottom: shortfall > 0 ? 8 : 0,
+//             }}
+//           >
+//             <Text style={{ fontSize: 13, color: "#7F1D1D" }}>Wallet:</Text>
+//             <Text style={{ fontSize: 13, fontWeight: "700", color: "#7F1D1D" }}>
+//               ₦{statusData?.walletBalance?.toLocaleString()}
+//             </Text>
+//           </View>
+//           {shortfall > 0 && (
+//             <View
+//               style={{ flexDirection: "row", justifyContent: "space-between" }}
+//             >
+//               <Text style={{ fontSize: 13, color: "#7F1D1D" }}>Need:</Text>
+//               <Text
+//                 style={{ fontSize: 13, fontWeight: "700", color: "#DC2626" }}
+//               >
+//                 ₦{shortfall.toLocaleString()}
+//               </Text>
+//             </View>
+//           )}
+//         </View>
+//         {canPayDebt ? (
+//           <TouchableOpacity
+//             onPress={handlePayDebt}
+//             disabled={isPayingDebt}
+//             style={{
+//               backgroundColor: isPayingDebt ? "#9CA3AF" : "#059669",
+//               borderRadius: 12,
+//               paddingVertical: 14,
+//               alignItems: "center",
+//             }}
+//           >
+//             {isPayingDebt ? (
+//               <ActivityIndicator color="#fff" />
+//             ) : (
+//               <>
+//                 <Text
+//                   style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}
+//                 >
+//                   ✓ Pay ₦{EMERGENCY_DEBT.toLocaleString()} Now
+//                 </Text>
+//                 <Text
+//                   style={{
+//                     color: "rgba(255,255,255,0.8)",
+//                     fontSize: 12,
+//                     marginTop: 2,
+//                   }}
+//                 >
+//                   Deduct from wallet
+//                 </Text>
+//               </>
+//             )}
+//           </TouchableOpacity>
+//         ) : (
+//           <View
+//             style={{
+//               backgroundColor: "#FCA5A5",
+//               borderRadius: 12,
+//               paddingVertical: 14,
+//               alignItems: "center",
+//             }}
+//           >
+//             <Text style={{ color: "#7F1D1D", fontWeight: "600", fontSize: 14 }}>
+//               ❌ Insufficient Balance
+//             </Text>
+//             <Text style={{ color: "#7F1D1D", fontSize: 12, marginTop: 2 }}>
+//               Fund ₦{shortfall.toLocaleString()} more
+//             </Text>
+//           </View>
+//         )}
+//       </View>
+//     );
+//   };
+
+//   const renderEmergencyStatusCard = () => {
+//     if (isStatusLoading) {
+//       return (
+//         <View
+//           style={{
+//             backgroundColor: "#F3F4F6",
+//             borderRadius: 16,
+//             padding: 20,
+//             marginBottom: 20,
+//             alignItems: "center",
+//           }}
+//         >
+//           <ActivityIndicator size="small" color="#6B7280" />
+//         </View>
+//       );
+//     }
+//     if (!statusData?.isEligible) {
+//       const progress = statusData?.eligibilityProgress;
+//       return (
+//         <View
+//           style={{
+//             backgroundColor: "#F3F4F6",
+//             borderRadius: 16,
+//             padding: 16,
+//             marginBottom: 20,
+//           }}
+//         >
+//           <View
+//             style={{
+//               flexDirection: "row",
+//               alignItems: "center",
+//               marginBottom: 12,
+//             }}
+//           >
+//             <Text style={{ fontSize: 20, marginRight: 8 }}>🔒</Text>
+//             <Text style={{ fontSize: 14, fontWeight: "700", color: "#374151" }}>
+//               Unlock Emergency Units
+//             </Text>
+//           </View>
+//           <View
+//             style={{
+//               height: 10,
+//               backgroundColor: "#E5E7EB",
+//               borderRadius: 5,
+//               overflow: "hidden",
+//               marginBottom: 8,
+//             }}
+//           >
+//             <View
+//               style={{
+//                 height: "100%",
+//                 width: `${progress?.percentage || 0}%`,
+//                 backgroundColor: "#3B82F6",
+//                 borderRadius: 5,
+//               }}
+//             />
+//           </View>
+//           <View
+//             style={{ flexDirection: "row", justifyContent: "space-between" }}
+//           >
+//             <Text style={{ fontSize: 11, color: "#6B7280" }}>
+//               ₦{(progress?.current || 0).toLocaleString()}
+//             </Text>
+//             <Text style={{ fontSize: 11, color: "#6B7280" }}>
+//               ₦
+//               {(
+//                 progress?.required ||
+//                 config?.eligibilityThreshold ||
+//                 50000
+//               ).toLocaleString()}
+//             </Text>
+//           </View>
+//           <Text
+//             style={{
+//               fontSize: 12,
+//               color: "#6B7280",
+//               marginTop: 10,
+//               textAlign: "center",
+//             }}
+//           >
+//             Spend ₦{(progress?.remaining || 0).toLocaleString()} more to unlock
+//           </Text>
+//         </View>
+//       );
+//     }
+//     return (
+//       <View
+//         style={{
+//           backgroundColor: canUseEmergency ? "#ECFDF5" : "#FEF3C7",
+//           borderRadius: 16,
+//           padding: 16,
+//           marginBottom: 20,
+//           borderLeftWidth: 4,
+//           borderLeftColor: canUseEmergency ? "#10B981" : "#F59E0B",
+//         }}
+//       >
+//         <View
+//           style={{
+//             flexDirection: "row",
+//             alignItems: "center",
+//             marginBottom: 8,
+//           }}
+//         >
+//           <Text style={{ fontSize: 20, marginRight: 8 }}>⚡</Text>
+//           <Text
+//             style={{
+//               fontSize: 14,
+//               fontWeight: "700",
+//               color: canUseEmergency ? "#065F46" : "#92400E",
+//             }}
+//           >
+//             Emergency: {EMERGENCY_UNITS} units = ₦
+//             {EMERGENCY_DEBT.toLocaleString()}
+//           </Text>
+//         </View>
+//         <Text style={{ fontSize: 12, color: "#6B7280" }}>
+//           {canUseEmergency
+//             ? "Available to use"
+//             : "Currently in use (pay debt first)"}
+//         </Text>
+//       </View>
+//     );
+//   };
+
+//   const renderPurchaseForm = () => {
+//     if (hasDebt) return null;
+//     return (
+//       <>
+//         {/* ── Meter Input ── */}
+//         <View
+//           style={{
+//             backgroundColor: "white",
+//             borderRadius: 20,
+//             padding: 20,
+//             marginBottom: 20,
+//             elevation: 3,
+//           }}
+//         >
+//           <Text
+//             style={{
+//               fontSize: 14,
+//               fontWeight: "600",
+//               color: "#374151",
+//               marginBottom: 10,
+//             }}
+//           >
+//             🔢 Meter ID
+//           </Text>
+
+//           {meterId.length === 11 && !meterInfo && (
+//             <TouchableOpacity
+//               onPress={handleCheckMeter}
+//               disabled={checkMeterIsPending}
+//               style={{
+//                 backgroundColor: checkMeterIsPending ? "#9CA3AF" : "#3B82F6",
+//                 borderRadius: 12,
+//                 paddingVertical: 13,
+//                 alignItems: "center",
+//                 flexDirection: "row",
+//                 justifyContent: "center",
+//                 marginBottom: 10,
+//                 elevation: 3,
+//               }}
+//             >
+//               {checkMeterIsPending ? (
+//                 <>
+//                   <ActivityIndicator color="#fff" size="small" />
+//                   <Text
+//                     style={{
+//                       color: "#fff",
+//                       fontWeight: "700",
+//                       fontSize: 15,
+//                       marginLeft: 8,
+//                     }}
+//                   >
+//                     Verifying...
+//                   </Text>
+//                 </>
+//               ) : (
+//                 <Text
+//                   style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}
+//                 >
+//                   ⚡ Verify Meter
+//                 </Text>
+//               )}
+//             </TouchableOpacity>
+//           )}
+
+//           <TextInput
+//             value={meterId}
+//             onChangeText={handleMeterIdChange}
+//             placeholder="Enter 11-digit meter ID"
+//             keyboardType="numeric"
+//             maxLength={11}
+//             style={{
+//               borderWidth: 2,
+//               borderColor: meterId.length === 11 ? "#3B82F6" : "#E5E7EB",
+//               borderRadius: 12,
+//               paddingHorizontal: 16,
+//               paddingVertical: 12,
+//               fontSize: 16,
+//               backgroundColor: meterInfo ? "#EFF6FF" : "#F9FAFB",
+//             }}
+//           />
+//           {meterId.length > 0 && meterId.length !== 11 && (
+//             <Text style={{ color: "#F59E0B", fontSize: 12, marginTop: 6 }}>
+//               ⚠️ {meterId.length}/11 digits
+//             </Text>
+//           )}
+//         </View>
+
+//         {/* ── Verified meter info ── */}
+//         {meterInfo && (
+//           <Animated.View
+//             style={{
+//               transform: [{ scale: scaleAnim }],
+//               backgroundColor: "#ECFDF5",
+//               borderRadius: 16,
+//               padding: 16,
+//               marginBottom: 20,
+//               borderLeftWidth: 4,
+//               borderLeftColor: "#10B981",
+//             }}
+//           >
+//             <View
+//               style={{
+//                 flexDirection: "row",
+//                 alignItems: "center",
+//                 marginBottom: 12,
+//               }}
+//             >
+//               <View
+//                 style={{
+//                   width: 40,
+//                   height: 40,
+//                   borderRadius: 20,
+//                   backgroundColor: "#10B981",
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                   marginRight: 12,
+//                 }}
+//               >
+//                 <Text style={{ fontSize: 18, color: "#fff" }}>✓</Text>
+//               </View>
+//               <View style={{ flex: 1 }}>
+//                 <Text
+//                   style={{
+//                     fontSize: 14,
+//                     fontWeight: "700",
+//                     color: "#065F46",
+//                     marginBottom: 4,
+//                   }}
+//                 >
+//                   Meter Verified!
+//                 </Text>
+//                 <Text style={{ fontSize: 13, color: "#374151" }}>
+//                   {meterInfo?.Customer_name}
+//                 </Text>
+//                 <Text style={{ fontSize: 11, color: "#6B7280" }}>
+//                   {meterInfo?.Customer_address}
+//                 </Text>
+//               </View>
+//             </View>
+//             {!beneficiaries.find((b) => b.meterId === meterId) ? (
+//               <TouchableOpacity
+//                 onPress={() => setShowSaveModal(true)}
+//                 style={{
+//                   backgroundColor: "#3B82F6",
+//                   borderRadius: 12,
+//                   paddingVertical: 14,
+//                   alignItems: "center",
+//                   flexDirection: "row",
+//                   justifyContent: "center",
+//                   elevation: 4,
+//                 }}
+//               >
+//                 <MaterialCommunityIcons
+//                   name="content-save"
+//                   size={20}
+//                   color="#fff"
+//                   style={{ marginRight: 8 }}
+//                 />
+//                 <Text
+//                   style={{ fontSize: 15, fontWeight: "700", color: "#fff" }}
+//                 >
+//                   💾 Save This Meter for Later
+//                 </Text>
+//               </TouchableOpacity>
+//             ) : (
+//               <View
+//                 style={{
+//                   backgroundColor: "#E0E7FF",
+//                   borderRadius: 10,
+//                   paddingVertical: 10,
+//                   paddingHorizontal: 12,
+//                   flexDirection: "row",
+//                   alignItems: "center",
+//                   justifyContent: "center",
+//                 }}
+//               >
+//                 <MaterialCommunityIcons
+//                   name="check-circle"
+//                   size={18}
+//                   color="#4F46E5"
+//                   style={{ marginRight: 6 }}
+//                 />
+//                 <Text
+//                   style={{ fontSize: 13, fontWeight: "600", color: "#4F46E5" }}
+//                 >
+//                   ✓ Already saved as beneficiary
+//                 </Text>
+//               </View>
+//             )}
+//           </Animated.View>
+//         )}
+
+//         {/* ── Units Input ── */}
+//         {meterInfo && (
+//           <View
+//             style={{
+//               backgroundColor: "white",
+//               borderRadius: 20,
+//               padding: 20,
+//               marginBottom: 20,
+//               elevation: 3,
+//             }}
+//           >
+//             <View style={{ marginBottom: 20 }}>
+//               <Text
+//                 style={{
+//                   fontSize: 14,
+//                   fontWeight: "600",
+//                   color: "#374151",
+//                   marginBottom: 8,
+//                 }}
+//               >
+//                 💰 Units from Wallet (₦{NORMAL_PRICE}/unit)
+//               </Text>
+//               <TextInput
+//                 value={walletUnits}
+//                 onChangeText={handleWalletUnitsChange}
+//                 placeholder="0"
+//                 keyboardType="numeric"
+//                 style={{
+//                   borderWidth: 2,
+//                   borderColor: walletUnits ? "#3B82F6" : "#E5E7EB",
+//                   borderRadius: 12,
+//                   paddingHorizontal: 16,
+//                   paddingVertical: 14,
+//                   fontSize: 24,
+//                   fontWeight: "bold",
+//                   textAlign: "center",
+//                   backgroundColor: "#F9FAFB",
+//                 }}
+//               />
+//               <Text
+//                 style={{
+//                   fontSize: 11,
+//                   color: "#6B7280",
+//                   marginTop: 6,
+//                   textAlign: "center",
+//                 }}
+//               >
+//                 Min: {MIN_UNITS} • Max: {statusData?.maxWalletUnits || 0} units
+//               </Text>
+//               <View
+//                 style={{
+//                   flexDirection: "row",
+//                   justifyContent: "space-between",
+//                   marginTop: 10,
+//                   gap: 8,
+//                 }}
+//               >
+//                 {[5, 10, 20, statusData?.maxWalletUnits || 0]
+//                   .filter(
+//                     (v, i, a) =>
+//                       a.indexOf(v) === i &&
+//                       v > 0 &&
+//                       v <= (statusData?.maxWalletUnits || 0),
+//                   )
+//                   .slice(0, 4)
+//                   .map((unit) => (
+//                     <TouchableOpacity
+//                       key={unit}
+//                       onPress={() => setWalletUnits(unit.toString())}
+//                       style={{
+//                         flex: 1,
+//                         backgroundColor:
+//                           walletUnits === unit.toString()
+//                             ? "#3B82F6"
+//                             : "#F3F4F6",
+//                         borderRadius: 8,
+//                         paddingVertical: 8,
+//                         alignItems: "center",
+//                       }}
+//                     >
+//                       <Text
+//                         style={{
+//                           fontSize: 12,
+//                           fontWeight: "600",
+//                           color:
+//                             walletUnits === unit.toString()
+//                               ? "#fff"
+//                               : "#374151",
+//                         }}
+//                       >
+//                         {unit}
+//                       </Text>
+//                     </TouchableOpacity>
+//                   ))}
+//               </View>
+//             </View>
+
+//             {statusData?.isEligible && canUseEmergency && (
+//               <View
+//                 style={{
+//                   backgroundColor: useEmergency ? "#FEF3C7" : "#F9FAFB",
+//                   borderRadius: 12,
+//                   padding: 16,
+//                   borderWidth: 2,
+//                   borderColor: useEmergency ? "#F59E0B" : "#E5E7EB",
+//                 }}
+//               >
+//                 <View
+//                   style={{
+//                     flexDirection: "row",
+//                     alignItems: "center",
+//                     justifyContent: "space-between",
+//                   }}
+//                 >
+//                   <View style={{ flex: 1 }}>
+//                     <Text
+//                       style={{
+//                         fontSize: 14,
+//                         fontWeight: "600",
+//                         color: "#374151",
+//                       }}
+//                     >
+//                       ⚡ Add Emergency Units
+//                     </Text>
+//                     <Text
+//                       style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}
+//                     >
+//                       {EMERGENCY_UNITS} units • ₦
+//                       {EMERGENCY_DEBT.toLocaleString()} debt
+//                     </Text>
+//                   </View>
+//                   <Switch
+//                     value={useEmergency}
+//                     onValueChange={setUseEmergency}
+//                     trackColor={{ false: "#E5E7EB", true: "#FCD34D" }}
+//                     thumbColor={useEmergency ? "#F59E0B" : "#9CA3AF"}
+//                   />
+//                 </View>
+//                 {useEmergency && (
+//                   <View
+//                     style={{
+//                       backgroundColor: "#FEF3C7",
+//                       borderRadius: 8,
+//                       padding: 8,
+//                       marginTop: 12,
+//                     }}
+//                   >
+//                     <Text style={{ fontSize: 11, color: "#92400E" }}>
+//                       ⚠️ Debt auto-deducted from wallet when you fund
+//                     </Text>
+//                   </View>
+//                 )}
+//               </View>
+//             )}
+//           </View>
+//         )}
+
+//         {/* ── Summary ── */}
+//         {meterInfo && isValidPurchase && (
+//           <View
+//             style={{
+//               backgroundColor: "#F8FAFC",
+//               borderRadius: 16,
+//               padding: 16,
+//               marginBottom: 20,
+//               borderWidth: 1,
+//               borderColor: "#E2E8F0",
+//             }}
+//           >
+//             <Text
+//               style={{
+//                 fontSize: 14,
+//                 fontWeight: "700",
+//                 color: "#374151",
+//                 marginBottom: 12,
+//               }}
+//             >
+//               Summary
+//             </Text>
+//             {totals.walletUnits > 0 && (
+//               <View
+//                 style={{
+//                   flexDirection: "row",
+//                   justifyContent: "space-between",
+//                   marginBottom: 8,
+//                 }}
+//               >
+//                 <Text style={{ fontSize: 13, color: "#6B7280" }}>
+//                   💰 {totals.walletUnits} × ₦{NORMAL_PRICE}
+//                 </Text>
+//                 <Text
+//                   style={{ fontSize: 13, fontWeight: "600", color: "#374151" }}
+//                 >
+//                   ₦{totals.walletCost.toLocaleString()}
+//                 </Text>
+//               </View>
+//             )}
+//             {useEmergency && (
+//               <View
+//                 style={{
+//                   flexDirection: "row",
+//                   justifyContent: "space-between",
+//                   marginBottom: 8,
+//                 }}
+//               >
+//                 <Text style={{ fontSize: 13, color: "#F59E0B" }}>
+//                   ⚡ {EMERGENCY_UNITS} units
+//                 </Text>
+//                 <Text
+//                   style={{ fontSize: 13, fontWeight: "600", color: "#F59E0B" }}
+//                 >
+//                   ₦{EMERGENCY_DEBT.toLocaleString()}
+//                 </Text>
+//               </View>
+//             )}
+//             <View
+//               style={{
+//                 backgroundColor: "#ECFDF5",
+//                 borderRadius: 8,
+//                 padding: 10,
+//                 marginBottom: 8,
+//                 borderWidth: 1,
+//                 borderColor: "#A7F3D0",
+//                 borderStyle: "dashed",
+//               }}
+//             >
+//               <View
+//                 style={{
+//                   flexDirection: "row",
+//                   justifyContent: "space-between",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <View style={{ flexDirection: "row", alignItems: "center" }}>
+//                   <Text style={{ fontSize: 13, color: "#6B7280" }}>
+//                     🎁 Service Charge
+//                   </Text>
+//                   {SERVICE_CHARGE_DISCOUNT === 100 && (
+//                     <View
+//                       style={{
+//                         backgroundColor: "#10B981",
+//                         borderRadius: 4,
+//                         paddingHorizontal: 6,
+//                         paddingVertical: 2,
+//                         marginLeft: 8,
+//                       }}
+//                     >
+//                       <Text
+//                         style={{
+//                           fontSize: 10,
+//                           fontWeight: "700",
+//                           color: "#fff",
+//                         }}
+//                       >
+//                         100% OFF
+//                       </Text>
+//                     </View>
+//                   )}
+//                 </View>
+//                 <View style={{ alignItems: "flex-end" }}>
+//                   {SERVICE_CHARGE > 0 && (
+//                     <Text
+//                       style={{
+//                         fontSize: 11,
+//                         color: "#9CA3AF",
+//                         textDecorationLine: "line-through",
+//                       }}
+//                     >
+//                       ₦{SERVICE_CHARGE.toLocaleString()}
+//                     </Text>
+//                   )}
+//                   <Text
+//                     style={{
+//                       fontSize: 13,
+//                       fontWeight: "700",
+//                       color: "#10B981",
+//                     }}
+//                   >
+//                     ₦{totals.serviceChargeFinal.toLocaleString()}
+//                   </Text>
+//                 </View>
+//               </View>
+//               {SERVICE_CHARGE_DISCOUNT === 100 && SERVICE_CHARGE > 0 && (
+//                 <Text
+//                   style={{
+//                     fontSize: 10,
+//                     color: "#059669",
+//                     marginTop: 4,
+//                     fontStyle: "italic",
+//                   }}
+//                 >
+//                   You save ₦{SERVICE_CHARGE.toLocaleString()}! 🎉
+//                 </Text>
+//               )}
+//             </View>
+//             <View
+//               style={{
+//                 height: 1,
+//                 backgroundColor: "#E5E7EB",
+//                 marginVertical: 10,
+//               }}
+//             />
+//             <View
+//               style={{
+//                 flexDirection: "row",
+//                 justifyContent: "space-between",
+//                 marginBottom: 4,
+//               }}
+//             >
+//               <Text
+//                 style={{ fontSize: 15, fontWeight: "700", color: "#1F2937" }}
+//               >
+//                 Total:
+//               </Text>
+//               <Text
+//                 style={{ fontSize: 15, fontWeight: "700", color: "#1F2937" }}
+//               >
+//                 {totals.totalUnits} kWh
+//               </Text>
+//             </View>
+//             <View
+//               style={{
+//                 flexDirection: "row",
+//                 justifyContent: "space-between",
+//                 marginBottom: 4,
+//               }}
+//             >
+//               <Text
+//                 style={{ fontSize: 14, fontWeight: "600", color: "#059669" }}
+//               >
+//                 Pay Now:
+//               </Text>
+//               <Text
+//                 style={{ fontSize: 14, fontWeight: "700", color: "#059669" }}
+//               >
+//                 ₦{totals.payNow.toLocaleString()}
+//               </Text>
+//             </View>
+//             {useEmergency && (
+//               <View
+//                 style={{
+//                   flexDirection: "row",
+//                   justifyContent: "space-between",
+//                 }}
+//               >
+//                 <Text
+//                   style={{ fontSize: 14, fontWeight: "600", color: "#DC2626" }}
+//                 >
+//                   Will Owe:
+//                 </Text>
+//                 <Text
+//                   style={{ fontSize: 14, fontWeight: "700", color: "#DC2626" }}
+//                 >
+//                   ₦{totals.oweAfter.toLocaleString()}
+//                 </Text>
+//               </View>
+//             )}
+//           </View>
+//         )}
+
+//         {/* ── Buy Button ── */}
+//         {meterInfo && isValidPurchase && (
+//           <TouchableOpacity
+//             onPress={handlePayment}
+//             disabled={isBuying}
+//             style={{
+//               backgroundColor: isBuying
+//                 ? "#9CA3AF"
+//                 : useEmergency
+//                   ? "#F59E0B"
+//                   : "#3B82F6",
+//               borderRadius: 16,
+//               paddingVertical: 18,
+//               elevation: 5,
+//             }}
+//           >
+//             {isBuying ? (
+//               <View
+//                 style={{
+//                   flexDirection: "row",
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <ActivityIndicator color="#fff" />
+//                 <Text
+//                   style={{
+//                     color: "#fff",
+//                     marginLeft: 10,
+//                     fontSize: 16,
+//                     fontWeight: "700",
+//                   }}
+//                 >
+//                   Processing...
+//                 </Text>
+//               </View>
+//             ) : (
+//               <View>
+//                 <Text
+//                   style={{
+//                     color: "#fff",
+//                     textAlign: "center",
+//                     fontSize: 18,
+//                     fontWeight: "700",
+//                   }}
+//                 >
+//                   ⚡ Buy {totals.totalUnits} Units
+//                 </Text>
+//                 <Text
+//                   style={{
+//                     color: "rgba(255,255,255,0.8)",
+//                     textAlign: "center",
+//                     fontSize: 12,
+//                     marginTop: 4,
+//                   }}
+//                 >
+//                   Pay ₦{totals.payNow.toLocaleString()}
+//                   {useEmergency &&
+//                     ` • Owe ₦${totals.oweAfter.toLocaleString()}`}
+//                 </Text>
+//               </View>
+//             )}
+//           </TouchableOpacity>
+//         )}
+//       </>
+//     );
+//   };
+
+//   // Show loading while config loads
+//   if (isLoadingConfig) {
+//     return (
+//       <ScreenWrapper
+//         title="Buy Electricity ⚡"
+//         navigation={navigation}
+//         headerStyle={{ backgroundColor: "white" }}
+//       >
+//         <View
+//           style={{
+//             flex: 1,
+//             justifyContent: "center",
+//             alignItems: "center",
+//             backgroundColor: "#F8FAFC",
+//           }}
+//         >
+//           <ActivityIndicator size="large" color="#3B82F6" />
+//           <Text style={{ marginTop: 16, color: "#6B7280", fontSize: 14 }}>
+//             Loading configuration...
+//           </Text>
+//         </View>
+//       </ScreenWrapper>
+//     );
+//   }
+
+//   return (
+//     <ScreenWrapper
+//       title="Buy Electricity ⚡"
+//       navigation={navigation}
+//       headerStyle={{ backgroundColor: "white" }}
+//     >
+//       <KeyboardAvoidingView
+//         style={{ flex: 1 }}
+//         behavior={Platform.OS === "ios" ? "padding" : "height"}
+//         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 60}
+//       >
+//         <ScrollView
+//           style={{ flex: 1, backgroundColor: "#F8FAFC" }}
+//           contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+//           keyboardShouldPersistTaps="handled"
+//           showsVerticalScrollIndicator={false}
+//         >
+//           {renderWalletCard()}
+//           {renderDebtWarning()}
+//           {renderEmergencyStatusCard()}
+//           {renderEmptyBeneficiariesState()}
+//           {renderBeneficiariesList()}
+//           {renderPurchaseForm()}
+
+//           {!meterInfo && !hasDebt && beneficiaries.length > 0 && (
+//             <View
+//               style={{
+//                 backgroundColor: "#F9FAFB",
+//                 borderRadius: 16,
+//                 padding: 16,
+//                 marginTop: 8,
+//               }}
+//             >
+//               <Text
+//                 style={{
+//                   textAlign: "center",
+//                   color: "#6B7280",
+//                   fontSize: 13,
+//                   fontStyle: "italic",
+//                 }}
+//               >
+//                 💡 Select a saved meter or enter a new meter ID above
+//               </Text>
+//             </View>
+//           )}
+
+//           <View style={{ marginTop: 24 }}>
+//             <Text
+//               style={{ textAlign: "center", fontSize: 11, color: "#9CA3AF" }}
+//             >
+//               Wallet: ₦{NORMAL_PRICE}/unit • Emergency: {EMERGENCY_UNITS} units
+//               = ₦{EMERGENCY_DEBT.toLocaleString()}
+//             </Text>
+//             <Text
+//               style={{
+//                 textAlign: "center",
+//                 fontSize: 10,
+//                 color: "#10B981",
+//                 marginTop: 4,
+//                 fontWeight: "600",
+//               }}
+//             >
+//               {SERVICE_CHARGE_DISCOUNT === 100
+//                 ? "🎁 Service Charge: FREE (100% discount!)"
+//                 : `🎁 Service Charge: ₦${totals.serviceChargeFinal.toLocaleString()} (${SERVICE_CHARGE_DISCOUNT}% discount!)`}
+//             </Text>
+//           </View>
+//         </ScrollView>
+//       </KeyboardAvoidingView>
+
+//       {renderSaveBeneficiaryModal()}
+//     </ScreenWrapper>
+//   );
+// };
+
+// export default ElectricityPaymentScreen;
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -13,7 +1807,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
@@ -46,66 +1839,61 @@ const ElectricityPaymentScreen = () => {
   const [showBeneficiariesExpanded, setShowBeneficiariesExpanded] =
     useState(true);
 
-  const NORMAL_PRICE = 260;
-  const EMERGENCY_UNITS = 38;
-  const EMERGENCY_DEBT = 10000;
-  const MIN_UNITS = 1;
-  const MAX_UNITS = 500;
-  const SERVICE_CHARGE = 250;
-  const SERVICE_CHARGE_DISCOUNT = 100;
+  // ==================== GET CONFIG FROM API ====================
+  const { data: configResponse, isLoading: isLoadingConfig } = useFetchData_v2(
+    "api/v1/captain/electricty_v2/config",
+    "electricity-config",
+  );
 
+  const config = configResponse?.data;
+
+  // ALL values from API with fallbacks
+  const NORMAL_PRICE = config?.normalPricePerUnit || 260;
+  const EMERGENCY_UNITS = config?.emergencyUnits || 38;
+  const EMERGENCY_DEBT = config?.emergencyDebt || 10500;
+  const MIN_UNITS = config?.minPurchaseUnits || 39;
+  const MAX_UNITS = config?.maxPurchaseUnits || 400;
+  const SERVICE_CHARGE = config?.serviceCharge || 0;
+  const SERVICE_CHARGE_DISCOUNT = config?.serviceChargeDiscount || 100;
+
+  // ==================== GET USER STATUS ====================
   const {
     data: statusResponse,
     isLoading: isLoadingStatus,
     isFetching: isFetchingStatus,
     refetch: refetchStatus,
   } = useFetchData_v2(
-    "api/v1/captain/electricty/emergency-status",
+    "api/v1/captain/electricty_v2/emergency-status",
     "emergency-status",
   );
 
   const isStatusLoading = isLoadingStatus || isFetchingStatus;
-
   const statusData = statusResponse?.data;
 
-  const {
-    mutate: checkMeter,
-    isLoading: checkMeterLoading,
-    isPending: checkMeterPending,
-  } = useMutateData_v2(
-    "api/v1/captain/electricty/QueryCustomerInfo",
+  const { mutate: checkMeter, isPending: checkMeterPending } = useMutateData_v2(
+    "api/v1/captain/electricty_v2/QueryCustomerInfo",
     "POST",
     "billpayment",
   );
 
-  const checkMeterIsPending = checkMeterPending ?? checkMeterLoading;
-
-  const {
-    mutate: buyElectricity,
-    isLoading: buyLoading,
-    isPending: buyPending,
-  } = useMutateData_v2(
-    "api/v1/captain/electricty/purchase_electricty",
+  const { mutate: buyElectricity, isPending: isBuying } = useMutateData_v2(
+    "api/v1/captain/electricty_v2/purchase_electricty",
     "POST",
     "buy-electricity",
   );
 
-  const isBuying = buyPending ?? buyLoading;
-
   const {
-    data: payDebtResponse,
     isLoading: payDebtLoading,
     isFetching: payDebtFetching,
     refetch: refetchPayDebt,
   } = useFetchData_v2(
-    "api/v1/captain/electricty/UserPayDeptElectricty",
+    "api/v1/captain/electricty_v2/UserPayDeptElectricty",
     "pay-debt",
     { enabled: false },
   );
   const isPayingDebt = payDebtLoading || payDebtFetching;
 
   // ==================== BENEFICIARIES ====================
-
   const loadBeneficiaries = async () => {
     try {
       const saved = await AsyncStorage.getItem(BENEFICIARIES_KEY);
@@ -119,7 +1907,6 @@ const ElectricityPaymentScreen = () => {
     try {
       await AsyncStorage.setItem(BENEFICIARIES_KEY, JSON.stringify(data));
     } catch (e) {
-      console.error("Error saving beneficiaries:", e);
       Alert.alert("Error", "Failed to save beneficiary");
     }
   };
@@ -223,28 +2010,43 @@ const ElectricityPaymentScreen = () => {
     loadBeneficiaries();
   }, []);
 
-  // ==================== HELPERS ====================
-
+  // ==================== FIX 1 — calculateTotals ====================
+  // Emergency mode: wallet untouched, 38 units only, pay nothing now, owe debt later
+  // Normal mode: wallet deducted, user-entered units
   const calculateTotals = () => {
-    const walletUnitsNum = Number(walletUnits) || 0;
-    const emergencyUnitsNum = useEmergency ? EMERGENCY_UNITS : 0;
-    const totalUnits = walletUnitsNum + emergencyUnitsNum;
-    const walletCost = walletUnitsNum * NORMAL_PRICE;
-    const emergencyCost = useEmergency ? EMERGENCY_DEBT : 0;
     const serviceChargeDiscount =
       (SERVICE_CHARGE * SERVICE_CHARGE_DISCOUNT) / 100;
     const serviceChargeFinal = SERVICE_CHARGE - serviceChargeDiscount;
+
+    if (useEmergency) {
+      return {
+        walletUnits: 0,
+        emergencyUnits: EMERGENCY_UNITS,
+        totalUnits: EMERGENCY_UNITS,
+        walletCost: 0,
+        emergencyCost: EMERGENCY_DEBT,
+        serviceChargeOriginal: SERVICE_CHARGE,
+        serviceChargeDiscount,
+        serviceChargeFinal: 0, // no service charge on emergency
+        payNow: 0, // nothing paid now
+        oweAfter: EMERGENCY_DEBT,
+      };
+    }
+
+    const walletUnitsNum = Number(walletUnits) || 0;
+    const walletCost = walletUnitsNum * NORMAL_PRICE;
+
     return {
       walletUnits: walletUnitsNum,
-      emergencyUnits: emergencyUnitsNum,
-      totalUnits,
+      emergencyUnits: 0,
+      totalUnits: walletUnitsNum,
       walletCost,
-      emergencyCost,
+      emergencyCost: 0,
       serviceChargeOriginal: SERVICE_CHARGE,
       serviceChargeDiscount,
       serviceChargeFinal,
       payNow: walletCost + serviceChargeFinal,
-      oweAfter: emergencyCost,
+      oweAfter: 0,
     };
   };
 
@@ -314,65 +2116,81 @@ const ElectricityPaymentScreen = () => {
     );
   };
 
+  // ==================== FIX 5 — handlePayment ====================
   const handlePayment = () => {
     const totals = calculateTotals();
+
     if (!meterId || !meterInfo) {
       Alert.alert("Error", "Please verify the meter first");
       return;
     }
-    if (totals.totalUnits < MIN_UNITS) {
-      Alert.alert("Error", `Minimum purchase is ${MIN_UNITS} unit`);
-      return;
-    }
-    if (totals.totalUnits > MAX_UNITS) {
-      Alert.alert("Error", `Maximum purchase is ${MAX_UNITS} units`);
-      return;
-    }
-    if (totals?.walletUnits > statusData?.maxWalletUnits) {
-      Alert.alert("Error", `Max wallet units: ${statusData?.maxWalletUnits}`);
-      return;
+
+    // FIX 5a — skip MIN_UNITS check for emergency
+    if (!useEmergency) {
+      if (totals.totalUnits < MIN_UNITS) {
+        Alert.alert("Error", `Minimum purchase is ${MIN_UNITS} units`);
+        return;
+      }
+      if (totals.totalUnits > MAX_UNITS) {
+        Alert.alert("Error", `Maximum purchase is ${MAX_UNITS} units`);
+        return;
+      }
+      if (totals.walletUnits > statusData?.maxWalletUnits) {
+        Alert.alert("Error", `Max wallet units: ${statusData?.maxWalletUnits}`);
+        return;
+      }
     }
 
+    // Build confirmation message
     let msg = `Buy ${totals.totalUnits} units?\n\n`;
-    if (totals.walletUnits > 0)
-      msg += `💰 Wallet: ${totals.walletUnits} units = ₦${totals.walletCost.toLocaleString()}\n`;
-    if (useEmergency)
-      msg += `⚡ Emergency: ${EMERGENCY_UNITS} units = ₦${EMERGENCY_DEBT.toLocaleString()} (owed)\n`;
-    msg += `🎁 Service Charge: ₦0 (100% OFF!)\n\nPay Now: ₦${totals.payNow.toLocaleString()}`;
-    if (useEmergency) msg += `\nWill Owe: ₦${totals.oweAfter.toLocaleString()}`;
 
-    console.log({
-      meterId,
-      units: totals.walletUnits,
-      useEmergency,
-    });
+    if (useEmergency) {
+      msg += `⚡ Emergency: ${EMERGENCY_UNITS} units\n`;
+      msg += `💰 Wallet: untouched\n`;
+      msg += `\nPay Now: ₦0`;
+      msg += `\nWill Owe: ₦${EMERGENCY_DEBT.toLocaleString()}`;
+    } else {
+      if (totals.walletUnits > 0) {
+        msg += `💰 Wallet: ${totals.walletUnits} units = ₦${totals.walletCost.toLocaleString()}\n`;
+      }
+      if (SERVICE_CHARGE_DISCOUNT === 100) {
+        msg += `🎁 Service Charge: ₦0 (100% OFF!)\n`;
+      } else {
+        msg += `🎁 Service Charge: ₦${totals.serviceChargeFinal.toLocaleString()} (${SERVICE_CHARGE_DISCOUNT}% OFF!)\n`;
+      }
+      msg += `\nPay Now: ₦${totals.payNow.toLocaleString()}`;
+    }
 
     Alert.alert("Confirm", msg, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Buy",
         onPress: () => {
+          // FIX 5b — send units: 0 when emergency
           buyElectricity(
-            { meterId, units: totals.walletUnits, useEmergency },
+            {
+              meterId,
+              units: useEmergency ? 0 : totals.walletUnits,
+              useEmergency,
+            },
             {
               onSuccess: (data) => {
                 let successMsg = `Token: ${data.data.token}\nUnits: ${data.data.totalUnits} kWh`;
-                if (data.data.emergencyUnits > 0)
+                if (data.data.emergencyUnits > 0) {
                   successMsg += `\n\nDebt: ₦${data.data.emergencyAmountOwed.toLocaleString()}`;
+                }
                 successMsg += `\nWallet: ₦${data.data.newWalletBalance.toLocaleString()}`;
                 Alert.alert("Success! 🎉", successMsg, [
                   { text: "OK", onPress: () => navigation.goBack() },
                 ]);
                 refetchStatus();
+                refetchWallet();
               },
-              // onError: (error) =>
-              //   console.log({
-              //     yuuu: error,
-              //   }),
-
               onError: (error) =>
-                Alert.alert("Error", error.message || "Purchase failed"),
-              // Alert.alert("Error", error.message || "Purchase failed"),
+                Alert.alert(
+                  "Error",
+                  error?.data?.message || error?.message || "Purchase failed",
+                ),
             },
           );
         },
@@ -394,10 +2212,17 @@ const ElectricityPaymentScreen = () => {
   };
 
   const totals = calculateTotals();
-  const isValidPurchase =
-    totals.totalUnits >= MIN_UNITS && totals.totalUnits <= MAX_UNITS;
+
+  // FIX 4 — isValidPurchase — emergency is always valid
+  const isValidPurchase = useEmergency
+    ? true
+    : totals.totalUnits >= MIN_UNITS && totals.totalUnits <= MAX_UNITS;
+
   const hasDebt = statusData?.emergency?.hasDebt || false;
+
+  // FIX 3 — canUseEmergency only (no isEligible check)
   const canUseEmergency = statusData?.emergency?.canUse || false;
+
   const canPayDebt = hasDebt && statusData?.walletBalance >= EMERGENCY_DEBT;
 
   // ==================== RENDER ====================
@@ -552,7 +2377,6 @@ const ElectricityPaymentScreen = () => {
     </Modal>
   );
 
-  // ── Compact empty state — same size/feel as emergency card ──
   const renderEmptyBeneficiariesState = () => {
     if (beneficiaries.length > 0) return null;
     return (
@@ -779,7 +2603,7 @@ const ElectricityPaymentScreen = () => {
                 <Text
                   style={{ fontSize: 20, fontWeight: "700", color: "#1E40AF" }}
                 >
-                  {/* ₦ {mainBalance} */}₦{mainBalance?.toFixed(2) || "0.00"}
+                  ₦{mainBalance?.toFixed(2) || "0.00"}
                 </Text>
                 <Text style={{ fontSize: 11, color: "#6B7280" }}>
                   Max {statusData?.maxWalletUnits || 0} units
@@ -789,7 +2613,10 @@ const ElectricityPaymentScreen = () => {
           </View>
         </View>
         <TouchableOpacity
-          onPress={() => refetchStatus()}
+          onPress={() => {
+            refetchStatus();
+            refetchWallet();
+          }}
           disabled={isFetchingStatus}
           style={{
             backgroundColor: isFetchingStatus ? "#9CA3AF" : "#DBEAFE",
@@ -869,7 +2696,6 @@ const ElectricityPaymentScreen = () => {
             <Text style={{ fontSize: 13, color: "#7F1D1D" }}>Wallet:</Text>
             <Text style={{ fontSize: 13, fontWeight: "700", color: "#7F1D1D" }}>
               ₦{statusData?.walletBalance?.toLocaleString()}
-              {/* ₦{mainBalance.toFixed(2) || "0.00"} */}
             </Text>
           </View>
           {shortfall > 0 && (
@@ -954,70 +2780,8 @@ const ElectricityPaymentScreen = () => {
         </View>
       );
     }
-    if (!statusData?.isEligible) {
-      const progress = statusData?.eligibilityProgress;
-      return (
-        <View
-          style={{
-            backgroundColor: "#F3F4F6",
-            borderRadius: 16,
-            padding: 16,
-            marginBottom: 20,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <Text style={{ fontSize: 20, marginRight: 8 }}>🔒</Text>
-            <Text style={{ fontSize: 14, fontWeight: "700", color: "#374151" }}>
-              Unlock Emergency Units
-            </Text>
-          </View>
-          <View
-            style={{
-              height: 10,
-              backgroundColor: "#E5E7EB",
-              borderRadius: 5,
-              overflow: "hidden",
-              marginBottom: 8,
-            }}
-          >
-            <View
-              style={{
-                height: "100%",
-                width: `${progress?.percentage || 0}%`,
-                backgroundColor: "#3B82F6",
-                borderRadius: 5,
-              }}
-            />
-          </View>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <Text style={{ fontSize: 11, color: "#6B7280" }}>
-              ₦{(progress?.current || 0).toLocaleString()}
-            </Text>
-            <Text style={{ fontSize: 11, color: "#6B7280" }}>
-              ₦{(progress?.required || 100000).toLocaleString()}
-            </Text>
-          </View>
-          <Text
-            style={{
-              fontSize: 12,
-              color: "#6B7280",
-              marginTop: 10,
-              textAlign: "center",
-            }}
-          >
-            Spend ₦{(progress?.remaining || 0).toLocaleString()} more to unlock
-          </Text>
-        </View>
-      );
-    }
+
+    // FIX 3 — show emergency card to everyone, no isEligible gate
     return (
       <View
         style={{
@@ -1044,14 +2808,14 @@ const ElectricityPaymentScreen = () => {
               color: canUseEmergency ? "#065F46" : "#92400E",
             }}
           >
-            Emergency: {EMERGENCY_UNITS} units = ₦
+            Emergency: {EMERGENCY_UNITS} units — ₦
             {EMERGENCY_DEBT.toLocaleString()}
           </Text>
         </View>
         <Text style={{ fontSize: 12, color: "#6B7280" }}>
           {canUseEmergency
-            ? "Available to use"
-            : "Currently in use (pay debt first)"}
+            ? "Available — wallet untouched, pay debt later"
+            : "Currently in use — pay debt first to use again"}
         </Text>
       </View>
     );
@@ -1082,13 +2846,12 @@ const ElectricityPaymentScreen = () => {
             🔢 Meter ID
           </Text>
 
-          {/* Verify button ABOVE the input so keyboard never covers it */}
           {meterId.length === 11 && !meterInfo && (
             <TouchableOpacity
               onPress={handleCheckMeter}
-              disabled={checkMeterIsPending}
+              disabled={checkMeterPending}
               style={{
-                backgroundColor: checkMeterIsPending ? "#9CA3AF" : "#3B82F6",
+                backgroundColor: checkMeterPending ? "#9CA3AF" : "#3B82F6",
                 borderRadius: 12,
                 paddingVertical: 13,
                 alignItems: "center",
@@ -1098,7 +2861,7 @@ const ElectricityPaymentScreen = () => {
                 elevation: 3,
               }}
             >
-              {checkMeterIsPending ? (
+              {checkMeterPending ? (
                 <>
                   <ActivityIndicator color="#fff" size="small" />
                   <Text
@@ -1250,7 +3013,7 @@ const ElectricityPaymentScreen = () => {
           </Animated.View>
         )}
 
-        {/* ── Units Input ── */}
+        {/* ── Units Input + Emergency Toggle ── */}
         {meterInfo && (
           <View
             style={{
@@ -1261,93 +3024,98 @@ const ElectricityPaymentScreen = () => {
               elevation: 3,
             }}
           >
-            <View style={{ marginBottom: 20 }}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "600",
-                  color: "#374151",
-                  marginBottom: 8,
-                }}
-              >
-                💰 Units from Wallet (₦{NORMAL_PRICE}/unit)
-              </Text>
-              <TextInput
-                value={walletUnits}
-                onChangeText={handleWalletUnitsChange}
-                placeholder="0"
-                keyboardType="numeric"
-                style={{
-                  borderWidth: 2,
-                  borderColor: walletUnits ? "#3B82F6" : "#E5E7EB",
-                  borderRadius: 12,
-                  paddingHorizontal: 16,
-                  paddingVertical: 14,
-                  fontSize: 24,
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  backgroundColor: "#F9FAFB",
-                }}
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  color: "#6B7280",
-                  marginTop: 6,
-                  textAlign: "center",
-                }}
-              >
-                Max: {statusData?.maxWalletUnits || 0} units
-              </Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginTop: 10,
-                  gap: 8,
-                }}
-              >
-                {[5, 10, 20, statusData?.maxWalletUnits || 0]
-                  .filter(
-                    (v, i, a) =>
-                      a.indexOf(v) === i &&
-                      v > 0 &&
-                      v <= (statusData?.maxWalletUnits || 0),
-                  )
-                  .slice(0, 4)
-                  .map((unit) => (
-                    <TouchableOpacity
-                      key={unit}
-                      onPress={() => setWalletUnits(unit.toString())}
-                      style={{
-                        flex: 1,
-                        backgroundColor:
-                          walletUnits === unit.toString()
-                            ? "#3B82F6"
-                            : "#F3F4F6",
-                        borderRadius: 8,
-                        paddingVertical: 8,
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text
+            {/* FIX 2 — hide wallet units input when emergency is on */}
+            {!useEmergency && (
+              <View style={{ marginBottom: 20 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: "#374151",
+                    marginBottom: 8,
+                  }}
+                >
+                  💰 Units from Wallet (₦{NORMAL_PRICE}/unit)
+                </Text>
+                <TextInput
+                  value={walletUnits}
+                  onChangeText={handleWalletUnitsChange}
+                  placeholder="0"
+                  keyboardType="numeric"
+                  style={{
+                    borderWidth: 2,
+                    borderColor: walletUnits ? "#3B82F6" : "#E5E7EB",
+                    borderRadius: 12,
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    fontSize: 24,
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    backgroundColor: "#F9FAFB",
+                  }}
+                />
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: "#6B7280",
+                    marginTop: 6,
+                    textAlign: "center",
+                  }}
+                >
+                  Min: {MIN_UNITS} • Max: {statusData?.maxWalletUnits || 0}{" "}
+                  units
+                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 10,
+                    gap: 8,
+                  }}
+                >
+                  {[5, 10, 20, statusData?.maxWalletUnits || 0]
+                    .filter(
+                      (v, i, a) =>
+                        a.indexOf(v) === i &&
+                        v > 0 &&
+                        v <= (statusData?.maxWalletUnits || 0),
+                    )
+                    .slice(0, 4)
+                    .map((unit) => (
+                      <TouchableOpacity
+                        key={unit}
+                        onPress={() => setWalletUnits(unit.toString())}
                         style={{
-                          fontSize: 12,
-                          fontWeight: "600",
-                          color:
+                          flex: 1,
+                          backgroundColor:
                             walletUnits === unit.toString()
-                              ? "#fff"
-                              : "#374151",
+                              ? "#3B82F6"
+                              : "#F3F4F6",
+                          borderRadius: 8,
+                          paddingVertical: 8,
+                          alignItems: "center",
                         }}
                       >
-                        {unit}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            fontWeight: "600",
+                            color:
+                              walletUnits === unit.toString()
+                                ? "#fff"
+                                : "#374151",
+                          }}
+                        >
+                          {unit}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                </View>
               </View>
-            </View>
+            )}
 
-            {statusData?.isEligible && canUseEmergency && (
+            {/* FIX 3 — remove isEligible gate, only canUseEmergency */}
+            {canUseEmergency && (
               <View
                 style={{
                   backgroundColor: useEmergency ? "#FEF3C7" : "#F9FAFB",
@@ -1372,18 +3140,21 @@ const ElectricityPaymentScreen = () => {
                         color: "#374151",
                       }}
                     >
-                      ⚡ Add Emergency Units
+                      ⚡ Use Emergency Units
                     </Text>
                     <Text
                       style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}
                     >
-                      {EMERGENCY_UNITS} units • ₦
-                      {EMERGENCY_DEBT.toLocaleString()} debt
+                      {EMERGENCY_UNITS} units • Wallet untouched • Owe ₦
+                      {EMERGENCY_DEBT.toLocaleString()}
                     </Text>
                   </View>
                   <Switch
                     value={useEmergency}
-                    onValueChange={setUseEmergency}
+                    onValueChange={(val) => {
+                      setUseEmergency(val);
+                      if (val) setWalletUnits(""); // clear wallet units when switching to emergency
+                    }}
                     trackColor={{ false: "#E5E7EB", true: "#FCD34D" }}
                     thumbColor={useEmergency ? "#F59E0B" : "#9CA3AF"}
                   />
@@ -1398,7 +3169,9 @@ const ElectricityPaymentScreen = () => {
                     }}
                   >
                     <Text style={{ fontSize: 11, color: "#92400E" }}>
-                      ⚠️ Debt auto-deducted from wallet when you fund
+                      ⚠️ Your wallet balance stays untouched. Debt of ₦
+                      {EMERGENCY_DEBT.toLocaleString()} must be cleared before
+                      your next purchase.
                     </Text>
                   </View>
                 )}
@@ -1407,7 +3180,7 @@ const ElectricityPaymentScreen = () => {
           </View>
         )}
 
-        {/* ── Summary ── */}
+        {/* FIX 6 — Summary — different display for emergency vs normal */}
         {meterInfo && isValidPurchase && (
           <View
             style={{
@@ -1429,173 +3202,250 @@ const ElectricityPaymentScreen = () => {
             >
               Summary
             </Text>
-            {totals.walletUnits > 0 && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 13, color: "#6B7280" }}>
-                  💰 {totals.walletUnits} × ₦{NORMAL_PRICE}
-                </Text>
-                <Text
-                  style={{ fontSize: 13, fontWeight: "600", color: "#374151" }}
+
+            {useEmergency ? (
+              // Emergency summary
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 8,
+                  }}
                 >
-                  ₦{totals.walletCost.toLocaleString()}
-                </Text>
-              </View>
-            )}
-            {useEmergency && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 13, color: "#F59E0B" }}>
-                  ⚡ {EMERGENCY_UNITS} units
-                </Text>
-                <Text
-                  style={{ fontSize: 13, fontWeight: "600", color: "#F59E0B" }}
-                >
-                  ₦{EMERGENCY_DEBT.toLocaleString()}
-                </Text>
-              </View>
-            )}
-            <View
-              style={{
-                backgroundColor: "#ECFDF5",
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 8,
-                borderWidth: 1,
-                borderColor: "#A7F3D0",
-                borderStyle: "dashed",
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={{ fontSize: 13, color: "#6B7280" }}>
-                    🎁 Service Charge
-                  </Text>
-                  <View
-                    style={{
-                      backgroundColor: "#10B981",
-                      borderRadius: 4,
-                      paddingHorizontal: 6,
-                      paddingVertical: 2,
-                      marginLeft: 8,
-                    }}
-                  >
-                    <Text
-                      style={{ fontSize: 10, fontWeight: "700", color: "#fff" }}
-                    >
-                      100% OFF
-                    </Text>
-                  </View>
-                </View>
-                <View style={{ alignItems: "flex-end" }}>
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      color: "#9CA3AF",
-                      textDecorationLine: "line-through",
-                    }}
-                  >
-                    ₦{SERVICE_CHARGE.toLocaleString()}
+                  <Text style={{ fontSize: 13, color: "#F59E0B" }}>
+                    ⚡ {EMERGENCY_UNITS} emergency units
                   </Text>
                   <Text
                     style={{
                       fontSize: 13,
-                      fontWeight: "700",
+                      fontWeight: "600",
+                      color: "#F59E0B",
+                    }}
+                  >
+                    ₦{EMERGENCY_DEBT.toLocaleString()}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                    💰 Wallet
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
                       color: "#10B981",
+                    }}
+                  >
+                    Untouched ✓
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: "#E5E7EB",
+                    marginVertical: 10,
+                  }}
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "600",
+                      color: "#059669",
+                    }}
+                  >
+                    Pay Now:
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "700",
+                      color: "#059669",
                     }}
                   >
                     ₦0
                   </Text>
                 </View>
-              </View>
-              <Text
-                style={{
-                  fontSize: 10,
-                  color: "#059669",
-                  marginTop: 4,
-                  fontStyle: "italic",
-                }}
-              >
-                You save ₦{SERVICE_CHARGE.toLocaleString()}! 🎉
-              </Text>
-            </View>
-            <View
-              style={{
-                height: 1,
-                backgroundColor: "#E5E7EB",
-                marginVertical: 10,
-              }}
-            />
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 4,
-              }}
-            >
-              <Text
-                style={{ fontSize: 15, fontWeight: "700", color: "#1F2937" }}
-              >
-                Total:
-              </Text>
-              <Text
-                style={{ fontSize: 15, fontWeight: "700", color: "#1F2937" }}
-              >
-                {totals.totalUnits} kWh
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 4,
-              }}
-            >
-              <Text
-                style={{ fontSize: 14, fontWeight: "600", color: "#059669" }}
-              >
-                Pay Now:
-              </Text>
-              <Text
-                style={{ fontSize: 14, fontWeight: "700", color: "#059669" }}
-              >
-                ₦{totals.payNow.toLocaleString()}
-              </Text>
-            </View>
-            {useEmergency && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text
-                  style={{ fontSize: 14, fontWeight: "600", color: "#DC2626" }}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
                 >
-                  Will Owe:
-                </Text>
-                <Text
-                  style={{ fontSize: 14, fontWeight: "700", color: "#DC2626" }}
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "600",
+                      color: "#DC2626",
+                    }}
+                  >
+                    Will Owe:
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "700",
+                      color: "#DC2626",
+                    }}
+                  >
+                    ₦{EMERGENCY_DEBT.toLocaleString()}
+                  </Text>
+                </View>
+              </>
+            ) : (
+              // Normal wallet summary
+              <>
+                {totals.walletUnits > 0 && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                      💰 {totals.walletUnits} × ₦{NORMAL_PRICE}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: "600",
+                        color: "#374151",
+                      }}
+                    >
+                      ₦{totals.walletCost.toLocaleString()}
+                    </Text>
+                  </View>
+                )}
+                <View
+                  style={{
+                    backgroundColor: "#ECFDF5",
+                    borderRadius: 8,
+                    padding: 10,
+                    marginBottom: 8,
+                    borderWidth: 1,
+                    borderColor: "#A7F3D0",
+                    borderStyle: "dashed",
+                  }}
                 >
-                  ₦{totals.oweAfter.toLocaleString()}
-                </Text>
-              </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                        🎁 Service Charge
+                      </Text>
+                      {SERVICE_CHARGE_DISCOUNT === 100 && (
+                        <View
+                          style={{
+                            backgroundColor: "#10B981",
+                            borderRadius: 4,
+                            paddingHorizontal: 6,
+                            paddingVertical: 2,
+                            marginLeft: 8,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 10,
+                              fontWeight: "700",
+                              color: "#fff",
+                            }}
+                          >
+                            100% OFF
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: "700",
+                        color: "#10B981",
+                      }}
+                    >
+                      ₦{totals.serviceChargeFinal.toLocaleString()}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: "#E5E7EB",
+                    marginVertical: 10,
+                  }}
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "700",
+                      color: "#1F2937",
+                    }}
+                  >
+                    Total:
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "700",
+                      color: "#1F2937",
+                    }}
+                  >
+                    {totals.totalUnits} kWh
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "600",
+                      color: "#059669",
+                    }}
+                  >
+                    Pay Now:
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "700",
+                      color: "#059669",
+                    }}
+                  >
+                    ₦{totals.payNow.toLocaleString()}
+                  </Text>
+                </View>
+              </>
             )}
           </View>
         )}
@@ -1646,7 +3496,10 @@ const ElectricityPaymentScreen = () => {
                     fontWeight: "700",
                   }}
                 >
-                  ⚡ Buy {totals.totalUnits} Units
+                  ⚡{" "}
+                  {useEmergency
+                    ? `Get ${EMERGENCY_UNITS} Emergency Units`
+                    : `Buy ${totals.totalUnits} Units`}
                 </Text>
                 <Text
                   style={{
@@ -1656,9 +3509,9 @@ const ElectricityPaymentScreen = () => {
                     marginTop: 4,
                   }}
                 >
-                  Pay ₦{totals.payNow.toLocaleString()}
-                  {useEmergency &&
-                    ` • Owe ₦${totals.oweAfter.toLocaleString()}`}
+                  {useEmergency
+                    ? `Wallet untouched • Owe ₦${EMERGENCY_DEBT.toLocaleString()} later`
+                    : `Pay ₦${totals.payNow.toLocaleString()}`}
                 </Text>
               </View>
             )}
@@ -1667,6 +3520,30 @@ const ElectricityPaymentScreen = () => {
       </>
     );
   };
+
+  if (isLoadingConfig) {
+    return (
+      <ScreenWrapper
+        title="Buy Electricity ⚡"
+        navigation={navigation}
+        headerStyle={{ backgroundColor: "white" }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#F8FAFC",
+          }}
+        >
+          <ActivityIndicator size="large" color="#3B82F6" />
+          <Text style={{ marginTop: 16, color: "#6B7280", fontSize: 14 }}>
+            Loading configuration...
+          </Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper
@@ -1730,12 +3607,13 @@ const ElectricityPaymentScreen = () => {
                 fontWeight: "600",
               }}
             >
-              🎁 Service Charge: FREE (100% discount applied!)
+              {SERVICE_CHARGE_DISCOUNT === 100
+                ? "🎁 Service Charge: FREE (100% discount!)"
+                : `🎁 Service Charge: ₦${totals.serviceChargeFinal.toLocaleString()} (${SERVICE_CHARGE_DISCOUNT}% discount!)`}
             </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
       {renderSaveBeneficiaryModal()}
     </ScreenWrapper>
   );

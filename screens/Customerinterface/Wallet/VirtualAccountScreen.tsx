@@ -35,9 +35,6 @@ const VirtualAccountScreen = () => {
   // ✅ DATA AS ARRAY
   const accountDetails = virtualAccountData?.data || [];
   const hasAccount = accountDetails.length > 0;
-  console.log({
-    kakak: accountDetails,
-  });
 
   const onRefresh = async () => {
     setRefreshing(true);

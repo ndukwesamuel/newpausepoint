@@ -25,9 +25,6 @@ import { Get_all_admin_Service__Fun } from "../../../Redux/Admin/AdminServiceSli
 
 const VendorListDetails = ({ navigation }) => {
   const item = useRoute().params?.item;
-  console.log({
-    kaka2: item,
-  });
 
   const dispatch = useDispatch();
   const {

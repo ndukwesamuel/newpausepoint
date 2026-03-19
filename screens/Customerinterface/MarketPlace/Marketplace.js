@@ -31,10 +31,10 @@ import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 const MarketPlace = () => {
   const dispatch = useDispatch();
   const { Market_data, MyProduct_data } = useSelector(
-    (state) => state.MarketSLice
+    (state) => state.MarketSLice,
   );
   const [productType, setproductType] = useState("allProduct");
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
+  // const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
   const animation = useRef(null);
 
@@ -42,15 +42,15 @@ const MarketPlace = () => {
     fkfkf: MyProduct_data?.products[0]?.name,
   });
 
-  useEffect(() => {
-    if (userProfile_data?.user?.isGuest != true) {
-      dispatch(Market_data_Fun());
-      dispatch(myProductFun());
-    }
+  // useEffect(() => {
+  //   if (userProfile_data?.user?.isGuest != true) {
+  //     dispatch(Market_data_Fun());
+  //     dispatch(myProductFun());
+  //   }
 
-    return () => {};
-  }, [dispatch]);
-  const [search, setSearch] = useState("");
+  //   return () => {};
+  // }, [dispatch]);
+  // const [search, setSearch] = useState("");
 
   const handleSearch = (text) => {
     setSearch(text);
@@ -122,6 +122,8 @@ const MarketPlace = () => {
   );
 
   const [mart, setMart] = useState(false);
+
+  return <MarketplaceComingSoon />;
 
   return (
     <ScreenWrapper
@@ -213,7 +215,7 @@ const MarketPlace = () => {
                 // data={MyProduct_data?.products}
                 data={MyProduct_data?.products?.filter(
                   (data) =>
-                    data?.name.toLowerCase().includes(search.toLowerCase())
+                    data?.name.toLowerCase().includes(search.toLowerCase()),
                   // user?.about_me?.toLowerCase().includes(search.toLowerCase())
                 )}
                 renderItem={renderItem}
@@ -247,7 +249,7 @@ const MarketPlace = () => {
 
               data={Market_data?.products?.filter(
                 (data) =>
-                  data?.name.toLowerCase().includes(search.toLowerCase())
+                  data?.name.toLowerCase().includes(search.toLowerCase()),
                 // user?.about_me?.toLowerCase().includes(search.toLowerCase())
               )}
               renderItem={renderItem}
@@ -334,6 +336,7 @@ const MarketplaceComingSoon = () => {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
 
   useEffect(() => {
     // Initial animations
@@ -373,11 +376,26 @@ const MarketplaceComingSoon = () => {
     pulse();
   }, []);
 
+  // const handleNotifyMe = () => {
+  //   Alert.alert(
+  //     "Notification Set!",
+  //     "Thank you! We'll notify you when our marketplace is available.",
+  //     [{ text: "OK", style: "default" }],
+  //   );
+  // };
+
+  // Change handleNotifyMe to:
   const handleNotifyMe = () => {
     Alert.alert(
       "Notification Set!",
       "Thank you! We'll notify you when our marketplace is available.",
-      [{ text: "OK", style: "default" }]
+      [
+        {
+          text: "OK",
+          style: "default",
+          onPress: () => navigation.goBack(),
+        },
+      ],
     );
   };
 

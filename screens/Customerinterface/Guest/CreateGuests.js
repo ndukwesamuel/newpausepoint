@@ -404,47 +404,4 @@ const styles = StyleSheet.create({
 
 // ---
 
-// ## **What Changed:**
 
-// ### **✅ Removed:**
-// 1. ❌ Old `Guests_Mutation` useMutation hook
-// 2. ❌ Commented out old code
-// 3. ❌ Unused imports (`axios`, `API_BASEURL`)
-// 4. ❌ `createVisitorMutation` (merged into `visitorMutation`)
-
-// ### **✅ Added:**
-// 1. ✅ Single `visitorMutation` hook that handles **both create and update**
-// 2. ✅ Dynamic method: `POST` for create, `PATCH` for update
-// 3. ✅ `onSuccess` and `onError` callbacks in hook options
-// 4. ✅ `visitorID` added to payload for updates
-// 5. ✅ Clean, single source of truth
-
-// ---
-
-// ## **How It Works:**
-
-// ### **Create (No `visitation_id`):**
-// ```
-// POST /api/v1/visitor
-// {
-//   "arraval": "2026-03-06T21:25:29.300Z",
-//   "expires": "2026-03-06T21:25:29.300Z",
-//   "gender": "Male",
-//   "location": "71 bricking",
-//   "phone_number": "08056148116",
-//   "visitor_name": "Lakaka"
-// }
-// ```
-
-// ### **Update (Has `visitation_id`):**
-// ```
-// PATCH /api/v1/visitor
-// {
-//   "arraval": "2026-03-06T21:25:29.300Z",
-//   "expires": "2026-03-06T21:25:29.300Z",
-//   "gender": "Male",
-//   "location": "71 bricking",
-//   "phone_number": "08056148116",
-//   "visitor_name": "Lakaka",
-//   "visitorID": "69abb06050579d1a8051fb86"
-// }

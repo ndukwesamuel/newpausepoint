@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,379 +7,401 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
   ActivityIndicator,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
-
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
+import { useNavigation } from "@react-navigation/native";
 
 import {
   FormLabel,
-  Formbutton,
   Forminput,
   RadioButton,
 } from "../../../components/shared/InputForm";
-import AppScreen from "../../../components/shared/AppScreen";
-import { RegularFontText } from "../../../components/shared/Paragrahp";
-import LottieView from "lottie-react-native";
-// *** CHANGE: Import useMutation from @tanstack/react-query ***
-import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
+import { useFormDataMutate } from "../../../hooks/Requestv2";
 
-import axios from "axios";
-import Toast from "react-native-toast-message";
-import { useDispatch, useSelector } from "react-redux";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import {
-  Get_All_Domestic_Fun,
-  Get_All_User_Guest_Fun,
-  Get__User_Guest_detail_Fun,
-} from "../../../Redux/UserSide/GuestSlice";
-import { Image } from "react-native";
+const GENDER_OPTIONS = ["Male", "Female"];
 
-/**
- * @typedef {FormData} DomesticStaffFormData
- */
+const PLACEHOLDER_AVATAR =
+  "https://t4.ftcdn.net/jpg/02/44/43/69/360_F_244436923_vkMe10KKKiw5bjhZeRDT05moxWcPpdmb.jpg";
 
 const CreateDomesticStaff = () => {
-  const route = useRoute();
-  const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const [selectedOption, setSelectedOption] = useState(1); // 1: Male, 2: Female
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-
+  const [photo, setPhoto] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [formData, setFormData] = useState({
     staffName: "",
-    gender: "Male", // Initialize with default radio button value
+    gender: "Male",
     phone: "",
     dateOfBirth: new Date(),
     homeAddress: "",
     Role: "",
     workingHours: "",
   });
-  const [images, setImages] = useState(""); // Holds URI of the selected photo
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  // ── Validation ──────────────────────────────────────────
+  const isFormValid =
+    formData.staffName.trim() &&
+    formData.phone.trim() &&
+    formData.homeAddress.trim() &&
+    formData.Role.trim() &&
+    formData.workingHours.trim() &&
+    photo;
+
+  // ── Mutation ────────────────────────────────────────────
+  const createStaffMutation = useFormDataMutate(
+    "api/v1/domestic",
+    "POST",
+    ["domesticStaff"],
+    {
+      onSuccess: () => {
+        Toast.show({
+          type: "success",
+          text1: "Staff added successfully",
+        });
+        navigation.goBack();
+      },
+      onError: (error) => {
+        Toast.show({
+          type: "error",
+          text1: error?.message || "Failed to create staff",
+        });
+      },
+    },
+  );
+
+  // ── Helpers ─────────────────────────────────────────────
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+      aspect: [1, 1],
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      setImages(result.assets[0].uri);
+      setPhoto(result.assets[0].uri);
     }
-  };
-
-  const handleInputChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
-  };
-
-  const showDatePickerModal = () => {
-    setShowDatePicker(true);
   };
 
   const handleDateChange = (event, selectedDate) => {
     if (selectedDate) {
-      setFormData({
-        ...formData,
-        dateOfBirth: selectedDate,
-      });
-      setShowDatePicker(Platform.OS === "ios"); // Only hide immediately on non-iOS
+      handleInputChange("dateOfBirth", selectedDate);
+      if (Platform.OS !== "ios") setShowDatePicker(false);
     } else {
       setShowDatePicker(false);
     }
   };
 
-  const handleRadioSelect = (option) => {
-    setSelectedOption(option);
-    setFormData({
-      ...formData,
-      gender: option === 1 ? "Male" : "Female",
-    });
-  };
-
   const handleSubmit = () => {
-    // Basic validation
-    if (
-      !formData.staffName ||
-      !formData.phone ||
-      !formData.homeAddress ||
-      !formData.Role ||
-      !formData.workingHours ||
-      !images
-    ) {
+    if (!isFormValid) {
       Toast.show({
         type: "error",
-        text1: "Please fill all fields and select a photo.",
+        text1: "Please fill all fields and select a photo",
       });
       return;
     }
 
     const data = new FormData();
-    data.append("staffName", formData.staffName);
+    data.append("staffName", formData.staffName.trim());
     data.append("gender", formData.gender);
-    data.append("phone", formData.phone);
+    data.append("phone", formData.phone.trim());
     data.append(
       "dateOfBirth",
       formData.dateOfBirth.toISOString().split("T")[0],
     );
-    data.append("homeAddress", formData.homeAddress);
-    data.append("Role", formData.Role);
-    data.append("workingHours", formData.workingHours);
+    data.append("homeAddress", formData.homeAddress.trim());
+    data.append("Role", formData.Role.trim());
+    data.append("workingHours", formData.workingHours.trim());
 
-    // --- Corrected file handling for multipart/form-data ---
-    if (images) {
-      const uri = images;
-      const filename = uri.split("/").pop();
-      const match = /\.(\w+)$/.exec(filename);
-      const fileType = match ? `image/${match[1]}` : "image";
+    const uri = photo;
+    const filename = uri.split("/").pop();
+    const match = /\.(\w+)$/.exec(filename);
+    const fileType = match ? `image/${match[1]}` : "image/jpeg";
+    data.append("images", { uri, name: filename, type: fileType });
 
-      // Ensure the server expects 'photo' or 'images'. The old code used 'images',
-      // but typical API expects singular 'photo'. Sticking to original 'images' name for now.
-      data.append("images", {
-        uri,
-        name: filename,
-        type: fileType,
-      });
-    }
-    // --------------------------------------------------------
-
-    Guests_Mutation.mutate(data);
+    createStaffMutation.mutate(data);
   };
-
-  // *** TANSTACK QUERY MUTATION IMPLEMENTATION ***
-
-  /**
-   * @param {DomesticStaffFormData} data_info - The FormData object.
-   * @returns {Promise<import('axios').AxiosResponse>} The Axios response.
-   */
-  const createDomesticStaffRequest = async (data_info) => {
-    const config = {
-      headers: {
-        // IMPORTANT: Do NOT manually set 'Content-Type': 'multipart/form-data'.
-        // Let Axios handle it for proper boundary generation.
-        Authorization: `Bearer ${user_data?.token}`,
-      },
-    };
-
-    let url = `${API_BASEURL}api/v1/domestic`;
-
-    return axios.post(url, data_info, config);
-  };
-
-  const Guests_Mutation = useMutation({
-    mutationFn: createDomesticStaffRequest,
-    onSuccess: (success) => {
-      Toast.show({
-        type: "success",
-        text1: "Staff created successfully",
-      });
-
-      // Refresh the staff list
-      dispatch(Get_All_Domestic_Fun());
-
-      navigation.goBack();
-    },
-
-    onError: (error) => {
-      /** @type {import('axios').AxiosError} */
-      const axiosError = error;
-      const errorMessage =
-        axiosError?.response?.data?.message || "Failed to create staff.";
-
-      console.log({
-        nnn: axiosError?.response?.data,
-      });
-
-      Toast.show({
-        type: "error",
-        text1: errorMessage,
-      });
-    },
-  });
-  // *** END TANSTACK QUERY MUTATION IMPLEMENTATION ***
 
   return (
-    <AppScreen>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: "white",
+      }}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
-            <TouchableOpacity
-              onPress={pickImage}
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 20,
-              }}
-            >
-              <Image
-                source={{
-                  uri:
-                    images ||
-                    "https://t4.ftcdn.net/jpg/02/44/43/69/360_F_244436923_vkMe10KKKiw5bjhZeRDT05moxWcPpdmb.jpg",
-                }}
-                style={styles.profileImage}
-              />
-              <Text
-                style={{ marginTop: 10, color: "#04973C", fontWeight: "bold" }}
-              >
-                Tap to Select Photo
-              </Text>
-            </TouchableOpacity>
-
-            <View style={{ marginBottom: 15 }}>
-              <FormLabel data="Staff Name" />
-              <Forminput
-                placeholder="Enter Staff Name"
-                value={formData.staffName}
-                onChangeText={(value) => handleInputChange("staffName", value)}
-              />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* ── Avatar picker ───────────────────── */}
+          <TouchableOpacity
+            style={styles.avatarWrap}
+            onPress={pickImage}
+            activeOpacity={0.85}
+          >
+            <Image
+              source={{ uri: photo || PLACEHOLDER_AVATAR }}
+              style={styles.avatar}
+            />
+            <View style={styles.avatarEditBadge}>
+              <MaterialCommunityIcons name="camera" size={14} color="#FFFFFF" />
             </View>
+            <Text style={styles.avatarHint}>
+              {photo ? "Change photo" : "Tap to add photo"}
+            </Text>
+          </TouchableOpacity>
 
-            <View style={{ marginBottom: 15 }}>
-              <FormLabel data="Phone Number" />
+          {/* ── Form fields ─────────────────────── */}
+          <View style={styles.form}>
+            <FormField label="Staff Name" required>
               <Forminput
-                placeholder="Enter Phone Number"
+                placeholder="e.g. Chinelo Okafor"
+                value={formData.staffName}
+                onChangeText={(v) => handleInputChange("staffName", v)}
+              />
+            </FormField>
+
+            <FormField label="Phone Number" required>
+              <Forminput
+                placeholder="e.g. +2348012345678"
                 value={formData.phone}
-                onChangeText={(value) => handleInputChange("phone", value)}
+                onChangeText={(v) => handleInputChange("phone", v)}
                 keyboardType="phone-pad"
               />
-            </View>
+            </FormField>
 
-            <View style={{ marginTop: 15 }}>
-              <Text style={styles.radioTitle}>Choose Gender:</Text>
-              <View style={{ flexDirection: "row", gap: 20 }}>
-                <RadioButton
-                  label="Male"
-                  selected={selectedOption === 1}
-                  onSelect={() => handleRadioSelect(1)}
-                />
-                <RadioButton
-                  label="Female"
-                  selected={selectedOption === 2}
-                  onSelect={() => handleRadioSelect(2)}
-                />
+            <FormField label="Gender" required>
+              <View style={styles.radioRow}>
+                {GENDER_OPTIONS.map((g, i) => (
+                  <RadioButton
+                    key={g}
+                    label={g}
+                    selected={formData.gender === g}
+                    onSelect={() => handleInputChange("gender", g)}
+                  />
+                ))}
               </View>
-            </View>
+            </FormField>
 
-            <View style={{ marginTop: 20 }}>
-              <RegularFontText data="Date of Birth" />
+            <FormField label="Date of Birth" required>
               <TouchableOpacity
-                style={styles.dateButton}
-                onPress={showDatePickerModal}
+                style={styles.dateBtn}
+                onPress={() => setShowDatePicker(true)}
               >
-                <Text>{formData.dateOfBirth.toLocaleDateString()}</Text>
+                <MaterialCommunityIcons
+                  name="calendar"
+                  size={18}
+                  color="#10B981"
+                />
+                <Text style={styles.dateBtnText}>
+                  {formData.dateOfBirth.toLocaleDateString(undefined, {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </Text>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={18}
+                  color="#9CA3AF"
+                />
               </TouchableOpacity>
               {showDatePicker && (
                 <DateTimePicker
                   value={formData.dateOfBirth}
                   mode="date"
                   display="default"
+                  maximumDate={new Date()}
                   onChange={handleDateChange}
                 />
               )}
-            </View>
+            </FormField>
 
-            <View style={{ marginBottom: 15, marginTop: 15 }}>
-              <FormLabel data="Home Address" />
+            <FormField label="Home Address" required>
               <Forminput
-                placeholder="Enter Staff Home Address"
+                placeholder="e.g. 123, Lagos Street, VI, Lagos"
                 value={formData.homeAddress}
-                onChangeText={(value) =>
-                  handleInputChange("homeAddress", value)
-                }
+                onChangeText={(v) => handleInputChange("homeAddress", v)}
               />
-            </View>
+            </FormField>
 
-            <View style={{ marginBottom: 15 }}>
-              <FormLabel data="Role" />
+            <FormField label="Role" required>
               <Forminput
-                placeholder="Enter Staff Role (e.g., Maid, Driver)"
+                placeholder="e.g. Housekeeper, Driver, Cook"
                 value={formData.Role}
-                onChangeText={(value) => handleInputChange("Role", value)}
+                onChangeText={(v) => handleInputChange("Role", v)}
               />
-            </View>
+            </FormField>
 
-            <View style={{ marginBottom: 15 }}>
-              <FormLabel data="Working Hours" />
+            <FormField label="Working Hours" required>
               <Forminput
-                placeholder="Enter Working Hours (e.g., 9am - 5pm)"
+                placeholder="e.g. 8 AM – 5 PM"
                 value={formData.workingHours}
-                onChangeText={(value) =>
-                  handleInputChange("workingHours", value)
-                }
+                onChangeText={(v) => handleInputChange("workingHours", v)}
               />
-            </View>
-
-            <Formbutton
-              buttonStyle={styles.submitButton}
-              textStyle={styles.submitButtonText}
-              data={Guests_Mutation.isPending ? "" : "Submit"}
-              onPress={handleSubmit}
-              isLoading={Guests_Mutation.isPending}
-            >
-              {Guests_Mutation.isPending && <ActivityIndicator color="white" />}
-            </Formbutton>
+            </FormField>
           </View>
+
+          {/* ── Submit ──────────────────────────── */}
+          <TouchableOpacity
+            style={[styles.submitBtn, !isFormValid && styles.submitBtnDisabled]}
+            onPress={handleSubmit}
+            disabled={!isFormValid || createStaffMutation.isPending}
+            activeOpacity={0.85}
+          >
+            {createStaffMutation.isPending ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="account-plus"
+                  size={20}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.submitBtnText}>Add Staff Member</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </AppScreen>
+    </View>
   );
 };
 
-export default CreateDomesticStaff;
+// ── Small helper component ───────────────────────────────
+const FormField = ({ label, required, children }) => (
+  <View style={styles.fieldWrap}>
+    <Text style={styles.fieldLabel}>
+      {label}
+      {required && <Text style={styles.required}> *</Text>}
+    </Text>
+    {children}
+  </View>
+);
 
 const styles = StyleSheet.create({
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
   },
-  radioTitle: {
-    marginBottom: 5,
-    fontWeight: "bold",
-  },
-  dateButton: {
-    padding: 10,
-    borderRadius: 5,
-    backgroundColor: "#F6F8FAE5",
-    height: 50,
-    justifyContent: "center",
-  },
-  submitButton: {
-    backgroundColor: "#04973C",
-    paddingVertical: 14,
+
+  // Avatar
+  avatarWrap: {
     alignItems: "center",
-    borderRadius: 5,
-    marginTop: 30,
-    minHeight: 50,
-    justifyContent: "center",
+    marginBottom: 28,
   },
-  submitButtonText: {
-    color: "white",
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 24,
+    backgroundColor: "#F3F4F6",
+    borderWidth: 2,
+    borderColor: "#D1FAE5",
+  },
+  avatarEditBadge: {
+    position: "absolute",
+    bottom: 24,
+    right: "33%",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  avatarHint: {
+    marginTop: 8,
+    fontSize: 13,
+    color: "#10B981",
+    fontWeight: "700",
+  },
+
+  // Form
+  form: {
+    gap: 20,
+    marginBottom: 28,
+  },
+  fieldWrap: {
+    gap: 6,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  required: {
+    color: "#EF4444",
+  },
+  radioRow: {
+    flexDirection: "row",
+    gap: 20,
+    paddingTop: 4,
+  },
+
+  // Date button
+  dateBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    gap: 10,
+  },
+  dateBtnText: {
+    flex: 1,
+    fontSize: 15,
+    color: "#111827",
     fontWeight: "500",
+  },
+
+  // Submit
+  submitBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#10B981",
+    paddingVertical: 16,
+    borderRadius: 16,
+    gap: 10,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  submitBtnDisabled: {
+    backgroundColor: "#D1D5DB",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  submitBtnText: {
     fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
   },
 });
+
+export default CreateDomesticStaff;
