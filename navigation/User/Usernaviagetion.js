@@ -66,6 +66,14 @@ import DataPurchase from "../../screens/Customerinterface/BillPayment/DataPurcha
 import AmenityDetailScreen from "../../screens/Customerinterface/Amentities/Amenitydetailscreen";
 import { MOCK_MY_REPORTS } from "../../screens/Customerinterface/Amentities/amenityData";
 import MyReportsScreen from "../../screens/Customerinterface/Amentities/Myreportsscreen";
+import GeneralDuesUser from "../../screens/Customerinterface/Wallet/Generalduesuser";
+import MarketplaceFeed from "../../screens/Customerinterface/MarketPlace/MarketplaceFeed";
+import MarketplaceDetail from "../../screens/Customerinterface/MarketPlace/MarketplaceDetail";
+import MarketplaceCreate from "../../screens/Customerinterface/MarketPlace/MarketplaceCreate";
+import MarketplaceMyListings from "../../screens/Customerinterface/MarketPlace/MarketplaceMyListings";
+import MarketplaceUpdate from "../../screens/Customerinterface/MarketPlace/MarketplaceUpdate";
+import Myclan from "../../screens/Customerinterface/Clan/Myclan";
+import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
 
 const Stack = createNativeStackNavigator();
 
@@ -217,6 +225,37 @@ export const Usernaviagetion = () => {
       component: UserPolls,
       title: "Estate Polls",
     },
+
+    {
+      name: "Marketplace",
+      component: MarketplaceFeed,
+      title: "Market place ",
+    },
+
+    {
+      name: "MarketplaceUpdate",
+      component: MarketplaceUpdate,
+      title: "Market place Update ",
+    },
+
+    {
+      name: "MarketplaceCreate",
+      component: MarketplaceCreate,
+      title: "Market place Create ",
+    },
+
+    {
+      name: "MarketplaceMyListings",
+      component: MarketplaceMyListings,
+      title: "My Product",
+    },
+
+    {
+      name: "MarketplaceDetail",
+      component: MarketplaceDetail,
+      title: "Market place Detail ",
+    },
+
     {
       name: "estatepollsdetail",
       component: UserPollDetails,
@@ -511,6 +550,62 @@ export const Usernaviagetion = () => {
 
       <Stack.Screen
         options={({ navigation }) => ({
+          title: "Join Clan",
+          headerStyle: {
+            backgroundColor: "white",
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => {
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                }
+              }}
+              style={{
+                marginLeft: Platform.OS === "android" ? 16 : 10,
+                padding: 8,
+              }}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              activeOpacity={0.7}
+            >
+              <AntDesign name="arrowleft" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        })}
+        name="joinclan"
+        component={Joinclan}
+      />
+
+      <Stack.Screen
+        options={({ navigation }) => ({
+          title: "My Communities",
+          headerStyle: {
+            backgroundColor: "white",
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => {
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                }
+              }}
+              style={{
+                marginLeft: Platform.OS === "android" ? 16 : 10,
+                padding: 8,
+              }}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              activeOpacity={0.7}
+            >
+              <AntDesign name="arrowleft" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        })}
+        name="myclan"
+        component={Myclan}
+      />
+
+      <Stack.Screen
+        options={({ navigation }) => ({
           title: "Complaints and Feedback",
           headerStyle: {
             backgroundColor: "white",
@@ -701,12 +796,6 @@ export const Usernaviagetion = () => {
       />
 
       <Stack.Screen
-        name="Marketplace"
-        component={MarketPlace}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
         name="erranddetail"
         component={ErrandDetailScreen}
         options={{ headerShown: false }}
@@ -727,6 +816,12 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         name="Due"
         component={HouseholdDues}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="GeneralDuesUser"
+        component={GeneralDuesUser}
         options={{ headerShown: false }}
       />
 

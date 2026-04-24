@@ -126,9 +126,9 @@ const UserClans = () => {
       >
         <View style={{ width: "75%" }}>
           <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item?.name}</Text>
-          {/* <Text>{item?.description}</Text> */}
-          {/* <Text>Status: {item?.status}</Text>
-          <Text>Email: {item?.email}</Text> */}
+          <Text>{item?.description}</Text>
+          <Text>Status: {item?.status}</Text>
+          <Text>Email: {item?.email}</Text>
         </View>
 
         <TouchableOpacity

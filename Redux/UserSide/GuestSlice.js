@@ -55,13 +55,15 @@ export const Get_All_User_Guest_Fun = createAsyncThunk(
 
       return response.data;
     } catch (error) {
+      console.log({ iiyyyy: error });
+
       Toast.show({
         type: "error",
         text1: `${error?.response?.data?.message} `,
       });
       return thunkAPI.rejectWithValue(error?.response?.data?.message);
     }
-  }
+  },
 );
 
 export const Get_All_Domestic_Fun = createAsyncThunk(
@@ -91,7 +93,7 @@ export const Get_All_Domestic_Fun = createAsyncThunk(
       });
       return thunkAPI.rejectWithValue(error?.response?.data?.message);
     }
-  }
+  },
 );
 
 export const Get__User_Guest_detail_Fun = createAsyncThunk(
@@ -121,7 +123,7 @@ export const Get__User_Guest_detail_Fun = createAsyncThunk(
       });
       return thunkAPI.rejectWithValue(error?.response?.data?.message);
     }
-  }
+  },
 );
 
 export const GuestSlice = createSlice({

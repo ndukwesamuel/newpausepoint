@@ -39,10 +39,6 @@ export const Get_My_Clan_Single_Forum_Fun = createAsyncThunk(
     try {
       let token_Data = thunkAPI.getState()?.authSlice;
 
-      console.log({
-        uuuuu: token_Data,
-      });
-
       let clan_id =
         thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
           ?.currentClanMeeting?._id;

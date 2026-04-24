@@ -41,7 +41,7 @@ const DomesticDetail = ({ route }) => {
   //   nnn: photo,
   // });
 
-  const { user_data } = useSelector((state) => state.AuthSlice);
+  // const { user_data } = useSelector((state) => state.AuthSlice);
   const navigation = useNavigation();
 
   const dispatch = useDispatch();
@@ -62,7 +62,7 @@ const DomesticDetail = ({ route }) => {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        Authorization: `Bearer ${user_data?.token}`,
+        // Authorization: `Bearer ${user_data?.token}`,
       },
     };
 

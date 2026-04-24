@@ -665,27 +665,73 @@ const HouseholdDues = ({ navigation }) => {
     );
   }
 
+  // if (error || !duesData) {
+  //   return (
+  //     <ScreenWrapper
+  //       title="My Dues"
+  //       navigation={navigation}
+  //       headerStyle={{ backgroundColor: "white" }}
+  //     >
+  //       <View style={styles.errorContainer}>
+  //         <MaterialCommunityIcons
+  //           name="alert-circle"
+  //           size={48}
+  //           color="#DC2626"
+  //         />
+  //         <Text style={styles.errorText}>Failed to load dues</Text>
+  //         <Text style={styles.errorSubText}>
+  //           {error?.message || "Please try again"}
+  //         </Text>
+  //         <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+  //           <Text style={styles.retryButtonText}>Retry</Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </ScreenWrapper>
+  //   );
+  // }
+
   if (error || !duesData) {
+    const noHousehold = error?.message?.includes(
+      "don't belong to any household",
+    );
+
     return (
       <ScreenWrapper
         title="My Dues"
         navigation={navigation}
         headerStyle={{ backgroundColor: "white" }}
       >
-        <View style={styles.errorContainer}>
-          <MaterialCommunityIcons
-            name="alert-circle"
-            size={48}
-            color="#DC2626"
-          />
-          <Text style={styles.errorText}>Failed to load dues</Text>
-          <Text style={styles.errorSubText}>
-            {error?.message || "Please try again"}
-          </Text>
-          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
+        {noHousehold ? (
+          <View style={styles.errorContainer}>
+            <MaterialCommunityIcons
+              name="home-off-outline"
+              size={64}
+              color="#D1D5DB"
+            />
+            <Text style={[styles.errorText, { color: "#374151" }]}>
+              Not in a household yet
+            </Text>
+            <Text style={styles.errorSubText}>
+              You need to be added to a household before you can view dues.
+              Contact your estate admin.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.errorContainer}>
+            <MaterialCommunityIcons
+              name="alert-circle"
+              size={48}
+              color="#DC2626"
+            />
+            <Text style={styles.errorText}>Failed to load dues</Text>
+            <Text style={styles.errorSubText}>
+              {error?.message || "Please try again"}
+            </Text>
+            <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScreenWrapper>
     );
   }

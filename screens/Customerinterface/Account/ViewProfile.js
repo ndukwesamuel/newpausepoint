@@ -44,6 +44,10 @@ export default function ViewProfile({ navigation }) {
     error: userError,
   } = useFetchData_v2("api/v1/user", "getUserUnified");
 
+  console.log({
+    uuuuuuu: userData?.data,
+  });
+
   // Fetch household data using the new hook
   const {
     data: householdData,
@@ -111,7 +115,7 @@ export default function ViewProfile({ navigation }) {
             color="#10B981"
             style={{ marginRight: 8 }}
           />
-          <Text style={styles.sectionTitle}>User Information</Text>
+          <Text style={styles.sectionTitle}>User Information </Text>
         </View>
 
         {/* Phone Number */}

@@ -59,9 +59,14 @@ const initialState: AuthState = {
 const extractErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<ApiErrorResponse>;
+
+    console.log({
+      cccvv: axiosError.response?.data,
+    });
+
     return (
-      axiosError.response?.data?.error ||
       axiosError.response?.data?.message ||
+      axiosError.response?.data?.error ||
       axiosError.message ||
       "Login failed. Please try again."
     );
@@ -130,18 +135,9 @@ const loginService = async (
       await AsyncStorage.setItem("userDatav2", JSON.stringify(response.data));
     }
 
-    console.log({
-      yuiii: response.data,
-    });
-
     return response.data;
   } catch (error) {
-    console.log({
-      iiiiifff: error,
-    });
-
-    const errorMessage = extractErrorMessage(error);
-    throw errorMessage;
+    throw error;
   }
 };
 
@@ -155,9 +151,8 @@ export const loginUser = createAsyncThunk<
     showSuccessToast("Welcome back!");
     return userDatav2;
   } catch (error) {
-    const errorMessage = extractErrorMessage(error);
-    showErrorToast(errorMessage);
-    return thunkAPI.rejectWithValue(errorMessage);
+    showErrorToast(error.response?.data?.message);
+    return thunkAPI.rejectWithValue(error.response?.data?.message);
   }
 });
 

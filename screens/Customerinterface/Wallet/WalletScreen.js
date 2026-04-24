@@ -56,7 +56,7 @@ const WalletScreen = ({}) => {
       iconSet: Ionicons,
       color: "#2196F3",
       type: "clans",
-      route: "alluserclan",
+      route: "myclan",
       params: {},
       condition: userDatav2?.data?.isInClan,
     },
@@ -82,6 +82,7 @@ const WalletScreen = ({}) => {
       params: {},
       condition: userDatav2?.data?.isInClan,
     },
+
     {
       id: 4,
       name: "Emergency",
@@ -148,6 +149,18 @@ const WalletScreen = ({}) => {
       params: {},
       condition: userDatav2?.data?.isInClan,
     },
+
+    // {
+    //   id: 10,
+    //   name: "General Dues",
+    //   icon: "superpowers",
+    //   iconSet: FontAwesome5,
+    //   color: "#009688",
+    //   type: "amenities",
+    //   route: "GeneralDuesUser",
+    //   params: {},
+    //   condition: userDatav2?.data?.isInClan,
+    // },
   ];
 
   const visibleQuickLinks = quickLinks.filter((link) => link.condition);
@@ -389,6 +402,7 @@ const WalletScreen = ({}) => {
             }}
           >
             {/* Electricity */}
+
             <TouchableOpacity
               style={{
                 width: "30%",

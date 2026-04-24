@@ -40,19 +40,19 @@ export default function Emergencies({ navigation }) {
   const dispatch = useDispatch();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { Admin_Get_ALl_Emergency_Report } = useSelector(
-    (state) => state.EmergencySlice
+    (state) => state.EmergencySlice,
   );
 
-  const { user_data } = useSelector((state) => state.AuthSlice);
+  // const { user_data } = useSelector((state) => state.AuthSlice);
 
   const [activeButton, setActiveButton] = useState("pending"); // Initialize with 'Social' as the active button
 
   const pendingReports = Admin_Get_ALl_Emergency_Report?.reports?.filter(
-    (report) => report.status === "pending"
+    (report) => report.status === "pending",
   );
 
   const resolvedReports = Admin_Get_ALl_Emergency_Report?.reports.filter(
-    (report) => report.status === "resolved"
+    (report) => report.status === "resolved",
   );
 
   const toggleModal = () => {

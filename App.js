@@ -57,6 +57,7 @@ import { API_CONFIG } from "./api";
 
 // ⭐⭐⭐ IMPORT THE INTERCEPTOR - This sets it up globally ⭐⭐⭐
 import "./hooks/axiosInterceptor"; //"./config/axiosInterceptor";
+import AppAlert from "./navigation/AppAlert";
 const queryClient = new QueryClient();
 
 const Stack = createNativeStackNavigator();
@@ -249,6 +250,7 @@ export const NavigationScreen = () => {
   return (
     <NavigationContainer>
       <AppNotification />
+      <AppAlert />
       {forceUpdate ? (
         <UpdateScreen message={updateInfo?.message} />
       ) : (

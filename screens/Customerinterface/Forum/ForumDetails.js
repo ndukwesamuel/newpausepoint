@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
@@ -39,6 +40,10 @@ const ForumDetails = () => {
   const animation = useRef(null);
   const maindata = route?.params;
   const forumId = maindata?._id;
+
+  console.log({
+    yyyy: forumId,
+  });
 
   const { get_user_profile_data } = useSelector(
     (state) => state.UserProfileSlice,
@@ -97,7 +102,7 @@ const ForumDetails = () => {
 
   // ── Delete mutation ──────────────────────────────────────
   const deleteMutation = useMutateData_v2(
-    `api/v1/forum/user/${forumId}`,
+    `api/v1/forum/${forumId}`,
     "DELETE",
     undefined,
     {
@@ -119,9 +124,16 @@ const ForumDetails = () => {
 
   // ── Derived state ────────────────────────────────────────
   const isLiked = post?.likes?.includes(get_user_profile_data?.user?._id);
-  const isOwner =
-    maindata?.user?._id === get_user_profile_data?.user?._id ||
-    maindata?.user === get_user_profile_data?.user?._id;
+
+  console.log({
+    user_info: maindata?.user?._id,
+    aaaaa: get_user_profile_data?.data?._id,
+    xxxx: get_user_profile_data?.data?.user?._id,
+  });
+
+  const isOwner = maindata?.user?._id === get_user_profile_data?.data?._id;
+  //  ||
+  // maindata?.user === get_user_profile_data?.user?._id;
 
   const handleLike = () => {
     if (!likeMutation.isPending) {
@@ -131,6 +143,11 @@ const ForumDetails = () => {
 
   const handleCommentSubmit = () => {
     if (!newcomment.trim() || commentMutation.isPending) return;
+    console.log({
+      content: newcomment.trim(),
+      postId: forumId,
+    });
+
     commentMutation.mutate({
       content: newcomment.trim(),
       postId: forumId,
@@ -256,7 +273,7 @@ const ForumDetails = () => {
 
         {/* ── Comments section ─────────────────── */}
         <View style={styles.commentsSection}>
-          <Text style={styles.commentsSectionTitle}>Comments</Text>
+          <Text style={styles.commentsSectionTitle}>Comments </Text>
 
           {!post?.comments?.length ? (
             <View style={styles.emptyComments}>
@@ -657,6 +674,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    width: "100%",
   },
   deleteModalTitle: {
     fontSize: 16,
