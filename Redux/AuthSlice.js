@@ -167,7 +167,7 @@ export const Login_Fun = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const AuthSlice = createSlice({

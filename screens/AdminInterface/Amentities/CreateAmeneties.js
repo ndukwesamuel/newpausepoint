@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+// Converted import from 'react-query' to '@tanstack/react-query'
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -27,8 +28,10 @@ const ProductDetails = ({ navigation }) => {
     ds: user_data?.token,
     ewe: item?._id,
   });
-  const Aprove_Mutation = useMutation(
-    (data_info) => {
+
+  // Converted useMutation to TanStack Query object syntax
+  const Aprove_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}market/product/status/${item?._id}`;
 
       const config = {
@@ -42,36 +45,35 @@ const ProductDetails = ({ navigation }) => {
 
       return axios.put(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        dispatch(AdminMarket_data_Fun());
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: " successfully ",
+      });
+      dispatch(AdminMarket_data_Fun());
 
-        navigation.goBack();
-        // dispatch(Get_My_Clan_Forum_Fun());
+      navigation.goBack();
+      // dispatch(Get_My_Clan_Forum_Fun());
 
-        // setTurnmodal(false);
-      },
+      // setTurnmodal(false);
+    },
 
-      onError: (error) => {
-        console.log({
-          error: error?.response?.data,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+    onError: (error) => {
+      console.log({
+        error: error?.response?.data,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+        //   text2: ` ${error?.response?.data?.errorMsg} `,
+      });
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+      // dispatch(Get_User_Clans_Fun());
+      // dispatch(Get_User_Profle_Fun());
+      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+    },
+  });
+
   return (
     <>
       <View>
@@ -110,7 +112,8 @@ const ProductDetails = ({ navigation }) => {
         </View>
 
         <View style={styles.buttonContainer}>
-          {Aprove_Mutation?.isLoading ? (
+          {/* Updated deprecated 'isLoading' to 'isPending' */}
+          {Aprove_Mutation?.isPending ? (
             <ActivityIndicator size="large" color="white" />
           ) : (
             <>
@@ -122,6 +125,7 @@ const ProductDetails = ({ navigation }) => {
                       status: "Approve",
                     });
                   }}
+                  disabled={Aprove_Mutation.isPending} // Disable button while mutating
                 >
                   <Text style={styles.buttonText}>Approve</Text>
                 </TouchableOpacity>
@@ -133,6 +137,7 @@ const ProductDetails = ({ navigation }) => {
                       status: "Pending",
                     });
                   }}
+                  disabled={Aprove_Mutation.isPending} // Disable button while mutating
                 >
                   <Text style={styles.buttonText}>Decline</Text>
                 </TouchableOpacity>

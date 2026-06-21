@@ -10,68 +10,99 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+
+// *** CHANGE: Import from @tanstack/react-query ***
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { useDispatch, useSelector } from "react-redux";
+// Assuming AdminMarket_data_Fun is the function that fetches the market data
 import { AdminMarket_data_Fun } from "../../../Redux/Admin/AdminMarketSLice";
+
+// Define the shape of the data being passed to the mutation for clarity
+// In a real project, you might define this in a separate types file
+/**
+ * @typedef {('Approve' | 'Pending')} ProductStatus
+ * @typedef {{ status: ProductStatus }} ProductStatusUpdateData
+ * @typedef {import('axios').AxiosResponse} MutationSuccessResponse
+ * @typedef {import('axios').AxiosError} MutationError
+ */
+
 const ProductDetails = ({ navigation }) => {
   const { item } = useRoute().params;
   const dispatch = useDispatch();
 
   const { user_data } = useSelector((state) => state?.AuthSlice);
 
+  // You can remove this console log in production code
   console.log({
     ds: user_data?.token,
     ewe: item?._id,
   });
-  const Aprove_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}market/product/status/${item?._id}`;
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  /**
+   * Mutation function to update the product status.
+   * @param {ProductStatusUpdateData} data_info - The status update object (e.g., { status: 'Approve' }).
+   * @returns {Promise<MutationSuccessResponse>} The Axios response.
+   */
+  const updateProductStatus = async (data_info) => {
+    let url = `${API_BASEURL}market/product/status/${item?._id}`;
 
-      return axios.put(url, data_info, config);
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${user_data?.token}`,
+      },
+    };
+
+    return axios.put(url, data_info, config);
+  };
+
+  // Renamed to be more descriptive (e.g., useUpdateProductStatus)
+  const productStatusMutation = useMutation({
+    mutationFn: updateProductStatus, // The function that performs the API call
+
+    // Success handler
+    onSuccess: (success) => {
+      // The `success` parameter is the result of the `mutationFn` (AxiosResponse)
+      Toast.show({
+        type: "success",
+        text1: "Status updated successfully", // Better message
+      });
+
+      // Dispatch action to refresh the market data list
+      dispatch(AdminMarket_data_Fun());
+
+      // Navigate back after successful update
+      navigation.goBack();
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        dispatch(AdminMarket_data_Fun());
 
-        navigation.goBack();
-        // dispatch(Get_My_Clan_Forum_Fun());
+    // Error handler
+    onError: (error) => {
+      // The `error` parameter is the result of the `mutationFn` rejection (AxiosError)
+      /** @type {MutationError} */
+      const axiosError = error;
 
-        // setTurnmodal(false);
-      },
+      console.log({
+        error: axiosError?.response?.data,
+      });
 
-      onError: (error) => {
-        console.log({
-          error: error?.response?.data,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+      // Display specific error message from the API response
+      const errorMessage =
+        axiosError?.response?.data?.message || "An unknown error occurred.";
+      Toast.show({
+        type: "error",
+        text1: errorMessage,
+      });
+    },
+  });
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+  // Destructure for cleaner usage in the JSX
+  const { isLoading, mutate } = productStatusMutation;
+
   return (
     <>
       <View>
@@ -101,6 +132,7 @@ const ProductDetails = ({ navigation }) => {
           <Text style={styles.sellerTitle}>Seller Details</Text>
           <Text style={styles.sellerInfo}>
             <Icon name="user" size={20} color="black" />
+            {/* The space inside Text is a little brittle, better to use padding/margin */}
             <Text> Jide Kosoko </Text>
           </Text>
           <Text style={styles.sellerInfo}>
@@ -110,15 +142,16 @@ const ProductDetails = ({ navigation }) => {
         </View>
 
         <View style={styles.buttonContainer}>
-          {Aprove_Mutation?.isLoading ? (
-            <ActivityIndicator size="large" color="white" />
+          {isLoading ? ( // Use the destructured `isLoading`
+            <ActivityIndicator size="large" color="green" /> // Changed color for visibility on white background
           ) : (
             <>
               {item?.status === "Pending" ? (
                 <TouchableOpacity
                   style={styles.approveButton}
                   onPress={() => {
-                    Aprove_Mutation.mutate({
+                    mutate({
+                      // Use the destructured `mutate`
                       status: "Approve",
                     });
                   }}
@@ -129,7 +162,8 @@ const ProductDetails = ({ navigation }) => {
                 <TouchableOpacity
                   style={styles.declineButton}
                   onPress={() => {
-                    Aprove_Mutation.mutate({
+                    mutate({
+                      // Use the destructured `mutate`
                       status: "Pending",
                     });
                   }}
@@ -145,6 +179,7 @@ const ProductDetails = ({ navigation }) => {
   );
 };
 
+// ... Styles remain the same
 const styles = StyleSheet.create({
   image: {
     width: "100%",

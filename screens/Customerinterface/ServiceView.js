@@ -23,25 +23,26 @@ import { useDispatch, useSelector } from "react-redux";
 import { All_service__data_Fun } from "../../Redux/UserSide/ServiceSlice";
 import LottieView from "lottie-react-native";
 import ScreenWrapper from "../../components/shared/ScreenWrapper";
+import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
 const ServiceView = ({ navigation }) => {
   const dispatch = useDispatch();
   const animation = useRef(null);
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
+  // const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
   const { all_service__data } = useSelector((state) => state.ServiceSlice);
 
-  useEffect(() => {
-    if (userProfile_data?.user?.isGuest != true) {
-      dispatch(All_service__data_Fun());
-    }
+  // useEffect(() => {
+  //   if (userProfile_data?.user?.isGuest != true) {
+  //     dispatch(All_service__data_Fun());
+  //   }
 
-    return () => {};
-  }, [dispatch]);
+  //   return () => {};
+  // }, [dispatch]);
 
-  const [search, setSearch] = useState("");
+  // const [search, setSearch] = useState("");
 
   const handleSearch = (text) => {
     setSearch(text);
@@ -121,6 +122,8 @@ const ServiceView = ({ navigation }) => {
     </ScrollView>
   );
 
+  return <ArtisanComingSoon />;
+
   return (
     <ScreenWrapper
       title="Service"
@@ -167,7 +170,7 @@ const ServiceView = ({ navigation }) => {
               data={all_service__data?.vendors?.filter(
                 (user) =>
                   user?.FullName.toLowerCase().includes(search.toLowerCase()) ||
-                  user?.about_me?.toLowerCase().includes(search.toLowerCase())
+                  user?.about_me?.toLowerCase().includes(search.toLowerCase()),
               )}
               renderItem={renderItem}
               keyExtractor={(item, index) => index.toString()}
@@ -240,12 +243,12 @@ const styles = StyleSheet.create({
 
 export default ServiceView;
 
-const ArtisanComingSoon = () => {
+const ArtisanComingSoon = ({}) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
-
+  const navigation = useNavigation();
   useEffect(() => {
     // Initial animations
     Animated.parallel([
@@ -288,7 +291,14 @@ const ArtisanComingSoon = () => {
     Alert.alert(
       "Notification Set!",
       "Thank you! We'll notify you when artisan services are available.",
-      [{ text: "OK", style: "default" }]
+
+      [
+        {
+          text: "OK",
+          style: "default",
+          onPress: () => navigation.goBack(),
+        },
+      ],
     );
   };
 

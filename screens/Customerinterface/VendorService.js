@@ -9,17 +9,21 @@ import {
   TouchableOpacity,
   Linking,
   ScrollView,
+  // Added ActivityIndicator as it's common for mutations
+  ActivityIndicator,
 } from "react-native";
 import { Rating } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+// --- IMPORTANT: Change this import from 'react-query' to '@tanstack/react-query' ---
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { All_service__data_Fun } from "../../Redux/UserSide/ServiceSlice";
 import { useDispatch, useSelector } from "react-redux";
+
 const VendorService = ({ navigation }) => {
   const item = useRoute().params?.item;
   console.log({
@@ -34,57 +38,59 @@ const VendorService = ({ navigation }) => {
     user_isLoading,
     user_message,
   } = useSelector((state) => state.AuthSlice);
-  const Like_Mutation = useMutation(
-    (data_info) => {
+
+  // --- TanStack Query useMutation for Liking/Disliking Vendor Service ---
+  const Like_Mutation = useMutation({
+    mutationFn: () => {
       let url = `${API_BASEURL}services/vendors/like-dislike/${item?._id}`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
+      // This is a GET request used as a toggle endpoint
       return axios.get(url, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        dispatch(All_service__data_Fun());
-
-        // setTurnmodal(false);
-      },
-
-      onError: (error) => {
-        console.log({
-          jjjL: error?.response,
-        });
-        Toast.show({
-          type: "error",
-
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Like/Dislike successful", // Adjusted message for clarity
+      });
+      // Dispatch action to refresh the list of services/data
+      dispatch(All_service__data_Fun());
+    },
+    onError: (error) => {
+      console.log({
+        jjjL: error?.response,
+      });
+      const errorMessage = error?.response?.data?.message || "Action failed";
+      Toast.show({
+        type: "error",
+        text1: errorMessage,
+      });
+    },
+  });
+  // -------------------------------------------------------------------
 
   const makePhoneCall = () => {
-    // Alert.alert("Call Support", "Are you sure you want to call support?");
-    // Linking.openURL(
-    //   `${Admin_Get_Single_Emergency_Report?.userProfile?.phoneNumber} || 080`
-    // );
-    Linking.openURL(`tel:${item?.phone_number}`);
+    // Safely open URL for phone call
+    if (item?.phone_number) {
+      Linking.openURL(`tel:${item.phone_number}`);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Phone number not available.",
+      });
+    }
   };
+
+  // Determine if the current user has liked the service (for heart icon color)
+  const isLiked = item?.servicelikes?.includes(user_data?.user?._id);
+
   return (
     <ScrollView style={{ backgroundColor: "white" }}>
       <View style={styles.container}>
@@ -109,7 +115,8 @@ const VendorService = ({ navigation }) => {
           <View>
             <Pressable
               onPress={() => {
-                navigation.navigate("review", { item });
+                // Assuming 'item' passed to 'review' screen is the vendor ID
+                navigation.navigate("review", { item: item?._id });
               }}
               style={{ alignItems: "center" }}
             >
@@ -123,61 +130,66 @@ const VendorService = ({ navigation }) => {
           <TouchableOpacity
             style={{ alignItems: "center" }}
             onPress={() => Like_Mutation.mutate()}
+            disabled={Like_Mutation.isLoading}
           >
-            <Icon
-              name="heart"
-              size={20}
-              color="#04973C"
-              style={{ paddingBottom: 5 }}
-            />
-            <Text>
-              {item?.servicelikes?.length}
-              Likes
-            </Text>
+            {Like_Mutation.isLoading ? (
+              <ActivityIndicator
+                size="small"
+                color="#04973C"
+                style={{ paddingBottom: 5 }}
+              />
+            ) : (
+              <Icon
+                name="heart"
+                size={20}
+                // Change color based on like status
+                color={isLiked ? "red" : "#04973C"}
+                style={{ paddingBottom: 5 }}
+              />
+            )}
+
+            <Text>{item?.servicelikes?.length || 0} Likes</Text>
           </TouchableOpacity>
           <Pressable
             style={{ alignItems: "center" }}
             onPress={() => {
-              navigation.navigate("review", { item });
+              // Assuming 'item' passed to 'review' screen is the vendor ID
+              navigation.navigate("review", { item: item?._id });
             }}
           >
             <Rating
               type="custom"
               ratingCount={5}
               imageSize={20}
-              // startingValue={0}
-              startingValue={item?.avgRating} // Use item.avgRating for the rating value
+              startingValue={item?.avgRating}
               ratingBackgroundColor="white"
-              ratingColor="green"
-              value={3}
+              ratingColor="#04973C" // Consistent green color
               readonly
               style={{ paddingBottom: 5 }}
             />
-
-            {/* <Rating
-              readonly
-              startingValue={item?.avgRating} // Use item.avgRating for the rating value
-              imageSize={17}
-              fractions={5}
-            /> */}
-
             <Text>Rating</Text>
           </Pressable>
         </View>
       </View>
-      <View style={{ padding: 30, height: "50%" }}>
+      <View style={{ padding: 30, flexGrow: 1 }}>
         <View style={styles.downContainer}>
-          <Text style={{ fontSize: 20, fontWeight: "400", paddingBottom: 5 }}>
+          <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 5 }}>
             Contact
           </Text>
-          <Text>
-            <Icon name="phone" size={20} color="green" />
-            <Text> {item?.phone_number} </Text>
+          <Text
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 5,
+            }}
+          >
+            <Icon name="phone" size={20} color="#04973C" />
+            <Text style={{ marginLeft: 10 }}> {item?.phone_number} </Text>
           </Text>
 
-          <Text>
-            <Icon name="map-marker" size={20} color="green" />
-            <Text>{item?.address}</Text>
+          <Text style={{ flexDirection: "row", alignItems: "center" }}>
+            <Icon name="map-marker" size={20} color="#04973C" />
+            <Text style={{ marginLeft: 10 }}>{item?.address}</Text>
           </Text>
         </View>
         <View
@@ -188,7 +200,7 @@ const VendorService = ({ navigation }) => {
             borderBottomColor: "#F6F6F6",
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: "400", paddingBottom: 5 }}>
+          <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 5 }}>
             Working Time
           </Text>
 
@@ -199,7 +211,7 @@ const VendorService = ({ navigation }) => {
             style={styles.buttonContainer}
             onPress={makePhoneCall}
           >
-            <Icon name="phone" size={30} color="white" style={styles.icon} />
+            <Icon name="phone" size={25} color="white" style={styles.icon} />
             <Text style={styles.text}>Call Now</Text>
           </TouchableOpacity>
         </View>
@@ -211,7 +223,6 @@ const VendorService = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#F3FFF3",
-    // height: "52%",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
   },
@@ -230,19 +241,21 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    padding: 15,
     backgroundColor: "#04973C",
-    borderRadius: 5,
+    borderRadius: 8,
     justifyContent: "center",
     marginTop: 40,
-    paddingBottom: 20,
+    paddingBottom: 15,
+    elevation: 5,
   },
   icon: {
     marginRight: 10,
   },
   text: {
-    fontSize: 16,
+    fontSize: 18,
     color: "white",
+    fontWeight: "bold",
   },
 });
 

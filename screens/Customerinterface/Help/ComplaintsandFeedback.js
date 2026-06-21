@@ -25,8 +25,6 @@ import {
   CustomTextArea,
   Formbutton,
 } from "../../../components/shared/InputForm";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -102,47 +100,47 @@ const ComplaintsandFeedback = () => {
     user_message,
   } = useSelector((state) => state.AuthSlice);
 
-  const Complain_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}complaint`;
+  // const Complain_Mutation = useMutation(
+  //   (data_info) => {
+  //     let url = `${API_BASEURL}complaint`;
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  //     const config = {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Accept: "application/json",
+  //         //   "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${user_data?.token}`,
+  //       },
+  //     };
 
-      return axios.post(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        setText("");
-        navigation.goBack();
-      },
+  //     return axios.post(url, data_info, config);
+  //   },
+  //   {
+  //     onSuccess: (success) => {
+  //       Toast.show({
+  //         type: "success",
+  //         text1: " successfully ",
+  //       });
+  //       setText("");
+  //       navigation.goBack();
+  //     },
 
-      onError: (error) => {
-        console.log({
-          error: error?.response,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+  //     onError: (error) => {
+  //       console.log({
+  //         error: error?.response,
+  //       });
+  //       Toast.show({
+  //         type: "error",
+  //         text1: `${error?.response?.data?.message} `,
+  //         //   text2: ` ${error?.response?.data?.errorMsg} `,
+  //       });
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+  //       // dispatch(Get_User_Clans_Fun());
+  //       // dispatch(Get_User_Profle_Fun());
+  //       // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+  //     },
+  //   }
+  // );
 
   return (
     <AppScreen>
@@ -204,12 +202,12 @@ const ComplaintsandFeedback = () => {
               fontFamily: "RobotoSlab-Medium",
             }}
             data="Send"
-            onPress={() =>
-              Complain_Mutation.mutate({
-                complaint: text,
-              })
-            }
-            isLoading={Complain_Mutation?.isLoading}
+            // onPress={() =>
+            //   // Complain_Mutation.mutate({
+            //   //   complaint: text,
+            //   // })
+            // }
+            // isLoading={Complain_Mutation?.isLoading}
           />
         </View>
       </KeyboardAvoidingView>

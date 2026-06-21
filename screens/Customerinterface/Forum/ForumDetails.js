@@ -6,599 +6,722 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  RefreshControl,
   ScrollView,
-  Touchable,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Modal,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
-import { useDispatch, useSelector } from "react-redux";
-
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
+import {
+  MaterialCommunityIcons,
+  AntDesign,
+  Entypo,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 
 import {
-  LightFontText,
   MediumFontText,
   RegularFontText,
+  LightFontText,
 } from "../../../components/shared/Paragrahp";
 import { formatDateandTime } from "../../../utils/DateTime";
-import { Entypo, AntDesign, MaterialIcons } from "@expo/vector-icons";
-import {
-  Get_My_Clan_Forum_Fun,
-  Get_My_Clan_Single_Forum_Fun,
-  reset__single_forum,
-} from "../../../Redux/UserSide/ForumSlice";
 import ForumModal from "../../../components/Forum/ForumModal";
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
-import {
-  CustomTextArea,
-  Formbutton,
-  Forminput,
-} from "../../../components/shared/InputForm";
+import { CustomTextArea } from "../../../components/shared/InputForm";
+import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 
 const ForumDetails = () => {
-  const maindata = useRoute()?.params;
-
-  const { get_user_profile_data } = useSelector(
-    (state) => state.UserProfileSlice
-  );
-
-  console.log({
-    cccc: maindata,
-  });
-  console.log({
-    jhhhh: maindata?.forumid?._id,
-  });
-  let forumid = maindata?._id;
-
-  const deleteDate = () => {
-    Delete_Mutation.mutate();
-  };
-
-  let dataDetails = [
-    {
-      id: "1",
-      title: "Delete this post",
-      description: "This announcement will be deleted instantly",
-      img: require("../../../assets/images/trash.png"),
-      action: () => deleteDate(), //Alert.alert("Post Deleted", "This announcement has been deleted."),
-    },
-  ];
-
-  // let forumid = 1;
-
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-
+  const route = useRoute();
   const navigation = useNavigation();
   const animation = useRef(null);
-  const dispatch = useDispatch();
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [newModalVisible, setNewModalVisible] = useState(false);
-  const [newcomment, setNewcomment] = useState("");
-
-  const [showComments, setShowComments] = useState(false); // Step 1
-  const [commentInput, setCommentInput] = useState(""); // Step 3: State for user input
-
-  const handleTextChange = (newText) => {
-    setNewcomment(newText);
-  };
-
-  const toggleComments = () => {
-    setShowComments(!showComments); // Step 1
-    setNewModalVisible(true);
-  };
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
-
-  // Accessing nested properties
-  // const { content, createdAt, likes, user } = forumid;
-
-  const { get_my_clan_single_forum_data } = useSelector(
-    (state) => state?.ForumSlice
-  );
-
-  let item = {};
-
-  const handleCommentSubmit = () => {
-    // Step 4: Handle comment submission logic
-    // You can dispatch an action or perform any other logic here to submit the comment
-    // Clear the comment input after submission
-    setCommentInput("");
-  };
-
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = () => {
-    // Set the refreshing state to true
-    setRefreshing(true);
-    dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-
-    // Wait for 2 seconds
-    setRefreshing(false);
-  };
+  const maindata = route?.params;
+  const forumId = maindata?._id;
 
   console.log({
-    jjj: forumid,
+    yyyy: forumId,
   });
-  useEffect(() => {
-    // Check if forumid is available before dispatching the action
-    dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
 
-    return () => {
-      // dispatch(reset__single_forum(null));
-    };
-  }, [dispatch, forumid]); // Include forumid in the dependency array
+  const { get_user_profile_data } = useSelector(
+    (state) => state.UserProfileSlice,
+  );
 
-  const Like_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}forum/like/${data_info?.clanId}/${data_info?.forumid}`;
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [commentModalVisible, setCommentModalVisible] = useState(false);
+  const [newcomment, setNewcomment] = useState("");
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  // ── Fetch forum detail ───────────────────────────────────
+  const {
+    data: forumData,
+    isLoading,
+    refetch,
+  } = useFetchData_v2(`api/v1/forum/${forumId}`, `forum-${forumId}`);
 
-      return axios.get(url, config);
-    },
+  const post = forumData?.data || forumData;
+
+  // ── Like mutation ────────────────────────────────────────
+  const likeMutation = useMutateData_v2(
+    "api/v1/forum/like",
+    "PATCH",
+    [`forum-${forumId}`],
     {
-      onSuccess: (success) => {
-        // Toast.show({
-        //   type: "success",
-        //   text1: " successfully ",
-        // });
-        dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-
-        // setTurnmodal(false);
-      },
-
       onError: (error) => {
         Toast.show({
           type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
+          text1: error?.data?.message || "Failed to like post",
         });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
       },
-    }
+    },
   );
 
-  const Delete_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}forum/user/${forumid}`;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      return axios.delete(url, config);
-    },
+  // ── Comment mutation ─────────────────────────────────────
+  const commentMutation = useMutateData_v2(
+    "api/v1/forum/comment",
+    "POST",
+    [`forum-${forumId}`],
     {
-      onSuccess: (success) => {
+      onSuccess: () => {
         Toast.show({
           type: "success",
-          text1: " date deleted succesfully ",
+          text1: "Comment posted",
         });
-        // dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-        // setTurnmodal(false);
-        // navigate("")
+        setNewcomment("");
+        setCommentModalVisible(false);
+      },
+      onError: (error) => {
+        Toast.show({
+          type: "error",
+          text1: error?.data?.message || "Failed to post comment",
+        });
+      },
+    },
+  );
+
+  // ── Delete mutation ──────────────────────────────────────
+  const deleteMutation = useMutateData_v2(
+    `api/v1/forum/${forumId}`,
+    "DELETE",
+    undefined,
+    {
+      onSuccess: () => {
+        Toast.show({
+          type: "success",
+          text1: "Post deleted successfully",
+        });
         navigation.goBack();
       },
-
       onError: (error) => {
         Toast.show({
           type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
+          text1: error?.data?.message || "Failed to delete post",
         });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
       },
-    }
-  );
-
-  const Comment_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}forum/comment`;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        dispatch(Get_My_Clan_Single_Forum_Fun(forumid));
-        setNewcomment("");
-
-        // setTurnmodal(false);
-      },
-
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
   );
+
+  // ── Derived state ────────────────────────────────────────
+  const isLiked = post?.likes?.includes(get_user_profile_data?.user?._id);
+
+  console.log({
+    user_info: maindata?.user?._id,
+    aaaaa: get_user_profile_data?.data?._id,
+    xxxx: get_user_profile_data?.data?.user?._id,
+  });
+
+  const isOwner = maindata?.user?._id === get_user_profile_data?.data?._id;
+  //  ||
+  // maindata?.user === get_user_profile_data?.user?._id;
+
+  const handleLike = () => {
+    if (!likeMutation.isPending) {
+      likeMutation.mutate({ forumId });
+    }
+  };
+
+  const handleCommentSubmit = () => {
+    if (!newcomment.trim() || commentMutation.isPending) return;
+    console.log({
+      content: newcomment.trim(),
+      postId: forumId,
+    });
+
+    commentMutation.mutate({
+      content: newcomment.trim(),
+      postId: forumId,
+    });
+  };
+
+  // ── Comment item ─────────────────────────────────────────
+  const CommentItem = ({ item }) => (
+    <View style={styles.commentWrap}>
+      <View style={styles.commentAvatar}>
+        <Text style={styles.commentAvatarText}>
+          {item?.user?.name?.charAt(0)?.toUpperCase() || "?"}
+        </Text>
+      </View>
+      <View style={styles.commentBubble}>
+        <Text style={styles.commentAuthor}>
+          {item?.user?.firstName
+            ? `${item.user.firstName} ${item.user.lastName || ""}`.trim()
+            : item?.user?.name || "User"}
+        </Text>
+        <Text style={styles.commentContent}>{item?.content}</Text>
+      </View>
+    </View>
+  );
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator size="large" color="#10B981" />
+      </View>
+    );
+  }
 
   return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginVertical: 20,
-          paddingHorizontal: 20,
-          paddingHorizontal: 20,
-        }}
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          {console.log({
-            mmm: forumid,
-          })}
-
+        {/* ── Post header ──────────────────────── */}
+        <View style={styles.postHeader}>
           <Image
             source={{
-              uri: maindata?.user?.photo,
+              uri:
+                maindata?.user?.photo ||
+                post?.user?.photo ||
+                "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg",
             }}
-            style={{ width: 40, height: 40, borderRadius: 50 }}
+            style={styles.authorAvatar}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.authorName}>
+              {maindata?.user?.name ||
+                post?.user?.name ||
+                `${post?.user?.user?.firstName} ${post?.user?.user?.lastName}`}
+            </Text>
+            <Text style={styles.postDate}>
+              {formatDateandTime(post?.createdAt)}
+            </Text>
+          </View>
+          {isOwner && (
+            <TouchableOpacity
+              style={styles.menuBtn}
+              onPress={() => setModalVisible(true)}
+              disabled={deleteMutation.isPending}
+            >
+              <Entypo name="dots-three-vertical" size={20} color="#6B7280" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* ── Post content ─────────────────────── */}
+        <View style={styles.postContent}>
+          <Text style={styles.postText}>{post?.content}</Text>
+        </View>
+
+        {/* ── Divider ──────────────────────────── */}
+        <View style={styles.divider} />
+
+        {/* ── Action bar ───────────────────────── */}
+        <View style={styles.actionBar}>
+          <TouchableOpacity
+            style={[
+              styles.actionBtn,
+              likeMutation.isPending && { opacity: 0.5 },
+            ]}
+            onPress={handleLike}
+            disabled={likeMutation.isPending}
+          >
+            {likeMutation.isPending ? (
+              <ActivityIndicator size="small" color="#EF4444" />
+            ) : (
+              <AntDesign
+                name={isLiked ? "heart" : "hearto"}
+                size={22}
+                color={isLiked ? "#EF4444" : "#6B7280"}
+              />
+            )}
+            <Text style={[styles.actionText, isLiked && { color: "#EF4444" }]}>
+              {post?.likes?.length || 0}{" "}
+              {post?.likes?.length === 1 ? "Like" : "Likes"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => setCommentModalVisible(true)}
+          >
+            <MaterialCommunityIcons
+              name="comment-outline"
+              size={22}
+              color="#6B7280"
+            />
+            <Text style={styles.actionText}>
+              {post?.comments?.length || 0}{" "}
+              {post?.comments?.length === 1 ? "Comment" : "Comments"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* ── Comments section ─────────────────── */}
+        <View style={styles.commentsSection}>
+          <Text style={styles.commentsSectionTitle}>Comments </Text>
+
+          {!post?.comments?.length ? (
+            <View style={styles.emptyComments}>
+              <LottieView
+                autoPlay
+                ref={animation}
+                style={styles.lottie}
+                source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
+              />
+              <Text style={styles.emptyText}>No comments yet</Text>
+              <Text style={styles.emptySub}>Be the first to comment</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={post.comments}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => <CommentItem item={item} />}
+              scrollEnabled={false}
+              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+            />
+          )}
+        </View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      {/* ── Floating comment button ──────────── */}
+      {/* <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setCommentModalVisible(true)}
+        activeOpacity={0.85}
+      >
+        <MaterialCommunityIcons name="comment-plus" size={24} color="#FFFFFF" />
+      </TouchableOpacity> */}
+
+      {/* ── Comment modal ────────────────────── */}
+      <CenterReuseModals
+        visible={commentModalVisible}
+        onClose={() => setCommentModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={styles.modalCard}
+        >
+          {/* Modal header */}
+          <View style={styles.modalHeader}>
+            <MaterialCommunityIcons
+              name="comment-text-outline"
+              size={20}
+              color="#10B981"
+            />
+            <Text style={styles.modalTitle}>Add a Comment</Text>
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={() => setCommentModalVisible(false)}
+            >
+              <MaterialIcons name="close" size={20} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalDivider} />
+
+          <CustomTextArea
+            placeholder="Write your comment here..."
+            value={newcomment}
+            onChangeText={setNewcomment}
+            inputStyle={styles.commentInput}
           />
 
-          <View>
-            <MediumFontText
-              data={maindata?.user?.name}
-              textstyle={{ fontSize: 16, fontWeight: "500" }}
-            />
+          <Text style={styles.charCount}>{newcomment.length} / 500</Text>
 
-            <LightFontText
-              data={formatDateandTime(
-                get_my_clan_single_forum_data?.data?.createdAt
-              )}
-              // "Jane Doe - 54 mins ago"
-              textstyle={{ fontSize: 12, fontWeight: "300" }}
-            />
-          </View>
-        </View>
-        {maindata?.user === get_user_profile_data?.user?._id && (
           <TouchableOpacity
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 2,
-              borderRadius: 6,
-            }}
-            onPress={toggleModal}
+            style={[
+              styles.submitBtn,
+              (!newcomment.trim() || commentMutation.isPending) &&
+                styles.submitBtnDisabled,
+            ]}
+            onPress={handleCommentSubmit}
+            disabled={!newcomment.trim() || commentMutation.isPending}
+            activeOpacity={0.85}
           >
-            <Entypo name="dots-three-vertical" size={24} color="black" />
+            {commentMutation.isPending ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="send" size={16} color="#FFFFFF" />
+                <Text style={styles.submitBtnText}>Post Comment</Text>
+              </>
+            )}
           </TouchableOpacity>
-        )}
-      </View>
-
-      <View style={{ paddingHorizontal: 20 }}>
-        <RegularFontText
-          data={get_my_clan_single_forum_data?.data?.content}
-          textstyle={{
-            fontSize: 12,
-            fontWeight: "400",
-            textAlign: "justify",
-          }}
-        />
-      </View>
-
-      <View
-        style={{
-          borderWidth: 1,
-          borderColor: "#D9D9D9",
-          marginVertical: 10,
-        }}
-      />
-
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginVertical: 10,
-          paddingHorizontal: 30,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-          onPress={() => {
-            Like_Mutation.mutate({
-              forumid: get_my_clan_single_forum_data?.data._id,
-              clanId: get_my_clan_single_forum_data?.data?.clan,
-            });
-          }}
-        >
-          <AntDesign name="hearto" size={24} color="black" />
-          <Text>
-            {get_my_clan_single_forum_data?.data?.likes?.length} Likes{" "}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-          onPress={toggleComments} // Step 2
-        >
-          <AntDesign name="message1" size={24} color="black" />
-          <Text>Comment </Text>
-        </TouchableOpacity>
-        {/* <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-          <AntDesign name="sharealt" size={24} color="black" />
-          <Text>Share</Text>
-        </View> */}
-      </View>
-
-      {/* Conditionally render comments section based on state */}
-      {/* {showComments && ( */}
-
-      {get_my_clan_single_forum_data?.data?.comments?.length === 0 ? (
-        <View style={{ paddingHorizontal: 20 }}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <LottieView
-              autoPlay
-              ref={animation}
-              style={{
-                width: 200,
-                height: 200,
-                // backgroundColor: "#eee",
-              }}
-              // Find more Lottie files at https://lottiefiles.com/featured
-              source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
-            />
-            <Text>No Comment Available</Text>
-          </View>
-          {/* You can map through the comments array and render each comment */}
-        </View>
-      ) : (
-        <View>
-          {get_my_clan_single_forum_data?.data?.comments?.map((comment) => (
-            <View
-              style={{
-                // flexDirection: "row",
-                // alignItems: "center",
-                justifyContent: "space-between",
-                marginVertical: 5,
-                paddingHorizontal: 30,
-              }}
-              key={comment._id}
-            >
-              <View
-                style={{
-                  paddingHorizontal: 20,
-                  backgroundColor: "#DAE4EF",
-                  paddingVertical: 10,
-                  borderRadius: 10,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 17,
-                  }}
-                >
-                  {comment?.user?.name}
-                </Text>
-
-                <Text>{comment?.content}</Text>
-                {/* You can map through the comments array and render each comment */}
-              </View>
-            </View>
-          ))}
-        </View>
-      )}
-
-      <CenterReuseModals
-        visible={newModalVisible}
-        onClose={() => setNewModalVisible(false)}
-      >
-        <View
-          style={{
-            backgroundColor: "white",
-            padding: 20,
-            borderRadius: 10,
-            elevation: 5,
-            width: "90%",
-            height: "50%",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "500",
-              fontFamily: "RobotoSlab-Medium",
-              color: "black",
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            Send Comment
-          </Text>
-
-          <View>
-            <CustomTextArea
-              placeholder="Enter text here..."
-              // onChangeText={setNewcomment}
-              value={newcomment}
-              // value={text}
-              onChangeText={handleTextChange}
-              style={{ width: "80%" }}
-              inputStyle={{
-                textAlignVertical: "top", // Ensures text starts from the top
-                paddingTop: 10, // Add paddingTop to control vertical padding
-                paddingBottom: 10, // Add paddingBottom to balance padding
-                backgroundColor: "#F6F8FAE5",
-                paddingHorizontal: 10,
-                paddingTop: 10, // Add paddingTop to control the vertical padding
-                paddingBottom: 10, // Add paddingBottom to balance the padding
-                height: 100,
-                borderRadius: 6,
-                fontSize: 16,
-                marginTop: 20,
-              }}
-            />
-          </View>
-
-          <View style={{}}>
-            <TouchableOpacity
-              style={{
-                // paddingHorizontal: 12,
-                // paddingVertical: 2,
-                // borderRadius: 6,
-                position: "relative",
-                top: -260,
-                left: 10,
-              }}
-              // onPress={toggleModal}
-              onPress={() => setNewModalVisible(false)}
-            >
-              <MaterialIcons name="cancel" size={24} color="black" />
-            </TouchableOpacity>
-            <Formbutton
-              buttonStyle={{
-                backgroundColor: "#04973C",
-                borderWidth: 1,
-                borderColor: "#04973C",
-                paddingVertical: 14,
-                alignItems: "center",
-                borderRadius: 5,
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: 10,
-                marginTop: 20,
-              }}
-              textStyle={{
-                color: "white",
-                fontWeight: "500",
-                fontSize: 14,
-                fontFamily: "RobotoSlab-Medium",
-              }}
-              data="Submit"
-              onPress={() => {
-                Comment_Mutation.mutate({
-                  content: newcomment,
-                  postId: get_my_clan_single_forum_data?.data?._id,
-                });
-              }}
-              isLoading={Comment_Mutation.isLoading}
-            />
-          </View>
-        </View>
+        </KeyboardAvoidingView>
       </CenterReuseModals>
 
-      {/* // )} */}
-      <ForumModal visible={isModalVisible} onClose={toggleModal}>
-        <View
-          style={{
-            backgroundColor: "white",
-            padding: 20,
-            width: "100%",
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            height: "30%",
-          }}
-        >
-          {dataDetails.map((item) => (
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 10,
-                gap: 10,
-              }}
-              key={item.id}
-              onPress={item.action}
-            >
-              <Image
-                source={item?.img} // Replace with the correct path to your image
-                style={{ width: 30, height: 30, tintColor: "black" }}
-              />
+      {/* ── Delete modal ─────────────────────── */}
+      <ForumModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      >
+        <View style={styles.deleteModal}>
+          <Text style={styles.deleteModalTitle}>Post Options</Text>
 
-              <View>
-                <MediumFontText
-                  data="Hide this post"
-                  textstyle={{ fontSize: 16, fontWeight: "500" }}
+          <TouchableOpacity
+            style={[
+              styles.deleteOption,
+              deleteMutation.isPending && { opacity: 0.5 },
+            ]}
+            onPress={() => {
+              if (!deleteMutation.isPending) deleteMutation.mutate({});
+            }}
+            disabled={deleteMutation.isPending}
+          >
+            <View style={styles.deleteIconWrap}>
+              {deleteMutation.isPending ? (
+                <ActivityIndicator size="small" color="#EF4444" />
+              ) : (
+                <MaterialCommunityIcons
+                  name="trash-can-outline"
+                  size={22}
+                  color="#EF4444"
                 />
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.deleteOptionTitle}>Delete this post</Text>
+              <Text style={styles.deleteOptionSub}>
+                This post will be permanently deleted
+              </Text>
+            </View>
+          </TouchableOpacity>
 
-                <RegularFontText data="This announcement will be deleted instantly" />
-              </View>
-            </TouchableOpacity>
-          ))}
+          <TouchableOpacity
+            style={styles.cancelOption}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
         </View>
       </ForumModal>
-    </ScrollView>
+    </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#F9FAFB" },
+  scrollContent: { paddingTop: 8 },
+
+  loadingWrap: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+  },
+
+  // Post header
+  postHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#FFFFFF",
+    gap: 12,
+  },
+  authorAvatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: "#D1FAE5",
+  },
+  authorName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  postDate: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  menuBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Post content
+  postContent: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  postText: {
+    fontSize: 15,
+    color: "#374151",
+    lineHeight: 24,
+    fontWeight: "400",
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginVertical: 2,
+  },
+
+  // Action bar
+  actionBar: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 24,
+  },
+  actionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  actionText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "600",
+  },
+
+  // Comments section
+  commentsSection: {
+    backgroundColor: "#FFFFFF",
+    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+  },
+  commentsSectionTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#111827",
+    letterSpacing: -0.2,
+    marginBottom: 16,
+  },
+
+  // Comment item
+  commentWrap: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  commentAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  commentAvatarText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#065F46",
+  },
+  commentBubble: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 14,
+    borderTopLeftRadius: 4,
+    padding: 12,
+  },
+  commentAuthor: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 4,
+  },
+  commentContent: {
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 20,
+  },
+
+  // Empty comments
+  emptyComments: {
+    alignItems: "center",
+    paddingVertical: 20,
+    gap: 4,
+  },
+  lottie: { width: 140, height: 140 },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  emptySub: {
+    fontSize: 13,
+    color: "#9CA3AF",
+    fontWeight: "500",
+  },
+
+  // FAB
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+
+  // Comment modal
+  modalCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 24,
+    width: "92%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 16,
+  },
+  modalTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginBottom: 16,
+  },
+  commentInput: {
+    textAlignVertical: "top",
+    padding: 14,
+    backgroundColor: "#F9FAFB",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    fontSize: 15,
+    minHeight: 110,
+    color: "#111827",
+  },
+  charCount: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    textAlign: "right",
+    marginTop: 4,
+    marginBottom: 16,
+    fontWeight: "500",
+  },
+  submitBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#10B981",
+    paddingVertical: 14,
+    borderRadius: 14,
+    gap: 8,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  submitBtnDisabled: {
+    backgroundColor: "#D1D5DB",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  submitBtnText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+
+  // Delete modal
+  deleteModal: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 32,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: "100%",
+  },
+  deleteModalTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 20,
+    letterSpacing: -0.2,
+  },
+  deleteOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  deleteIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#FEE2E2",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  deleteOptionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#EF4444",
+  },
+  deleteOptionSub: {
+    fontSize: 13,
+    color: "#9CA3AF",
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  cancelOption: {
+    marginTop: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  cancelText: {
+    fontSize: 15,
+    color: "#6B7280",
+    fontWeight: "600",
+  },
+});
 
 export default ForumDetails;

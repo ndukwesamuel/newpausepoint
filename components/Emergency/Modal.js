@@ -17,8 +17,10 @@ import React, { ReactNode, useState } from "react";
 import { FormLabel, Formbutton, Forminput } from "../shared/InputForm";
 import { MediumFontText } from "../shared/Paragrahp";
 
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { useMutation } from "@tanstack/react-query"; // CHANGED: Updated import for TanStack Query v5
+import { API_CONFIG } from "../../api";
+
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -108,59 +110,70 @@ export const EmergencyModalTwo = ({
   visible,
   type,
 }: EmergencyModalProps2) => {
-  const Emergency_Mutation = useMutation(
-    (data_info) => {
+  // TanStack Query v5 structure: accepts a single object
+  const Emergency_Mutation = useMutation({
+    mutationFn: (data_info) => {
+      // The mutation function is now defined under mutationFn
       //   let url = `${API_BASEURL}clan/select_Admin_clan/${data_info?.id}`;
       console.log({
         data_info,
       });
-      //   const config = {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Accept: "application/json",
-      //       //   "Content-Type": "multipart/form-data",
-      //       Authorization: `Bearer ${user_data?.token}`,
-      //     },
-      //   };
 
-      //   if (data_info?.method == "GET") {
-      //     return axios.get(url, config);
-      //   }
+      // NOTE: Since the API call logic was commented out in the original code,
+      // I'm including the structure here. You should uncomment and fully define
+      // the axios call logic when implementing the API endpoint.
 
-      //   if (data_info?.method == "DELETE") {
-      //     return axios.delete(url, config);
-      //   }
+      /*
+        // Example structure for API call
+        const config = {
+           headers: {
+             "Content-Type": "application/json",
+             Accept: "application/json",
+             //   "Content-Type": "multipart/form-data",
+             Authorization: `Bearer ${user_data?.token}`,
+           },
+        };
+        
+        if (data_info?.method == "GET") {
+          return axios.get(url, config);
+        }
+
+        if (data_info?.method == "DELETE") {
+          return axios.delete(url, config);
+        }
+      */
+
+      // Placeholder return to satisfy TypeScript/JavaScript if API call is incomplete
+      return Promise.resolve({});
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Request To Join Estate successfully ",
-        });
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Request To Join Estate successfully ",
+      });
 
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-        // dispatch(reset_login());
-        // dispatch(reset_isOnboarding());
+      // dispatch(Get_User_Clans_Fun());
+      // dispatch(Get_User_Profle_Fun());
+      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+      // dispatch(reset_login());
+      // dispatch(reset_isOnboarding());
 
-        onClose();
-      },
+      onClose();
+    },
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+        //   text2: ` ${error?.response?.data?.errorMsg} `,
+      });
 
-        onClose();
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
+      onClose();
+      // dispatch(Get_User_Clans_Fun());
+      // dispatch(Get_User_Profle_Fun());
+      // dispatch(Get_all_clan_User_Is_adminIN_Fun());
+    },
+  });
 
   const [homeaddress, setHomeaddress] = useState("");
   const [moreinfo, setMoreinfo] = useState("");

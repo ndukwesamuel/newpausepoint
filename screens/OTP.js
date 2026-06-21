@@ -29,7 +29,7 @@ import { reset_login } from "../Redux/AuthSlice";
 import { authScreenChange, reset_isOnboarding } from "../Redux/OnboardingSlice";
 import { useDispatch, useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -44,10 +44,6 @@ const OTP = ({}) => {
 
   const handleLogout = async () => {
     dispatch(reset_login());
-    // dispatch(reset_isOnboarding());
-
-    // await AsyncStorage.removeItem("token");
-    // await AsyncStorage.removeItem("userdata");log
     console.log("this is to logout");
   };
 
@@ -55,82 +51,66 @@ const OTP = ({}) => {
     setOTPValue(otp);
   };
 
-  const ResendOtp_Mutation = useMutation(
-    (data_info) => {
+  const ResendOtp_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}send-otp`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          //   Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "OTP Sent successfully ",
-        });
-        // dispatch(Get_My_Clan_Forum_Fun());
-        // setTurnmodal(false);
-      },
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "OTP Sent successfully ",
+      });
+    },
+    onError: (error) => {
+      console.log({
+        ff: error?.response,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+      });
+    },
+  });
 
-      onError: (error) => {
-        console.log({
-          ff: error?.response,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
-
-  const SubmitOtp_Mutation = useMutation(
-    (data_info) => {
+  const SubmitOtp_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}verify-otp`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          //   Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "OTP Verified successfully ",
-        });
-        dispatch(authScreenChange("LOGIN"));
-
-        // setTurnmodal(false);
-      },
-
-      onError: (error) => {
-        console.log({
-          ff: error?.response,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "OTP Verified successfully ",
+      });
+      dispatch(authScreenChange("LOGIN"));
+    },
+    onError: (error) => {
+      console.log({
+        ff: error?.response,
+      });
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message} `,
+      });
+    },
+  });
 
   return (
     <AppScreen>
@@ -145,9 +125,6 @@ const OTP = ({}) => {
               onPress={() => {
                 dispatch(reset_login());
                 dispatch(reset_isOnboarding());
-                // dispatch(authScreenChange("LOGIN"));
-
-                // navigation.goBack();
               }}
             >
               <AntDesign name="arrowleft" size={28} color="black" />
@@ -177,7 +154,6 @@ const OTP = ({}) => {
                   height: 58,
                   textAlign: "center",
                   borderWidth: 1,
-
                   padding: 10,
                   borderRadius: 5,
                   fontSize: 16,
@@ -195,9 +171,8 @@ const OTP = ({}) => {
                 }}
               >
                 {" "}
-                Didn’t receive email?
+                Didn't receive email?
               </Text>
-              {/* <Text>You can resend code in 49 secs</Text> */}
             </View>
 
             {otpValue.length === 4 && (
@@ -219,21 +194,13 @@ const OTP = ({}) => {
                 }}
                 data="Submit"
                 isLoading_color="#04973C"
-                isLoading={SubmitOtp_Mutation.isLoading}
+                isLoading={SubmitOtp_Mutation.isPending}
                 onPress={() => {
                   SubmitOtp_Mutation.mutate({
                     email: otpemail,
                     otp: otpValue,
                   });
-                  //   navigation.navigate("CreatePassword");
-                  //   console.log({
-                  //     email: otpemail,
-                  //     otpValue,
-                  //   });
-                  // ResendOtp_Mutation.
-                  // Handle the button press here
                   console.log("Button pressed");
-                  // You can call your custom function or navigate to another screen, etc.
                 }}
               />
             )}
@@ -254,21 +221,12 @@ const OTP = ({}) => {
                 fontFamily: "RobotoSlab-Medium",
               }}
               data="Resend Code"
-              isLoading={ResendOtp_Mutation.isLoading}
+              isLoading={ResendOtp_Mutation.isPending}
               isLoading_color="#04973C"
               onPress={() => {
                 ResendOtp_Mutation.mutate({
                   email: otpemail,
                 });
-                // navigation.navigate("CreatePassword");
-                // console.log({
-                //   email: otpemail,
-                //   otpValue,
-                // });
-                // ResendOtp_Mutation.
-                // Handle the button press here
-                // console.log("Button pressed");
-                // You can call your custom function or navigate to another screen, etc.
               }}
             />
           </View>

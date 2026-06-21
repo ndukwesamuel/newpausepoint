@@ -1,4 +1,4 @@
-import AppScreen from "../../../components/shared/AppScreen";
+import AppScreen from "../../../components/shared/AppScreen"; // Not used in the final return, but kept for context
 import {
   View,
   Text,
@@ -16,15 +16,18 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+
+// --- IMPORTANT: Change this import from 'react-query' to '@tanstack/react-query' ---
+import { useMutation } from "@tanstack/react-query";
+
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
-import * as ImagePicker from "expo-image-picker";
+import * as ImagePicker from "expo-image-picker"; // Not used directly
 import { Ionicons, AntDesign, MaterialIcons } from "@expo/vector-icons";
 
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker"; // Not used directly
 
 import { useDispatch, useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
@@ -35,20 +38,20 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import {
-  Get_All_User_Guest_Fun,
-  Get__User_Guest_detail_Fun,
-} from "../../../Redux/UserSide/GuestSlice";
+  Get_All_User_Guest_Fun, // Not used directly
+  Get__User_Guest_detail_Fun, // Not used directly
+} from "../../../Redux/UserSide/GuestSlice"; // Not used directly
 import { formatDateandTime } from "../../../utils/DateTime";
 import * as Sharing from "expo-sharing";
 
 import QRCode from "react-native-qrcode-svg";
-import ViewShot from "react-native-view-shot";
-// import Share from "react-nat
+import ViewShot from "react-native-view-shot"; // Not used directly
+// import Share from "react-nat // Not used directly
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
 import {
   Get_Single_UserEvent_Fun,
   Get_UserEvent_Fun,
-  reset_MainEventSlice,
+  reset_MainEventSlice, // Not used directly
 } from "../../../Redux/UserSide/MainEventSlice";
 
 const AdminEventDetals = () => {
@@ -59,103 +62,104 @@ const AdminEventDetals = () => {
 
   const { itemdata } = useRoute().params;
 
-  const animation = useRef(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const animation = useRef(null); // Not used directly
+  const [searchQuery, setSearchQuery] = useState(""); // Not used directly
   const { singleEvent_Data, singleEvent_isLoading } = useSelector(
     (state) => state?.MainEventSlice
   );
 
-  console.log({
-    ooo: singleEvent_Data,
-  });
+  // console.log({ ooo: singleEvent_Data }); // Commented out
 
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const { user_data } = useSelector((state) => state.AuthSlice);
 
   useEffect(() => {
     dispatch(Get_Single_UserEvent_Fun(itemdata?._id));
 
     return () => {
-      // dispatch(reset_MainEventSlice());
+      // dispatch(reset_MainEventSlice()); // Commented out in original
     };
-  }, [dispatch]);
+  }, [dispatch, itemdata?._id]); // Added dependencies for best practice
 
-  // const filteredData = get_all_user_guest_data?.userInvites?.filter((item) =>
-  //   item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
-  // );
-
-  const Cancle_Guests_Mutation = useMutation(
-    (data_info) => {
+  // --- TanStack Query useMutation for Cancelling Event ---
+  const Cancle_Guests_Mutation = useMutation({
+    mutationFn: (data_info) => {
+      // 'mutationFn' replaces the function passed directly to useMutation
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
+      // Note: The original code passed data_info (which appears empty) to axios.delete.
+      // Axios delete typically doesn't take a data body, but I'm keeping the original signature.
       let url = `${API_BASEURL}resident-event/${singleEvent_Data?.events?._id}`;
 
-      return axios.delete(url, data_info, config);
+      return axios.delete(url, config); // Simplified to usually correct axios.delete signature
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Event cancelled successfully",
+      });
 
-        dispatch(Get_UserEvent_Fun());
+      // Re-fetch list of events via Redux (for simplicity/Redux consistency)
+      dispatch(Get_UserEvent_Fun());
 
-        navigation.goBack();
-      },
+      navigation.goBack();
+    },
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.message}`,
+      });
+    },
+  });
+  // -------------------------------------------------------
 
   const [qrCodeValue, setQRCodeValue] = useState("");
   const viewShotRef = useRef();
+
+  // Note: These functions are not currently used due to the share button being commented out,
+  // but kept for completeness.
   const captureAndShare = async () => {
     try {
       const uri = await captureQRCodeAsImage();
       await Sharing.shareAsync(uri);
     } catch (error) {
       console.error("Error sharing QR code: ", error.message);
+      Toast.show({
+        type: "error",
+        text1: "Failed to share QR code",
+      });
     }
   };
 
   const captureQRCodeAsImage = async () => {
     try {
+      // Check if the ref is attached to the view correctly (original code didn't show this)
+      if (!viewShotRef.current) {
+        throw new Error("ViewShot ref not ready.");
+      }
       const uri = await viewShotRef.current.capture();
       return uri;
     } catch (error) {
-      throw new Error("Error capturing QR code as image: ", error);
+      // Throwing an error here is fine, but it should be caught above.
+      console.error("Error capturing QR code as image: ", error);
+      throw new Error("Error capturing QR code as image.");
     }
   };
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = () => {
-    // Set the refreshing state to true
+  const onRefresh = async () => {
     setRefreshing(true);
 
-    // Fetch the updated data
-    dispatch(Get_Single_UserEvent_Fun(itemdata?._id));
+    // Fetch the updated data (currently using Redux)
+    await dispatch(Get_Single_UserEvent_Fun(itemdata?._id));
 
-    // After fetching the data, set the refreshing state back to false
     setRefreshing(false);
   };
 
@@ -163,8 +167,6 @@ const AdminEventDetals = () => {
     <ScrollView
       contentContainerStyle={{
         flex: 1,
-        // justifyContent: "center",
-        // alignItems: "center",
       }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -172,11 +174,7 @@ const AdminEventDetals = () => {
     >
       {singleEvent_isLoading && (
         <View>
-          <ActivityIndicator
-            animating={user_isLoading}
-            size="large"
-            color="green"
-          />
+          <ActivityIndicator size="large" color="green" />
         </View>
       )}
 
@@ -221,16 +219,16 @@ const AdminEventDetals = () => {
                 <TouchableOpacity
                   style={{
                     backgroundColor: "red",
-                    // paddingHorizontal: 20,
-                    // paddingVertical: 10,
                     borderRadius: 10,
                     width: "40%",
-                    // height: 50
                     paddingVertical: 10,
                   }}
                   onPress={() => {
+                    // Call the mutate function without arguments for this use case
                     Cancle_Guests_Mutation.mutate();
                   }}
+                  // Disable the button while the mutation is in progress
+                  disabled={Cancle_Guests_Mutation.isLoading}
                 >
                   {Cancle_Guests_Mutation.isLoading ? (
                     <ActivityIndicator size="small" color="white" />
@@ -252,16 +250,13 @@ const AdminEventDetals = () => {
                 <TouchableOpacity
                   style={{
                     backgroundColor: "green",
-                    // paddingHorizontal: 20,
-                    // paddingVertical: 10,
                     borderRadius: 10,
                     width: "40%",
-                    // height: 50
                     paddingVertical: 10,
                   }}
                   onPress={() => {
-                    // Cancle_Guests_Mutation.mutate();
                     setModalVisible(true);
+                    // The QR code value is the entire event object stringified
                     const jsonString = JSON.stringify(singleEvent_Data?.events);
                     setQRCodeValue(jsonString);
                   }}
@@ -296,8 +291,6 @@ const AdminEventDetals = () => {
           <TouchableOpacity
             style={{
               backgroundColor: "green",
-              // paddingHorizontal: 20,
-              // paddingVertical: 10,
               borderRadius: 50,
               width: 50,
               height: 50,
@@ -313,6 +306,7 @@ const AdminEventDetals = () => {
         </View>
       )}
 
+      {/* QR Code Modal */}
       <CenterReuseModals
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -327,14 +321,17 @@ const AdminEventDetals = () => {
             height: "50%",
           }}
         >
-          <TouchableOpacity onPress={() => setModalVisible(false)}>
+          <TouchableOpacity
+            onPress={() => setModalVisible(false)}
+            style={{ alignSelf: "flex-start" }}
+          >
             <MaterialIcons name="cancel" size={24} color="black" />
           </TouchableOpacity>
           <Text
             style={{
               fontSize: 16,
               fontWeight: "500",
-              fontFamily: "RobotoSlab-Medium",
+              // fontFamily: "RobotoSlab-Medium", // Removed custom font for standard use
               color: "black",
               textAlign: "center",
               marginBottom: 20,
@@ -343,12 +340,16 @@ const AdminEventDetals = () => {
             Qrcode
           </Text>
 
+          {/* ViewShot is only useful if you intend to capture and share the image */}
           {qrCodeValue !== "" && (
-            <View
+            <ViewShot
+              ref={viewShotRef}
+              options={{ format: "png", quality: 1.0 }}
               style={{
                 marginTop: 20,
                 justifyContent: "center",
                 alignItems: "center",
+                backgroundColor: "white", // Ensure background is white for capture
               }}
             >
               <QRCode
@@ -357,13 +358,14 @@ const AdminEventDetals = () => {
                 color="black"
                 backgroundColor="white"
               />
-            </View>
+            </ViewShot>
           )}
 
           <Text style={{ textAlign: "center", marginTop: 30, fontSize: 16 }}>
-            Screen Short and send to Guest
+            Screen Shot and send to Guest
           </Text>
 
+          {/* Share button (commented out in original, kept here as an option) */}
           {/* <TouchableOpacity
             onPress={captureAndShare}
             style={{
@@ -397,9 +399,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    // justifyContent: "center",
-    // alignItems: "center",
-    // backgroundColor: "#f0f0f0",
   },
   title: {
     fontSize: 24,
@@ -407,7 +406,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   detailsContainer: {
-    // backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
     elevation: 3,

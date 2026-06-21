@@ -4,8 +4,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
 import { AntDesign } from "@expo/vector-icons";
 import Chats from "../../screens/Customerinterface/Chats";
-import Createclan from "../../screens/Customerinterface/Clan/Createclan.js";
-import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
 import ICEcontact from "../../screens/Customerinterface/ICEcontact";
 import HelpSupport from "../../screens/Customerinterface/Help/HelpSupport";
 import LiveSupport from "../../screens/Customerinterface/Help/LiveSupport";
@@ -46,9 +44,7 @@ import DomesticDetail from "../../screens/AdminInterface/Domestic/DomesticDetail
 import Amenities from "../../screens/AdminInterface/Amentities/Amenities";
 import VendorListDetails from "../../screens/AdminInterface/Service/VendorListDetails";
 import VendortDetailsReview from "../../screens/AdminInterface/Service/VendortDetailsReview";
-import WalletScreen from "../../screens/AdminInterface/Wallet/WalletScreen";
-import DueDetails from "../../screens/AdminInterface/Wallet/DueDetails";
-import CreateDueScreen from "../../screens/AdminInterface/Wallet/CreateDueScreen";
+// import WalletScreen from "../../screens/AdminInterface/Wallet/WalletScreen";
 
 const Stack = createStackNavigator();
 
@@ -84,14 +80,14 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "AdminMyclan",
           UserClans,
-          "Admin My Clans"
+          "Admin My Clans",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "AdminUserPolls",
           AdminUserPolls,
-          "User Polls"
+          "User Polls",
         )}
       />
 
@@ -99,7 +95,7 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "domestic",
           DomesticStaff,
-          "Domestic Staff"
+          "Domestic Staff",
         )}
       />
 
@@ -107,31 +103,21 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "vendorServiceDetails",
           VendorListDetails,
-          "Details"
+          "Details",
         )}
       />
 
-      <Stack.Screen
+      {/* <Stack.Screen
         {...SingleScreenWithBackButton("payment", WalletScreen, "Payment")}
-      />
+      /> */}
 
-      <Stack.Screen
-        {...SingleScreenWithBackButton("duedetails", DueDetails, "duedetails")}
-      />
 
-      <Stack.Screen
-        {...SingleScreenWithBackButton(
-          "createdue",
-          CreateDueScreen,
-          "Create Due"
-        )}
-      />
 
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "VendortDetailsReview",
           VendortDetailsReview,
-          "All Review"
+          "All Review",
         )}
       />
 
@@ -145,7 +131,7 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "admin-user-poll-detail",
           AdminUserPollDetail,
-          "Detail Poll"
+          "Detail Poll",
         )}
       />
 
@@ -153,49 +139,49 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "adminUserDetails",
           UserDetails,
-          "User Details"
+          "User Details",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "AdminEmergencies",
           Emergencies,
-          "Emergencies"
+          "Emergencies",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "EmergencyDetails",
           EmergencyDetails,
-          ""
+          "",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "Adminnotification",
           Notification,
-          "Notification"
+          "Notification",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "AdminAnnouncement",
           Announcement,
-          "Announcement"
+          "Announcement",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "AnnouncementDetails",
           AnnouncementDetails,
-          " Announcement Details"
+          " Announcement Details",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "AdmincreateAnnouncement",
           CreateAnnouncement,
-          "Create Announcement"
+          "Create Announcement",
         )}
       />
 
@@ -215,7 +201,7 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "AdminMarketPlace",
           VendorLists,
-          "Market Place"
+          "Market Place",
         )}
       />
 
@@ -223,7 +209,7 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "ProductDetails",
           ProductDetails,
-          "Product Details"
+          "Product Details",
         )}
       />
 
@@ -231,14 +217,14 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "VendorProfile",
           VendorProfile,
-          "VendorProfile"
+          "VendorProfile",
         )}
       />
       <Stack.Screen
         {...SingleScreenWithBackButton(
           "AdminGuestsDetail",
           AdminGuestsDetail,
-          "Guest Details"
+          "Guest Details",
         )}
       />
 
@@ -246,7 +232,7 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "AdmindomesticDetail",
           DomesticDetail,
-          "Domestic Staff Details"
+          "Domestic Staff Details",
         )}
       />
 
@@ -258,7 +244,7 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton(
           "PersonalInfo",
           EditPersonalInformation,
-          "Profile"
+          "Profile",
         )}
       />
 
@@ -350,48 +336,6 @@ const Adminnaviagetion = () => {
                 })}
 
                 name="myclan" component={Myclan} /> */}
-
-      <Stack.Screen
-        options={({ navigation }) => ({
-          title: "Create Clan",
-          headerStyle: {
-            backgroundColor: "white",
-          },
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{
-                marginLeft: 10,
-              }}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
-          ),
-        })}
-        name="createclan"
-        component={Createclan}
-      />
-
-      <Stack.Screen
-        options={({ navigation }) => ({
-          title: "Join Clan",
-          headerStyle: {
-            backgroundColor: "white",
-          },
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{
-                marginLeft: 10,
-              }}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
-          ),
-        })}
-        name="joinclan"
-        component={Joinclan}
-      />
 
       <Stack.Screen
         options={({ navigation }) => ({

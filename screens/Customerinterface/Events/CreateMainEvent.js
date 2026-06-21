@@ -9,7 +9,8 @@ import {
   Image,
 } from "react-native";
 import React, { useState } from "react";
-import { useMutation } from "react-query";
+// *** CHANGE: Import useMutation from @tanstack/react-query ***
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -42,6 +43,11 @@ import {
   NavigationProp,
   useNavigation,
 } from "@react-navigation/native";
+
+/**
+ * @typedef {{ name: string, date: string, time: string, location: string, guestNumber: string }} ResidentEventData
+ */
+
 const CreateMainEvent = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -55,15 +61,15 @@ const CreateMainEvent = () => {
   } = useSelector((state) => state.AuthSlice);
 
   const [eventname, setEventname] = useState("");
-  const [eventcountry, setEventcountry] = useState("");
+  const [eventcountry, setEventcountry] = useState(""); // Not used
   const [eventlocatiion, setEventlocatiion] = useState("");
   const [numberofguest, setNumberofguest] = useState("");
-  const [email, setEmail] = useState("");
-  const [description, setDescription] = useState("");
+  const [email, setEmail] = useState(""); // Not used
+  const [description, setDescription] = useState(""); // Not used
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date()); // Not used
   const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false); // Not used
 
   const onStartChange = (event, selectedDate) => {
     const currentDate = selectedDate || startDate;
@@ -85,16 +91,15 @@ const CreateMainEvent = () => {
     setShowEndPicker(!showEndPicker);
   };
 
-  const [selectedOption, setSelectedOption] = useState(1);
+  const [selectedOption, setSelectedOption] = useState(1); // Not used
   const handleRadioSelect = (option) => {
     setSelectedOption(option);
   };
 
-  const [free_event, setFree_event] = useState(true);
+  const [free_event, setFree_event] = useState(true); // Not used
 
-  const [profileImage, setProfileImage] = useState("");
-
-  const [picFile, setPicFile] = useState(null);
+  const [profileImage, setProfileImage] = useState(""); // Not used
+  const [picFile, setPicFile] = useState(null); // Not used
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -104,19 +109,29 @@ const CreateMainEvent = () => {
       quality: 1,
     });
 
-    if (!result.cancelled) {
-      setProfileImage(result.uri);
-      setPicFile(result.uri);
-      // Handle the image upload and profile update here
-      // You may want to send the image to a server and update the user's profile data
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+      setPicFile(result.assets[0].uri);
     }
   };
 
   const handlesubmit = () => {
-    let event_date = formatDate(startDate);
-    // Example usage
-    const { date, time } = ReturnSeprateDateAndTime(startDate, 7); // Adds 7 days and sets time to 9:00AM by default
+    // --- Validation (Highly recommended before mutation) ---
+    if (!eventname.trim() || !eventlocatiion.trim() || !numberofguest.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Please fill out Event Name, Location, and Guest Number.",
+      });
+      return;
+    }
+    // --------------------------------------------------------
 
+    // The utility function ReturnSeprateDateAndTime is used here, adding 7 days by default.
+    // If the intent is to use the selected start date, we should pass startDate to the utility.
+    // Assuming the current implementation of ReturnSeprateDateAndTime(startDate) is correct for the API.
+    const { date, time } = ReturnSeprateDateAndTime(startDate);
+
+    /** @type {ResidentEventData} */
     let newdata = {
       name: eventname,
       date: date,
@@ -127,48 +142,55 @@ const CreateMainEvent = () => {
 
     console.log(newdata);
 
-    Create_Private_Event_Mutation.mutate(newdata);
+    Create_Resident_Event_Mutation.mutate(newdata); // Renamed mutation for clarity
   };
 
-  const Create_Private_Event_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}resident-event`;
+  // *** TANSTACK QUERY MUTATION IMPLEMENTATION (Renamed to Create_Resident_Event_Mutation for accuracy) ***
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  /**
+   * @param {ResidentEventData} data_info - The event data.
+   * @returns {Promise<import('axios').AxiosResponse>} The Axios response.
+   */
+  const createResidentEventRequest = async (data_info) => {
+    let url = `${API_BASEURL}resident-event`;
 
-      return axios.post(url, data_info, config);
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user_data?.token}`,
+      },
+    };
+
+    return axios.post(url, data_info, config);
+  };
+
+  const Create_Resident_Event_Mutation = useMutation({
+    mutationFn: createResidentEventRequest,
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Event created successfully!",
+      });
+      // Optionally dispatch a refresh action for the event list
+      navigation.goBack();
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Event created successfully!",
-        });
-        navigation.goBack();
-      },
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.error}`,
-          // text2: 'Toast message',
-        });
-      },
-    }
-  );
+    onError: (error) => {
+      /** @type {import('axios').AxiosError} */
+      const axiosError = error;
+      const errorMessage =
+        axiosError?.response?.data?.error || "Failed to create event.";
+
+      Toast.show({
+        type: "error",
+        text1: errorMessage,
+      });
+    },
+  });
+  // *** END TANSTACK QUERY MUTATION IMPLEMENTATION ***
 
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>
-      {/* <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        > */}
-
       <View style={{ flex: 1, padding: 20 }}>
         <KeyboardAvoidingView
           behavior="padding"
@@ -177,33 +199,32 @@ const CreateMainEvent = () => {
         >
           <ScrollView
             style={{ flex: 1 }}
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled" // or "always"
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+            keyboardShouldPersistTaps="handled"
           >
             <View style={{ flex: 1, gap: 25 }}>
-              <MediumFontText data="Event Name " />
+              <MediumFontText data="Event Name" />
               <Forminput
                 placeholder="Event Name"
                 onChangeText={setEventname}
                 value={eventname}
               />
 
-              <MediumFontText data="Event Time" />
+              <MediumFontText data="Event Date and Time" />
               <View>
                 <TouchableOpacity
                   style={{
-                    // borderWidth: 1,
                     padding: 10,
                     borderRadius: 5,
                     fontSize: 16,
                     backgroundColor: "#F6F8FAE5",
-                    // opacity: 0.4
+                    justifyContent: "center",
+                    height: 50,
                   }}
                   onPress={toggleStartPicker}
                 >
                   <Text>{formatDateString(startDate)}</Text>
                 </TouchableOpacity>
-                {/* <Text>{startDate.toDateString()}</Text> */}
 
                 {showStartPicker && (
                   <DateTimePicker
@@ -231,15 +252,16 @@ const CreateMainEvent = () => {
                 textstyle={{ fontSize: 14 }}
               />
               <Forminput
-                placeholder="Event  Number Guests"
+                placeholder="Event Number Guests"
                 onChangeText={setNumberofguest}
                 value={numberofguest}
+                keyboardType="numeric"
               />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
 
-        <View style={{}}>
+        <View style={{ marginTop: 10 }}>
           <Formbutton
             buttonStyle={{
               backgroundColor: "#04973C",
@@ -250,13 +272,12 @@ const CreateMainEvent = () => {
             textStyle={{
               color: "white",
               fontWeight: "500",
-              fontSize: 14,
-              fontFamily: "RobotoSlab-Medium",
+              fontSize: 16,
             }}
             data="Create Event"
             onPress={handlesubmit}
-            icon={<AntDesign name="plus" size={24} color="white" />}
-            isLoading={Create_Private_Event_Mutation?.isLoading}
+            icon={<AntDesign name="plus" size={20} color="white" />}
+            isLoading={Create_Resident_Event_Mutation.isLoading}
           />
         </View>
       </View>

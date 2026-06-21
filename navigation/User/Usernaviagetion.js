@@ -5,9 +5,6 @@ import UserTabNavigation from "./UserTabNavigation";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
 import { AntDesign } from "@expo/vector-icons";
 import Chats from "../../screens/Customerinterface/Chats";
-import Myclan from "../../screens/Customerinterface/Clan/Myclan";
-import Createclan from "../../screens/Customerinterface/Clan/Createclan.js";
-import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
 import ICEcontact from "../../screens/Customerinterface/ICEcontact";
 import HelpSupport from "../../screens/Customerinterface/Help/HelpSupport";
 import LiveSupport from "../../screens/Customerinterface/Help/LiveSupport";
@@ -49,8 +46,6 @@ import DomesticDetail from "../../screens/Customerinterface/DomesticStaff/Domest
 import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
 import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
 import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
-import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
-import Errand from "../../screens/Customerinterface/Errands/Errand";
 import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDetailScreen";
 import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
 import { BackHandler } from "react-native";
@@ -58,7 +53,28 @@ import { useEffect, useCallback } from "react";
 import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
 import BillDashboard from "../../screens/Customerinterface/BillPayment/BillDashboard";
 import ElectricityPaymentScreen from "../../screens/Customerinterface/BillPayment/ElectricityPaymentScreen";
-import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
+// import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
+
+import Airtime from "../../screens/Customerinterface/BillPayment/Airtime";
+import TransactionHistoryScreen from "../../screens/Customerinterface/TransactionHistory/Transactionhistoryscreen";
+import TransactionDetailScreen from "../../screens/Customerinterface/TransactionHistory/Transactiondetailscreen";
+import HouseholdDues from "../../screens/Customerinterface/Wallet/HouseholdDues";
+import CreateVirtualAccountScreen from "../../screens/Customerinterface/Wallet/CreateVirtualAccountScreen";
+import VirtualAccountScreen from "../../screens/Customerinterface/Wallet/VirtualAccountScreen";
+import DataPurchase from "../../screens/Customerinterface/BillPayment/DataPurchase";
+import AmenityDetailScreen from "../../screens/Customerinterface/Amentities/Amenitydetailscreen";
+import { MOCK_MY_REPORTS } from "../../screens/Customerinterface/Amentities/amenityData";
+import MyReportsScreen from "../../screens/Customerinterface/Amentities/Myreportsscreen";
+import GeneralDuesUser from "../../screens/Customerinterface/Wallet/Generalduesuser";
+import MarketplaceFeed from "../../screens/Customerinterface/MarketPlace/MarketplaceFeed";
+import MarketplaceDetail from "../../screens/Customerinterface/MarketPlace/MarketplaceDetail";
+import MarketplaceCreate from "../../screens/Customerinterface/MarketPlace/MarketplaceCreate";
+import MarketplaceMyListings from "../../screens/Customerinterface/MarketPlace/MarketplaceMyListings";
+import MarketplaceUpdate from "../../screens/Customerinterface/MarketPlace/MarketplaceUpdate";
+import Myclan from "../../screens/Customerinterface/Clan/Myclan";
+import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
+import HouseholdDueDetail from "../../screens/Customerinterface/Wallet/Householdduedetail";
+import UserCardScreen from "../../screens/Customerinterface/Wallet/UserCardScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -79,7 +95,7 @@ const SingleScreenWithBackButton = (screenName, component, title) => {
     useEffect(() => {
       const backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
-        handleBackPress
+        handleBackPress,
       );
 
       return () => backHandler.remove();
@@ -93,7 +109,7 @@ const SingleScreenWithBackButton = (screenName, component, title) => {
     (navigation) => () => {
       navigation.goBack();
     },
-    []
+    [],
   );
 
   return {
@@ -152,6 +168,11 @@ export const Usernaviagetion = () => {
       title: "Create Main Event",
     },
     {
+  title: "Due Details",
+  component: HouseholdDueDetail,
+  name: "HouseholdDueDetail",
+},
+    {
       name: "FundWallet",
       component: FundWalletScreen,
       title: "FundWallet",
@@ -161,15 +182,23 @@ export const Usernaviagetion = () => {
       component: WalletScreen,
       title: "Payment",
     },
-    {
-      name: "duedetails",
-      component: DueDetails,
-      title: "Due Details",
-    },
+
     {
       name: "CreatePublicEvent",
       component: CreatePublicEvent,
       title: "Create Public Event",
+    },
+
+    {
+      name: "transactionHistory",
+      component: TransactionHistoryScreen,
+      title: "Transaction History ",
+    },
+
+    {
+      name: "TransactionDetail",
+      component: TransactionDetailScreen,
+      title: "Transaction Detail ",
     },
     {
       name: "createforum",
@@ -202,6 +231,37 @@ export const Usernaviagetion = () => {
       component: UserPolls,
       title: "Estate Polls",
     },
+
+    {
+      name: "Marketplace",
+      component: MarketplaceFeed,
+      title: "Market place ",
+    },
+
+    {
+      name: "MarketplaceUpdate",
+      component: MarketplaceUpdate,
+      title: "Market place Update ",
+    },
+
+    {
+      name: "MarketplaceCreate",
+      component: MarketplaceCreate,
+      title: "Market place Create ",
+    },
+
+    {
+      name: "MarketplaceMyListings",
+      component: MarketplaceMyListings,
+      title: "My Product",
+    },
+
+    {
+      name: "MarketplaceDetail",
+      component: MarketplaceDetail,
+      title: "Market place Detail ",
+    },
+
     {
       name: "estatepollsdetail",
       component: UserPollDetails,
@@ -213,6 +273,39 @@ export const Usernaviagetion = () => {
       component: Amenities,
       title: "Amenities",
     },
+
+    {
+  name: "UserCard",
+  component: UserCardScreen,
+  title: "My Access Card",
+},
+
+    {
+      name: "AmenityDetail",
+      component: AmenityDetailScreen,
+      title: "AmenityDetail",
+    },
+
+    {
+      name: "MyReports",
+      component: MyReportsScreen,
+      title: "MyReports",
+    },
+
+    {
+      name: "Airtime",
+      component: Airtime,
+      title: "Airtime",
+    },
+
+
+
+    {
+      name: "DataPurchase",
+      component: DataPurchase,
+      title: "DataPurchase",
+    },
+
     {
       name: "MarketReview",
       component: MarketReview,
@@ -227,6 +320,18 @@ export const Usernaviagetion = () => {
       name: "vendorService",
       component: VendorService,
       title: "Services",
+    },
+
+    {
+      name: "CreateVirtualAccount",
+      component: CreateVirtualAccountScreen,
+      title: "Create Virtual Account",
+    },
+
+    {
+      name: "VirtualAccountScreen",
+      component: VirtualAccountScreen,
+      title: "Virtual Account",
     },
     {
       name: "review",
@@ -248,6 +353,7 @@ export const Usernaviagetion = () => {
       component: HelpSupport,
       name: "HelpSupport",
     },
+
     {
       title: "About Us",
       component: AboutUS,
@@ -317,6 +423,7 @@ export const Usernaviagetion = () => {
           headerStyle: {
             backgroundColor: "white",
           },
+
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {
@@ -340,7 +447,7 @@ export const Usernaviagetion = () => {
       />
 
       {screens.map((screen) =>
-        createScreen(screen.name, screen.component, screen.title)
+        createScreen(screen.name, screen.component, screen.title),
       )}
 
       <Stack.Screen
@@ -401,62 +508,6 @@ export const Usernaviagetion = () => {
 
       <Stack.Screen
         options={({ navigation }) => ({
-          title: "My Communities",
-          headerStyle: {
-            backgroundColor: "white",
-          },
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
-          ),
-        })}
-        name="myclan"
-        component={Myclan}
-      />
-
-      <Stack.Screen
-        options={({ navigation }) => ({
-          title: "Create Clan",
-          headerStyle: {
-            backgroundColor: "white",
-          },
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
-          ),
-        })}
-        name="createclan"
-        component={Createclan}
-      />
-
-      <Stack.Screen
-        options={({ navigation }) => ({
           title: "All User Clan",
           headerStyle: {
             backgroundColor: "white",
@@ -481,6 +532,34 @@ export const Usernaviagetion = () => {
         })}
         name="alluserclan"
         component={UserClans}
+      />
+
+      <Stack.Screen
+        options={({ navigation }) => ({
+          title: "Live Support",
+          headerStyle: {
+            backgroundColor: "white",
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => {
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                }
+              }}
+              style={{
+                marginLeft: Platform.OS === "android" ? 16 : 10,
+                padding: 8,
+              }}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              activeOpacity={0.7}
+            >
+              <AntDesign name="arrowleft" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        })}
+        name="LiveSupport"
+        component={LiveSupport}
       />
 
       <Stack.Screen
@@ -513,7 +592,7 @@ export const Usernaviagetion = () => {
 
       <Stack.Screen
         options={({ navigation }) => ({
-          title: "Live Support",
+          title: "My Communities",
           headerStyle: {
             backgroundColor: "white",
           },
@@ -535,8 +614,8 @@ export const Usernaviagetion = () => {
             </TouchableOpacity>
           ),
         })}
-        name="LiveSupport"
-        component={LiveSupport}
+        name="myclan"
+        component={Myclan}
       />
 
       <Stack.Screen
@@ -720,12 +799,6 @@ export const Usernaviagetion = () => {
       />
 
       <Stack.Screen
-        name="errands"
-        component={Errand}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
         name="service"
         component={ServiceView}
         options={{ headerShown: false }}
@@ -735,18 +808,6 @@ export const Usernaviagetion = () => {
         component={Emergency}
         options={{ headerShown: false }}
       />
-
-      <Stack.Screen
-        name="Marketplace"
-        component={MarketPlace}
-        options={{ headerShown: false }}
-      />
-
-      {/* {
-      name: "Marketplace",
-      component: MarketPlace,
-      title: "Market Place",
-    }, */}
 
       <Stack.Screen
         name="erranddetail"
@@ -767,8 +828,14 @@ export const Usernaviagetion = () => {
       />
 
       <Stack.Screen
-        name="AirtimePurchase"
-        component={AirtimePurchase}
+        name="Due"
+        component={HouseholdDues}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="GeneralDuesUser"
+        component={GeneralDuesUser}
         options={{ headerShown: false }}
       />
 
@@ -782,7 +849,7 @@ export const Usernaviagetion = () => {
         {...SingleScreenWithBackButton(
           "CommentScreen",
           CommentScreen,
-          "Comments"
+          "Comments",
         )}
       />
     </Stack.Navigator>

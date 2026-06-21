@@ -9,27 +9,49 @@ import {
   ScrollView,
   Dimensions,
   StyleSheet,
+  RefreshControl,
+  Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useFetchData } from "../../../hooks/Request";
+import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import ReceiptPDF from "./ReceiptPDF";
+import { useFetchData_v2 } from "../../../hooks/Requestv2";
 
 const { width, height } = Dimensions.get("window");
 
 export default function HistoryScreen() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
+
+  // ── API — unchanged ────────────────────────────────────────────────────
   const {
     data: history_info,
     isLoading,
     error,
-  } = useFetchData("api/captain", "history_info");
+    refetch,
+  } = useFetchData_v2("api/v1/captain/electricty_v2", "history_info");
 
-  // Open modal with animation
+  console.log({
+    uuuu: history_info,
+  });
+
+  // ── Pull-to-refresh — unchanged ────────────────────────────────────────
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
+
+  // ── Modal open/close — unchanged ───────────────────────────────────────
   const openModal = (item) => {
     setSelectedTransaction(item);
     setModalVisible(true);
@@ -48,7 +70,6 @@ export default function HistoryScreen() {
     ]).start();
   };
 
-  // Close modal with animation
   const closeModal = () => {
     Animated.parallel([
       Animated.timing(slideAnim, {
@@ -67,7 +88,7 @@ export default function HistoryScreen() {
     });
   };
 
-  // Format currency
+  // ── Formatters — unchanged ─────────────────────────────────────────────
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
@@ -76,7 +97,6 @@ export default function HistoryScreen() {
     }).format(amount);
   };
 
-  // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return {
@@ -92,83 +112,81 @@ export default function HistoryScreen() {
     };
   };
 
-  // Render each transaction card
+  // ── Transaction card — redesigned ──────────────────────────────────────
   const renderTransactionCard = ({ item, index }) => {
     const { date, time } = formatDate(item.createdAt);
 
     return (
-      <Animated.View
-        style={[
-          styles.transactionCard,
-          {
-            opacity: 1,
-            transform: [
-              {
-                translateY: 0,
-              },
-            ],
-          },
-        ]}
+      <TouchableOpacity
+        onPress={() => openModal(item)}
+        style={styles.transactionCard}
+        activeOpacity={0.7}
       >
-        <TouchableOpacity
-          onPress={() => openModal(item)}
-          style={styles.cardTouchable}
-          activeOpacity={0.7}
-        >
-          <View style={styles.cardHeader}>
-            <View style={styles.customerInfo}>
-              <View style={styles.avatarContainer}>
-                <Text style={styles.avatarText}>
-                  {item.customerName?.charAt(0)?.toUpperCase() || "C"}
-                </Text>
-              </View>
-              <View style={styles.nameContainer}>
-                <Text style={styles.customerName} numberOfLines={1}>
-                  {item.customerName}
-                </Text>
-                <Text style={styles.meterId} numberOfLines={1}>
-                  Meter: {item.meterId}
-                </Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
-          </View>
-
-          <View style={styles.cardBody}>
-            <View style={styles.amountContainer}>
-              <Text style={styles.amountLabel}>Amount</Text>
-              <Text style={styles.amountValue}>
-                {formatCurrency(item.totalAmount)}
+        <View style={styles.cardHeader}>
+          <View style={styles.customerInfo}>
+            <View style={styles.avatarContainer}>
+              <Text style={styles.avatarText}>
+                {item.customerName?.charAt(0)?.toUpperCase() || "C"}
               </Text>
             </View>
-
-            <View style={styles.unitsContainer}>
-              <Text style={styles.unitsLabel}>Units</Text>
-              <Text style={styles.unitsValue}>{item.totalUnit} kWh</Text>
+            <View style={styles.nameContainer}>
+              <Text style={styles.customerName} numberOfLines={1}>
+                {item.customerName}
+              </Text>
+              <Text style={styles.meterId} numberOfLines={1}>
+                Meter: {item.meterId}
+              </Text>
             </View>
           </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color="#D1D5DB"
+          />
+        </View>
 
-          <View style={styles.cardFooter}>
-            <View style={styles.dateTimeContainer}>
-              <Ionicons name="calendar-outline" size={14} color="#8E8E93" />
-              <Text style={styles.dateText}>{date}</Text>
-              <Ionicons name="time-outline" size={14} color="#8E8E93" />
-              <Text style={styles.timeText}>{time}</Text>
-            </View>
+        <View style={styles.cardBody}>
+          <View style={styles.amountContainer}>
+            <Text style={styles.amountLabel}>Amount</Text>
+            <Text style={styles.amountValue}>
+              {formatCurrency(item.totalAmount)}
+            </Text>
           </View>
-        </TouchableOpacity>
-      </Animated.View>
+
+          <View style={styles.unitsContainer}>
+            <Text style={styles.unitsLabel}>Units</Text>
+            <Text style={styles.unitsValue}>{item.totalUnit} kWh</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <View style={styles.dateTimeContainer}>
+            <MaterialCommunityIcons
+              name="calendar-outline"
+              size={14}
+              color="#6B7280"
+            />
+            <Text style={styles.dateText}>{date}</Text>
+            <MaterialCommunityIcons
+              name="clock-outline"
+              size={14}
+              color="#6B7280"
+            />
+            <Text style={styles.timeText}>{time}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     );
   };
 
-  // Render transaction details modal
+  // ── Details modal — redesigned ─────────────────────────────────────────
   const renderDetailsModal = () => {
     if (!selectedTransaction) return null;
 
     const { date, time } = formatDate(selectedTransaction.createdAt);
 
     const transactionData = {
-      date: `${date} ${time}`, // "2024-01-15 14:30:00",
+      date: `${date} ${time}`,
       userCode: selectedTransaction?.customerName,
       customerNo: selectedTransaction?.customerId,
       meterNo: selectedTransaction?.meterId,
@@ -185,10 +203,6 @@ export default function HistoryScreen() {
       netValue: selectedTransaction?.totalAmount,
     };
 
-    console.log({
-      jaja: selectedTransaction?.token,
-    });
-
     return (
       <Modal
         visible={modalVisible}
@@ -196,7 +210,6 @@ export default function HistoryScreen() {
         animationType="none"
         onRequestClose={closeModal}
       >
-        {/* Backdrop */}
         <Animated.View style={[styles.backdrop, { opacity: backdropAnim }]}>
           <TouchableOpacity
             style={styles.backdropTouchable}
@@ -205,13 +218,10 @@ export default function HistoryScreen() {
           />
         </Animated.View>
 
-        {/* Modal Content */}
         <Animated.View
           style={[
             styles.modalContainer,
-            {
-              transform: [{ translateY: slideAnim }],
-            },
+            { transform: [{ translateY: slideAnim }] },
           ]}
         >
           <View style={styles.modalHandle} />
@@ -223,11 +233,20 @@ export default function HistoryScreen() {
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <View style={styles.modalTitleContainer}>
-                <Ionicons name="receipt-outline" size={24} color="#007AFF" />
+                <MaterialCommunityIcons
+                  name="receipt-text-outline"
+                  size={20}
+                  color="#10B981"
+                  style={{ marginRight: 8 }}
+                />
                 <Text style={styles.modalTitle}>Transaction Details</Text>
               </View>
               <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#8E8E93" />
+                <MaterialCommunityIcons
+                  name="close"
+                  size={20}
+                  color="#6B7280"
+                />
               </TouchableOpacity>
             </View>
 
@@ -269,13 +288,15 @@ export default function HistoryScreen() {
                   icon="flash-outline"
                   label="Units Purchased"
                   value={`${selectedTransaction.totalUnit} kWh`}
-                  color="#FF9500"
+                  bg="#FEF3C7"
+                  iconColor="#F59E0B"
                 />
                 <DetailCard
                   icon="key-outline"
                   label="Token"
                   value={selectedTransaction.token}
-                  color="#34C759"
+                  bg="#D1FAE5"
+                  iconColor="#10B981"
                   copyable={true}
                 />
               </View>
@@ -284,28 +305,44 @@ export default function HistoryScreen() {
             {/* Date & Time Section */}
             <View style={styles.detailSection}>
               <View style={styles.dateTimeDetailContainer}>
+                <View style={styles.sectionHeader}>
+                  <MaterialCommunityIcons
+                    name="calendar-clock"
+                    size={20}
+                    color="#10B981"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.sectionTitle}>Date &amp; Time</Text>
+                </View>
                 <View style={styles.dateTimeDetailRow}>
-                  <Ionicons name="calendar" size={20} color="#007AFF" />
+                  <View style={styles.dateTimeIconWrap}>
+                    <MaterialCommunityIcons
+                      name="calendar"
+                      size={18}
+                      color="#3B82F6"
+                    />
+                  </View>
                   <Text style={styles.dateTimeDetailLabel}>Date</Text>
                   <Text style={styles.dateTimeDetailValue}>{date}</Text>
                 </View>
-                <View style={styles.dateTimeDetailRow}>
-                  <Ionicons name="time" size={20} color="#007AFF" />
+                <View style={[styles.dateTimeDetailRow, { marginBottom: 0 }]}>
+                  <View style={styles.dateTimeIconWrap}>
+                    <MaterialCommunityIcons
+                      name="clock-outline"
+                      size={18}
+                      color="#3B82F6"
+                    />
+                  </View>
                   <Text style={styles.dateTimeDetailLabel}>Time</Text>
                   <Text style={styles.dateTimeDetailValue}>{time}</Text>
                 </View>
               </View>
             </View>
 
-            {/* Transaction ID */}
+            {/* Receipt */}
             <View style={[styles.detailSection, { marginBottom: 40 }]}>
               <View style={styles.transactionIdContainer}>
                 <ReceiptPDF transaction={transactionData} />
-                {/* 
-                <Text style={styles.transactionIdLabel}>Transaction ID</Text>
-                <Text style={styles.transactionIdValue}>
-                  {selectedTransaction._id}
-                </Text> */}
               </View>
             </View>
           </ScrollView>
@@ -314,10 +351,16 @@ export default function HistoryScreen() {
     );
   };
 
-  // Empty state component
+  // ── Empty state — redesigned ───────────────────────────────────────────
   const EmptyState = () => (
     <View style={styles.emptyState}>
-      <Ionicons name="receipt-outline" size={64} color="#C7C7CC" />
+      <View style={styles.emptyStateIconWrap}>
+        <MaterialCommunityIcons
+          name="receipt-text-outline"
+          size={40}
+          color="#10B981"
+        />
+      </View>
       <Text style={styles.emptyStateTitle}>No Transactions</Text>
       <Text style={styles.emptyStateDescription}>
         Your transaction history will appear here once you make your first
@@ -329,36 +372,33 @@ export default function HistoryScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Transaction History</Text>
-        <Text style={styles.headerSubtitle}>
-          {history_info?.transactions?.length || 0} transactions
-        </Text>
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "100%",
-          }}
-        >
+      <View style={styles.headerCard}>
+        <View style={styles.headerTitleRow}>
+          <TouchableOpacity
+            onPress={() => {
+              if (navigation.canGoBack()) navigation.goBack();
+            }}
+            style={styles.backButton}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <AntDesign name="arrowleft" size={22} color="#111827" />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>Transaction History</Text>
+            <Text style={styles.headerSubtitle}>
+              {history_info?.transactions?.length || 0} transactions
+            </Text>
+          </View>
           <TouchableOpacity
             onPress={() => navigation.navigate("MakeUtilityPayment")}
-            style={{
-              backgroundColor: "#007AFF",
-              padding: 8,
-              borderRadius: 20,
-              alignItems: "center",
-              position: "absolute",
-              top: 10,
-              right: 0,
-            }}
+            style={styles.addButton}
           >
-            <Ionicons name="add" size={20} color="#fff" />
+            <MaterialCommunityIcons name="plus" size={22} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Transaction List */}
+      {/* Transaction List with Pull-to-Refresh */}
       <FlatList
         data={history_info?.transactions}
         keyExtractor={(item) => item._id}
@@ -366,6 +406,16 @@ export default function HistoryScreen() {
         ListEmptyComponent={EmptyState}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#10B981"
+            colors={["#10B981"]}
+            title="Pull to refresh"
+            titleColor="#6B7280"
+          />
+        }
       />
 
       {/* Details Modal */}
@@ -374,11 +424,11 @@ export default function HistoryScreen() {
   );
 }
 
-// Detail Card Component
-const DetailCard = ({ icon, label, value, color, copyable = false }) => (
+// ── Detail Card — redesigned ─────────────────────────────────────────────
+const DetailCard = ({ icon, label, value, bg, iconColor, copyable = false }) => (
   <View style={styles.detailCard}>
-    <View style={[styles.detailCardIcon, { backgroundColor: color + "20" }]}>
-      <Ionicons name={icon} size={20} color={color} />
+    <View style={[styles.detailCardIcon, { backgroundColor: bg }]}>
+      <MaterialCommunityIcons name={icon} size={22} color={iconColor} />
     </View>
     <Text style={styles.detailCardLabel}>{label}</Text>
     <Text style={styles.detailCardValue} numberOfLines={copyable ? 2 : 1}>
@@ -386,7 +436,11 @@ const DetailCard = ({ icon, label, value, color, copyable = false }) => (
     </Text>
     {copyable && (
       <TouchableOpacity style={styles.copyButton}>
-        <Ionicons name="copy-outline" size={16} color="#007AFF" />
+        <MaterialCommunityIcons
+          name="content-copy"
+          size={14}
+          color="#10B981"
+        />
       </TouchableOpacity>
     )}
   </View>
@@ -395,53 +449,78 @@ const DetailCard = ({ icon, label, value, color, copyable = false }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: "#F9FAFB",
   },
 
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+  // ── Header ──
+  headerCard: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "ios" ? 56 : 36,
     paddingBottom: 16,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
-
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "700",
-    color: "#000000",
-    marginBottom: 4,
+    color: "#111827",
+    letterSpacing: 0.3,
   },
-
   headerSubtitle: {
-    fontSize: 16,
-    color: "#8E8E93",
+    fontSize: 13,
     fontWeight: "500",
+    color: "#6B7280",
+    marginTop: 2,
   },
-
-  listContainer: {
-    padding: 16,
-    flexGrow: 1,
-  },
-
-  // Transaction Card Styles
-  transactionCard: {
-    backgroundColor: "#FFFFFF",
+  addButton: {
+    width: 40,
+    height: 40,
     borderRadius: 16,
-    marginBottom: 12,
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
 
-  cardTouchable: {
-    padding: 20,
+  listContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 40,
+    flexGrow: 1,
+  },
+
+  // ── Transaction Card ──
+  transactionCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
   cardHeader: {
@@ -458,10 +537,10 @@ const styles = StyleSheet.create({
   },
 
   avatarContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#007AFF",
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: "#D1FAE5",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -470,7 +549,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#10B981",
   },
 
   nameContainer: {
@@ -478,22 +557,26 @@ const styles = StyleSheet.create({
   },
 
   customerName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000000",
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
     marginBottom: 2,
+    letterSpacing: 0.3,
   },
 
   meterId: {
-    fontSize: 14,
-    color: "#8E8E93",
+    fontSize: 12,
+    color: "#6B7280",
     fontWeight: "500",
   },
 
   cardBody: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
   },
 
   amountContainer: {
@@ -501,16 +584,16 @@ const styles = StyleSheet.create({
   },
 
   amountLabel: {
-    fontSize: 14,
-    color: "#8E8E93",
+    fontSize: 11,
+    color: "#6B7280",
     marginBottom: 4,
     fontWeight: "500",
   },
 
   amountValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#34C759",
+    color: "#10B981",
   },
 
   unitsContainer: {
@@ -519,21 +602,21 @@ const styles = StyleSheet.create({
   },
 
   unitsLabel: {
-    fontSize: 14,
-    color: "#8E8E93",
+    fontSize: 11,
+    color: "#6B7280",
     marginBottom: 4,
     fontWeight: "500",
   },
 
   unitsValue: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#FF9500",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#F59E0B",
   },
 
   cardFooter: {
     borderTopWidth: 1,
-    borderTopColor: "#F2F2F7",
+    borderTopColor: "#F3F4F6",
     paddingTop: 12,
   },
 
@@ -543,28 +626,28 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
-    fontSize: 14,
-    color: "#8E8E93",
+    fontSize: 12,
+    color: "#6B7280",
     marginLeft: 6,
     marginRight: 16,
     fontWeight: "500",
   },
 
   timeText: {
-    fontSize: 14,
-    color: "#8E8E93",
+    fontSize: 12,
+    color: "#6B7280",
     marginLeft: 6,
     fontWeight: "500",
   },
 
-  // Modal Styles
+  // ── Modal ──
   backdrop: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(17, 24, 39, 0.5)",
   },
 
   backdropTouchable: {
@@ -580,12 +663,17 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: height * 0.85,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
 
   modalHandle: {
     width: 36,
     height: 5,
-    backgroundColor: "#C7C7CC",
+    backgroundColor: "#E5E7EB",
     borderRadius: 3,
     alignSelf: "center",
     marginTop: 12,
@@ -603,7 +691,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F2F2F7",
+    borderBottomColor: "#F3F4F6",
   },
 
   modalTitleContainer: {
@@ -612,46 +700,54 @@ const styles = StyleSheet.create({
   },
 
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#000000",
-    marginLeft: 8,
+    color: "#111827",
+    letterSpacing: 0.3,
   },
 
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: "#F3F4F6",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  // Detail Sections
+  // ── Detail Sections ──
   detailSection: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
 
   customerDetailHeader: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
   largeAvatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#007AFF",
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "#D1FAE5",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 16,
   },
 
   largeAvatarText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#10B981",
   },
 
   customerDetailInfo: {
@@ -659,36 +755,42 @@ const styles = StyleSheet.create({
   },
 
   customerDetailName: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#000000",
+    color: "#111827",
     marginBottom: 4,
+    letterSpacing: 0.3,
   },
 
   customerDetailMeter: {
-    fontSize: 16,
-    color: "#8E8E93",
+    fontSize: 13,
+    color: "#6B7280",
     fontWeight: "500",
   },
 
   amountDetailContainer: {
     alignItems: "center",
-    backgroundColor: "#F2F2F7",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     paddingVertical: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
   amountDetailLabel: {
-    fontSize: 16,
-    color: "#8E8E93",
+    fontSize: 13,
+    color: "#6B7280",
     fontWeight: "500",
     marginBottom: 8,
   },
 
   amountDetailValue: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: "700",
-    color: "#34C759",
+    color: "#10B981",
   },
 
   detailGrid: {
@@ -699,34 +801,39 @@ const styles = StyleSheet.create({
 
   detailCard: {
     flex: 1,
-    backgroundColor: "#F9F9F9",
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     padding: 16,
     alignItems: "center",
     position: "relative",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
   detailCardIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
 
   detailCardLabel: {
-    fontSize: 14,
-    color: "#8E8E93",
+    fontSize: 12,
+    color: "#6B7280",
     fontWeight: "500",
     marginBottom: 4,
     textAlign: "center",
   },
 
   detailCardValue: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000000",
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
     textAlign: "center",
   },
 
@@ -736,16 +843,44 @@ const styles = StyleSheet.create({
     right: 12,
     width: 24,
     height: 24,
-    borderRadius: 12,
-    backgroundColor: "#E3F2FD",
+    borderRadius: 8,
+    backgroundColor: "#D1FAE5",
     alignItems: "center",
     justifyContent: "center",
   },
 
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 0.3,
+  },
+
   dateTimeDetailContainer: {
-    backgroundColor: "#F9F9F9",
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  dateTimeIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "#DBEAFE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
 
   dateTimeDetailRow: {
@@ -755,40 +890,30 @@ const styles = StyleSheet.create({
   },
 
   dateTimeDetailLabel: {
-    fontSize: 16,
-    color: "#000000",
-    fontWeight: "500",
-    marginLeft: 12,
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "600",
     flex: 1,
   },
 
   dateTimeDetailValue: {
-    fontSize: 16,
-    color: "#8E8E93",
+    fontSize: 14,
+    color: "#6B7280",
     fontWeight: "600",
   },
 
   transactionIdContainer: {
-    backgroundColor: "#F9F9F9",
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
-  transactionIdLabel: {
-    fontSize: 14,
-    color: "#8E8E93",
-    fontWeight: "500",
-    marginBottom: 8,
-  },
-
-  transactionIdValue: {
-    fontSize: 14,
-    color: "#666666",
-    fontFamily: "monospace",
-    lineHeight: 20,
-  },
-
-  // Empty State
+  // ── Empty State ──
   emptyState: {
     flex: 1,
     alignItems: "center",
@@ -797,18 +922,28 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
 
+  emptyStateIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
   emptyStateTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "700",
-    color: "#000000",
-    marginTop: 16,
+    color: "#111827",
     marginBottom: 8,
+    letterSpacing: 0.3,
   },
 
   emptyStateDescription: {
-    fontSize: 16,
-    color: "#8E8E93",
+    fontSize: 14,
+    color: "#6B7280",
     textAlign: "center",
-    lineHeight: 24,
+    lineHeight: 20,
   },
 });

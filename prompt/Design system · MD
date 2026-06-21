@@ -1,0 +1,987 @@
+# Modern Fintech App Design System
+
+**Version 1.0 - PausePoint Design Language**
+
+> **AI Instruction**: When redesigning any React Native screen, follow this EXACT design system. Apply all colors, spacing, typography, and component styles consistently. This is a production-ready design system used across the entire app.
+
+---
+
+## 🎨 COLOR PALETTE
+
+### Primary Colors
+
+```javascript
+// Main brand colors
+PRIMARY_GREEN: '#10B981',        // Emerald green - main actions, success
+PRIMARY_GREEN_LIGHT: '#D1FAE5',  // Light green - success backgrounds
+PRIMARY_GREEN_DARK: '#065F46',   // Dark green - success text
+
+// Backgrounds
+BACKGROUND_LIGHT: '#F9FAFB',     // Main app background
+BACKGROUND_WHITE: '#FFFFFF',     // Card backgrounds
+BACKGROUND_GRAY: '#F3F4F6',      // Subtle backgrounds
+```
+
+### Semantic Colors
+
+```javascript
+// Status colors
+SUCCESS: '#10B981',
+WARNING: '#F59E0B',
+WARNING_LIGHT: '#FEF3C7',
+WARNING_DARK: '#92400E',
+ERROR: '#DC2626',
+ERROR_LIGHT: '#FEE2E2',
+INFO: '#2563EB',
+INFO_LIGHT: '#DBEAFE',
+```
+
+### Text Colors
+
+```javascript
+// Text hierarchy
+TEXT_PRIMARY: '#111827',      // Main headings, important text
+TEXT_SECONDARY: '#374151',    // Body text, descriptions
+TEXT_TERTIARY: '#6B7280',     // Labels, less important text
+TEXT_DISABLED: '#9CA3AF',     // Disabled state
+TEXT_WHITE: '#FFFFFF',        // Text on colored backgrounds
+```
+
+### Service-Specific Pastels
+
+```javascript
+// For icon backgrounds - use 15% opacity or these colors
+ELECTRICITY_BG: '#FEF3C7',    // Yellow tint
+ELECTRICITY_ICON: '#F59E0B',  // Orange
+
+ESUSU_BG: '#DBEAFE',          // Blue tint
+ESUSU_ICON: '#3B82F6',        // Blue
+
+AIRTIME_BG: '#E0E7FF',        // Indigo tint
+AIRTIME_ICON: '#6366F1',      // Indigo
+
+EMERGENCY_BG: '#FEE2E2',      // Red tint
+EMERGENCY_ICON: '#DC2626',    // Red
+
+// Pattern: For any service, use the service color at 15% opacity for background
+// Formula: `${serviceColor}15` or use the specific pastels above
+```
+
+### Border Colors
+
+```javascript
+BORDER_LIGHT: '#F3F4F6',      // Very subtle borders
+BORDER_MEDIUM: '#E5E7EB',     // Medium borders
+BORDER_DARK: '#D1D5DB',       // Visible borders
+```
+
+---
+
+## 📏 SPACING SYSTEM
+
+### Standard Spacing Scale (use multiples of 4)
+
+```javascript
+SPACING = {
+  xs: 4, // Tiny gaps
+  sm: 8, // Small gaps
+  md: 12, // Medium gaps
+  lg: 16, // Large gaps - DEFAULT for most padding
+  xl: 20, // Extra large
+  xxl: 24, // Section spacing
+  xxxl: 32, // Major sections
+};
+
+// RULE: Always use these values, never random numbers like 15 or 18
+```
+
+### Component-Specific Spacing
+
+```javascript
+// Cards
+CARD_PADDING: 16,              // Inside padding for most cards
+CARD_PADDING_LARGE: 20,        // Larger cards (wallet, important sections)
+CARD_PADDING_XL: 24,           // Hero cards, modals
+CARD_MARGIN_BOTTOM: 16,        // Space between cards
+
+// Sections
+SECTION_SPACING: 24,           // Space between major sections
+SECTION_HEADER_MARGIN: 16,     // Space below section headers
+
+// Container
+CONTAINER_PADDING_H: 16,       // Horizontal padding for main container
+CONTAINER_PADDING_V: 20,       // Vertical padding for main container
+```
+
+---
+
+## 🔤 TYPOGRAPHY SYSTEM
+
+### Font Sizes
+
+```javascript
+FONT_SIZES = {
+  xs: 11, // Small labels, badges
+  sm: 12, // Secondary text, descriptions
+  md: 13, // Regular body text
+  base: 14, // Standard body text
+  lg: 15, // Emphasized text
+  xl: 16, // Section headers, button text
+  xxl: 18, // Card titles
+  xxxl: 20, // Page titles, modal titles
+  huge: 24, // Important numbers (smaller)
+  display: 32, // Hero numbers (wallet balance)
+};
+```
+
+### Font Weights
+
+```javascript
+FONT_WEIGHTS = {
+  regular: "400", // Normal text (rarely used)
+  medium: "500", // Labels, subtle emphasis
+  semibold: "600", // Subheadings, card titles
+  bold: "700", // Headings, buttons, important text
+  extrabold: "800", // Hero text, main titles
+};
+
+// RULE: Never use 'normal' or 'bold' strings, always use numeric values
+```
+
+### Letter Spacing
+
+```javascript
+LETTER_SPACING = {
+  tight: 0, // Dense text (rarely used)
+  normal: 0.3, // Most text
+  wide: 0.5, // Headings, emphasized text
+  wider: 1, // All caps text
+};
+
+// RULE: Add letterSpacing to all headings and buttons
+```
+
+### Line Heights
+
+```javascript
+LINE_HEIGHTS = {
+  tight: 14, // Compact text
+  normal: 18, // Body text
+  relaxed: 20, // Descriptions
+  loose: 24, // Long form content
+};
+```
+
+---
+
+## 🎯 BORDER RADIUS SYSTEM
+
+```javascript
+BORDER_RADIUS = {
+  sm: 8, // Small elements, tags
+  md: 12, // Badges, small cards
+  lg: 16, // Standard cards, buttons - DEFAULT
+  xl: 20, // Large cards, hero sections
+  xxl: 24, // Modals, major cards
+  round: 100, // Fully rounded (pills, circular buttons)
+};
+
+// RULE: Use 16px as default, scale up for larger elements
+// RULE: Icons backgrounds typically use 16px
+// RULE: Main cards use 16-20px
+// RULE: Hero cards and modals use 20-24px
+```
+
+---
+
+## 🌑 SHADOW SYSTEM
+
+### Standard Shadows
+
+```javascript
+// Small shadow - for subtle elevation
+SHADOW_SM = {
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 2,
+};
+
+// Medium shadow - for cards
+SHADOW_MD = {
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.08,
+  shadowRadius: 12,
+  elevation: 4,
+};
+
+// Large shadow - for floating elements
+SHADOW_LG = {
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.1,
+  shadowRadius: 16,
+  elevation: 6,
+};
+```
+
+### Colored Shadows (for emphasis)
+
+```javascript
+// For primary buttons and important cards
+SHADOW_GREEN = {
+  shadowColor: "#10B981",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 12,
+  elevation: 8,
+};
+
+// RULE: Use colored shadows matching the element color
+// Example: A blue card gets a blue shadow with same hex code
+```
+
+---
+
+## 🎴 COMPONENT STYLES
+
+### 1. MAIN CONTAINER
+
+```javascript
+containerStyle = {
+  flex: 1,
+  paddingVertical: 20,
+  paddingHorizontal: 16,
+  backgroundColor: "#F9FAFB", // Always use this background
+};
+```
+
+### 2. SECTION CARDS
+
+```javascript
+// Standard white card for sections
+sectionCardStyle = {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 16,
+  padding: 16,
+  marginBottom: 20,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 3,
+};
+
+// RULE: No borders on cards, only shadows
+// RULE: Always use white background for cards
+```
+
+### 3. SECTION HEADERS
+
+```javascript
+// Inside each card, add a header
+sectionHeaderStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 16,
+};
+
+sectionHeaderIconStyle = {
+  marginRight: 8,
+  // Icon size: 20px
+  // Icon color: #10B981 (primary green)
+};
+
+sectionHeaderTextStyle = {
+  fontSize: 16,
+  fontWeight: "700",
+  color: "#1F2937",
+  letterSpacing: 0.3,
+};
+```
+
+### 4. ICON CONTAINERS
+
+```javascript
+// For service icons in grid
+iconContainerStyle = {
+  width: 56,
+  height: 56,
+  borderRadius: 16,
+  backgroundColor: "SERVICE_COLOR with 15% opacity", // e.g., #FEF3C7
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 8,
+};
+
+// Icon size inside: 24-28px
+// Icon color: Full opacity service color
+```
+
+### 5. BUTTONS
+
+#### Primary Button
+
+```javascript
+primaryButtonStyle = {
+  backgroundColor: "#10B981",
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  borderRadius: 16,
+  flexDirection: "row",
+  alignItems: "center",
+  shadowColor: "#10B981",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  elevation: 4,
+};
+
+primaryButtonTextStyle = {
+  color: "#FFFFFF",
+  fontSize: 14,
+  fontWeight: "700",
+  letterSpacing: 0.3,
+};
+```
+
+#### Secondary Button (Outline)
+
+```javascript
+secondaryButtonStyle = {
+  backgroundColor: "#FFFFFF",
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  borderRadius: 16,
+  borderWidth: 2,
+  borderColor: "#10B981",
+  flexDirection: "row",
+  alignItems: "center",
+};
+
+secondaryButtonTextStyle = {
+  color: "#10B981",
+  fontSize: 14,
+  fontWeight: "700",
+  letterSpacing: 0.3,
+};
+```
+
+#### Pill Button (Add Money style)
+
+```javascript
+pillButtonStyle = {
+  backgroundColor: "#FFFFFF",
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  borderRadius: 25, // Fully rounded
+  flexDirection: "row",
+  alignItems: "center",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+};
+```
+
+### 6. STATUS BADGES
+
+```javascript
+// Success badge
+successBadgeStyle = {
+  backgroundColor: "#D1FAE5",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 12,
+};
+
+successBadgeTextStyle = {
+  fontSize: 11,
+  fontWeight: "700",
+  color: "#065F46",
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
+};
+
+// Warning badge
+warningBadgeStyle = {
+  backgroundColor: "#FEF3C7",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 12,
+};
+
+warningBadgeTextStyle = {
+  fontSize: 11,
+  fontWeight: "700",
+  color: "#92400E",
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
+};
+```
+
+### 7. HERO CARDS (Like Wallet Balance)
+
+```javascript
+heroCardStyle = {
+  backgroundColor: "#10B981", // Or service primary color
+  borderRadius: 20,
+  padding: 24,
+  shadowColor: "#10B981", // Match background
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.3,
+  shadowRadius: 12,
+  elevation: 8,
+  overflow: "hidden", // For decorative elements
+};
+
+// Add decorative circles
+decorativeCircle1 = {
+  position: "absolute",
+  top: -30,
+  right: -30,
+  width: 120,
+  height: 120,
+  borderRadius: 60,
+  backgroundColor: "rgba(255, 255, 255, 0.1)",
+};
+
+decorativeCircle2 = {
+  position: "absolute",
+  bottom: -20,
+  left: -20,
+  width: 80,
+  height: 80,
+  borderRadius: 40,
+  backgroundColor: "rgba(255, 255, 255, 0.08)",
+};
+```
+
+### 8. MODALS (Bottom Sheet Style)
+
+```javascript
+modalOverlayStyle = {
+  flex: 1,
+  justifyContent: "flex-end", // Push to bottom
+  backgroundColor: "rgba(0,0,0,0.5)",
+};
+
+modalContainerStyle = {
+  backgroundColor: "white",
+  borderTopLeftRadius: 24,
+  borderTopRightRadius: 24,
+  padding: 24,
+  maxHeight: "85%",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: -4 },
+  shadowOpacity: 0.1,
+  shadowRadius: 12,
+  elevation: 8,
+};
+
+// Modal header with close button
+modalHeaderStyle = {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 24,
+  paddingBottom: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: "#F3F4F6",
+};
+
+closeButtonStyle = {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: "#F3F4F6",
+  justifyContent: "center",
+  alignItems: "center",
+};
+```
+
+### 9. LISTS & GRIDS
+
+#### Grid Layout (for services/quick links)
+
+```javascript
+gridContainerStyle = {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+};
+
+// For 4 items per row
+gridItemStyle = {
+  width: "23%",
+  alignItems: "center",
+  marginBottom: 20,
+};
+
+// For 3 items per row
+gridItemStyle3Col = {
+  width: "30%",
+  alignItems: "center",
+  marginBottom: 16,
+};
+
+// For 2 items per row
+gridItemStyle2Col = {
+  width: "48%",
+  alignItems: "center",
+  marginBottom: 16,
+};
+```
+
+### 10. INPUT FIELDS (When needed)
+
+```javascript
+inputContainerStyle = {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
+  paddingHorizontal: 16,
+  paddingVertical: 12,
+  marginBottom: 16,
+};
+
+inputTextStyle = {
+  fontSize: 14,
+  color: "#111827",
+  fontWeight: "500",
+};
+
+inputLabelStyle = {
+  fontSize: 13,
+  fontWeight: "600",
+  color: "#374151",
+  marginBottom: 8,
+};
+```
+
+---
+
+## 🎨 COMPONENT PATTERNS
+
+### Pattern 1: Service Grid Item
+
+```jsx
+<TouchableOpacity
+  style={{
+    width: "30%", // or '23%' for 4 columns
+    alignItems: "center",
+    marginBottom: 16,
+  }}
+  onPress={() => handlePress()}
+>
+  <View
+    style={{
+      width: 56,
+      height: 56,
+      backgroundColor: "#FEF3C7", // Pastel background
+      borderRadius: 16,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 8,
+    }}
+  >
+    <Icon name="icon-name" size={26} color="#F59E0B" />
+  </View>
+  <Text
+    style={{
+      fontSize: 12,
+      color: "#374151",
+      textAlign: "center",
+      fontWeight: "500",
+    }}
+  >
+    Service Name
+  </Text>
+</TouchableOpacity>
+```
+
+### Pattern 2: Section Card with Header
+
+```jsx
+<View
+  style={{
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  }}
+>
+  {/* Section Header */}
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+    }}
+  >
+    <MaterialCommunityIcons
+      name="icon-name"
+      size={20}
+      color="#10B981"
+      style={{ marginRight: 8 }}
+    />
+    <Text
+      style={{
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#1F2937",
+        letterSpacing: 0.3,
+      }}
+    >
+      Section Title
+    </Text>
+  </View>
+
+  {/* Section Content */}
+  {children}
+</View>
+```
+
+### Pattern 3: Status Badge
+
+```jsx
+<View
+  style={{
+    backgroundColor: status === "success" ? "#D1FAE5" : "#FEF3C7",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  }}
+>
+  <Text
+    style={{
+      fontSize: 11,
+      fontWeight: "700",
+      color: status === "success" ? "#065F46" : "#92400E",
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    }}
+  >
+    {statusText}
+  </Text>
+</View>
+```
+
+### Pattern 4: List Item Card
+
+```jsx
+<TouchableOpacity
+  style={{
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    marginBottom: 16,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  }}
+  onPress={() => handlePress()}
+>
+  <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+    <Icon name="icon-name" size={24} color="#2563EB" />
+    <View style={{ marginLeft: 16, flex: 1 }}>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "600",
+          color: "#111827",
+          marginBottom: 4,
+        }}
+      >
+        Title
+      </Text>
+      <Text
+        style={{
+          fontSize: 14,
+          color: "#6B7280",
+          lineHeight: 20,
+        }}
+      >
+        Description
+      </Text>
+    </View>
+  </View>
+</TouchableOpacity>
+```
+
+---
+
+## 📱 SCREEN STRUCTURE TEMPLATE
+
+```jsx
+import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+const YourScreen = () => {
+  return (
+    <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+        {/* Hero Card (if needed) */}
+        <View style={styles.heroCard}>
+          {/* Decorative elements */}
+          <View style={styles.decorativeCircle1} />
+          <View style={styles.decorativeCircle2} />
+
+          {/* Content */}
+        </View>
+
+        {/* Section 1 */}
+        <View style={styles.sectionCard}>
+          {/* Section Header */}
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons
+              name="icon-name"
+              size={20}
+              color="#10B981"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.sectionTitle}>Section Title</Text>
+          </View>
+
+          {/* Section Content */}
+          <View style={styles.gridContainer}>{/* Grid items */}</View>
+        </View>
+
+        {/* Section 2 */}
+        <View style={styles.sectionCard}>{/* Similar structure */}</View>
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  container: {
+    flex: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  heroCard: {
+    backgroundColor: "#10B981",
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    overflow: "hidden",
+  },
+  decorativeCircle1: {
+    position: "absolute",
+    top: -30,
+    right: -30,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  decorativeCircle2: {
+    position: "absolute",
+    bottom: -20,
+    left: -20,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+  sectionCard: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 0.3,
+  },
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+});
+
+export default YourScreen;
+```
+
+---
+
+## ✅ DESIGN RULES CHECKLIST
+
+When redesigning any screen, ensure you follow these rules:
+
+### Colors
+
+- [ ] Main background is #F9FAFB
+- [ ] All cards are white (#FFFFFF)
+- [ ] Primary action color is #10B981
+- [ ] Text uses hierarchy (#111827, #374151, #6B7280)
+- [ ] No borders on cards (use shadows instead)
+- [ ] Service icons use pastel backgrounds (15% opacity)
+
+### Spacing
+
+- [ ] Container padding: 16px horizontal, 20px vertical
+- [ ] Card padding: 16-24px
+- [ ] Section spacing: 20-24px
+- [ ] Icon containers: 56x56px (standard)
+- [ ] All spacing uses multiples of 4
+
+### Typography
+
+- [ ] All headings have letterSpacing: 0.3-0.5
+- [ ] Font weights are numeric (700, 600, 500)
+- [ ] Buttons use 700 weight
+- [ ] Body text uses 500-600 weight
+- [ ] Labels use 500 weight
+
+### Borders & Shadows
+
+- [ ] Border radius: 16px (default), 20-24px (hero)
+- [ ] Cards have subtle shadows (not borders)
+- [ ] Important elements have colored shadows
+- [ ] Shadow offset: { width: 0, height: 2-8 }
+
+### Components
+
+- [ ] Section headers have icons
+- [ ] Buttons have proper padding (12-16px vertical)
+- [ ] Badges have 12px border radius
+- [ ] Modals are bottom sheets
+- [ ] ScrollView hides indicators
+
+### Icons
+
+- [ ] Section icons: 20px, #10B981
+- [ ] Service icons: 24-28px, colored
+- [ ] Icon containers: 56x56px with 16px radius
+- [ ] Backgrounds use 15% opacity of icon color
+
+---
+
+## 🚀 IMPLEMENTATION INSTRUCTIONS FOR AI
+
+When you receive a screen to redesign:
+
+1. **Replace all colors** with the colors from this design system
+2. **Update all spacing** to use the spacing scale (multiples of 4)
+3. **Wrap all sections** in white cards with shadows
+4. **Add section headers** with icons for each card
+5. **Update all typography** with proper weights and letter spacing
+6. **Change all border radius** to 16-24px range
+7. **Remove all borders**, use shadows instead
+8. **Update icon sizes** to 56x56px for containers, 24-28px for icons
+9. **Add pastel backgrounds** to all icon containers
+10. **Change ScrollView background** to #F9FAFB
+11. **Add showsVerticalScrollIndicator={false}** to ScrollView
+12. **Update button styles** to match primary/secondary patterns
+13. **Modernize modals** to bottom sheet style
+14. **Add decorative circles** to hero cards
+
+**Key Principle**: Make it look like the modernized WalletScreen - clean, professional, with card-based design and subtle shadows.
+
+---
+
+## 📝 EXAMPLE BEFORE/AFTER
+
+### ❌ OLD STYLE (Don't use)
+
+```javascript
+<View
+  style={{
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+  }}
+>
+  <Text style={{ fontSize: 14, fontWeight: "bold" }}>Title</Text>
+</View>
+```
+
+### ✅ NEW STYLE (Use this)
+
+```javascript
+<View
+  style={{
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  }}
+>
+  <Text
+    style={{
+      fontSize: 16,
+      fontWeight: "700",
+      color: "#1F2937",
+      letterSpacing: 0.3,
+    }}
+  >
+    Title
+  </Text>
+</View>
+```
+
+---
+
+## 🎯 SUCCESS CRITERIA
+
+A properly redesigned screen should:
+
+- ✅ Look professional and modern
+- ✅ Match the WalletScreen aesthetic
+- ✅ Use consistent colors, spacing, typography
+- ✅ Have no borders (only shadows)
+- ✅ Use white cards on gray background
+- ✅ Have proper visual hierarchy
+- ✅ Feel cohesive with the rest of the app
+
+---
+
+**End of Design System Document**
+Version 1.0 - Last Updated: November 2024

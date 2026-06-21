@@ -1,47 +1,28 @@
+
+
 import AppScreen from "../../../components/shared/AppScreen";
 import {
   View,
   Text,
-  Button,
-  Platform,
   TouchableOpacity,
-  KeyboardAvoidingView,
   ScrollView,
-  Image,
-  FlatList,
   StyleSheet,
-  TextInput,
   ActivityIndicator,
+  Share,
+  Alert,
 } from "react-native";
 
-import * as Clipboard from "expo-clipboard"; // Import the Clipboard API
-import { Share } from "react-native"; // Import the Share API
-import React, { useEffect, useRef, useState } from "react";
-import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
+import * as Clipboard from "expo-clipboard";
+import React, { useRef, useState } from "react";
 import Toast from "react-native-toast-message";
-import * as ImagePicker from "expo-image-picker";
 import {
-  Ionicons,
-  AntDesign,
   MaterialIcons,
-  FontAwesome,
   FontAwesome5,
+  MaterialCommunityIcons,
 } from "@expo/vector-icons";
 
-import DateTimePicker from "@react-native-community/datetimepicker";
-
-import { useDispatch, useSelector } from "react-redux";
-import { useRoute } from "@react-navigation/native";
-
-import {
-  NavigationContainer,
-  NavigationProp,
-  useNavigation,
-} from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import {
   Get_All_User_Guest_Fun,
   Get__User_Guest_detail_Fun,
@@ -51,571 +32,849 @@ import * as Sharing from "expo-sharing";
 
 import QRCode from "react-native-qrcode-svg";
 import ViewShot from "react-native-view-shot";
-// import Share from "react-nat
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
-import { useMutateData } from "../../../hooks/Request";
+import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 
 const GuestsDetail = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const [modalVisible, setModalVisible] = useState(false);
-
   const route = useRoute();
   const { itemdata } = route.params;
 
-  const animation = useRef(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const { get_all_user_guest_data, get_user_guest_detail_data } = useSelector(
-    (state) => state?.GuestSlice
-  );
-
   const {
-    mutate: setdepature,
-    isLoading: ispendingsetdepature,
-    error,
-  } = useMutateData("api/v1/guest/modify", "PATCH", "guest");
+    data: guestData,
+    isLoading: isLoadingGuests,
+    isError: isErrorGuests,
+    error: errorGuests,
+    refetch: refetchGuests,
+  } = useFetchData_v2(`api/v1/visitor/${itemdata?._id}`, "userGuests");
+
+  let invitation = guestData?.userInvites;
 
   const [qrCodeValue, setQRCodeValue] = useState("");
   const viewShotRef = useRef();
 
-  // Function to copy access code to clipboard
-  const copyToClipboard = async (code) => {
-    await Clipboard.setStringAsync(code);
-    Toast.show({
-      type: "success",
-      text1: "Access code copied to clipboard!",
-    });
-  };
-
-  // Function to share access code via WhatsApp or other apps
-  const shareAccessCode = async (code) => {
-    try {
-      const result = await Share.share({
-        message: `Here is the access code: ${code}`,
-      });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          console.log("Shared with activity type: ", result.activityType);
-        } else {
-          console.log("Shared successfully");
-        }
-      } else if (result.action === Share.dismissedAction) {
-        console.log("Share dismissed");
-      }
-    } catch (error) {
-      console.error("Error sharing access code: ", error.message);
-    }
-  };
-
-  // const copyAndShareAccessCode = async (code) => {
-  //   try {
-  //     // Copy to clipboard
-  //     await Clipboard.setStringAsync(code);
-  //     Toast.show({
-  //       type: "success",
-  //       text1: "Access code copied to clipboard!",
-  //     });
-
-  //     // Share the code
-  //     const result = await Share.share({
-  //       message: `Here is the access code: ${code}`,
-  //     });
-  //     if (result.action === Share.sharedAction) {
-  //       if (result.activityType) {
-  //         console.log("Shared with activity type: ", result.activityType);
-  //       } else {
-  //         console.log("Shared successfully");
-  //       }
-  //     } else if (result.action === Share.dismissedAction) {
-  //       console.log("Share dismissed");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error sharing access code: ", error.message);
-  //   }
-  // };
-
-  const copyAndShareAccessCode = async (accessCode) => {
-    // Message to copy and share
-    const message = `Hi,\n\nHere is your one-time access code: ${accessCode}\n\nPowered by Pausepoint.net.`;
-
-    // Copy to clipboard
-    Clipboard.setString(message);
-
-    // Share message
-    try {
-      const result = await Share.share({
-        message: message,
-      });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-
-  useEffect(() => {
-    dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
-
-    return () => {};
-  }, [dispatch]);
-
-  const filteredData = get_all_user_guest_data?.userInvites?.filter((item) =>
-    item.visitor_name?.toLowerCase().includes(searchQuery?.toLowerCase())
-  );
-
-  const Cancle_Guests_Mutation = useMutation(
-    (data_info) => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      let url = `${API_BASEURL}visitor/cancel/${get_user_guest_detail_data?.invitation?._id}`;
-
-      return axios.post(url, data_info, config);
-    },
+  // ✅ Cancel visitor mutation
+  const cancelVisitorMutation = useMutateData_v2(
+    `api/v1/visitor/${invitation?._id}`,
+    "DELETE",
+    ["visitors", "userGuests"],
     {
-      onSuccess: (success) => {
+      onSuccess: () => {
         Toast.show({
           type: "success",
-          text1: " successfully ",
+          text1: "Visitor cancelled successfully",
         });
-
         dispatch(Get_All_User_Guest_Fun());
-
         navigation.goBack();
       },
-
-      onError: (error) => {
+      onError: (error: any) => {
         Toast.show({
           type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
+          text1: error?.data?.message || "Failed to cancel visitor",
         });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
       },
     }
   );
+
+  // ✅ Set departure mutation
+  const setDepartureMutation = useMutateData_v2(
+    `api/v1/guest/modify`,
+    "PATCH",
+    ["userGuests"],
+    {
+      onSuccess: () => {
+        Toast.show({
+          type: "success",
+          text1: "Guest marked as departed",
+        });
+        dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
+        refetchGuests();
+      },
+      onError: (error: any) => {
+        Toast.show({
+          type: "error",
+          text1: error?.data?.message || "Failed to update status",
+        });
+      },
+    }
+  );
+
+  const copyAndShareAccessCode = async (accessCode: string) => {
+    // const message = `Hi,\n\nHere is your one-time access code: ${accessCode}\n\nPowered by Pausepoint.net.`;
+
+
+    const message = `Hi,\nHere is your one-time access code: ${accessCode}\nThis code is valid for your arrival and departure.\nTo use this app/service in your estate, contact support@pausepoint.net\nPowered by: pausepoint.net`;
+
+    await Clipboard.setStringAsync(message);
+    Toast.show({
+      type: "success",
+      text1: "Access code copied!",
+    });
+
+    try {
+      await Share.share({ message: message });
+    } catch (error) {
+      console.error("Error sharing:", error.message);
+    }
+  };
 
   const captureAndShare = async () => {
     try {
       const uri = await captureQRCodeAsImage();
-      await Sharing.shareAsync(uri);
+      await Sharing.shareAsync(uri, {
+        dialogTitle: "Share QR Code",
+        mimeType: "image/png",
+      });
     } catch (error) {
-      console.error("Error sharing QR code: ", error.message);
+      Toast.show({ type: "error", text1: "Failed to share QR code" });
     }
   };
 
   const captureQRCodeAsImage = async () => {
     try {
+      if (!viewShotRef.current) throw new Error("ViewShot ref is null");
       const uri = await viewShotRef.current.capture();
       return uri;
     } catch (error) {
-      throw new Error("Error capturing QR code as image: ", error);
+      throw new Error("Error capturing QR code");
     }
   };
 
   const handleDeparture = () => {
-    data = {
-      invitationId: get_user_guest_detail_data?.invitation?._id,
-      status: "departed",
-    };
-
-    console.log(data);
-    setdepature(
-      data,
+    Alert.alert("Mark as Departed", "Are you sure the guest has departed?", [
+      { text: "Cancel", style: "cancel" },
       {
-        onSuccess: (response) => {
-          console.log({
-            ddd: response?.data?.data,
-          });
-          navigation.goBack();
+        text: "Yes, Departed",
+        onPress: () => {
+          const data = {
+            invitationId: invitation._id,
+            status: "departed",
+          };
+          setDepartureMutation.mutate(data);
         },
       },
-
-      {
-        onError: (error) => {
-          console.error("Mutation Error:", error.message);
-        },
-      }
-    );
-    // Handle fund wallet logic here
-    // navigation.goBack();
+    ]);
   };
 
+  const handleCancelGuest = () => {
+    Alert.alert(
+      "Cancel Invitation",
+      "Are you sure you want to cancel this invitation?",
+      [
+        { text: "No", style: "cancel" },
+        {
+          text: "Yes, Cancel",
+          style: "destructive",
+          onPress: () => cancelVisitorMutation.mutate({}),
+        },
+      ]
+    );
+  };
+
+  const handleOpenQrcodeModal = () => {
+    if (!invitation) {
+      Toast.show({ type: "error", text1: "Invitation data not loaded" });
+      return;
+    }
+    const jsonString = JSON.stringify({
+      code: invitation.access_code,
+      name: invitation.visitor_name,
+      expires: invitation.expires,
+    });
+    setQRCodeValue(jsonString);
+    setModalVisible(true);
+  };
+
+  const statusColor =
+    invitation?.status === "arrived"
+      ? "#10B981"
+      : invitation?.status === "departed"
+        ? "#6B7280"
+        : "#F59E0B";
+
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Invitation Details</Text>
-        <View style={styles.detailsContainer}>
-          <View>
-            <Text style={styles.label}>Visitor Name:</Text>
-            <Text style={styles.text}>
-              {get_user_guest_detail_data?.invitation?.visitor_name}
+    <AppScreen>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.container}>
+          {/* Header Card */}
+          <View style={styles.headerCard}>
+            <View style={styles.headerIconContainer}>
+              <MaterialCommunityIcons
+                name="account-details"
+                size={32}
+                color="#10B981"
+              />
+            </View>
+            <Text style={styles.headerTitle}>Guest Details</Text>
+            <Text style={styles.headerSubtitle}>
+              Invitation for {invitation?.visitor_name}
             </Text>
           </View>
 
-          <View>
-            <Text style={styles.label}>Gender:</Text>
-            <Text style={styles.text}>
-              {get_user_guest_detail_data?.invitation?.gender}
-            </Text>
+          {/* Status Card */}
+          <View style={styles.statusCard}>
+            <View style={styles.statusRow}>
+              <View style={styles.statusIconContainer}>
+                <MaterialCommunityIcons
+                  name="shield-check"
+                  size={20}
+                  color={statusColor}
+                />
+              </View>
+              <View style={styles.statusTextContainer}>
+                <Text style={styles.statusLabel}>Current Status</Text>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    { backgroundColor: `${statusColor}15` },
+                  ]}
+                >
+                  <Text
+                    style={[styles.statusBadgeText, { color: statusColor }]}
+                  >
+                    {invitation?.status?.toUpperCase()}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
 
-          <View>
-            <Text style={styles.label}>Phone Number:</Text>
-            <Text style={styles.text}>
-              {get_user_guest_detail_data?.invitation?.phone_number}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <View>
-              <Text style={styles.label}>Access Code:</Text>
-
-              <Text style={styles.text}>
-                {get_user_guest_detail_data?.invitation?.access_code}
-              </Text>
+          {/* Personal Information Card */}
+          <View style={styles.infoCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="account"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Personal Information</Text>
             </View>
 
-            <TouchableOpacity
-              style={
-                {
-                  // backgroundColor: "blue",
-                  // padding: 10,
-                  // borderRadius: 5,
-                  // marginTop: 10,
-                }
-              }
-              onPress={() =>
-                copyAndShareAccessCode(
-                  get_user_guest_detail_data?.invitation?.access_code
-                )
-              }
-            >
-              <FontAwesome name="copy" size={24} color="black" />
-            </TouchableOpacity>
+            <InfoRow
+              icon="account-circle"
+              label="Visitor Name"
+              value={invitation?.visitor_name}
+            />
+            <InfoRow
+              icon="gender-male-female"
+              label="Gender"
+              value={invitation?.gender}
+            />
+            <InfoRow
+              icon="phone"
+              label="Phone Number"
+              value={invitation?.phone_number}
+            />
           </View>
 
-          {/* // In your return statement */}
-          <TouchableOpacity
-            style={
-              {
-                // backgroundColor: "blue",
-                // padding: 10,
-                // borderRadius: 5,
-                // marginTop: 10,
-              }
-            }
-            onPress={() =>
-              copyAndShareAccessCode(
-                get_user_guest_detail_data?.invitation?.access_code
-              )
-            }
-          >
-            <Text style={{ color: "white", textAlign: "center" }}>
-              Copy and Share Access Code
-            </Text>
-          </TouchableOpacity>
+          {/* Access Code Card */}
+          <View style={styles.accessCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="key-variant"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Access Code</Text>
+            </View>
 
-          <View>
-            <Text style={styles.label}>Status:</Text>
-            <Text style={styles.text}>
-              {get_user_guest_detail_data?.invitation?.status}
-            </Text>
-          </View>
-
-          <View>
-            <Text style={styles.label}>Arrived Date:</Text>
-            <Text style={styles.text}>
-              {formatDateandTime(
-                get_user_guest_detail_data?.invitation?.arrived_at
-              )}
-              {/* {get_user_guest_detail_data?.invitation?.expires} */}
-            </Text>
-          </View>
-
-          {ispendingsetdepature ? (
-            <ActivityIndicator size="large" color="green" />
-          ) : (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <View>
-                <Text style={styles.label}>Departure Date:</Text>
-                <Text style={styles.text}>
-                  {formatDateandTime(
-                    get_user_guest_detail_data?.invitation?.departed_at
-                  )}
-                  {/* {get_user_guest_detail_data?.invitation?.expires} */}
+            <View style={styles.accessCodeContainer}>
+              <View style={styles.accessCodeBox}>
+                <Text style={styles.accessCodeText}>
+                  {invitation?.access_code}
                 </Text>
               </View>
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={() => copyAndShareAccessCode(invitation?.access_code)}
+              >
+                <MaterialCommunityIcons
+                  name="share-variant"
+                  size={24}
+                  color="#10B981"
+                />
+              </TouchableOpacity>
+            </View>
 
-              {!get_user_guest_detail_data?.invitation?.departed_at && (
+            <Text style={styles.accessCodeHint}>
+              Tap the share icon to copy and send the access code
+            </Text>
+          </View>
+
+          {/* Timeline Card */}
+          <View style={styles.timelineCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Timeline</Text>
+            </View>
+
+            <TimelineItem
+              icon="calendar-check"
+              label="Arrived"
+              value={formatDateandTime(invitation?.arrived_at) || "Not yet"}
+              color="#10B981"
+            />
+
+            <View>
+              <TimelineItem
+                icon="calendar-remove"
+                label="Departed"
+                value={formatDateandTime(invitation?.departed_at) || "Not yet"}
+                color="#6B7280"
+              />
+
+              {!invitation?.departed_at && invitation?.status === "arrived" && (
                 <TouchableOpacity
-                  style={
-                    {
-                      // backgroundColor: "blue",
-                      // padding: 10,
-                      // borderRadius: 5,
-                      // marginTop: 10,
-                    }
-                  }
+                  style={styles.departureButton}
                   onPress={handleDeparture}
+                  disabled={setDepartureMutation.isPending}
                 >
-                  {/* <FontAwesome name="copy" size={24} color="black" /> */}
-                  <FontAwesome5
-                    name="plane-departure"
-                    size={24}
-                    color="black"
-                  />
+                  {setDepartureMutation.isPending ? (
+                    <ActivityIndicator size="small" color="#10B981" />
+                  ) : (
+                    <>
+                      <FontAwesome5
+                        name="plane-departure"
+                        size={16}
+                        color="#10B981"
+                      />
+                      <Text style={styles.departureButtonText}>
+                        Mark Departed
+                      </Text>
+                    </>
+                  )}
                 </TouchableOpacity>
               )}
             </View>
-          )}
 
-          <Text style={styles.label}>Expires Date:</Text>
-          <Text style={styles.text}>
-            {formatDateandTime(get_user_guest_detail_data?.invitation?.expires)}
-            {/* {get_user_guest_detail_data?.invitation?.expires} */}
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              backgroundColor: "red",
-              // paddingHorizontal: 20,
-              // paddingVertical: 10,
-              borderRadius: 10,
-              width: "40%",
-              // height: 50
-              paddingVertical: 10,
-            }}
-            onPress={() => {
-              Cancle_Guests_Mutation.mutate();
-            }}
-          >
-            {Cancle_Guests_Mutation.isLoading ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  marginBottom: 5,
-                  color: "white",
-                  textAlign: "center",
-                }}
-              >
-                Cancel Visitor
-              </Text>
-            )}
-          </TouchableOpacity>
+            <TimelineItem
+              icon="calendar-clock"
+              label="Expires"
+              value={formatDateandTime(invitation?.expires) || "N/A"}
+              color="#F59E0B"
+            />
+          </View>
 
-          <TouchableOpacity
-            style={{
-              backgroundColor: "green",
-              // paddingHorizontal: 20,
-              // paddingVertical: 10,
-              borderRadius: 10,
-              width: "40%",
-              // height: 50
-              paddingVertical: 10,
-            }}
-            onPress={() => {
-              // Cancle_Guests_Mutation.mutate();
-              setModalVisible(true);
-              const jsonString = JSON.stringify(
-                get_user_guest_detail_data?.invitation
-              );
-              setQRCodeValue(jsonString);
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "bold",
-                marginBottom: 5,
-                color: "white",
-                textAlign: "center",
-              }}
+          {/* Action Buttons */}
+          <View style={styles.actionSection}>
+            <TouchableOpacity
+              style={styles.qrButton}
+              onPress={handleOpenQrcodeModal}
             >
-              Qrcode
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+              <MaterialCommunityIcons name="qrcode" size={24} color="#FFFFFF" />
+              <Text style={styles.qrButtonText}>View QR Code</Text>
+            </TouchableOpacity>
 
-      <View style={{ position: "absolute", right: 20, top: 50, zIndex: 1 }}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCancelGuest}
+              disabled={cancelVisitorMutation.isPending}
+            >
+              {cancelVisitorMutation.isPending ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <MaterialCommunityIcons
+                    name="cancel"
+                    size={24}
+                    color="#FFFFFF"
+                  />
+                  <Text style={styles.cancelButtonText}>Cancel Invitation</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Floating Edit Button */}
+      <View style={{ position: "absolute", right: 20, top: 320, zIndex: 1 }}>
         <TouchableOpacity
-          style={{
-            backgroundColor: "green",
-            // paddingHorizontal: 20,
-            // paddingVertical: 10,
-            borderRadius: 50,
-            width: 50,
-            height: 50,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={() => {
-            navigation.navigate("inviteguest", { itemdata });
-          }}
+          style={styles.fab}
+          onPress={() => navigation.navigate("inviteguest", { itemdata })}
         >
-          <MaterialIcons name="mode-edit" size={24} color="black" />
+          <MaterialIcons name="edit" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
+      {/* QR Code Modal */}
       <CenterReuseModals
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
       >
-        <View
-          style={{
-            backgroundColor: "white",
-            padding: 20,
-            borderRadius: 10,
-            elevation: 5,
-            width: "90%",
-            height: "50%",
-          }}
-        >
-          <TouchableOpacity onPress={() => setModalVisible(false)}>
-            <MaterialIcons name="cancel" size={24} color="black" />
-          </TouchableOpacity>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "500",
-              fontFamily: "RobotoSlab-Medium",
-              color: "black",
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            Qrcode
-          </Text>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Guest QR Code</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <MaterialCommunityIcons
+                name="close-circle"
+                size={28}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
+          </View>
 
           {qrCodeValue !== "" && (
-            <View
-              style={{
-                marginTop: 20,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {console.log({
-                sssdd: qrCodeValue,
-              })}
-              <QRCode
-                value={qrCodeValue}
-                size={200}
-                color="black"
-                backgroundColor="white"
-              />
+            <View style={styles.qrWrapper}>
+              <ViewShot
+                ref={viewShotRef}
+                options={{ format: "png", quality: 1.0 }}
+                style={styles.qrViewShot}
+              >
+                <QRCode
+                  value={qrCodeValue}
+                  size={220}
+                  color="#111827"
+                  backgroundColor="white"
+                />
+              </ViewShot>
+              <Text style={styles.qrInstruction}>
+                Scan this code at the security gate
+              </Text>
             </View>
           )}
 
-          <Text style={{ textAlign: "center", marginTop: 30, fontSize: 16 }}>
-            Screen Short and send to Guest
-          </Text>
-
-          {/* <TouchableOpacity
+          <TouchableOpacity
+            style={styles.shareQrButton}
             onPress={captureAndShare}
-            style={{
-              marginTop: 20,
-              backgroundColor: "#007AFF",
-              padding: 10,
-              borderRadius: 5,
-              alignSelf: "center",
-            }}
           >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "bold",
-                color: "white",
-                textAlign: "center",
-              }}
-            >
-              Share QR Code
-            </Text>
-          </TouchableOpacity> */}
+            <MaterialCommunityIcons
+              name="share-variant"
+              size={20}
+              color="#FFFFFF"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.shareQrButtonText}>Share QR Code</Text>
+          </TouchableOpacity>
         </View>
       </CenterReuseModals>
-    </View>
+    </AppScreen>
   );
 };
+
+// Helper Components
+const InfoRow = ({ icon, label, value }) => (
+  <View style={styles.infoRow}>
+    <View style={styles.infoIconContainer}>
+      <MaterialCommunityIcons name={icon} size={20} color="#6B7280" />
+    </View>
+    <View style={styles.infoTextContainer}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value || "N/A"}</Text>
+    </View>
+  </View>
+);
+
+const TimelineItem = ({ icon, label, value, color }) => (
+  <View style={styles.timelineItem}>
+    <View
+      style={[styles.timelineIconContainer, { backgroundColor: `${color}15` }]}
+    >
+      <MaterialCommunityIcons name={icon} size={20} color={color} />
+    </View>
+    <View style={styles.timelineContent}>
+      <Text style={styles.timelineLabel}>{label}</Text>
+      <Text style={styles.timelineValue}>{value}</Text>
+    </View>
+  </View>
+);
 
 export default GuestsDetail;
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
   container: {
     flex: 1,
-    padding: 20,
-    // justifyContent: "center",
-    // alignItems: "center",
-    // backgroundColor: "#f0f0f0",
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 100,
   },
-  title: {
+
+  // Header Card
+  headerCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 16,
+    alignItems: "center",
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  headerIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  headerTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
+    fontWeight: "700",
+    color: "#111827",
+    letterSpacing: 0.3,
+    marginBottom: 8,
   },
-  detailsContainer: {
-    // backgroundColor: "#fff",
+  headerSubtitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B7280",
+    textAlign: "center",
+  },
+
+  // Status Card
+  statusCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     padding: 20,
-    borderRadius: 10,
-    elevation: 3,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  text: {
+  statusIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  statusTextContainer: {
+    flex: 1,
+  },
+  statusLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginBottom: 6,
+  },
+  statusBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+
+  // Section Card Common Styles
+  infoCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  accessCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  timelineCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  sectionTitle: {
     fontSize: 16,
-    marginBottom: 15,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 0.3,
+  },
+
+  // Info Row
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F9FAFB",
+  },
+  infoIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  infoTextContainer: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#111827",
+  },
+
+  // Access Code
+  accessCodeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  accessCodeBox: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: "#10B981",
+    borderStyle: "dashed",
+  },
+  accessCodeText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#111827",
+    letterSpacing: 2,
+    textAlign: "center",
+  },
+  shareButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 12,
+  },
+  accessCodeHint: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6B7280",
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+
+  // Timeline
+  timelineItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  timelineIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  timelineValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  departureButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#D1FAE5",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    gap: 6,
+    marginTop: 8,
+  },
+  departureButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#10B981",
+  },
+
+  // Action Buttons
+  actionSection: {
+    gap: 12,
+    marginTop: 8,
+  },
+  qrButton: {
+    backgroundColor: "#10B981",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+    gap: 8,
+  },
+  qrButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
+  },
+  cancelButton: {
+    backgroundColor: "#DC2626",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: "#DC2626",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+    gap: 8,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
+  },
+
+  // FAB
+  fab: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+
+  // Modal
+  modalContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 24,
+    width: "90%",
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    letterSpacing: 0.3,
+  },
+  qrWrapper: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  qrViewShot: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  qrInstruction: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#6B7280",
+    textAlign: "center",
+    marginTop: 16,
+    lineHeight: 18,
+  },
+  shareQrButton: {
+    backgroundColor: "#10B981",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 16,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  shareQrButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
   },
 });

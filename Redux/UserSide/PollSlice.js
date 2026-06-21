@@ -3,12 +3,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { AnyIfEmpty } from "react-redux";
 import Toast from "react-native-toast-message";
 import { handleApiError } from "../shareApi";
 import { Alert } from "react-native";
+import { API_CONFIG } from "../../api";
+
+const API_BASEURL = API_CONFIG?.BASE_URL; //process.env.EXPO_PUBLIC_API_URL;
 
 // import { Alert } from "react-native";
 
@@ -32,16 +34,22 @@ export const Get_All_Polls_Fun = createAsyncThunk(
   "PollSlice/Get_All_Polls_Fun",
   async (_, thunkAPI) => {
     try {
-      let clan_id_admin =
-        thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
-          ?.AdmincurrentClanMeeting;
-      let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
-      let clan_id =
-        thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
-          ?.currentClanMeeting?._id;
+      let token_Data = thunkAPI.getState().authSlice?.userDatav2?.data?.token;
+
+      // let clan_id_admin =
+      //   thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
+      //     ?.AdmincurrentClanMeeting;
+      // let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
+      // let clan_id =
+      //   thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
+      //     ?.currentClanMeeting?._id;
+
+      // console.log({
+      //   ddf: clan_id_admin,
+      // });
 
       console.log({
-        ddf: clan_id_admin,
+        ttt: token_Data,
       });
 
       const config = {
@@ -54,11 +62,11 @@ export const Get_All_Polls_Fun = createAsyncThunk(
 
       let response;
 
-      if (clan_id_admin) {
-        response = await axios.get(`${API_BASEURL}poll`, config);
-      } else {
-        response = await axios.get(`${API_BASEURL}poll/user`, config);
-      }
+      response = await axios.get(`${API_BASEURL}api/v1/poll`, config);
+
+      console.log({
+        yyy: response,
+      });
 
       return response.data;
     } catch (error) {
@@ -71,7 +79,7 @@ export const Get_All_Polls_Fun = createAsyncThunk(
       });
       return thunkAPI.rejectWithValue(error?.response?.data?.message);
     }
-  }
+  },
 );
 
 export const Get_Single_Polls_Fun = createAsyncThunk(
@@ -89,7 +97,7 @@ export const Get_Single_Polls_Fun = createAsyncThunk(
           Authorization: `Bearer ${token_Data}`,
         },
       };
-      const response = await axios.get(`${API_BASEURL}poll/${id}`, config);
+      const response = await axios.get(`${API_BASEURL}api/v1/poll/`, config);
 
       return response.data;
     } catch (error) {
@@ -99,7 +107,7 @@ export const Get_Single_Polls_Fun = createAsyncThunk(
       });
       return thunkAPI.rejectWithValue(error?.response?.data?.message);
     }
-  }
+  },
 );
 
 export const PollSlice = createSlice({

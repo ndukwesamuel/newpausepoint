@@ -1,6 +1,5 @@
 // import { View, Text, Button } from "react-native";
 import React from "react";
-import ElectricityPaymentScreen from "./ElectricityPaymentScreen";
 import HistoryScreen from "./HistoryScreen";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";

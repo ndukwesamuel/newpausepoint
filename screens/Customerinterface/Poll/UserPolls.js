@@ -1,477 +1,203 @@
-// import AppScreen from "../../../components/shared/AppScreen";
-// import {
-//   View,
-//   Text,
-//   Button,
-//   Platform,
-//   TouchableOpacity,
-//   KeyboardAvoidingView,
-//   ScrollView,
-//   Image,
-//   FlatList,
-//   StyleSheet,
-//   TextInput,
-//   RefreshControl,
-// } from "react-native";
-// import React, { useEffect, useRef, useState } from "react";
-// import LottieView from "lottie-react-native";
-// import { useMutation } from "react-query";
-// const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-// import axios from "axios";
-// import Toast from "react-native-toast-message";
-// import * as ImagePicker from "expo-image-picker";
-// import { MaterialIcons } from "@expo/vector-icons";
-// import { Ionicons, AntDesign } from "@expo/vector-icons";
-
-// import DateTimePicker from "@react-native-community/datetimepicker";
-
-// import { useDispatch, useSelector } from "react-redux";
-
-// import {
-//   NavigationContainer,
-//   NavigationProp,
-//   useNavigation,
-// } from "@react-navigation/native";
-// import { Get_All_Polls_Fun } from "../../../Redux/UserSide/PollSlice";
-// import { formatDateandTime } from "../../../utils/DateTime";
-
-// const UserPolls = () => {
-//   const [polls, setPolls] = useState([]);
-//   const { get_all_poll_data } = useSelector((state) => state?.PollSlice);
-//   const { get_user_profile_data } = useSelector(
-//     (state) => state?.UserProfileSlice
-//   );
-//   const [refreshing, setRefreshing] = useState(false);
-
-//   const dispatch = useDispatch();
-//   const navigation = useNavigation();
-//   const animation = useRef(null);
-//   const [searchQuery, setSearchQuery] = useState("");
-
-//   const onRefresh = () => {
-//     // Set the refreshing state to true
-//     setRefreshing(true);
-//     dispatch(Get_All_Polls_Fun());
-
-//     // Wait for 2 seconds
-//     setRefreshing(false);
-//   };
-
-//   useEffect(() => {
-//     dispatch(Get_All_Polls_Fun());
-//   }, []);
-
-//   const filteredData = get_all_poll_data?.data?.filter((item) =>
-//     item?.question?.toLowerCase().includes(searchQuery?.toLowerCase())
-//   );
-
-//   console.log({
-//     fff: get_all_poll_data,
-//   });
-
-//   const HistoryItem = ({ itemdata }) => {
-//     return (
-//       <TouchableOpacity
-//         style={{
-//           flexDirection: "row",
-//           // justifyContent: "space-around",
-//           paddingHorizontal: 10,
-//           borderWidth: 1,
-//           borderColor: "#CFCDCD",
-//           marginBottom: 10,
-//           paddingVertical: 10,
-//           borderRadius: 9,
-//         }}
-//         onPress={() => {
-//           navigation.navigate("estatepollsdetail", { itemdata });
-//         }}
-//       >
-//         <View>
-//           <View style={{ flexDirection: "row", alignItems: "center", gap: 25 }}>
-//             <Text
-//               style={{
-//                 fontSize: 11,
-//                 fontFamily: "RobotoSlab-Medium",
-//                 fontWeight: "500",
-//               }}
-//             >
-//               Question
-//             </Text>
-//             <Text
-//               style={{
-//                 fontSize: 14,
-//                 fontFamily: "Inter-SemiBold",
-//                 fontWeight: "600",
-//               }}
-//             >
-//               {itemdata?.question}
-//             </Text>
-//           </View>
-
-//           <View style={{ flexDirection: "row", alignItems: "center", gap: 25 }}>
-//             <Text
-//               style={{
-//                 fontSize: 11,
-//                 fontFamily: "RobotoSlab-Medium",
-//                 fontWeight: "500",
-//               }}
-//             >
-//               Date
-//             </Text>
-//             <Text
-//               style={{
-//                 fontSize: 14,
-//                 fontFamily: "Inter-SemiBold",
-//                 fontWeight: "600",
-//               }}
-//             >
-//               {formatDateandTime(itemdata?.createdAt)}
-//             </Text>
-//           </View>
-//         </View>
-//       </TouchableOpacity>
-//     );
-//   };
-
-//   return (
-//     <View style={{ flex: 1, padding: 20 }}>
-//       {get_user_profile_data?.currentClanMeeting?._id ? (
-//         <>
-//           <View
-//             style={{
-//               flex: 1,
-//               justifyContent: "center",
-//               paddingHorizontal: 20,
-//             }}
-//           >
-//             <TextInput
-//               style={{
-//                 height: 40,
-//                 borderColor: "gray",
-//                 borderWidth: 1,
-//                 marginBottom: 10,
-//                 paddingLeft: 10,
-//               }}
-//               placeholder="Search by Visitor Name"
-//               value={searchQuery}
-//               onChangeText={(text) => setSearchQuery(text)}
-//             />
-
-//             {filteredData?.length === 0 ? (
-//               <ScrollView
-//                 // style={{
-//                 //   flex: 1,
-//                 //   justifyContent: "center",
-//                 //   alignItems: "center",
-//                 // }}
-
-//                 contentContainerStyle={{
-//                   alignItems: "center",
-//                   justifyContent: "center",
-//                   flex: 1,
-//                 }}
-//                 refreshControl={
-//                   <RefreshControl
-//                     refreshing={refreshing}
-//                     onRefresh={onRefresh}
-//                   />
-//                 }
-//               >
-//                 <LottieView
-//                   autoPlay
-//                   ref={animation}
-//                   style={{
-//                     width: 200,
-//                     height: 200,
-//                     // backgroundColor: "#eee",
-//                   }}
-//                   // Find more Lottie files at https://lottiefiles.com/featured
-//                   source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
-//                 />
-//               </ScrollView>
-//             ) : (
-//               <FlatList
-//                 refreshControl={
-//                   <RefreshControl
-//                     refreshing={refreshing}
-//                     onRefresh={onRefresh}
-//                   />
-//                 }
-//                 data={filteredData}
-//                 renderItem={({ item }) => <HistoryItem itemdata={item} />}
-//               />
-//             )}
-//           </View>
-//         </>
-//       ) : (
-//         <ScrollView
-//           contentContainerStyle={{
-//             flex: 1,
-//             justifyContent: "center",
-//             alignItems: "center",
-//           }}
-//           refreshControl={
-//             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-//           }
-//         >
-//           <TouchableOpacity
-//             style={{
-//               borderWidth: 1,
-//               borderColor: "#D9D9D9",
-//               padding: 10,
-//               borderRadius: 6,
-//             }}
-//             onPress={() => navigation.navigate("myclan")}
-//           >
-//             <Text> Click join a clan </Text>
-//           </TouchableOpacity>
-//         </ScrollView>
-//       )}
-//     </View>
-//   );
-// };
-
 // export default UserPolls;
 
-import AppScreen from "../../../components/shared/AppScreen";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  Button,
-  Platform,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  ScrollView,
-  Image,
   FlatList,
   StyleSheet,
   TextInput,
   RefreshControl,
-  Dimensions,
   StatusBar,
+  Animated,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
-import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
-import Toast from "react-native-toast-message";
-import * as ImagePicker from "expo-image-picker";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
-
-import DateTimePicker from "@react-native-community/datetimepicker";
-
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
+import LottieView from "lottie-react-native";
 
-import {
-  NavigationContainer,
-  NavigationProp,
-  useNavigation,
-} from "@react-navigation/native";
 import { Get_All_Polls_Fun } from "../../../Redux/UserSide/PollSlice";
 import { formatDateandTime } from "../../../utils/DateTime";
-
-const { width } = Dimensions.get("window");
+import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 
 const UserPolls = () => {
-  const [polls, setPolls] = useState([]);
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const animation = useRef(null);
+
   const { get_all_poll_data } = useSelector((state) => state?.PollSlice);
   const { get_user_profile_data } = useSelector(
-    (state) => state?.UserProfileSlice
+    (state) => state?.UserProfileSlice,
   );
-  const [refreshing, setRefreshing] = useState(false);
 
-  const dispatch = useDispatch();
-  const navigation = useNavigation();
-  const animation = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    dispatch(Get_All_Polls_Fun());
-    setRefreshing(false);
-  };
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     dispatch(Get_All_Polls_Fun());
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    dispatch(Get_All_Polls_Fun()).finally(() => setRefreshing(false));
+  };
+
   const filteredData = get_all_poll_data?.data?.filter((item) =>
-    item?.question?.toLowerCase().includes(searchQuery?.toLowerCase())
+    item?.question?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const HistoryItem = ({ itemdata, index }) => {
+  const totalPolls = get_all_poll_data?.data?.length || 0;
+
+  // ── Poll card ────────────────────────────────────────────
+  const PollCard = ({ item, index }) => {
+    const isNew =
+      new Date(item?.createdAt) >
+      new Date(Date.now() - 1000 * 60 * 60 * 24 * 2); // within 2 days
+
+
+      console.log("Poll item:", item);
+
     return (
       <TouchableOpacity
-        style={[styles.pollCard, { marginTop: index === 0 ? 0 : 16 }]}
-        onPress={() => {
-          navigation.navigate("estatepollsdetail", { itemdata });
-        }}
-        activeOpacity={0.7}
+        style={styles.card}
+        onPress={() =>
+          navigation.navigate("estatepollsdetail", { itemdata: item })
+        }
+        activeOpacity={0.85}
       >
-        <View style={styles.pollHeader}>
-          <View style={styles.pollIcon}>
-            <Ionicons name="chatbubble-ellipses" size={20} color="#4A90E2" />
+        {/* Card header */}
+        <View style={styles.cardHeader}>
+          <View style={styles.cardIconWrap}>
+            <MaterialCommunityIcons name="poll" size={20} color="#10B981" />
           </View>
-          <View style={styles.pollBadge}>
-            <Text style={styles.pollBadgeText}>Poll</Text>
+          <View style={styles.cardBadgeRow}>
+            {isNew && (
+              <View style={styles.newBadge}>
+                <Text style={styles.newBadgeText}>NEW</Text>
+              </View>
+            )}
+            <View style={styles.pollBadge}>
+              <Text style={styles.pollBadgeText}>Poll</Text>
+            </View>
           </View>
         </View>
 
-        <View style={styles.pollContent}>
+        {/* Question */}
+        <View style={styles.cardBody}>
           <Text style={styles.questionLabel}>Question</Text>
-          <Text style={styles.questionText} numberOfLines={2}>
-            {itemdata?.question}
+          <Text style={styles.questionText} numberOfLines={3}>
+            {item?.question}
           </Text>
         </View>
 
-        <View style={styles.pollFooter}>
-          <View style={styles.dateContainer}>
-            <Ionicons name="time-outline" size={14} color="#8E8E93" />
+        {/* Footer */}
+        <View style={styles.cardFooter}>
+          <View style={styles.dateRow}>
+            <MaterialCommunityIcons
+              name="clock-outline"
+              size={13}
+              color="#9CA3AF"
+            />
             <Text style={styles.dateText}>
-              {formatDateandTime(itemdata?.createdAt)}
+              {formatDateandTime(item?.createdAt)}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+          <View style={styles.viewBtn}>
+            <Text style={styles.viewBtnText}>View</Text>
+            <MaterialCommunityIcons
+              name="arrow-right"
+              size={14}
+              color="#10B981"
+            />
+          </View>
         </View>
       </TouchableOpacity>
     );
   };
 
+  // ── Empty state ──────────────────────────────────────────
   const EmptyState = () => (
-    <View style={styles.emptyContainer}>
+    <View style={styles.emptyWrap}>
       <LottieView
         autoPlay
         ref={animation}
-        style={styles.lottieAnimation}
+        style={styles.lottie}
         source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
       />
-      <Text style={styles.emptyTitle}>No Polls Found</Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={styles.emptyTitle}>
+        {searchQuery ? "No results found" : "No polls yet"}
+      </Text>
+      <Text style={styles.emptySub}>
         {searchQuery
-          ? "Try adjusting your search terms"
+          ? "Try a different search term"
           : "Pull down to refresh and check for new polls"}
       </Text>
     </View>
   );
 
-  const SearchHeader = () => (
-    <View style={styles.searchContainer}>
-      <View style={styles.searchInputContainer}>
-        <Ionicons
-          name="search"
+  return (
+    <View style={styles.container}>
+      {/* ── Page header ─────────────────────── */}
+      <View style={styles.pageHeader}>
+        <View>
+          <Text style={styles.pageTitle}>Estate Polls</Text>
+          <Text style={styles.pageSub}>
+            {totalPolls} poll{totalPolls !== 1 ? "s" : ""} from your estate
+          </Text>
+        </View>
+        <View style={styles.statBadge}>
+          <MaterialCommunityIcons name="poll" size={16} color="#10B981" />
+          <Text style={styles.statBadgeText}>{totalPolls}</Text>
+        </View>
+      </View>
+
+      {/* ── Search ──────────────────────────── */}
+      <View style={styles.searchRow}>
+        <MaterialCommunityIcons
+          name="magnify"
           size={20}
-          color="#8E8E93"
-          style={styles.searchIcon}
+          color="#9CA3AF"
+          style={{ marginRight: 8 }}
         />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search polls by question..."
-          placeholderTextColor="#8E8E93"
+          placeholder="Search polls..."
+          placeholderTextColor="#9CA3AF"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity
-            onPress={() => setSearchQuery("")}
-            style={styles.clearButton}
-          >
-            <Ionicons name="close-circle" size={20} color="#8E8E93" />
+          <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <MaterialCommunityIcons
+              name="close-circle"
+              size={18}
+              color="#9CA3AF"
+            />
           </TouchableOpacity>
         )}
       </View>
-    </View>
-  );
 
-  const JoinClanPrompt = () => (
-    <View style={styles.joinClanContainer}>
-      <View style={styles.joinClanCard}>
-        <View style={styles.joinClanIcon}>
-          <Ionicons name="people" size={40} color="#4A90E2" />
-        </View>
-        <Text style={styles.joinClanTitle}>Join a Clan</Text>
-        <Text style={styles.joinClanSubtitle}>
-          Connect with your community and participate in polls by joining a clan
-          first.
-        </Text>
-        <TouchableOpacity
-          style={styles.joinClanButton}
-          onPress={() => navigation.navigate("myclan")}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.joinClanButtonText}>Join Clan</Text>
-          <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-      {get_user_profile_data?.currentClanMeeting?._id ? (
-        <>
-          <SearchHeader />
-
-          <View style={styles.contentContainer}>
-            {filteredData?.length === 0 ? (
-              <ScrollView
-                contentContainerStyle={styles.scrollContainer}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    colors={["#4A90E2"]}
-                    tintColor="#4A90E2"
-                  />
-                }
-                showsVerticalScrollIndicator={false}
-              >
-                <EmptyState />
-              </ScrollView>
-            ) : (
-              <FlatList
-                data={filteredData}
-                renderItem={({ item, index }) => (
-                  <HistoryItem itemdata={item} index={index} />
-                )}
-                keyExtractor={(item, index) =>
-                  item?.id?.toString() || index.toString()
-                }
-                contentContainerStyle={styles.listContainer}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    colors={["#4A90E2"]}
-                    tintColor="#4A90E2"
-                  />
-                }
-              />
-            )}
-          </View>
-        </>
-      ) : (
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#4A90E2"]}
-              tintColor="#4A90E2"
-            />
-          }
-          showsVerticalScrollIndicator={false}
-        >
-          <JoinClanPrompt />
-        </ScrollView>
-      )}
+      {/* ── List ────────────────────────────── */}
+      <FlatList
+        data={filteredData}
+        keyExtractor={(item, index) =>
+          item?._id?.toString() || index.toString()
+        }
+        renderItem={({ item, index }) => <PollCard item={item} index={index} />}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#10B981"
+            colors={["#10B981"]}
+          />
+        }
+        ListEmptyComponent={<EmptyState />}
+        ItemSeparatorComponent={() => <View style={{ height: 14 }} />}
+      />
     </View>
   );
 };
@@ -479,206 +205,207 @@ const UserPolls = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#F9FAFB",
   },
-  searchContainer: {
-    backgroundColor: "#FFFFFF",
+
+  // Page header
+  pageHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 20,
     paddingBottom: 12,
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
+    borderBottomColor: "#F3F4F6",
   },
-  searchInputContainer: {
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#111827",
+    letterSpacing: -0.4,
+  },
+  pageSub: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  statBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F2F2F7",
-    borderRadius: 12,
+    backgroundColor: "#D1FAE5",
     paddingHorizontal: 12,
-    height: 44,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 5,
   },
-  searchIcon: {
-    marginRight: 8,
+  statBadgeText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#065F46",
+  },
+
+  // Search
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: "#000000",
-    fontFamily: "Inter-Regular",
+    fontSize: 15,
+    color: "#111827",
+    fontWeight: "500",
   },
-  clearButton: {
-    padding: 4,
+
+  listContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 100,
   },
-  contentContainer: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
-  listContainer: {
-    padding: 20,
-  },
-  pollCard: {
+
+  // Poll card
+  card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
   },
-  pollHeader: {
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
   },
-  pollIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#E3F2FD",
+  cardIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#D1FAE5",
     justifyContent: "center",
     alignItems: "center",
   },
-  pollBadge: {
-    backgroundColor: "#4A90E2",
+  cardBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  newBadge: {
+    backgroundColor: "#FEF3C7",
     paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  newBadgeText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#92400E",
+    letterSpacing: 0.5,
+  },
+  pollBadge: {
+    backgroundColor: "#D1FAE5",
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   pollBadgeText: {
-    color: "#FFFFFF",
     fontSize: 12,
-    fontFamily: "Inter-Medium",
-    fontWeight: "500",
+    fontWeight: "700",
+    color: "#065F46",
   },
-  pollContent: {
-    marginBottom: 16,
+
+  cardBody: {
+    marginBottom: 14,
   },
   questionLabel: {
-    fontSize: 12,
-    color: "#8E8E93",
-    fontFamily: "RobotoSlab-Medium",
-    fontWeight: "500",
-    marginBottom: 4,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#9CA3AF",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
+    marginBottom: 5,
   },
   questionText: {
     fontSize: 16,
-    color: "#1C1C1E",
-    fontFamily: "Inter-SemiBold",
-    fontWeight: "600",
-    lineHeight: 22,
+    fontWeight: "700",
+    color: "#111827",
+    lineHeight: 23,
+    letterSpacing: -0.2,
   },
-  pollFooter: {
+
+  cardFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    paddingTop: 12,
   },
-  dateContainer: {
+  dateRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
   },
   dateText: {
-    fontSize: 14,
-    color: "#8E8E93",
-    fontFamily: "Inter-Regular",
-    marginLeft: 4,
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "500",
   },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 40,
-    paddingVertical: 60,
-  },
-  lottieAnimation: {
-    width: 200,
-    height: 200,
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontFamily: "Inter-SemiBold",
-    fontWeight: "600",
-    color: "#1C1C1E",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    fontFamily: "Inter-Regular",
-    color: "#8E8E93",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  joinClanContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  joinClanCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 32,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
-    width: width - 40,
-    maxWidth: 320,
-  },
-  joinClanIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#E3F2FD",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  joinClanTitle: {
-    fontSize: 24,
-    fontFamily: "Inter-Bold",
-    fontWeight: "700",
-    color: "#1C1C1E",
-    marginBottom: 12,
-  },
-  joinClanSubtitle: {
-    fontSize: 16,
-    fontFamily: "Inter-Regular",
-    color: "#8E8E93",
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  joinClanButton: {
-    backgroundColor: "#4A90E2",
+  viewBtn: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 25,
-    minWidth: 140,
+    gap: 4,
+    backgroundColor: "#F0FDF4",
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
-  joinClanButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontFamily: "Inter-SemiBold",
-    fontWeight: "600",
-    marginRight: 8,
+  viewBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#10B981",
+  },
+
+  // Empty
+  emptyWrap: {
+    alignItems: "center",
+    paddingTop: 60,
+    paddingHorizontal: 32,
+    gap: 8,
+  },
+  lottie: {
+    width: 180,
+    height: 180,
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontSize: 19,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  emptySub: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    textAlign: "center",
+    lineHeight: 21,
+    fontWeight: "500",
   },
 });
 

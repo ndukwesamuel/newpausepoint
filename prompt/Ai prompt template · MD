@@ -1,0 +1,306 @@
+# AI PROMPT TEMPLATE FOR SCREEN REDESIGN
+
+## Copy this entire prompt and add your screen code at the bottom
+
+---
+
+**TASK**: Redesign the React Native screen below using the PausePoint Modern Design System.
+
+**REQUIREMENTS**:
+Follow this design system EXACTLY. This is a production app with an established design language. Your redesign must match the WalletScreen aesthetic perfectly.
+
+---
+
+## DESIGN SYSTEM TO FOLLOW
+
+### Colors
+
+```javascript
+PRIMARY_GREEN: '#10B981'
+BACKGROUND: '#F9FAFB'
+CARD_WHITE: '#FFFFFF'
+TEXT_PRIMARY: '#111827'
+TEXT_SECONDARY: '#374151'
+TEXT_TERTIARY: '#6B7280'
+
+// Service Pastels
+YELLOW_BG: '#FEF3C7', YELLOW_ICON: '#F59E0B'
+BLUE_BG: '#DBEAFE', BLUE_ICON: '#3B82F6'
+INDIGO_BG: '#E0E7FF', INDIGO_ICON: '#6366F1'
+RED_BG: '#FEE2E2', RED_ICON: '#DC2626'
+GREEN_BG: '#D1FAE5', GREEN_ICON: '#10B981'
+```
+
+### Standard Card
+
+```javascript
+{
+  backgroundColor: '#FFFFFF',
+  borderRadius: 16,
+  padding: 16,
+  marginBottom: 20,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 3,
+}
+```
+
+### Icon Container
+
+```javascript
+{
+  width: 56,
+  height: 56,
+  borderRadius: 16,
+  backgroundColor: '#FEF3C7', // Use service color
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginBottom: 8,
+}
+// Icon: 24-28px size, colored (not white)
+```
+
+### Section Header
+
+```jsx
+<View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+  <MaterialCommunityIcons
+    name="icon"
+    size={20}
+    color="#10B981"
+    style={{ marginRight: 8 }}
+  />
+  <Text
+    style={{
+      fontSize: 16,
+      fontWeight: "700",
+      color: "#1F2937",
+      letterSpacing: 0.3,
+    }}
+  >
+    Section Title
+  </Text>
+</View>
+```
+
+### Primary Button
+
+```javascript
+{
+  backgroundColor: '#10B981',
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  borderRadius: 16,
+  shadowColor: '#10B981',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  elevation: 4,
+}
+```
+
+### Typography
+
+- Headings: 16-20px, weight '700', letterSpacing: 0.3
+- Body: 14px, weight '500'
+- Labels: 12px, weight '500'
+
+### Spacing
+
+- Container: paddingHorizontal: 16, paddingVertical: 20
+- Cards: padding: 16
+- Sections: marginBottom: 20
+- Icon containers: 56x56px
+
+### Critical Rules
+
+1. ❌ NO BORDERS on cards → ✅ Use shadows only
+2. ❌ NO solid colored icon backgrounds → ✅ Use pastel tints
+3. ❌ NO white icons → ✅ Use colored icons on pastel backgrounds
+4. ✅ ALL cards must be white (#FFFFFF)
+5. ✅ Screen background must be #F9FAFB
+6. ✅ Border radius: 16px (default), 20px (hero cards)
+7. ✅ Add section headers with icons (20px, #10B981)
+8. ✅ Add letter spacing (0.3) to all headings
+9. ✅ Use numeric font weights ('500', '600', '700')
+10. ✅ Icons: 56x56px containers, 24-28px icons
+
+---
+
+## REDESIGN INSTRUCTIONS
+
+1. **Replace ScrollView/Container**:
+
+   - Background: #F9FAFB
+   - Add showsVerticalScrollIndicator={false}
+   - Container padding: 16px horizontal, 20px vertical
+
+2. **Convert all sections to white cards**:
+
+   - Remove any borders
+   - Add shadow (copy from Standard Card above)
+   - Add section header with icon
+
+3. **Update all icon containers**:
+
+   - Size: 56x56px
+   - Border radius: 16px
+   - Pastel backgrounds (not solid colors)
+   - Colored icons (not white)
+
+4. **Update all buttons**:
+
+   - Use Primary Button style above
+   - Add icons if relevant
+   - Add colored shadows
+
+5. **Update typography**:
+
+   - Add letter spacing to headings
+   - Use numeric font weights
+   - Update font sizes per hierarchy
+
+6. **Update modals** (if any):
+
+   - Change to bottom sheet style
+   - justifyContent: 'flex-end'
+   - Round top corners only (24px)
+
+7. **Remove all**:
+   - Border styles
+   - borderWidth, borderColor
+   - Solid colored backgrounds (except primary green for hero)
+   - White icons on colored backgrounds
+
+---
+
+## EXAMPLE TRANSFORMATION
+
+### ❌ BEFORE (Old Style)
+
+```jsx
+<View
+  style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 5, padding: 10 }}
+>
+  <Text style={{ fontSize: 14, fontWeight: "bold" }}>Title</Text>
+  <TouchableOpacity
+    style={{ backgroundColor: "#4CAF50", padding: 10, borderRadius: 5 }}
+  >
+    <View style={{ width: 40, height: 40, backgroundColor: "#4CAF50" }}>
+      <Icon name="home" size={20} color="white" />
+    </View>
+  </TouchableOpacity>
+</View>
+```
+
+### ✅ AFTER (New Style)
+
+```jsx
+<View
+  style={{
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  }}
+>
+  <View
+    style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}
+  >
+    <MaterialCommunityIcons
+      name="home"
+      size={20}
+      color="#10B981"
+      style={{ marginRight: 8 }}
+    />
+    <Text
+      style={{
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#1F2937",
+        letterSpacing: 0.3,
+      }}
+    >
+      Title
+    </Text>
+  </View>
+  <TouchableOpacity
+    style={{
+      backgroundColor: "#10B981",
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 16,
+      shadowColor: "#10B981",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 4,
+    }}
+  >
+    <View
+      style={{
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        backgroundColor: "#D1FAE5",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <MaterialCommunityIcons name="home" size={26} color="#10B981" />
+    </View>
+  </TouchableOpacity>
+</View>
+```
+
+---
+
+## OUTPUT REQUIREMENTS
+
+1. Return the COMPLETE redesigned component code
+2. Update ALL StyleSheet styles to match design system
+3. Maintain ALL original functionality
+4. Add comments where you made significant changes
+5. Ensure imports include MaterialCommunityIcons if used
+
+---
+
+## SCREEN CODE TO REDESIGN
+
+[PASTE YOUR SCREEN CODE BELOW THIS LINE]
+
+---
+
+```javascript
+// PASTE YOUR REACT NATIVE SCREEN CODE HERE
+```
+
+---
+
+## VALIDATION CHECKLIST
+
+After redesign, verify:
+
+- [ ] ScrollView background is #F9FAFB
+- [ ] All cards are white with shadows (no borders)
+- [ ] All icon containers are 56x56px with pastel backgrounds
+- [ ] Icons are 24-28px and colored (not white)
+- [ ] All sections have headers with icons
+- [ ] All headings have letterSpacing: 0.3
+- [ ] Border radius is 16-20px (not 5-10px)
+- [ ] Buttons use primary green (#10B981)
+- [ ] Font weights are numeric ('700', not 'bold')
+- [ ] Spacing uses multiples of 4
+- [ ] No borderWidth or borderColor anywhere
+- [ ] Looks professional and matches WalletScreen aesthetic
+
+---
+
+**START REDESIGN NOW**

@@ -1,297 +1,5 @@
-// import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   TouchableOpacity,
-//   ActivityIndicator,
-//   ScrollView,
-//   RefreshControl,
-// } from "react-native";
-// import React, { useEffect, useState } from "react";
-// import { useRoute } from "@react-navigation/native";
-// import { MaterialIcons } from "@expo/vector-icons";
-// import { AntDesign } from "@expo/vector-icons";
-// import { useMutation } from "react-query";
-// const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
-// import axios from "axios";
-// import Toast from "react-native-toast-message";
-// import {
-//   Get_All_Polls_Fun,
-//   Get_Single_Polls_Fun,
-// } from "../../../Redux/UserSide/PollSlice";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useNavigation } from "@react-navigation/native";
-// const UserPollDetails = () => {
-//   const dispatch = useDispatch();
-//   const navigation = useNavigation();
-//   const { itemdata } = useRoute()?.params;
-//   const { user_data } = useSelector((state) => state.AuthSlice);
-//   const [loading, setLoading] = useState(true);
-//   const { get_all_poll_data, get_single_poll_data } = useSelector(
-//     (state) => state.PollSlice
-//   );
 
-//   useEffect(() => {
-//     dispatch(Get_Single_Polls_Fun(itemdata?._id));
-//     setLoading(false);
-
-//     return () => {};
-//   }, [dispatch, Vote_Mutation]);
-
-//   const [refreshing, setRefreshing] = useState(false);
-
-//   const onRefresh = () => {
-//     // Set the refreshing state to true
-//     setRefreshing(true);
-//     dispatch(Get_Single_Polls_Fun(itemdata?._id));
-
-//     // Wait for 2 seconds
-//     setRefreshing(false);
-//   };
-
-//   let totalVotes = 0;
-
-//   get_single_poll_data?.data?.options?.forEach((option) => {
-//     totalVotes += option.votes;
-//   });
-
-//   console.log({
-//     totalVotes,
-//   });
-
-//   function calculateTotalVotes(data) {
-//     let totalVotes = {};
-
-//     // return totalVotes;
-//   }
-
-//   const Vote_Mutation = useMutation(
-//     (data_info) => {
-//       let url = `${API_BASEURL}poll/${itemdata?._id}/vote`;
-
-//       const config = {
-//         headers: {
-//           "Content-Type": "application/json",
-//           Accept: "application/json",
-//           //   "Content-Type": "multipart/form-data",
-//           Authorization: `Bearer ${user_data?.token}`,
-//         },
-//       };
-
-//       return axios.post(url, data_info, config);
-//     },
-//     {
-//       onSuccess: (success) => {
-//         Toast.show({
-//           type: "success",
-//           text1: "Post Created  successfully ",
-//         });
-
-//         dispatch(Get_All_Polls_Fun());
-//         dispatch(Get_Single_Polls_Fun(itemdata?._id));
-
-//         // navigation.goBack();
-//       },
-
-//       onError: (error) => {
-//         Toast.show({
-//           type: "error",
-//           text1: `${error?.response?.data?.message} `,
-//           //   text2: ` ${error?.response?.data?.errorMsg} `,
-//         });
-//       },
-//     }
-//   );
-
-//   const castVote = (optionIndex) => {
-//     Vote_Mutation.mutate({
-//       optionIndex: optionIndex,
-//     });
-//     // Perform your vote casting logic here
-//     // Alert.alert("Vote Casted", `You voted for ${options[optionIndex].text}`);
-//     // In a real application, you would send a request to your backend to record the vote
-//   };
-//   return (
-//     <ScrollView
-//       style={styles.container}
-//       refreshControl={
-//         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-//       }
-//     >
-//       {Vote_Mutation?.isLoading && (
-//         <ActivityIndicator size="large" color="green" />
-//       )}
-
-//       <View style={{ flex: 1 }}>
-//         {loading ? (
-//           <ActivityIndicator size="large" color="#0000ff" />
-//         ) : (
-//           <VoteScreen
-//             mainoptions={get_single_poll_data?.data}
-//             castVote={castVote}
-//           />
-//         )}
-//       </View>
-
-//       <View
-//         style={{
-//           flex: 1,
-//           justifyContent: "center",
-//           alignItems: "center",
-//           paddingHorizontal: 20,
-//           backgroundColor: "#fff",
-//         }}
-//       >
-//         <Text
-//           style={{
-//             fontSize: 20,
-//             fontWeight: "bold",
-//             marginBottom: 20,
-//             // textAlign: "center",
-//           }}
-//         >
-//           Total Votes: {totalVotes}
-//         </Text>
-//       </View>
-//     </ScrollView>
-//   );
-// };
-
-// export default UserPollDetails;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     // justifyContent: "center",
-//     // alignItems: "center",
-//     paddingHorizontal: 20,
-//     backgroundColor: "#fff",
-//   },
-//   questionText: {
-//     fontSize: 20,
-//     fontWeight: "bold",
-//     marginBottom: 20,
-//     textAlign: "center",
-//   },
-//   optionButton: {
-//     backgroundColor: "#f0f0f0",
-//     paddingVertical: 10,
-//     paddingHorizontal: 20,
-//     marginVertical: 10,
-//     borderRadius: 10,
-//   },
-//   optionText: {
-//     fontSize: 18,
-//     color: "#333",
-//   },
-//   textInput: {
-//     width: "100%",
-//     height: 100,
-//     borderWidth: 1,
-//     borderColor: "#ccc",
-//     borderRadius: 10,
-//     paddingHorizontal: 10,
-//     marginTop: 20,
-//   },
-// });
-
-// // import React, { useState } from "react";
-// // import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-
-// export function VoteScreen({ mainoptions, castVote }) {
-//   const [selectedOption, setSelectedOption] = useState(null);
-
-//   const handleVote = () => {
-//     if (selectedOption !== null) {
-//       castVote(selectedOption);
-//     }
-//   };
-
-//   return (
-//     <View
-//       style={{
-//         // flex: 1,
-//         // justifyContent: "center",
-//         // alignItems: "center",
-//         paddingHorizontal: 20,
-//       }}
-//     >
-//       <Text
-//         style={{
-//           fontSize: 20,
-//           marginBottom: 20,
-//           textAlign: "center",
-//         }}
-//       >
-//         {mainoptions?.question}
-//       </Text>
-
-//       {mainoptions?.options?.map((option, index) => (
-//         <TouchableOpacity
-//           key={option.text}
-//           style={[
-//             {
-//               backgroundColor: "#e0e0e0",
-//               padding: 10,
-//               marginBottom: 10,
-//               borderRadius: 5,
-//               minWidth: 200,
-//               //   alignItems: "center",
-//             },
-//             selectedOption === index && { backgroundColor: "#b3e5fc" },
-//           ]}
-//           onPress={() => setSelectedOption(index)}
-//         >
-//           <View
-//             style={{
-//               flexDirection: "row",
-//               gap: 10,
-//               justifyContent: "space-between",
-//             }}
-//           >
-//             <Text
-//               style={{
-//                 fontSize: 16,
-//               }}
-//             >
-//               {option.text}
-//             </Text>
-
-//             <Text
-//               style={{
-//                 fontSize: 16,
-//               }}
-//             >
-//               {option.votes}
-//             </Text>
-//           </View>
-//         </TouchableOpacity>
-//       ))}
-//       <TouchableOpacity
-//         style={{
-//           backgroundColor: "#2196F3",
-//           padding: 10,
-//           borderRadius: 5,
-//           minWidth: 200,
-//           alignItems: "center",
-//           marginTop: 20,
-//         }}
-//         onPress={handleVote}
-//         disabled={selectedOption === null}
-//       >
-//         <Text
-//           style={{
-//             fontSize: 18,
-//             color: "white",
-//           }}
-//         >
-//           Vote
-//         </Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// }
 
 import {
   View,
@@ -307,95 +15,57 @@ import {
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
+import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import {
-  Get_All_Polls_Fun,
-  Get_Single_Polls_Fun,
-} from "../../../Redux/UserSide/PollSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-
-const { width } = Dimensions.get("window");
+import { Get_All_Polls_Fun } from "../../../Redux/UserSide/PollSlice";
+import { useDispatch } from "react-redux";
+import { useMutateData_v2 } from "../../../hooks/Requestv2";
 
 const UserPollDetails = () => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
   const { itemdata } = useRoute()?.params;
-  const { user_data } = useSelector((state) => state.AuthSlice);
-  const [loading, setLoading] = useState(true);
-  const { get_all_poll_data, get_single_poll_data } = useSelector(
-    (state) => state.PollSlice
-  );
 
-  useEffect(() => {
-    dispatch(Get_Single_Polls_Fun(itemdata?._id));
-    setLoading(false);
-    return () => {};
-  }, [dispatch, Vote_Mutation]);
-
+  const [pollData, setPollData] = useState(itemdata);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
     setRefreshing(true);
-    dispatch(Get_Single_Polls_Fun(itemdata?._id));
-    setRefreshing(false);
+    dispatch(Get_All_Polls_Fun()).finally(() => setRefreshing(false));
   };
 
-  let totalVotes = 0;
-  get_single_poll_data?.data?.options?.forEach((option) => {
-    totalVotes += option.votes;
-  });
-
-  const Vote_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}poll/${itemdata?._id}/vote`;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-      return axios.post(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Vote cast successfully!",
-        });
-        dispatch(Get_All_Polls_Fun());
-        dispatch(Get_Single_Polls_Fun(itemdata?._id));
-      },
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message}`,
-        });
-      },
-    }
+  // ── Vote mutation ────────────────────────────────────────
+  const { mutate: castVoteMutation, isPending: isVoting } = useMutateData_v2(
+    `api/v1/poll`,
+    "POST",
+    "polls",
   );
 
   const castVote = (optionIndex) => {
-    Vote_Mutation.mutate({
-      optionIndex: optionIndex,
-    });
+    castVoteMutation(
+      { optionIndex, id: pollData?._id },
+      {
+        onSuccess: (response) => {
+          Toast.show({
+            type: "success",
+            text1: "Vote cast successfully!",
+          });
+          if (response?.data) {
+            setPollData(response.data);
+          }
+          dispatch(Get_All_Polls_Fun());
+        },
+        onError: (error) => {
+          Toast.show({
+            type: "error",
+            text1: error?.message || "Failed to cast vote",
+          });
+        },
+      },
+    );
   };
 
-  const LoadingOverlay = () => (
-    <View style={styles.loadingOverlay}>
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={styles.loadingText}>Casting your vote...</Text>
-      </View>
-    </View>
-  );
+  const totalVotes =
+    pollData?.options?.reduce((sum, opt) => sum + (opt.votes || 0), 0) || 0;
 
   return (
     <View style={styles.container}>
@@ -414,40 +84,40 @@ const UserPollDetails = () => {
         }
         showsVerticalScrollIndicator={false}
       >
-        {loading ? (
-          <View style={styles.initialLoadingContainer}>
-            <ActivityIndicator size="large" color="#4A90E2" />
-            <Text style={styles.loadingText}>Loading poll details...</Text>
-          </View>
-        ) : (
-          <>
-            <VoteScreen
-              mainoptions={get_single_poll_data?.data}
-              castVote={castVote}
-              totalVotes={totalVotes}
-              isVoting={Vote_Mutation?.isLoading}
-            />
-          </>
-        )}
+        <VoteScreen
+          mainoptions={pollData}
+          castVote={castVote}
+          totalVotes={totalVotes}
+          isVoting={isVoting}
+        />
       </ScrollView>
 
-      {Vote_Mutation?.isLoading && <LoadingOverlay />}
+      {isVoting && <LoadingOverlay />}
     </View>
   );
 };
+
+const LoadingOverlay = () => (
+  <View style={styles.loadingOverlay}>
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color="#4A90E2" />
+      <Text style={styles.loadingText}>Casting your vote...</Text>
+    </View>
+  </View>
+);
 
 export default UserPollDetails;
 
 export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const animatedValues = useRef(
-    mainoptions?.options?.map(() => new Animated.Value(0)) || []
+    mainoptions?.options?.map(() => new Animated.Value(0)) || [],
   ).current;
 
   useEffect(() => {
-    // Animate progress bars
     mainoptions?.options?.forEach((option, index) => {
-      const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
+      const percentage =
+        totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
       Animated.timing(animatedValues[index], {
         toValue: percentage,
         duration: 1000,
@@ -462,14 +132,13 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
     }
   };
 
-  const getOptionPercentage = (votes) => {
-    return totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : 0;
-  };
+  const getOptionPercentage = (votes) =>
+    totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : 0;
 
   const getLeadingOption = () => {
-    if (!mainoptions?.options || mainoptions.options.length === 0) return null;
+    if (!mainoptions?.options?.length) return null;
     return mainoptions.options.reduce((prev, current) =>
-      prev.votes > current.votes ? prev : current
+      prev.votes > current.votes ? prev : current,
     );
   };
 
@@ -483,7 +152,6 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
           <Ionicons name="bar-chart" size={24} color="#4A90E2" />
         </View>
         <Text style={styles.questionText}>{mainoptions?.question}</Text>
-
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{totalVotes}</Text>
@@ -500,17 +168,17 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
       </View>
 
       {/* Leading Option Banner */}
-      {totalVotes > 0 && leadingOption && (
+      {totalVotes > 0 && leadingOption && leadingOption.votes > 0 && (
         <View style={styles.leadingBanner}>
           <Ionicons name="trophy" size={20} color="#FFD700" />
           <Text style={styles.leadingText}>
             "{leadingOption.text}" is currently leading with{" "}
-            {leadingOption.votes} votes
+            {leadingOption.votes} vote{leadingOption.votes !== 1 ? "s" : ""}
           </Text>
         </View>
       )}
 
-      {/* Options List */}
+      {/* Options */}
       <View style={styles.optionsContainer}>
         <Text style={styles.sectionTitle}>Cast Your Vote</Text>
 
@@ -520,7 +188,8 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
           const isLeading =
             leadingOption &&
             option.text === leadingOption.text &&
-            totalVotes > 0;
+            totalVotes > 0 &&
+            leadingOption.votes > 0;
 
           return (
             <TouchableOpacity
@@ -555,7 +224,6 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
                       {option.text}
                     </Text>
                   </View>
-
                   <View style={styles.optionRight}>
                     {isLeading && (
                       <Ionicons name="trending-up" size={16} color="#4CAF50" />
@@ -586,8 +254,8 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
                           backgroundColor: isLeading
                             ? "#4CAF50"
                             : isSelected
-                            ? "#4A90E2"
-                            : "#E0E0E0",
+                              ? "#4A90E2"
+                              : "#E0E0E0",
                         },
                       ]}
                     />
@@ -640,29 +308,13 @@ export function VoteScreen({ mainoptions, castVote, totalVotes, isVoting }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F9FA",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 30,
-  },
-  initialLoadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 100,
-  },
+  container: { flex: 1, backgroundColor: "#F8F9FA" },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 30 },
   loadingOverlay: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
@@ -678,15 +330,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#666",
-    fontFamily: "Inter-Medium",
-  },
-  voteContainer: {
-    padding: 20,
-  },
+  loadingText: { marginTop: 12, fontSize: 16, color: "#666" },
+  voteContainer: { padding: 20 },
   headerCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -700,220 +345,74 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pollIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 48, height: 48, borderRadius: 24,
     backgroundColor: "#E3F2FD",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center", alignItems: "center",
     marginBottom: 16,
   },
   questionText: {
-    fontSize: 20,
-    fontFamily: "Inter-Bold",
-    fontWeight: "700",
-    color: "#1C1C1E",
-    textAlign: "center",
-    lineHeight: 26,
-    marginBottom: 20,
+    fontSize: 20, fontWeight: "700", color: "#1C1C1E",
+    textAlign: "center", lineHeight: 26, marginBottom: 20,
   },
-  statsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statItem: {
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontFamily: "Inter-Bold",
-    fontWeight: "700",
-    color: "#4A90E2",
-  },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: "Inter-Medium",
-    color: "#8E8E93",
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: "#E5E5EA",
-  },
+  statsContainer: { flexDirection: "row", alignItems: "center" },
+  statItem: { alignItems: "center", paddingHorizontal: 16 },
+  statNumber: { fontSize: 24, fontWeight: "700", color: "#4A90E2" },
+  statLabel: { fontSize: 12, color: "#8E8E93", marginTop: 4 },
+  statDivider: { width: 1, height: 40, backgroundColor: "#E5E5EA" },
   leadingBanner: {
-    backgroundColor: "#FFF3CD",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    borderLeftWidth: 4,
-    borderLeftColor: "#FFD700",
+    backgroundColor: "#FFF3CD", borderRadius: 12, padding: 12,
+    marginBottom: 16, flexDirection: "row", alignItems: "center",
+    borderLeftWidth: 4, borderLeftColor: "#FFD700",
   },
-  leadingText: {
-    fontSize: 14,
-    fontFamily: "Inter-Medium",
-    color: "#856404",
-    marginLeft: 8,
-    flex: 1,
-  },
-  optionsContainer: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontFamily: "Inter-SemiBold",
-    fontWeight: "600",
-    color: "#1C1C1E",
-    marginBottom: 16,
-  },
+  leadingText: { fontSize: 14, color: "#856404", marginLeft: 8, flex: 1 },
+  optionsContainer: { marginBottom: 24 },
+  sectionTitle: { fontSize: 18, fontWeight: "600", color: "#1C1C1E", marginBottom: 16 },
   optionCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "#F0F0F0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: "#FFFFFF", borderRadius: 12, padding: 16,
+    marginBottom: 12, borderWidth: 2, borderColor: "#F0F0F0",
+    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
   },
-  selectedOption: {
-    borderColor: "#4A90E2",
-    backgroundColor: "#F0F8FF",
-  },
-  leadingOptionCard: {
-    borderColor: "#4CAF50",
-    backgroundColor: "#F1F8E9",
-  },
-  optionContent: {
-    flex: 1,
-  },
+  selectedOption: { borderColor: "#4A90E2", backgroundColor: "#F0F8FF" },
+  leadingOptionCard: { borderColor: "#4CAF50", backgroundColor: "#F1F8E9" },
+  optionContent: { flex: 1 },
   optionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
+    flexDirection: "row", justifyContent: "space-between",
+    alignItems: "center", marginBottom: 12,
   },
-  optionLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
+  optionLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
   radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#C7C7CC",
-    marginRight: 12,
-    justifyContent: "center",
-    alignItems: "center",
+    width: 20, height: 20, borderRadius: 10, borderWidth: 2,
+    borderColor: "#C7C7CC", marginRight: 12,
+    justifyContent: "center", alignItems: "center",
   },
-  radioButtonSelected: {
-    borderColor: "#4A90E2",
-  },
-  radioButtonInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#4A90E2",
-  },
-  optionText: {
-    fontSize: 16,
-    fontFamily: "Inter-Medium",
-    color: "#1C1C1E",
-    flex: 1,
-  },
-  selectedOptionText: {
-    color: "#4A90E2",
-    fontWeight: "600",
-  },
-  leadingOptionText: {
-    color: "#2E7D32",
-    fontWeight: "600",
-  },
-  optionRight: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  voteCount: {
-    fontSize: 16,
-    fontFamily: "Inter-SemiBold",
-    color: "#8E8E93",
-    marginLeft: 4,
-  },
-  leadingVoteCount: {
-    color: "#4CAF50",
-  },
-  progressContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
+  radioButtonSelected: { borderColor: "#4A90E2" },
+  radioButtonInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#4A90E2" },
+  optionText: { fontSize: 16, color: "#1C1C1E", flex: 1 },
+  selectedOptionText: { color: "#4A90E2", fontWeight: "600" },
+  leadingOptionText: { color: "#2E7D32", fontWeight: "600" },
+  optionRight: { flexDirection: "row", alignItems: "center" },
+  voteCount: { fontSize: 16, color: "#8E8E93", marginLeft: 4 },
+  leadingVoteCount: { color: "#4CAF50" },
+  progressContainer: { flexDirection: "row", alignItems: "center" },
   progressBackground: {
-    flex: 1,
-    height: 6,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 3,
-    marginRight: 12,
+    flex: 1, height: 6, backgroundColor: "#F0F0F0",
+    borderRadius: 3, marginRight: 12,
   },
-  progressBar: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  percentageText: {
-    fontSize: 14,
-    fontFamily: "Inter-Medium",
-    color: "#8E8E93",
-    minWidth: 40,
-    textAlign: "right",
-  },
-  leadingPercentage: {
-    color: "#4CAF50",
-    fontWeight: "600",
-  },
-  voteButtonContainer: {
-    alignItems: "center",
-  },
+  progressBar: { height: "100%", borderRadius: 3 },
+  percentageText: { fontSize: 14, color: "#8E8E93", minWidth: 40, textAlign: "right" },
+  leadingPercentage: { color: "#4CAF50", fontWeight: "600" },
+  voteButtonContainer: { alignItems: "center" },
   voteButton: {
-    backgroundColor: "#4A90E2",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 25,
-    minWidth: 160,
-    shadowColor: "#4A90E2",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    backgroundColor: "#4A90E2", flexDirection: "row",
+    alignItems: "center", justifyContent: "center",
+    paddingVertical: 16, paddingHorizontal: 32,
+    borderRadius: 25, minWidth: 160,
+    shadowColor: "#4A90E2", shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 6,
   },
-  voteButtonDisabled: {
-    backgroundColor: "#C7C7CC",
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  voteButtonLoading: {
-    backgroundColor: "#4A90E2",
-  },
-  voteButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontFamily: "Inter-SemiBold",
-    fontWeight: "600",
-    marginLeft: 8,
-  },
-  selectedOptionIndicator: {
-    marginTop: 12,
-    fontSize: 14,
-    fontFamily: "Inter-Regular",
-    color: "#4A90E2",
-    textAlign: "center",
-  },
+  voteButtonDisabled: { backgroundColor: "#C7C7CC", shadowOpacity: 0, elevation: 0 },
+  voteButtonLoading: { backgroundColor: "#4A90E2" },
+  voteButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600", marginLeft: 8 },
+  selectedOptionIndicator: { marginTop: 12, fontSize: 14, color: "#4A90E2", textAlign: "center" },
 });

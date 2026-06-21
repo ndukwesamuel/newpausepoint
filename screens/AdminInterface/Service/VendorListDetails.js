@@ -14,20 +14,17 @@ import {
 import { Rating } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LottieView from "lottie-react-native";
-import { useMutation } from "react-query";
+// --- IMPORTANT: Change this import from 'react-query' to '@tanstack/react-query' ---
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
-// import { All_service__data_Fun } from "../../Redux/UserSide/ServiceSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Get_all_admin_Service__Fun } from "../../../Redux/Admin/AdminServiceSlice";
 
 const VendorListDetails = ({ navigation }) => {
   const item = useRoute().params?.item;
-  console.log({
-    kaka2: item,
-  });
 
   const dispatch = useDispatch();
   const {
@@ -37,52 +34,55 @@ const VendorListDetails = ({ navigation }) => {
     user_isLoading,
     user_message,
   } = useSelector((state) => state.AuthSlice);
+
   const makePhoneCall = () => {
-    // Alert.alert("Call Support", "Are you sure you want to call support?");
-    // Linking.openURL(
-    //   `${Admin_Get_Single_Emergency_Report?.userProfile?.phoneNumber} || 080`
-    // );
-    Linking.openURL(`tel:${item?.phone_number}`);
+    // Safely open URL for phone call
+    if (item?.phone_number) {
+      Linking.openURL(`tel:${item.phone_number}`);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Phone number not available.",
+      });
+    }
   };
 
-  const Delete_Mutation = useMutation(
-    (data_info) => {
+  // --- TanStack Query useMutation for Deleting Vendor ---
+  const Delete_Mutation = useMutation({
+    mutationFn: () => {
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${user_data?.token}`,
         },
       };
 
+      // Construct the URL with the vendorId as a query parameter
       let url = `${API_BASEURL}services/vendors/estate-admin?vendorId=${item?._id}`;
 
       return axios.delete(url, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "successfully ",
-        });
-        dispatch(Get_all_admin_Service__Fun());
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Vendor deleted successfully",
+      });
+      // Dispatch Redux action to refresh the vendor list
+      dispatch(Get_all_admin_Service__Fun());
+      navigation.goBack();
+    },
+    onError: (error) => {
+      // Safely access the error message
+      const errorMessage = error?.response?.data?.message || "Deletion failed";
+      Toast.show({
+        type: "error",
+        text1: errorMessage,
+      });
+    },
+  });
+  // -------------------------------------------------------
 
-        navigation.goBack();
-      },
-
-      onError: (error) => {
-        console.log({
-          jjjjj: error?.response?.data,
-        });
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
   return (
     <ScrollView style={{ backgroundColor: "white", paddingBottom: 20 }}>
       <View style={styles.container}>
@@ -108,7 +108,10 @@ const VendorListDetails = ({ navigation }) => {
           <View>
             <Pressable
               onPress={() => {
-                navigation.navigate("VendortDetailsReview", { item });
+                // Pass the necessary item data for the review screen
+                navigation.navigate("VendortDetailsReview", {
+                  item: item?._id,
+                });
               }}
               style={{ alignItems: "center" }}
             >
@@ -119,46 +122,23 @@ const VendorListDetails = ({ navigation }) => {
               <Text>Reviews</Text>
             </Pressable>
           </View>
-          {/* <TouchableOpacity
-            style={{ alignItems: "center" }}
-            // onPress={() => Like_Mutation.mutate()}
-          >
-            <Icon
-              name="heart"
-              size={20}
-              color="#04973C"
-              style={{ paddingBottom: 5 }}
-            />
-            <Text>
-              {item?.servicelikes?.length}
-              Likes
-            </Text>
-          </TouchableOpacity> */}
+
           <Pressable
             style={{ alignItems: "center" }}
             onPress={() => {
-              navigation.navigate("VendortDetailsReview", { item });
+              navigation.navigate("VendortDetailsReview", { item: item?._id });
             }}
           >
             <Rating
               type="custom"
               ratingCount={5}
               imageSize={20}
-              // startingValue={0}
-              startingValue={item?.avgRating} // Use item.avgRating for the rating value
+              startingValue={item?.avgRating}
               ratingBackgroundColor="white"
-              ratingColor="green"
-              value={3}
+              ratingColor="#04973C" // Use theme color for consistency
               readonly
               style={{ paddingBottom: 5 }}
             />
-
-            {/* <Rating
-              readonly
-              startingValue={item?.avgRating} // Use item.avgRating for the rating value
-              imageSize={17}
-              fractions={5}
-            /> */}
 
             <Text>Rating</Text>
           </Pressable>
@@ -167,17 +147,23 @@ const VendorListDetails = ({ navigation }) => {
 
       <View style={{ padding: 30, height: "50%" }}>
         <View style={styles.downContainer}>
-          <Text style={{ fontSize: 20, fontWeight: "400", paddingBottom: 5 }}>
+          <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 5 }}>
             Contact
           </Text>
-          <Text>
-            <Icon name="phone" size={20} color="green" />
-            <Text> {item?.phone_number} </Text>
+          <Text
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 5,
+            }}
+          >
+            <Icon name="phone" size={20} color="#04973C" />
+            <Text style={{ marginLeft: 10 }}> {item?.phone_number} </Text>
           </Text>
 
-          <Text>
-            <Icon name="map-marker" size={20} color="green" />
-            <Text>{item?.address}</Text>
+          <Text style={{ flexDirection: "row", alignItems: "center" }}>
+            <Icon name="map-marker" size={20} color="#04973C" />
+            <Text style={{ marginLeft: 10 }}>{item?.address}</Text>
           </Text>
         </View>
         <View
@@ -188,7 +174,7 @@ const VendorListDetails = ({ navigation }) => {
             borderBottomColor: "#F6F6F6",
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: "400", paddingBottom: 5 }}>
+          <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 5 }}>
             Working Time
           </Text>
           <Text>{item?.opens}</Text>
@@ -207,20 +193,25 @@ const VendorListDetails = ({ navigation }) => {
             }}
           >
             {Delete_Mutation.isLoading ? (
-              <ActivityIndicator color="green" size="large" />
+              <ActivityIndicator
+                color="red"
+                size="large"
+                style={{ marginTop: 40, marginBottom: 40 }}
+              />
             ) : (
               <TouchableOpacity
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  padding: 10,
+                  padding: 12,
                   backgroundColor: "red",
-                  borderRadius: 5,
+                  borderRadius: 8,
                   justifyContent: "center",
                   marginTop: 40,
                   marginBottom: 40,
                 }}
                 onPress={() => Delete_Mutation.mutate()}
+                disabled={Delete_Mutation.isLoading}
               >
                 <Text style={styles.text}>Delete</Text>
               </TouchableOpacity>
@@ -235,7 +226,7 @@ const VendorListDetails = ({ navigation }) => {
               style={styles.buttonContainer}
               onPress={makePhoneCall}
             >
-              <Icon name="phone" size={30} color="white" style={styles.icon} />
+              <Icon name="phone" size={20} color="white" style={styles.icon} />
               <Text style={styles.text}>Call Now</Text>
             </TouchableOpacity>
           </View>
@@ -248,7 +239,8 @@ const VendorListDetails = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#F3FFF3",
-    height: "52%",
+    // Note: '52%' height might be problematic on different screens,
+    // consider using flex or dynamic calculation if possible
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
   },
@@ -267,9 +259,9 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    padding: 12, // Increased padding
     backgroundColor: "#04973C",
-    borderRadius: 5,
+    borderRadius: 8, // Increased border radius
     justifyContent: "center",
     marginTop: 40,
     marginBottom: 40,
@@ -280,6 +272,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     color: "white",
+    fontWeight: "bold",
   },
 });
 export default VendorListDetails;

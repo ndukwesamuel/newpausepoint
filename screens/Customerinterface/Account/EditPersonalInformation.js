@@ -1,364 +1,1183 @@
+// import React, { useEffect, useState } from "react";
+// import {
+//   View,
+//   Text,
+//   TouchableOpacity,
+//   ScrollView,
+//   Modal,
+//   StyleSheet,
+//   Image,
+// } from "react-native";
+// import * as ImagePicker from "expo-image-picker";
+// import { MaterialCommunityIcons } from "@expo/vector-icons";
+// import {
+//   FormLabel,
+//   Formbutton,
+//   Forminput,
+// } from "../../../components/shared/InputForm";
+// import { useDispatch, useSelector } from "react-redux";
+// import Toast from "react-native-toast-message";
+// import ScreenWrapper from "../../../components/shared/ScreenWrapper";
+// import { formdatauseMutateData } from "../../../hooks/Request";
+// import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
+// import { Get_User_Profle_Fun } from "../../../Redux/UserSide/UserProfileSlice";
+
+// const EditPersonalInformation = ({ navigation }) => {
+//   const dispatch = useDispatch();
+
+//   const { get_user_profile_data: userProfile_data } = useSelector(
+//     (state) => state.UserProfileSlice,
+//   );
+
+//   console.log({
+//     uuu: userProfile_data?.data,
+//   });
+
+//   const isGuest =
+//     !userProfile_data?.data?.currentClanMeeting &&
+//     !userProfile_data?.data?.AdmincurrentClanMeeting;
+//   const isClanMember = !!userProfile_data?.data?.currentClanMeeting;
+
+//   const userIdToFind = userProfile_data?.data?.user?._id;
+//   const foundMember = userProfile_data?.data?.currentClanMeeting?.members.find(
+//     (member) => member.user.toString() === userIdToFind.toString(),
+//   );
+
+//   const canEditProfile =
+//     userProfile_data?.data?.currentClanMeeting?.settings
+//       ?.allowMembersToEditProfile;
+
+//   // ✅ Initialize form state
+//   const fullName = userProfile_data?.data?.user?.name || "";
+//   const nameParts = fullName.split(" ");
+//   const initialFirstName = nameParts[0] || "";
+//   const initialLastName = nameParts.slice(1).join(" ") || "";
+
+//   const [firstName, setFirstName] = useState(initialFirstName);
+//   const [lastName, setLastName] = useState(initialLastName);
+//   const [gender, setGender] = useState(userProfile_data?.user?.gender || "");
+//   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+//   const [phone, setPhone] = useState(userProfile_data?.phoneNumber || "");
+
+//   // ✅ Address fields
+//   const [street, setStreet] = useState(
+//     isGuest
+//       ? userProfile_data?.address?.street || ""
+//       : foundMember?.street || "",
+//   );
+//   const [city, setCity] = useState(userProfile_data?.data?.address?.city || "");
+//   const [state, setState] = useState(
+//     userProfile_data?.data?.address?.state || "",
+//   );
+
+//   // ✅ Clan-specific fields
+//   const [showStreetDropdown, setShowStreetDropdown] = useState(false);
+//   const [showApartmentDropdown, setShowApartmentDropdown] = useState(false);
+//   const [houseNumber, sethouseNumber] = useState(
+//     foundMember?.houseNumber || "",
+//   );
+//   const [typeOfApartment, setTypeOfApartment] = useState(
+//     foundMember?.apartmentType || "",
+//   );
+//   const [unitNumber, setUnitNumber] = useState(foundMember?.unitNumber || "");
+
+//   const genderOptions = ["male", "female", "other", "prefer_not_to_say"];
+//   const availableApartmentTypes =
+//     userProfile_data?.data?.currentClanMeeting?.availableApartmentTypes || [];
+//   const availableStreets =
+//     userProfile_data?.data?.currentClanMeeting?.availableStreets || [];
+
+//   useEffect(() => {
+//     dispatch(Get_User_Profle_Fun());
+//   }, [dispatch]);
+
+//   // ✅ SINGLE UPDATE MUTATION
+//   const UpdateProfile = useMutateData_v2("api/v1/user", "POST", [
+//     "getUserUnified",
+//     "userProfile",
+//   ]);
+
+//   // ✅ Handle success
+//   useEffect(() => {
+//     if (UpdateProfile.isSuccess) {
+//       Toast.show({
+//         type: "success",
+//         text1: "Profile updated successfully!",
+//       });
+//       dispatch(Get_User_Profle_Fun());
+//       navigation.goBack();
+//     }
+//   }, [UpdateProfile.isSuccess]);
+
+//   // ✅ Handle error
+//   useEffect(() => {
+//     if (UpdateProfile.isError) {
+//       const errorMessage =
+//         UpdateProfile.error?.data?.message ||
+//         UpdateProfile.error?.data?.error ||
+//         "Failed to update profile";
+//       Toast.show({
+//         type: "error",
+//         text1: errorMessage,
+//       });
+//     }
+//   }, [UpdateProfile.isError]);
+
+//   // ✅ SINGLE SUBMIT HANDLER
+//   const handleSubmit = () => {
+//     const payload = {
+//       firstName: firstName.trim(),
+//       lastName: lastName.trim(),
+//     };
+
+//     // Add optional fields
+//     if (gender) payload.gender = gender.toLowerCase();
+//     if (phone) payload.phoneNumber = phone;
+
+//     // Add address
+//     payload.address = {
+//       street: street || "",
+//       city: city || "",
+//       state: state || "",
+//     };
+
+//     console.log("Submitting payload:", payload);
+//     UpdateProfile.mutate(payload);
+//   };
+
+//   // ✅ Custom Dropdown Component
+//   const CustomDropdown = ({
+//     visible,
+//     onClose,
+//     options,
+//     onSelect,
+//     selectedValue,
+//   }) => {
+//     return (
+//       <Modal
+//         transparent={true}
+//         visible={visible}
+//         onRequestClose={onClose}
+//         animationType="fade"
+//       >
+//         <TouchableOpacity
+//           style={styles.dropdownOverlay}
+//           activeOpacity={1}
+//           onPress={onClose}
+//         >
+//           <View style={styles.dropdownContainer}>
+//             <ScrollView>
+//               {options.map((item, index) => (
+//                 <TouchableOpacity
+//                   key={index}
+//                   style={[
+//                     styles.dropdownItem,
+//                     selectedValue === item && styles.selectedItem,
+//                   ]}
+//                   onPress={() => {
+//                     onSelect(item);
+//                     onClose();
+//                   }}
+//                 >
+//                   <Text style={styles.dropdownItemText}>
+//                     {item.charAt(0).toUpperCase() +
+//                       item.slice(1).replace(/_/g, " ")}
+//                   </Text>
+//                 </TouchableOpacity>
+//               ))}
+//             </ScrollView>
+//           </View>
+//         </TouchableOpacity>
+//       </Modal>
+//     );
+//   };
+
+//   return (
+//     <ScreenWrapper
+//       title="Edit Profile"
+//       navigation={navigation}
+//       headerStyle={{ backgroundColor: "white" }}
+//     >
+//       <ScrollView
+//         style={styles.scrollView}
+//         contentContainerStyle={styles.scrollContent}
+//         showsVerticalScrollIndicator={false}
+//       >
+//         <View style={styles.container}>
+//           {/* ✅ Profile Image Component */}
+//           {/* <ProfileImageUploaderComponent /> */}
+
+//           {/* add this later */}
+//           {/* ✅ Personal Information Card */}
+//           <View style={styles.sectionCard}>
+//             <View style={styles.sectionHeader}>
+//               <MaterialCommunityIcons
+//                 name="account-circle"
+//                 size={20}
+//                 color="#10B981"
+//                 style={{ marginRight: 8 }}
+//               />
+//               <Text style={styles.sectionTitle}>Personal Information</Text>
+//             </View>
+
+//             {/* First Name */}
+//             <View style={styles.inputGroup}>
+//               <FormLabel data="First Name" />
+//               <Forminput
+//                 placeholder="First Name"
+//                 onChangeText={setFirstName}
+//                 value={firstName}
+//               />
+//             </View>
+
+//             {/* Last Name */}
+//             <View style={styles.inputGroup}>
+//               <FormLabel data="Last Name" />
+//               <Forminput
+//                 placeholder="Last Name"
+//                 onChangeText={setLastName}
+//                 value={lastName}
+//               />
+//             </View>
+
+//             {/* Phone Number */}
+//             <View style={styles.inputGroup}>
+//               <FormLabel data="Phone Number" />
+//               <Forminput
+//                 placeholder="Phone Number"
+//                 onChangeText={setPhone}
+//                 value={phone}
+//                 keyboardType="phone-pad"
+//               />
+//             </View>
+
+//             {/* Gender */}
+//             <View style={styles.inputGroup}>
+//               <FormLabel data="Gender" />
+//               <TouchableOpacity
+//                 onPress={() => setShowGenderDropdown(true)}
+//                 style={styles.dropdownTrigger}
+//               >
+//                 <Text style={styles.dropdownTriggerText}>
+//                   {gender
+//                     ? gender.charAt(0).toUpperCase() +
+//                       gender.slice(1).replace(/_/g, " ")
+//                     : "Select Gender"}
+//                 </Text>
+//                 <MaterialCommunityIcons
+//                   name="chevron-down"
+//                   size={20}
+//                   color="#6B7280"
+//                 />
+//               </TouchableOpacity>
+//               <CustomDropdown
+//                 visible={showGenderDropdown}
+//                 onClose={() => setShowGenderDropdown(false)}
+//                 options={genderOptions}
+//                 onSelect={(item) => setGender(item)}
+//                 selectedValue={gender}
+//               />
+//             </View>
+//           </View>
+
+//           {/* ✅ Address Information Card */}
+//           <View style={styles.sectionCard}>
+//             <View style={styles.sectionHeader}>
+//               <MaterialCommunityIcons
+//                 name="home-map-marker"
+//                 size={20}
+//                 color="#10B981"
+//                 style={{ marginRight: 8 }}
+//               />
+//               <Text style={styles.sectionTitle}>Address Information</Text>
+//             </View>
+
+//             {/* Street - Dropdown for clan members, text input for guests */}
+//             <View style={styles.inputGroup}>
+//               <FormLabel data="Street" />
+//               {isClanMember && canEditProfile && availableStreets.length > 0 ? (
+//                 <>
+//                   <TouchableOpacity
+//                     onPress={() => setShowStreetDropdown(true)}
+//                     style={styles.dropdownTrigger}
+//                   >
+//                     <Text style={styles.dropdownTriggerText}>
+//                       {street || "Select Street"}
+//                     </Text>
+//                     <MaterialCommunityIcons
+//                       name="chevron-down"
+//                       size={20}
+//                       color="#6B7280"
+//                     />
+//                   </TouchableOpacity>
+//                   <CustomDropdown
+//                     visible={showStreetDropdown}
+//                     onClose={() => setShowStreetDropdown(false)}
+//                     options={availableStreets}
+//                     onSelect={(item) => setStreet(item)}
+//                     selectedValue={street}
+//                   />
+//                 </>
+//               ) : (
+//                 <Forminput
+//                   placeholder="Street Address"
+//                   onChangeText={setStreet}
+//                   value={street}
+//                 />
+//               )}
+//             </View>
+
+//             {/* City */}
+//             <View style={styles.inputGroup}>
+//               <FormLabel data="City" />
+//               <Forminput
+//                 placeholder="City"
+//                 onChangeText={setCity}
+//                 value={city}
+//               />
+//             </View>
+
+//             {/* State */}
+//             <View style={styles.inputGroup}>
+//               <FormLabel data="State" />
+//               <Forminput
+//                 placeholder="State"
+//                 onChangeText={setState}
+//                 value={state}
+//               />
+//             </View>
+
+//             {/* ✅ Clan-specific fields - Only show if allowed */}
+//             {isClanMember && canEditProfile && (
+//               <>
+//                 {/* House Number */}
+//                 <View style={styles.inputGroup}>
+//                   <FormLabel data="House Number" />
+//                   <Forminput
+//                     placeholder="House Number"
+//                     onChangeText={sethouseNumber}
+//                     value={houseNumber}
+//                   />
+//                 </View>
+
+//                 {/* Type of Apartment */}
+//                 {availableApartmentTypes.length > 0 && (
+//                   <View style={styles.inputGroup}>
+//                     <FormLabel data="Type of Apartment" />
+//                     <TouchableOpacity
+//                       onPress={() => setShowApartmentDropdown(true)}
+//                       style={styles.dropdownTrigger}
+//                     >
+//                       <Text style={styles.dropdownTriggerText}>
+//                         {typeOfApartment || "Select Apartment Type"}
+//                       </Text>
+//                       <MaterialCommunityIcons
+//                         name="chevron-down"
+//                         size={20}
+//                         color="#6B7280"
+//                       />
+//                     </TouchableOpacity>
+//                     <CustomDropdown
+//                       visible={showApartmentDropdown}
+//                       onClose={() => setShowApartmentDropdown(false)}
+//                       options={availableApartmentTypes}
+//                       onSelect={(item) => setTypeOfApartment(item)}
+//                       selectedValue={typeOfApartment}
+//                     />
+//                   </View>
+//                 )}
+
+//                 {/* Unit Number */}
+//                 <View style={styles.inputGroup}>
+//                   <FormLabel data="Unit Number" />
+//                   <Forminput
+//                     placeholder="Unit Number"
+//                     onChangeText={setUnitNumber}
+//                     value={unitNumber}
+//                   />
+//                 </View>
+//               </>
+//             )}
+//           </View>
+
+//           {/* ✅ Update Button */}
+//           <Formbutton
+//             buttonStyle={styles.primaryButton}
+//             textStyle={styles.primaryButtonText}
+//             data="Update Profile"
+//             onPress={handleSubmit}
+//             isLoading={UpdateProfile.isPending || UpdateProfile.isLoading}
+//           />
+//         </View>
+//       </ScrollView>
+//     </ScreenWrapper>
+//   );
+// };
+
+// // ✅ Profile Image Uploader Component (UNCHANGED)
+// // function ProfileImageUploaderComponent() {
+// //   const dispatch = useDispatch();
+// //   // const { userProfile_data } = useSelector((state) => state.ProfileSlice);
+
+// //   const { get_user_profile_data: userProfile_data } = useSelector(
+// //     (state) => state.UserProfileSlice,
+// //   );
+
+// //   console.log({
+// //     uuu: userProfile_data,
+// //   });
+
+// //   const [profileImage, setProfileImage] = useState(
+// //     userProfile_data?.photo ||
+// //       "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg",
+// //   );
+// //   const [hasImageChanged, setHasImageChanged] = useState(false);
+
+// //   const UpdateImage_Mutation = formdatauseMutateData(
+// //     "api/v1/general/update-profile-image",
+// //     "PUT",
+// //     "userProfile",
+// //   );
+
+// //   const pickImage = async () => {
+// //     const permissionResult =
+// //       await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+// //     if (!permissionResult.granted) {
+// //       alert("Permission to access gallery is required!");
+// //       return;
+// //     }
+
+// //     const result = await ImagePicker.launchImageLibraryAsync({
+// //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+// //       allowsEditing: true,
+// //       aspect: [1, 1],
+// //       quality: 0.7,
+// //     });
+
+// //     if (!result.canceled && result.assets?.length > 0) {
+// //       const localUri = result.assets[0].uri;
+// //       setProfileImage(localUri);
+// //       setHasImageChanged(true);
+// //     }
+// //   };
+
+// //   const handleImageUpdate = async () => {
+// //     if (!profileImage) return;
+
+// //     const uriParts = profileImage.split(".");
+// //     const fileExtension = uriParts[uriParts.length - 1];
+// //     const mimeType =
+// //       fileExtension === "jpg" || fileExtension === "jpeg"
+// //         ? "image/jpeg"
+// //         : `image/${fileExtension}`;
+
+// //     const formData = new FormData();
+// //     formData.append("image", {
+// //       uri: profileImage,
+// //       type: mimeType,
+// //       name: `profile_${Date.now()}.${fileExtension}`,
+// //     });
+
+// //     UpdateImage_Mutation.mutate(formData, {
+// //       onSuccess: () => {
+// //         Toast.show({
+// //           type: "success",
+// //           text1: "Profile image updated successfully!",
+// //         });
+// //         dispatch(UserProfile_data_Fun());
+// //         setHasImageChanged(false);
+// //       },
+// //       onError: (error) => {
+// //         const errorMessage =
+// //           error?.response?.data?.error || "Failed to update profile image";
+// //         Toast.show({
+// //           type: "error",
+// //           text1: errorMessage,
+// //         });
+// //       },
+// //     });
+// //   };
+
+// //   return (
+// //     <View style={profileImageStyles.container}>
+// //       <View style={profileImageStyles.imageCard}>
+// //         <TouchableOpacity
+// //           onPress={pickImage}
+// //           style={profileImageStyles.imageContainer}
+// //         >
+// //           <Image
+// //             source={{ uri: profileImage }}
+// //             style={profileImageStyles.profileImage}
+// //           />
+// //           <View style={profileImageStyles.editBadge}>
+// //             <MaterialCommunityIcons name="camera" size={16} color="#FFFFFF" />
+// //           </View>
+// //         </TouchableOpacity>
+
+// //         <Text style={profileImageStyles.emailText}>
+// //           {userProfile_data?.user?.email}
+// //         </Text>
+// //         <Text style={profileImageStyles.tapText}>Tap image to change</Text>
+// //       </View>
+
+// //       {hasImageChanged && (
+// //         <Formbutton
+// //           buttonStyle={profileImageStyles.updateButton}
+// //           textStyle={profileImageStyles.updateButtonText}
+// //           data="Update Profile Image"
+// //           onPress={handleImageUpdate}
+// //           isLoading={UpdateImage_Mutation.isLoading}
+// //         />
+// //       )}
+// //     </View>
+// //   );
+// // }
+
+// const styles = StyleSheet.create({
+//   scrollView: {
+//     flex: 1,
+//     backgroundColor: "#F9FAFB",
+//   },
+//   scrollContent: {
+//     flexGrow: 1,
+//     paddingBottom: 30,
+//   },
+//   container: {
+//     flex: 1,
+//     paddingVertical: 20,
+//     paddingHorizontal: 16,
+//   },
+//   sectionCard: {
+//     backgroundColor: "#FFFFFF",
+//     padding: 16,
+//     borderRadius: 16,
+//     marginBottom: 20,
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 8,
+//     elevation: 3,
+//   },
+//   sectionHeader: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginBottom: 16,
+//   },
+//   sectionTitle: {
+//     fontSize: 16,
+//     fontWeight: "700",
+//     color: "#1F2937",
+//     letterSpacing: 0.3,
+//   },
+//   inputGroup: {
+//     marginBottom: 16,
+//   },
+//   primaryButton: {
+//     backgroundColor: "#10B981",
+//     paddingHorizontal: 20,
+//     paddingVertical: 14,
+//     borderRadius: 16,
+//     alignItems: "center",
+//     marginTop: 10,
+//     shadowColor: "#10B981",
+//     shadowOffset: { width: 0, height: 4 },
+//     shadowOpacity: 0.3,
+//     shadowRadius: 8,
+//     elevation: 4,
+//   },
+//   primaryButtonText: {
+//     color: "#FFFFFF",
+//     fontWeight: "700",
+//     fontSize: 14,
+//     letterSpacing: 0.3,
+//   },
+//   dropdownTrigger: {
+//     backgroundColor: "#F9FAFB",
+//     padding: 15,
+//     borderRadius: 12,
+//     borderWidth: 1,
+//     borderColor: "#E5E7EB",
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//   },
+//   dropdownTriggerText: {
+//     fontSize: 14,
+//     color: "#111827",
+//     fontWeight: "500",
+//   },
+//   dropdownOverlay: {
+//     flex: 1,
+//     backgroundColor: "rgba(0,0,0,0.5)",
+//     justifyContent: "flex-end",
+//   },
+//   dropdownContainer: {
+//     backgroundColor: "white",
+//     borderTopLeftRadius: 24,
+//     borderTopRightRadius: 24,
+//     padding: 24,
+//     maxHeight: "50%",
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: -4 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 12,
+//     elevation: 8,
+//   },
+//   dropdownItem: {
+//     padding: 16,
+//     borderBottomWidth: 1,
+//     borderBottomColor: "#F3F4F6",
+//   },
+//   dropdownItemText: {
+//     fontSize: 14,
+//     color: "#111827",
+//     fontWeight: "500",
+//   },
+//   selectedItem: {
+//     backgroundColor: "#D1FAE5",
+//   },
+// });
+
+// const profileImageStyles = StyleSheet.create({
+//   container: {
+//     marginBottom: 24,
+//   },
+//   imageCard: {
+//     backgroundColor: "#FFFFFF",
+//     borderRadius: 16,
+//     padding: 24,
+//     alignItems: "center",
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 8,
+//     elevation: 3,
+//   },
+//   imageContainer: {
+//     position: "relative",
+//     marginBottom: 16,
+//   },
+//   profileImage: {
+//     width: 100,
+//     height: 100,
+//     borderRadius: 50,
+//     borderWidth: 3,
+//     borderColor: "#10B981",
+//   },
+//   editBadge: {
+//     position: "absolute",
+//     bottom: 0,
+//     right: 0,
+//     backgroundColor: "#10B981",
+//     width: 32,
+//     height: 32,
+//     borderRadius: 16,
+//     justifyContent: "center",
+//     alignItems: "center",
+//     borderWidth: 3,
+//     borderColor: "#FFFFFF",
+//   },
+//   emailText: {
+//     fontSize: 14,
+//     fontWeight: "600",
+//     color: "#111827",
+//     marginBottom: 4,
+//   },
+//   tapText: {
+//     fontSize: 12,
+//     color: "#6B7280",
+//     fontWeight: "500",
+//   },
+//   updateButton: {
+//     backgroundColor: "#10B981",
+//     paddingHorizontal: 20,
+//     paddingVertical: 12,
+//     borderRadius: 16,
+//     alignItems: "center",
+//     marginTop: 16,
+//     shadowColor: "#10B981",
+//     shadowOffset: { width: 0, height: 4 },
+//     shadowOpacity: 0.3,
+//     shadowRadius: 8,
+//     elevation: 4,
+//   },
+//   updateButtonText: {
+//     color: "#FFFFFF",
+//     fontSize: 14,
+//     fontWeight: "700",
+//     letterSpacing: 0.3,
+//   },
+// });
+
+// export default EditPersonalInformation;
+
+
+
 import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
-  Image,
   TouchableOpacity,
   ScrollView,
   Modal,
   StyleSheet,
+  Image,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   FormLabel,
   Formbutton,
   Forminput,
 } from "../../../components/shared/InputForm";
 import { useDispatch, useSelector } from "react-redux";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-import axios from "axios";
 import Toast from "react-native-toast-message";
-import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
-import {
-  formdatauseMutateData,
-  useFetchData,
-  useMutateData,
-} from "../../../hooks/Request";
-import { useNavigation } from "@react-navigation/native";
+import { useFetchData_v2, useMutateData_v2, useFormDataMutate } from "../../../hooks/Requestv2";
+import { Get_User_Profle_Fun } from "../../../Redux/UserSide/UserProfileSlice";
 
 const EditPersonalInformation = ({ navigation }) => {
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
+  const dispatch = useDispatch();
 
-  const userIdToFind = userProfile_data?.user?._id; // The userId you're looking for
-  const foundMember = userProfile_data?.currentClanMeeting?.members.find(
-    (member) => member.user.toString() === userIdToFind.toString()
+  const { get_user_profile_data: userProfile_data } = useSelector(
+    (state) => state.UserProfileSlice,
+  );
+
+  const isGuest =
+    !userProfile_data?.data?.currentClanMeeting &&
+    !userProfile_data?.data?.AdmincurrentClanMeeting;
+  const isClanMember = !!userProfile_data?.data?.currentClanMeeting;
+
+  const userIdToFind = userProfile_data?.data?.user?._id;
+  const foundMember = userProfile_data?.data?.currentClanMeeting?.members.find(
+    (member) => member.user.toString() === userIdToFind?.toString(),
   );
 
   const canEditProfile =
-    userProfile_data?.currentClanMeeting?.settings?.allowMembersToEditProfile;
+    userProfile_data?.data?.currentClanMeeting?.settings
+      ?.allowMembersToEditProfile;
 
-  const [name, setName] = useState(userProfile_data?.user?.name);
-  const [gender, setGender] = useState("Male");
+  // ── Profile image state ───────────────────────────────────────────────────
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const currentPhoto =
+    userProfile_data?.data?.user?.photo ||
+    userProfile_data?.data?.photo ||
+    "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg";
 
+  // ── Form state ────────────────────────────────────────────────────────────
+  const fullName = userProfile_data?.data?.user?.name || "";
+  const nameParts = fullName.split(" ");
+  const initialFirstName = nameParts[0] || "";
+  const initialLastName = nameParts.slice(1).join(" ") || "";
+
+  const [firstName, setFirstName] = useState(initialFirstName);
+  const [lastName, setLastName] = useState(initialLastName);
+  const [gender, setGender] = useState(userProfile_data?.user?.gender || "");
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  const [phone, setPhone] = useState(userProfile_data?.phoneNumber || "");
 
-  // Add this array with your other options arrays
-  const genderOptions = ["Male", "Female"];
-  const [profileImage, setProfileImage] = useState(userProfile_data?.photo);
-  const [hasImageChanged, setHasImageChanged] = useState(false);
-
-  // Address fields
-  const [street, setStreet] = useState(foundMember?.street);
-  const [city, setCity] = useState(userProfile_data?.address?.city);
-  const [state, setState] = useState(userProfile_data?.address?.state);
-  const [houseNumber, sethouseNumber] = useState(foundMember?.houseNumber);
-  const [typeOfApartment, setTypeOfApartment] = useState(
-    foundMember?.apartmentType
+  const [street, setStreet] = useState(
+    isGuest
+      ? userProfile_data?.address?.street || ""
+      : foundMember?.street || "",
+  );
+  const [city, setCity] = useState(userProfile_data?.data?.address?.city || "");
+  const [state, setState] = useState(
+    userProfile_data?.data?.address?.state || "",
   );
 
-  const [selfcon, setSelfcon] = useState(userProfile_data?.address?.selfcon);
-  const [unitNumber, setUnitNumber] = useState(foundMember?.unitNumber);
-
-  const [phone, setPhone] = useState(userProfile_data?.phoneNumber);
-  const dispatch = useDispatch();
-
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-
-  // Dropdown states
   const [showStreetDropdown, setShowStreetDropdown] = useState(false);
   const [showApartmentDropdown, setShowApartmentDropdown] = useState(false);
+  const [houseNumber, sethouseNumber] = useState(
+    foundMember?.houseNumber || "",
+  );
+  const [typeOfApartment, setTypeOfApartment] = useState(
+    foundMember?.apartmentType || "",
+  );
+  const [unitNumber, setUnitNumber] = useState(foundMember?.unitNumber || "");
 
-  // Get available apartment types and streets from userProfile_data
+  const genderOptions = ["male", "female", "other", "prefer_not_to_say"];
   const availableApartmentTypes =
-    userProfile_data?.currentClanMeeting?.availableApartmentTypes || [];
+    userProfile_data?.data?.currentClanMeeting?.availableApartmentTypes || [];
   const availableStreets =
-    userProfile_data?.currentClanMeeting?.availableStreets || [];
-
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
-      setHasImageChanged(true);
-    }
-  };
+    userProfile_data?.data?.currentClanMeeting?.availableStreets || [];
 
   useEffect(() => {
-    dispatch(UserProfile_data_Fun());
-    return () => {};
+    dispatch(Get_User_Profle_Fun());
   }, [dispatch]);
 
-  // Handle text data update (JSON)
-  const handleTextUpdate = () => {
-    const textData = {
-      name,
-      phoneNumber: phone,
-      gender,
-    };
+  // ── Profile update mutation ───────────────────────────────────────────────
+  const UpdateProfile = useMutateData_v2("api/v1/user", "POST", [
+    "getUserUnified",
+    "userProfile",
+  ]);
 
-    // Only include address fields if allowed to edit profile
-    if (canEditProfile) {
-      textData.street = street;
-      textData.typeOfApartment = typeOfApartment;
-      textData.unitNumber = unitNumber;
-      textData.houseNumber = houseNumber;
-      textData.city = city;
-      textData.state = state;
-      textData.selfcon = selfcon;
-    }
+  // ── Image update mutation ─────────────────────────────────────────────────
+  const UpdateImage = useFormDataMutate(
+    "api/v1/user",
+    "PATCH",
+    ["getUserUnified", "userProfile"],
+  );
 
-    console.log({
-      cc: textData,
-    });
-
-    UpdateText_Mutation.mutate(textData);
-  };
-
-  // Handle image upload (FormData)
-  const handleImageUpdate = () => {
-    if (!hasImageChanged || !profileImage) {
+  useEffect(() => {
+    if (UpdateProfile.isSuccess) {
       Toast.show({
-        type: "error",
-        text1: "Please select an image to upload",
+        type: "success",
+        text1: "Profile updated successfully!",
       });
+      dispatch(Get_User_Profle_Fun());
+      navigation.goBack();
+    }
+  }, [UpdateProfile.isSuccess]);
+
+  useEffect(() => {
+    if (UpdateProfile.isError) {
+      const errorMessage =
+        UpdateProfile.error?.data?.message ||
+        UpdateProfile.error?.data?.error ||
+        "Failed to update profile";
+      Toast.show({ type: "error", text1: errorMessage });
+    }
+  }, [UpdateProfile.isError]);
+
+  // ── Image picker ──────────────────────────────────────────────────────────
+  const pickImage = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow access to your photo library.",
+      );
       return;
     }
 
-    const formData = new FormData();
-    const uri = profileImage;
-    const type = "image/jpeg";
-    const name = "photo.jpg";
-    formData.append("photo", { uri, type, name });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
 
-    UpdateImage_Mutation.mutate(formData);
+    if (!result.canceled && result.assets?.length > 0) {
+      setSelectedImage(result.assets[0].uri);
+    }
   };
 
-  // Text update mutation (JSON)
-  const UpdateText_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}api/v1/user/update-profile`;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  // ── Handle image upload ───────────────────────────────────────────────────
+  const handleImageUpload = () => {
+    if (!selectedImage) return;
 
-      return axios.patch(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
+    const uriParts = selectedImage.split(".");
+    const fileExtension = uriParts[uriParts.length - 1];
+    const mimeType =
+      fileExtension === "jpg" || fileExtension === "jpeg"
+        ? "image/jpeg"
+        : `image/${fileExtension}`;
+
+    const formData = new FormData();
+    formData.append("image", {
+      uri: selectedImage,
+      type: mimeType,
+      name: `profile_${Date.now()}.${fileExtension}`,
+    }  )
+
+    UpdateImage.mutate(formData, {
+      onSuccess: () => {
         Toast.show({
           type: "success",
-          text1: "Profile information updated successfully!",
+          text1: "Profile image updated!",
         });
-        dispatch(UserProfile_data_Fun());
-        navigation.goBack(); // Navigate back after successful update
+        dispatch(Get_User_Profle_Fun());
+        setShowImageModal(false);
+        setSelectedImage(null);
       },
       onError: (error) => {
         Toast.show({
           type: "error",
-          text1: `${
-            error?.response?.data?.error ||
-            "Failed to update profile information"
-          }`,
+          text1:
+            error?.data?.message ||
+            error?.message ||
+            "Failed to update image",
         });
       },
-    }
-  );
+    });
+  };
 
-  // Image update mutation (FormData)
-  const UpdateImage_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}profile/update-image`;
+  const handleCloseImageModal = () => {
+    setShowImageModal(false);
+    setSelectedImage(null);
+  };
 
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
+  // ── Profile form submit ───────────────────────────────────────────────────
+  const handleSubmit = () => {
+    const payload: any = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+    };
 
-      return axios.put(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Profile image updated successfully!",
-        });
-        setHasImageChanged(false);
-        dispatch(UserProfile_data_Fun());
-      },
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${
-            error?.response?.data?.error || "Failed to update profile image"
-          }`,
-        });
-      },
-    }
-  );
+    if (gender) payload.gender = gender.toLowerCase();
+    if (phone) payload.phoneNumber = phone;
 
-  // Custom Dropdown Component
+    payload.address = {
+      street: street || "",
+      city: city || "",
+      state: state || "",
+    };
+
+    UpdateProfile.mutate(payload);
+  };
+
+  // ── Custom Dropdown ───────────────────────────────────────────────────────
   const CustomDropdown = ({
     visible,
     onClose,
     options,
     onSelect,
     selectedValue,
-  }) => {
-    return (
-      <Modal
-        transparent={true}
-        visible={visible}
-        onRequestClose={onClose}
-        animationType="fade"
+  }) => (
+    <Modal
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+      animationType="fade"
+    >
+      <TouchableOpacity
+        style={styles.dropdownOverlay}
+        activeOpacity={1}
+        onPress={onClose}
       >
-        <TouchableOpacity
-          style={styles.dropdownOverlay}
-          activeOpacity={1}
-          onPress={onClose}
-        >
-          <View style={styles.dropdownContainer}>
-            <ScrollView>
-              {options.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.dropdownItem,
-                    selectedValue === item && styles.selectedItem,
-                  ]}
-                  onPress={() => {
-                    onSelect(item);
-                    onClose();
-                  }}
-                >
-                  <Text style={styles.dropdownItemText}>{item}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-    );
-  };
+        <View style={styles.dropdownContainer}>
+          <ScrollView>
+            {options.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.dropdownItem,
+                  selectedValue === item && styles.selectedItem,
+                ]}
+                onPress={() => {
+                  onSelect(item);
+                  onClose();
+                }}
+              >
+                <Text style={styles.dropdownItemText}>
+                  {item.charAt(0).toUpperCase() +
+                    item.slice(1).replace(/_/g, " ")}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
 
   return (
     <ScreenWrapper
-      title=""
+      title="Edit Profile"
       navigation={navigation}
-      headerStyle={{
-        backgroundColor: "white",
-      }}
-      // showHeader={false}
+      headerStyle={{ backgroundColor: "white" }}
     >
-      <View style={{ paddingBottom: 30 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          {/* Profile Image Section */}
-          <Text
-            style={[
-              styles.sectionTitle,
-              {
-                textAlign: "center",
-              },
-            ]}
-          >
-            Personal Information
-          </Text>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.container}>
 
-          <ProfileImageUploader />
+          {/* ── Profile Image Section ──────────────────────────────────── */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="camera-account"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Profile Photo</Text>
+            </View>
 
-          {userProfile_data?.user?.isGuest === true ? (
-            <GeneralEditPersonalInformation />
-          ) : (
-            <View style={{ paddingHorizontal: 20, gap: 10, marginTop: 20 }}>
-              <View>
-                <FormLabel data="Name" />
-                <Forminput
-                  placeholder="Your Name"
-                  onChangeText={setName}
-                  value={name}
-                />
-              </View>
+            <View style={styles.profileImageRow}>
+              {/* Current photo */}
+              <Image
+                source={{ uri: currentPhoto }}
+                style={styles.profileImagePreview}
+              />
 
-              <View>
-                <FormLabel data="Phone Number" />
-                <Forminput
-                  placeholder="Phone Number"
-                  onChangeText={setPhone}
-                  value={phone}
-                />
-              </View>
-
-              <View>
-                <FormLabel data="Gender" />
+              <View style={styles.profileImageInfo}>
+                <Text style={styles.profileImageName}>
+                  {firstName} {lastName}
+                </Text>
+                <Text style={styles.profileImageSubtext}>
+                  {userProfile_data?.data?.user?.email || ""}
+                </Text>
                 <TouchableOpacity
-                  onPress={() => setShowGenderDropdown(true)}
-                  style={styles.dropdownTrigger}
+                  style={styles.changePhotoButton}
+                  onPress={() => setShowImageModal(true)}
                 >
-                  <Text style={styles.dropdownTriggerText}>
-                    {gender || "Select Gender"}
-                  </Text>
+                  <MaterialCommunityIcons
+                    name="camera"
+                    size={14}
+                    color="#fff"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.changePhotoButtonText}>Change Photo</Text>
                 </TouchableOpacity>
-                <CustomDropdown
-                  visible={showGenderDropdown}
-                  onClose={() => setShowGenderDropdown(false)}
-                  options={genderOptions}
-                  onSelect={(item) => setGender(item)}
-                  selectedValue={gender}
-                />
               </View>
+            </View>
+          </View>
 
-              {/* Only show address fields if canEditProfile is true */}
-              {canEditProfile && (
+          {/* ── Personal Information ───────────────────────────────────── */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="account-circle"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Personal Information</Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <FormLabel data="First Name" />
+              <Forminput
+                placeholder="First Name"
+                onChangeText={setFirstName}
+                value={firstName}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <FormLabel data="Last Name" />
+              <Forminput
+                placeholder="Last Name"
+                onChangeText={setLastName}
+                value={lastName}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <FormLabel data="Phone Number" />
+              <Forminput
+                placeholder="Phone Number"
+                onChangeText={setPhone}
+                value={phone}
+                keyboardType="phone-pad"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <FormLabel data="Gender" />
+              <TouchableOpacity
+                onPress={() => setShowGenderDropdown(true)}
+                style={styles.dropdownTrigger}
+              >
+                <Text style={styles.dropdownTriggerText}>
+                  {gender
+                    ? gender.charAt(0).toUpperCase() +
+                      gender.slice(1).replace(/_/g, " ")
+                    : "Select Gender"}
+                </Text>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={20}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
+              <CustomDropdown
+                visible={showGenderDropdown}
+                onClose={() => setShowGenderDropdown(false)}
+                options={genderOptions}
+                onSelect={(item) => setGender(item)}
+                selectedValue={gender}
+              />
+            </View>
+          </View>
+
+          {/* ── Address Information ────────────────────────────────────── */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="home-map-marker"
+                size={20}
+                color="#10B981"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.sectionTitle}>Address Information</Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <FormLabel data="Street" />
+              {isClanMember && canEditProfile && availableStreets.length > 0 ? (
                 <>
-                  <Text style={styles.sectionTitle}>Address Information</Text>
-
-                  <View>
-                    <FormLabel data="Street Name" />
-                    <TouchableOpacity
-                      onPress={() => setShowStreetDropdown(true)}
-                      style={styles.dropdownTrigger}
-                    >
-                      <Text style={styles.dropdownTriggerText}>
-                        {street || "Select Street"}
-                      </Text>
-                    </TouchableOpacity>
-                    <CustomDropdown
-                      visible={showStreetDropdown}
-                      onClose={() => setShowStreetDropdown(false)}
-                      options={availableStreets}
-                      onSelect={(item) => setStreet(item)}
-                      selectedValue={street}
+                  <TouchableOpacity
+                    onPress={() => setShowStreetDropdown(true)}
+                    style={styles.dropdownTrigger}
+                  >
+                    <Text style={styles.dropdownTriggerText}>
+                      {street || "Select Street"}
+                    </Text>
+                    <MaterialCommunityIcons
+                      name="chevron-down"
+                      size={20}
+                      color="#6B7280"
                     />
-                  </View>
+                  </TouchableOpacity>
+                  <CustomDropdown
+                    visible={showStreetDropdown}
+                    onClose={() => setShowStreetDropdown(false)}
+                    options={availableStreets}
+                    onSelect={(item) => setStreet(item)}
+                    selectedValue={street}
+                  />
+                </>
+              ) : (
+                <Forminput
+                  placeholder="Street Address"
+                  onChangeText={setStreet}
+                  value={street}
+                />
+              )}
+            </View>
 
-                  <View>
-                    <FormLabel data="House Number" />
-                    <Forminput
-                      placeholder="House Number"
-                      onChangeText={sethouseNumber}
-                      value={houseNumber}
-                    />
-                  </View>
+            <View style={styles.inputGroup}>
+              <FormLabel data="City" />
+              <Forminput
+                placeholder="City"
+                onChangeText={setCity}
+                value={city}
+              />
+            </View>
 
-                  <View>
+            <View style={styles.inputGroup}>
+              <FormLabel data="State" />
+              <Forminput
+                placeholder="State"
+                onChangeText={setState}
+                value={state}
+              />
+            </View>
+
+            {isClanMember && canEditProfile && (
+              <>
+                <View style={styles.inputGroup}>
+                  <FormLabel data="House Number" />
+                  <Forminput
+                    placeholder="House Number"
+                    onChangeText={sethouseNumber}
+                    value={houseNumber}
+                  />
+                </View>
+
+                {availableApartmentTypes.length > 0 && (
+                  <View style={styles.inputGroup}>
                     <FormLabel data="Type of Apartment" />
                     <TouchableOpacity
                       onPress={() => setShowApartmentDropdown(true)}
@@ -367,6 +1186,11 @@ const EditPersonalInformation = ({ navigation }) => {
                       <Text style={styles.dropdownTriggerText}>
                         {typeOfApartment || "Select Apartment Type"}
                       </Text>
+                      <MaterialCommunityIcons
+                        name="chevron-down"
+                        size={20}
+                        color="#6B7280"
+                      />
                     </TouchableOpacity>
                     <CustomDropdown
                       visible={showApartmentDropdown}
@@ -376,364 +1200,358 @@ const EditPersonalInformation = ({ navigation }) => {
                       selectedValue={typeOfApartment}
                     />
                   </View>
+                )}
 
-                  <View>
-                    <FormLabel data="Unit Number" />
-                    <Forminput
-                      placeholder="Unit Number"
-                      onChangeText={setUnitNumber}
-                      value={unitNumber}
-                    />
-                  </View>
-                </>
-              )}
+                <View style={styles.inputGroup}>
+                  <FormLabel data="Unit Number" />
+                  <Forminput
+                    placeholder="Unit Number"
+                    onChangeText={setUnitNumber}
+                    value={unitNumber}
+                  />
+                </View>
+              </>
+            )}
+          </View>
 
-              {/* Text Update Button */}
-              <Formbutton
-                buttonStyle={[
-                  styles.submitButton,
-                  { backgroundColor: "#04973C" },
-                ]}
-                textStyle={styles.submitButtonText}
-                data="Update Information"
-                onPress={handleTextUpdate}
-                isLoading={UpdateText_Mutation.isLoading}
-              />
+          {/* ── Update Button ──────────────────────────────────────────── */}
+          <Formbutton
+            buttonStyle={styles.primaryButton}
+            textStyle={styles.primaryButtonText}
+            data="Update Profile"
+            onPress={handleSubmit}
+            isLoading={UpdateProfile.isPending || UpdateProfile.isLoading}
+          />
+        </View>
+      </ScrollView>
+
+      {/* ── Profile Image Modal ──────────────────────────────────────────── */}
+      <Modal
+        visible={showImageModal}
+        transparent
+        animationType="slide"
+        onRequestClose={handleCloseImageModal}
+      >
+        <View style={styles.imageModalOverlay}>
+          <View style={styles.imageModalContainer}>
+
+            {/* Header */}
+            <View style={styles.imageModalHeader}>
+              <Text style={styles.imageModalTitle}>Update Profile Photo</Text>
+              <TouchableOpacity onPress={handleCloseImageModal}>
+                <MaterialCommunityIcons name="close" size={24} color="#374151" />
+              </TouchableOpacity>
             </View>
-          )}
-        </ScrollView>
-      </View>
+
+            {/* Image preview */}
+            <View style={styles.imagePreviewContainer}>
+              <Image
+                source={{ uri: selectedImage || currentPhoto }}
+                style={styles.imageModalPreview}
+              />
+              {selectedImage && (
+                <View style={styles.newBadge}>
+                  <Text style={styles.newBadgeText}>New</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Pick image button */}
+            <TouchableOpacity
+              style={styles.pickImageButton}
+              onPress={pickImage}
+              disabled={UpdateImage.isPending}
+            >
+              <MaterialCommunityIcons
+                name="image-plus"
+                size={20}
+                color="#2563EB"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.pickImageButtonText}>
+                {selectedImage ? "Choose Different Photo" : "Choose Photo"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Upload button — only show when image is selected */}
+            {selectedImage && (
+              <TouchableOpacity
+                style={[
+                  styles.uploadButton,
+                  UpdateImage.isPending && { opacity: 0.6 },
+                ]}
+                onPress={handleImageUpload}
+                disabled={UpdateImage.isPending}
+              >
+                {UpdateImage.isPending ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <MaterialCommunityIcons
+                      name="upload"
+                      size={18}
+                      color="#fff"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.uploadButtonText}>Save Photo</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
+
+            {/* Cancel */}
+            <TouchableOpacity
+              style={styles.cancelImageButton}
+              onPress={handleCloseImageModal}
+              disabled={UpdateImage.isPending}
+            >
+              <Text style={styles.cancelImageButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  imageSection: {
-    alignItems: "center",
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    marginHorizontal: 20,
+  scrollView: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
   },
-  changeImageText: {
-    color: "#666",
-    fontSize: 12,
-    marginTop: 5,
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 30,
+  },
+  container: {
+    flex: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  sectionCard: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 10,
-    color: "#333",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 0.3,
   },
-  submitButton: {
-    paddingVertical: 14,
+  inputGroup: {
+    marginBottom: 16,
+  },
+
+  // ── Profile image row ──
+  profileImageRow: {
+    flexDirection: "row",
     alignItems: "center",
-    borderRadius: 5,
-    marginTop: 10,
+    gap: 16,
   },
-  submitButtonText: {
-    color: "white",
-    fontWeight: "500",
+  profileImagePreview: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: "#10B981",
+  },
+  profileImageInfo: {
+    flex: 1,
+  },
+  profileImageName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  profileImageSubtext: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 10,
+  },
+  changePhotoButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#10B981",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+  },
+  changePhotoButtonText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  // ── Form ──
+  primaryButton: {
+    backgroundColor: "#10B981",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: "center",
+    marginTop: 10,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
     fontSize: 14,
-    fontFamily: "RobotoSlab-Medium",
+    letterSpacing: 0.3,
   },
   dropdownTrigger: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F9FAFB",
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#E5E7EB",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   dropdownTriggerText: {
-    fontSize: 16,
+    fontSize: 14,
+    color: "#111827",
+    fontWeight: "500",
   },
   dropdownOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-end",
   },
   dropdownContainer: {
     backgroundColor: "white",
-    width: "80%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
     maxHeight: "50%",
-    borderRadius: 10,
-    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
   dropdownItem: {
-    padding: 15,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#F3F4F6",
   },
   dropdownItemText: {
-    fontSize: 16,
+    fontSize: 14,
+    color: "#111827",
+    fontWeight: "500",
   },
   selectedItem: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#D1FAE5",
+  },
+
+  // ── Image modal ──
+  imageModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  imageModalContainer: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+  },
+  imageModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  imageModalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  imagePreviewContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+    position: "relative",
+  },
+  imageModalPreview: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: "#10B981",
+  },
+  newBadge: {
+    position: "absolute",
+    bottom: 4,
+    right: "30%",
+    backgroundColor: "#10B981",
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  newBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  pickImageButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#2563EB",
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginBottom: 12,
+  },
+  pickImageButtonText: {
+    color: "#2563EB",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  uploadButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#10B981",
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginBottom: 12,
+  },
+  uploadButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  cancelImageButton: {
+    alignItems: "center",
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+  },
+  cancelImageButtonText: {
+    color: "#6B7280",
+    fontWeight: "600",
+    fontSize: 15,
   },
 });
-
-function GeneralEditPersonalInformation() {
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [street, setStreet] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-
-  // mutation for PATCH update
-  const UpdateText_Mutation = useMutateData(
-    "api/v1/general/UserProfile",
-    "PATCH",
-    "userProfile"
-  );
-
-  // fetch current user profile
-  const {
-    data: getuserinfo,
-    isLoading: isloadinggetuserinfo,
-    error: iserrorgetuserinfo,
-  } = useFetchData("api/v1/general/UserProfile", "getuserinfo");
-
-  // ✅ populate state once data is fetched
-  useEffect(() => {
-    if (getuserinfo?.user) {
-      const { name, phoneNumber, address } = getuserinfo.user;
-
-      setName(name || "");
-      setPhone(phoneNumber || "");
-      setStreet(address?.street || "");
-      setCity(address?.city || "");
-      setState(address?.state || "");
-    }
-  }, [getuserinfo]);
-
-  // ✅ navigate back after success
-  useEffect(() => {
-    if (UpdateText_Mutation.isSuccess) {
-      dispatch(UserProfile_data_Fun());
-      navigation.goBack();
-    }
-  }, [UpdateText_Mutation.isSuccess, navigation]);
-
-  const handleTextUpdate = () => {
-    const payload = {
-      name,
-      phoneNumber: phone,
-      address: {
-        street,
-        city,
-        state,
-      },
-    };
-
-    console.log("Submitting:", payload);
-    UpdateText_Mutation.mutate(payload);
-  };
-
-  return (
-    <View>
-      <View style={{ paddingHorizontal: 20, gap: 10, marginTop: 20 }}>
-        {/* Name */}
-        <View>
-          <FormLabel data="Name" />
-          <Forminput
-            placeholder="Your Name"
-            onChangeText={setName}
-            value={name}
-          />
-        </View>
-
-        {/* Phone Number */}
-        <View>
-          <FormLabel data="Phone Number" />
-          <Forminput
-            placeholder="Phone Number"
-            onChangeText={setPhone}
-            value={phone}
-          />
-        </View>
-
-        {/* Street */}
-        <View>
-          <FormLabel data="Street" />
-          <Forminput
-            placeholder="Street Address"
-            onChangeText={setStreet}
-            value={street}
-          />
-        </View>
-
-        {/* City */}
-        <View>
-          <FormLabel data="City" />
-          <Forminput placeholder="City" onChangeText={setCity} value={city} />
-        </View>
-
-        {/* State */}
-        <View>
-          <FormLabel data="State" />
-          <Forminput
-            placeholder="State"
-            onChangeText={setState}
-            value={state}
-          />
-        </View>
-
-        {/* Submit Button */}
-        <Formbutton
-          buttonStyle={[styles.submitButton, { backgroundColor: "#04973C" }]}
-          textStyle={styles.submitButtonText}
-          data="Update Information"
-          onPress={handleTextUpdate}
-          isLoading={UpdateText_Mutation.isLoading}
-        />
-      </View>
-    </View>
-  );
-}
-
-function ProfileImageUploader({}) {
-  const dispatch = useDispatch();
-  const navigation = useNavigation();
-
-  const { userProfile_data } = useSelector((state) => state.ProfileSlice);
-
-  const [profileImage, setProfileImage] = useState(
-    userProfile_data?.photo ||
-      "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg"
-  );
-  const [hasImageChanged, setHasImageChanged] = useState(false);
-
-  // mutation for uploading image
-  const UpdateImage_Mutation = formdatauseMutateData(
-    "api/v1/general/update-profile-image",
-    "PUT",
-    "userProfile"
-  );
-
-  // Pick image from device
-  // const pickImage = async () => {
-  //   const permissionResult =
-  //     await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-  //   if (!permissionResult.granted) {
-  //     alert("Permission to access gallery is required!");
-  //     return;
-  //   }
-
-  //   const result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //     allowsEditing: true,
-  //     quality: 0.7,
-  //   });
-
-  //   if (!result.canceled) {
-  //     setProfileImage(result.assets[0].uri);
-  //     setHasImageChanged(true);
-  //   }
-  // };
-
-  const pickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      alert("Permission to access gallery is required!");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1], // square crop for profile pic
-      quality: 0.7,
-    });
-
-    if (!result.canceled && result.assets?.length > 0) {
-      const localUri = result.assets[0].uri;
-
-      console.log("Selected Image URI:", localUri);
-
-      setProfileImage(localUri); // for preview
-      setHasImageChanged(true);
-    }
-  };
-
-  const handleImageUpdate = async () => {
-    const formData = new FormData();
-    formData.append("image", {
-      uri: profileImage,
-      type: "image/jpeg", // or infer with mime from extension
-      name: `profile_${Date.now()}.jpg`,
-    });
-
-    UpdateImage_Mutation.mutate(formData, {
-      onSuccess: () => {
-        dispatch(UserProfile_data_Fun()); // refresh profile
-        setHasImageChanged(false);
-        navigation.goBack(); // navigate back
-      },
-    });
-  };
-
-  return (
-    <View
-      style={{
-        alignItems: "center",
-        paddingVertical: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
-        marginHorizontal: 20,
-        flexDirection: "row",
-        justifyContent: "center",
-        gap: 20,
-      }}
-    >
-      <TouchableOpacity
-        onPress={pickImage}
-        style={{ alignItems: "center", justifyContent: "center" }}
-      >
-        {/* <Image
-          source={{ uri: profileImage }}
-          style={{ width: 100, height: 100, borderRadius: 50 }}
-        /> */}
-
-        <Image
-          source={{ uri: profileImage }}
-          style={{ width: 100, height: 100, borderRadius: 50 }}
-          onError={(e) => console.log("Image load error:", e.nativeEvent.error)}
-        />
-        <Text style={{ color: "blue", marginTop: 5, fontSize: 12 }}>
-          Tap to change image
-        </Text>
-        <Text>{userProfile_data?.user?.email}</Text>
-      </TouchableOpacity>
-
-      {/* Only show update button if image has changed */}
-      {hasImageChanged && (
-        <Formbutton
-          buttonStyle={{
-            backgroundColor: "green",
-            marginTop: 15,
-            paddingHorizontal: 20,
-            borderRadius: 10,
-            paddingVertical: 10,
-          }}
-          textStyle={{
-            color: "#fff",
-            fontSize: 14,
-            fontWeight: "600",
-          }}
-          data="Update Image"
-          onPress={handleImageUpdate}
-          isLoading={UpdateImage_Mutation.isLoading}
-        />
-      )}
-    </View>
-  );
-}
 
 export default EditPersonalInformation;

@@ -25,7 +25,8 @@ import {
   CenterReuseModals,
 } from "../../../components/shared/ReuseModals";
 
-import { useMutation } from "react-query";
+// Converted import from 'react-query' to '@tanstack/react-query'
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -75,8 +76,9 @@ const Myclan = ({ navigation }) => {
     setText(newText);
   };
 
-  const Crate_Estate_Mutation = useMutation(
-    (data_info) => {
+  // Converted useMutation to TanStack Query object syntax
+  const Crate_Estate_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}clan`;
 
       const config = {
@@ -90,41 +92,39 @@ const Myclan = ({ navigation }) => {
 
       return axios.post(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        console.log({
-          success,
-        });
-        Toast.show({
-          type: "success",
-          text1: "Estate created successfully ",
-          text2: ` Waiting for Admin to Aprove `,
-        });
-        // setModalVisible(false);
-        setModalVisible(false);
-        // setModalVisibility({});
-      },
+    onSuccess: (success) => {
+      console.log({
+        success,
+      });
+      Toast.show({
+        type: "success",
+        text1: "Estate created successfully ",
+        text2: ` Waiting for Admin to Aprove `,
+      });
+      // setModalVisible(false);
+      setModalVisible(false);
+      // setModalVisibility({});
+    },
 
-      onError: (error) => {
-        console.log({
-          error: error?.response,
-        });
+    onError: (error) => {
+      console.log({
+        error: error?.response,
+      });
 
-        console.log({
-          error: error?.response?.data?.error,
-        });
-        setModalVisible(false);
+      console.log({
+        error: error?.response?.data?.error,
+      });
+      setModalVisible(false);
 
-        // setModalVisible(false);
-        // setModalVisibility({});
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.error} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-      },
-    }
-  );
+      // setModalVisible(false);
+      // setModalVisibility({});
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.error} `,
+        //   text2: ` ${error?.response?.data?.errorMsg} `,
+      });
+    },
+  });
 
   const handleEstate = () => {
     let data = {
@@ -268,7 +268,7 @@ const Myclan = ({ navigation }) => {
               width: "100%",
               borderTopLeftRadius: 30,
               borderTopRightRadius: 30,
-              height: "50%",
+              // Removed fixed height: "50%" to allow content to dictate size
             }}
           >
             <TouchableOpacity
@@ -330,8 +330,10 @@ const Myclan = ({ navigation }) => {
                 marginTop: 20,
               }}
               onPress={handleEstate}
+              disabled={Crate_Estate_Mutation.isPending} // Disable button while loading
             >
-              {Crate_Estate_Mutation.isLoading ? (
+              {/* Updated deprecated 'isLoading' to 'isPending' */}
+              {Crate_Estate_Mutation.isPending ? (
                 <ActivityIndicator size="small" color="white" />
               ) : (
                 <Text

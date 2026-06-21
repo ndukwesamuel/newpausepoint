@@ -1,586 +1,1048 @@
+// import React, { useEffect, useState } from "react";
+// import {
+//   View,
+//   Text,
+//   Image,
+//   ScrollView,
+//   TouchableOpacity,
+//   Modal,
+//   TouchableWithoutFeedback,
+//   StyleSheet,
+//   ActivityIndicator,
+// } from "react-native";
+// import { useRoute } from "@react-navigation/native";
+// import { useDispatch, useSelector } from "react-redux";
+// import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+// import { useMutation } from "@tanstack/react-query";
+// import Toast from "react-native-toast-message";
+// import axios from "axios";
+// import ScreenWrapper from "../../components/shared/ScreenWrapper";
+// import {
+//   Admin_Get_Single_Clan_Memeber_Fun,
+//   Get_Single_clan,
+// } from "../../Redux/UserSide/ClanSlice";
+// import { Admin_Get_Single_User_Fun } from "../../Redux/Admin/UserSlice";
+// import { useNavigation } from "@react-navigation/native";
+
+// const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+
+// const STATUS_CONFIG = {
+//   approved: { bg: "#DCFCE7", text: "#166534", label: "Approved" },
+//   pending: { bg: "#FEF3C7", text: "#92400E", label: "Pending" },
+//   suspended: { bg: "#FEE2E2", text: "#991B1B", label: "Suspended" },
+//   rejected: { bg: "#F3F4F6", text: "#374151", label: "Rejected" },
+// };
+
+// export default function UserDetails() {
+//   const dispatch = useDispatch();
+//   const navigation = useNavigation();
+//   const route = useRoute();
+//   // const { item } = route.params;
+
+//   let item = "OPERA1-AAAA-0001";
+
+//   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+
+//   const { get_user_profile_data } = useSelector(
+//     (state) => state?.UserProfileSlice,
+//   );
+//   const { admin_get_single_clan_memeber_data } = useSelector(
+//     (state) => state?.ClanSlice,
+//   );
+
+//   useEffect(() => {
+//     if (item) {
+//       dispatch(Admin_Get_Single_User_Fun(item));
+//       // item.user is just an ID string based on actual data
+//       const userId = item?.user?._id || item?.user;
+//       if (userId) {
+//         dispatch(Admin_Get_Single_Clan_Memeber_Fun(userId));
+//       }
+//     }
+//   }, [item, dispatch]);
+
+//   // ── Member data ───────────────────────────────────────────────────────────
+//   const member = admin_get_single_clan_memeber_data?.data?.member;
+//   const userProfile = admin_get_single_clan_memeber_data?.data?.userProfile;
+//   const isLoading = !admin_get_single_clan_memeber_data;
+
+//   const status = member?.status || item?.status || "pending";
+//   const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+
+//   const isApproved = status === "approved";
+//   const nextStatus = isApproved ? "suspended" : "approved";
+//   const memberId =
+//     member?.user?._id || member?.user || item?.user?._id || item?.user;
+
+//   // ── Approve/suspend mutation ──────────────────────────────────────────────
+//   const ApproveMember_Mutation = useMutation({
+//     mutationFn: (data_info) => {
+//       return axios.post(
+//         `${API_BASEURL}clan/EstateAdminsapproveMembership`,
+//         data_info,
+//         { headers: { "Content-Type": "application/json" } },
+//       );
+//     },
+//     onSuccess: () => {
+//       Toast.show({
+//         type: "success",
+//         text1: isApproved
+//           ? "User suspended successfully"
+//           : "User reinstated successfully",
+//       });
+//       const adminClanId =
+//         get_user_profile_data?.data?.AdmincurrentClanMeeting?._id ||
+//         get_user_profile_data?.data?.AdmincurrentClanMeeting;
+//       if (adminClanId) dispatch(Get_Single_clan(adminClanId));
+//       const userId = item?.user?._id || item?.user;
+//       if (userId) dispatch(Admin_Get_Single_Clan_Memeber_Fun(userId));
+//       setConfirmModalVisible(false);
+//     },
+//     onError: (error) => {
+//       Toast.show({
+//         type: "error",
+//         text1: error?.response?.data?.message || "Error updating status",
+//       });
+//     },
+//   });
+
+//   const handleConfirm = () => {
+//     if (!memberId) {
+//       Toast.show({ type: "error", text1: "Missing member ID" });
+//       return;
+//     }
+//     const adminClanId =
+//       get_user_profile_data?.data?.AdmincurrentClanMeeting?._id ||
+//       get_user_profile_data?.data?.AdmincurrentClanMeeting;
+
+//     ApproveMember_Mutation.mutate({
+//       clanId: adminClanId,
+//       memberId,
+//       approvalStatus: nextStatus,
+//     });
+//   };
+
+//   // ── Loading state ─────────────────────────────────────────────────────────
+//   if (isLoading) {
+//     return (
+//       <ScreenWrapper
+//         title="Member Details"
+//         navigation={navigation}
+//         headerStyle={{ backgroundColor: "white" }}
+//       >
+//         <View style={styles.centered}>
+//           <ActivityIndicator size="large" color="#10B981" />
+//           <Text style={styles.loadingText}>Loading member details...</Text>
+//         </View>
+//       </ScreenWrapper>
+//     );
+//   }
+
+//   const displayName = member?.user?.name || item?.user?.name || "Unknown";
+
+//   const displayEmail = member?.user?.email || item?.user?.email || "";
+
+//   const displayPhoto =
+//     userProfile?.photo ||
+//     "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg";
+
+//   return (
+//     <ScreenWrapper
+//       title="Member Details"
+//       navigation={navigation}
+//       headerStyle={{ backgroundColor: "white" }}
+//     >
+//       <ScrollView
+//         style={styles.scrollView}
+//         contentContainerStyle={styles.scrollContent}
+//         showsVerticalScrollIndicator={false}
+//       >
+//         {/* ── Profile card ──────────────────────────────────────────────── */}
+//         <View style={styles.profileCard}>
+//           <Image source={{ uri: displayPhoto }} style={styles.avatar} />
+//           <View style={styles.profileInfo}>
+//             <Text style={styles.profileName}>{displayName}</Text>
+//             {displayEmail ? (
+//               <Text style={styles.profileEmail}>{displayEmail}</Text>
+//             ) : null}
+//             <View
+//               style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}
+//             >
+//               <Text style={[styles.statusText, { color: statusConfig.text }]}>
+//                 {statusConfig.label}
+//               </Text>
+//             </View>
+//           </View>
+//         </View>
+
+//         {/* ── Member code ───────────────────────────────────────────────── */}
+//         {(member?.memberCode || item?.memberCode) && (
+//           <View style={styles.card}>
+//             <View style={styles.cardHeader}>
+//               <MaterialCommunityIcons
+//                 name="identifier"
+//                 size={18}
+//                 color="#10B981"
+//               />
+//               <Text style={styles.cardTitle}>Member Code</Text>
+//             </View>
+//             <Text style={styles.memberCode}>
+//               {member?.memberCode || item?.memberCode}
+//             </Text>
+//           </View>
+//         )}
+
+//         {/* ── Address info ──────────────────────────────────────────────── */}
+//         <View style={styles.card}>
+//           <View style={styles.cardHeader}>
+//             <MaterialCommunityIcons
+//               name="home-map-marker"
+//               size={18}
+//               color="#10B981"
+//             />
+//             <Text style={styles.cardTitle}>Address Information</Text>
+//           </View>
+
+//           <InfoRow
+//             label="Street"
+//             value={
+//               member?.street || item?.street || userProfile?.address?.street
+//             }
+//           />
+//           <InfoRow
+//             label="House Number"
+//             value={member?.houseNumber || item?.houseNumber}
+//           />
+//           <InfoRow
+//             label="Unit Number"
+//             value={member?.unitNumber || item?.unitNumber}
+//           />
+//           <InfoRow
+//             label="Apartment Type"
+//             value={member?.apartmentType || item?.apartmentType}
+//           />
+//           <InfoRow label="City" value={userProfile?.address?.city} last />
+//         </View>
+
+//         {/* ── Contact info ──────────────────────────────────────────────── */}
+//         <View style={styles.card}>
+//           <View style={styles.cardHeader}>
+//             <MaterialCommunityIcons
+//               name="phone-outline"
+//               size={18}
+//               color="#10B981"
+//             />
+//             <Text style={styles.cardTitle}>Contact</Text>
+//           </View>
+//           <InfoRow
+//             label="Phone Number"
+//             value={userProfile?.phoneNumber || member?.phonenumber}
+//             last
+//           />
+//         </View>
+
+//         {/* ── Action button ─────────────────────────────────────────────── */}
+//         <TouchableOpacity
+//           style={[
+//             styles.actionButton,
+//             { backgroundColor: isApproved ? "#FEE2E2" : "#DCFCE7" },
+//           ]}
+//           onPress={() => setConfirmModalVisible(true)}
+//           disabled={ApproveMember_Mutation.isPending}
+//         >
+//           {ApproveMember_Mutation.isPending ? (
+//             <ActivityIndicator
+//               size="small"
+//               color={isApproved ? "#DC2626" : "#16A34A"}
+//             />
+//           ) : (
+//             <>
+//               <MaterialCommunityIcons
+//                 name={isApproved ? "account-cancel" : "account-check"}
+//                 size={20}
+//                 color={isApproved ? "#DC2626" : "#16A34A"}
+//               />
+//               <Text
+//                 style={[
+//                   styles.actionButtonText,
+//                   { color: isApproved ? "#DC2626" : "#16A34A" },
+//                 ]}
+//               >
+//                 {isApproved ? "Suspend Member" : "Reinstate Member"}
+//               </Text>
+//             </>
+//           )}
+//         </TouchableOpacity>
+//       </ScrollView>
+
+//       {/* ── Confirm modal ─────────────────────────────────────────────────── */}
+//       <Modal
+//         transparent
+//         animationType="slide"
+//         visible={confirmModalVisible}
+//         onRequestClose={() => setConfirmModalVisible(false)}
+//       >
+//         <TouchableWithoutFeedback onPress={() => setConfirmModalVisible(false)}>
+//           <View style={styles.modalOverlay}>
+//             <TouchableWithoutFeedback>
+//               <View style={styles.modalContainer}>
+//                 {/* Header */}
+//                 <View style={styles.modalHeader}>
+//                   <MaterialCommunityIcons
+//                     name={isApproved ? "account-cancel" : "account-check"}
+//                     size={24}
+//                     color={isApproved ? "#DC2626" : "#16A34A"}
+//                   />
+//                   <Text style={styles.modalTitle}>
+//                     {isApproved ? "Suspend Member" : "Reinstate Member"}
+//                   </Text>
+//                 </View>
+
+//                 {/* Description */}
+//                 <Text style={styles.modalDescription}>
+//                   {isApproved
+//                     ? `Are you sure you want to suspend ${displayName}? They will lose access to the estate.`
+//                     : `Are you sure you want to reinstate ${displayName}? They will regain access to the estate.`}
+//                 </Text>
+
+//                 {/* Buttons */}
+//                 <View style={styles.modalButtons}>
+//                   <TouchableOpacity
+//                     style={styles.cancelButton}
+//                     onPress={() => setConfirmModalVisible(false)}
+//                     disabled={ApproveMember_Mutation.isPending}
+//                   >
+//                     <Text style={styles.cancelButtonText}>Cancel</Text>
+//                   </TouchableOpacity>
+
+//                   <TouchableOpacity
+//                     style={[
+//                       styles.confirmButton,
+//                       {
+//                         backgroundColor: isApproved ? "#DC2626" : "#16A34A",
+//                         opacity: ApproveMember_Mutation.isPending ? 0.6 : 1,
+//                       },
+//                     ]}
+//                     onPress={handleConfirm}
+//                     disabled={ApproveMember_Mutation.isPending}
+//                   >
+//                     {ApproveMember_Mutation.isPending ? (
+//                       <ActivityIndicator size="small" color="#fff" />
+//                     ) : (
+//                       <Text style={styles.confirmButtonText}>
+//                         {isApproved ? "Yes, Suspend" : "Yes, Reinstate"}
+//                       </Text>
+//                     )}
+//                   </TouchableOpacity>
+//                 </View>
+//               </View>
+//             </TouchableWithoutFeedback>
+//           </View>
+//         </TouchableWithoutFeedback>
+//       </Modal>
+//     </ScreenWrapper>
+//   );
+// }
+
+// // ─── Info row ─────────────────────────────────────────────────────────────────
+// const InfoRow = ({ label, value, last }) => {
+//   if (!value) return null;
+//   return (
+//     <View style={[styles.infoRow, last && { borderBottomWidth: 0 }]}>
+//       <Text style={styles.infoLabel}>{label}</Text>
+//       <Text style={styles.infoValue}>{value}</Text>
+//     </View>
+//   );
+// };
+
+// // ─── Styles ───────────────────────────────────────────────────────────────────
+// const styles = StyleSheet.create({
+//   scrollView: {
+//     flex: 1,
+//     backgroundColor: "#F9FAFB",
+//   },
+//   scrollContent: {
+//     padding: 16,
+//     paddingBottom: 40,
+//   },
+//   centered: {
+//     flex: 1,
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+//   loadingText: {
+//     marginTop: 12,
+//     color: "#6B7280",
+//     fontSize: 14,
+//   },
+
+//   // ── Profile card ──
+//   profileCard: {
+//     backgroundColor: "#fff",
+//     borderRadius: 16,
+//     padding: 20,
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 16,
+//     marginBottom: 16,
+//     elevation: 2,
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 1 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 4,
+//   },
+//   avatar: {
+//     width: 80,
+//     height: 80,
+//     borderRadius: 40,
+//     borderWidth: 2,
+//     borderColor: "#10B981",
+//   },
+//   profileInfo: {
+//     flex: 1,
+//     gap: 4,
+//   },
+//   profileName: {
+//     fontSize: 20,
+//     fontWeight: "700",
+//     color: "#111827",
+//   },
+//   profileEmail: {
+//     fontSize: 13,
+//     color: "#6B7280",
+//   },
+//   statusBadge: {
+//     alignSelf: "flex-start",
+//     paddingHorizontal: 10,
+//     paddingVertical: 3,
+//     borderRadius: 20,
+//     marginTop: 4,
+//   },
+//   statusText: {
+//     fontSize: 12,
+//     fontWeight: "600",
+//   },
+
+//   // ── Cards ──
+//   card: {
+//     backgroundColor: "#fff",
+//     borderRadius: 16,
+//     padding: 16,
+//     marginBottom: 16,
+//     elevation: 2,
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 1 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 4,
+//   },
+//   cardHeader: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 8,
+//     marginBottom: 14,
+//     paddingBottom: 12,
+//     borderBottomWidth: 1,
+//     borderBottomColor: "#F3F4F6",
+//   },
+//   cardTitle: {
+//     fontSize: 15,
+//     fontWeight: "700",
+//     color: "#1F2937",
+//   },
+//   memberCode: {
+//     fontSize: 22,
+//     fontWeight: "700",
+//     color: "#10B981",
+//     letterSpacing: 1,
+//   },
+
+//   // ── Info row ──
+//   infoRow: {
+//     paddingVertical: 10,
+//     borderBottomWidth: 1,
+//     borderBottomColor: "#F3F4F6",
+//   },
+//   infoLabel: {
+//     fontSize: 11,
+//     color: "#9CA3AF",
+//     textTransform: "uppercase",
+//     letterSpacing: 0.5,
+//     marginBottom: 3,
+//   },
+//   infoValue: {
+//     fontSize: 15,
+//     fontWeight: "600",
+//     color: "#111827",
+//   },
+
+//   // ── Action button ──
+//   actionButton: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     justifyContent: "center",
+//     borderRadius: 14,
+//     paddingVertical: 16,
+//     gap: 8,
+//     marginTop: 4,
+//   },
+//   actionButtonText: {
+//     fontSize: 15,
+//     fontWeight: "700",
+//   },
+
+//   // ── Modal ──
+//   modalOverlay: {
+//     flex: 1,
+//     backgroundColor: "rgba(0,0,0,0.5)",
+//     justifyContent: "flex-end",
+//   },
+//   modalContainer: {
+//     backgroundColor: "#fff",
+//     borderTopLeftRadius: 24,
+//     borderTopRightRadius: 24,
+//     padding: 24,
+//     paddingBottom: 40,
+//   },
+//   modalHeader: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 10,
+//     marginBottom: 14,
+//   },
+//   modalTitle: {
+//     fontSize: 18,
+//     fontWeight: "700",
+//     color: "#111827",
+//   },
+//   modalDescription: {
+//     fontSize: 14,
+//     color: "#6B7280",
+//     lineHeight: 22,
+//     marginBottom: 24,
+//   },
+//   modalButtons: {
+//     flexDirection: "row",
+//     gap: 12,
+//   },
+//   cancelButton: {
+//     flex: 1,
+//     backgroundColor: "#F3F4F6",
+//     borderRadius: 12,
+//     paddingVertical: 14,
+//     alignItems: "center",
+//   },
+//   cancelButtonText: {
+//     fontSize: 15,
+//     fontWeight: "600",
+//     color: "#6B7280",
+//   },
+//   confirmButton: {
+//     flex: 1,
+//     borderRadius: 12,
+//     paddingVertical: 14,
+//     alignItems: "center",
+//   },
+//   confirmButtonText: {
+//     fontSize: 15,
+//     fontWeight: "700",
+//     color: "#fff",
+//   },
+// });
+
+import React, { useState } from "react";
 import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
   View,
+  Text,
+  Image,
+  ScrollView,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Modal,
   TouchableWithoutFeedback,
-  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { emergencydata } from "../../components/Emergency/emdata";
-import AppScreen from "../../components/shared/AppScreen";
-import EmergencyModal, {
-  EmergencyModalTwo,
-} from "../../components/Emergency/Modal";
-import {
-  MediumFontText,
-  RegularFontText,
-  SemiBoldFontText,
-} from "../../components/shared/Paragrahp";
-
-import { AntDesign } from "@expo/vector-icons";
-import { Formbutton, Forminput_Icon } from "../../components/shared/InputForm";
-import { userFile } from "../../utils/fakedata";
-import { useRoute } from "@react-navigation/native";
-import { HalfScreenModal } from "../../components/shared/ReuseableModal";
-import { Admin_Get_Single_User_Fun } from "../../Redux/Admin/UserSlice";
-import { useMutation } from "react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import { useDispatch, useSelector } from "react-redux";
-
-import axios from "axios";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import {
-  Admin_Get_Single_Clan_Memeber_Fun,
-  Get_Single_clan,
-} from "../../Redux/UserSide/ClanSlice";
-export default function UserDetails({ navigation }) {
-  const dispatch = useDispatch();
-  const [isModalVisible, setIsModalVisible] = useState(false);
+import ScreenWrapper from "../../components/shared/ScreenWrapper";
+import { useFetchData_v2, useMutateData_v2 } from "../../hooks/Requestv2";
 
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
+const STATUS_CONFIG = {
+  approved: { bg: "#DCFCE7", text: "#166534", label: "Approved" },
+  pending: { bg: "#FEF3C7", text: "#92400E", label: "Pending" },
+  suspended: { bg: "#FEE2E2", text: "#991B1B", label: "Suspended" },
+  rejected: { bg: "#F3F4F6", text: "#374151", label: "Rejected" },
+};
 
+export default function UserDetails() {
+  const navigation = useNavigation();
   const route = useRoute();
-
-  console.log({
-    iii: route,
-  });
-
-  // const { item } = route.params as { item: any };
-
   const { item } = route.params;
-  console.log({
-    item: item,
-  });
+
+  // let item = "OPERA1-AAAA-0001";
+
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
   const { get_user_profile_data } = useSelector(
-    (state) => state?.UserProfileSlice
+    (state) => state?.UserProfileSlice,
   );
 
-  const { admin_get_single_clan_memeber_data } = useSelector(
-    (state) => state?.ClanSlice
-  );
+  // ── Get member code from item ─────────────────────────────────────────────
+  // item can be a member object with memberCode or just a memberCode string
+  const memberCode = item?.memberCode || item;
 
-  const { Singleuser_data } = useSelector((state) => state?.UserSlice);
+  // ── Get clan ID from admin profile ────────────────────────────────────────
+  const adminClanId =
+    get_user_profile_data?.data?.AdmincurrentClanMeeting?._id ||
+    get_user_profile_data?.data?.AdmincurrentClanMeeting;
 
-  useEffect(() => {
-    dispatch(Admin_Get_Single_User_Fun(item));
-    dispatch(Admin_Get_Single_Clan_Memeber_Fun(item?.user?._id));
-
-    return () => {};
-  }, []);
-
-  console.log({
-    ooo: admin_get_single_clan_memeber_data?.data?.member,
-  });
-  console.log({
-    qqqoo: admin_get_single_clan_memeber_data?.data?.userProfile,
-  });
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalformVisible, setModalFormVisible] = useState(false);
-
-  const openModal = () => {
-    setModalVisible(true);
-  };
-
-  const closeFormModal = () => {
-    setModalFormVisible(false);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
-  const [userType, setUserType] = useState("All");
+  // ── Fetch member details from new endpoint ────────────────────────────────
   const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
-  const usertypelist = ["All", "Active", "Banned", "Pending"];
+    data: memberResponse,
+    isLoading,
+    isError,
+    refetch,
+  } = useFetchData_v2(
+    `api/v1/clan/estate/getUserByMemberCode/${memberCode}`,
+    `member-${memberCode}`,
+    { enabled: !!memberCode },
+  );
 
-  const filteredUsers = userFile.filter((user) => {
-    // if (userType === "ALL") {
+  const memberData = memberResponse?.data;
+  const member = memberData?.member;
+  const user = memberData?.user;
+  const profile = memberData?.profile;
 
-    if (userType.toUpperCase() === "ALL") {
-      return true; // Show all users
-    } else {
-      return user.status === userType; // Show users with selected status
+  // ── Status ────────────────────────────────────────────────────────────────
+  const status = member?.status || "pending";
+  const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  const isApproved = status === "approved";
+  const nextStatus = isApproved ? "suspended" : "approved";
+  const memberId = user?._id;
+
+  // ── Approve/suspend mutation ──────────────────────────────────────────────
+  const { mutate: updateMemberStatus, isPending: isUpdating } =
+    useMutateData_v2(
+      "api/v1/clan/EstateAdminsapproveMembership",
+      "POST",
+      `member-${memberCode}`,
+    );
+
+  const handleConfirm = () => {
+    if (!memberId || !adminClanId) {
+      Toast.show({ type: "error", text1: "Missing required information" });
+      return;
     }
-  });
 
-  const [formData, setFormData] = useState({
-    search: "", // Initialize with empty values
-  });
-
-  const handleInputChange = (inputName, text) => {
-    setFormData({ ...formData, [inputName]: text });
-  };
-
-  const RenderItem = ({ item }) => {
-    let statusColor = "#3DCF3A";
-    let statusBackColor = "#F3FFF3";
-    if (item?.status === "Banned") {
-      statusColor = "#F34357"; // Red color for 'Banned' status
-      statusBackColor = "#FDF2F3";
-    } else if (item?.status === "Pending") {
-      statusColor = "#F27F2D"; // Yellow color for 'Pending' status
-      statusBackColor = "#FFF1E7";
-    }
-
-    return (
-      <TouchableOpacity
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          borderWidth: 1,
-          borderColor: "#CFCDCD",
-          borderRadius: 6,
-          paddingHorizontal: 10,
-          gap: 10,
-          paddingVertical: 20,
-          marginBottom: 20,
-        }}
-        onPress={() =>
-          navigation.navigate("adminUserDetails", { data: "this" })
-        }
-      >
-        <View
-          style={{
-            borderRadius: 6,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Image
-            source={{
-              uri: "https://img.bleacherreport.net/img/images/photos/003/701/847/hi-res-c834ba050d9e72e90eca37c6b08b6fc5_crop_north.jpg?1508166325&w=3072&h=2048",
-            }}
-            style={{ width: 50, height: 50, borderRadius: 50 }}
-          />
-        </View>
-
-        <View
-          style={{
-            width: "90%",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <View style={{}}>
-            <Text
-              style={{
-                fontWeight: "500",
-                fontSize: 14,
-                fontFamily: "RobotoSlab-Medium",
-              }}
-            >
-              {item?.user?.name}
-            </Text>
-
-            <Text>{item?.user?.email}</Text>
-          </View>
-
-          <View
-            style={{ backgroundColor: statusBackColor, paddingHorizontal: 10 }}
-          >
-            <Text style={{ color: statusColor }}>{item?.status}</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
+    updateMemberStatus(
+      { clanId: adminClanId, memberId, approvalStatus: nextStatus },
+      {
+        onSuccess: () => {
+          Toast.show({
+            type: "success",
+            text1: isApproved
+              ? "Member suspended successfully"
+              : "Member reinstated successfully",
+          });
+          refetch();
+          setConfirmModalVisible(false);
+        },
+        onError: (error) => {
+          Toast.show({
+            type: "error",
+            text1: error?.data?.message || "Error updating status",
+          });
+        },
+      },
     );
   };
 
-  function capitalizeFirstLetter(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  // ── Display values ────────────────────────────────────────────────────────
+  const displayName = user?.name || "Unknown";
+  const displayEmail = user?.email || "";
+  const displayPhoto =
+    profile?.photo ||
+    "https://static.vecteezy.com/system/resources/previews/002/318/271/original/user-profile-icon-free-vector.jpg";
+
+  // ── Loading ───────────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <ScreenWrapper
+        title="Member Details"
+        navigation={navigation}
+        headerStyle={{ backgroundColor: "white" }}
+      >
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#10B981" />
+          <Text style={styles.loadingText}>Loading member details...</Text>
+        </View>
+      </ScreenWrapper>
+    );
   }
 
-  const ApproveMember_Mutation = useMutation(
-    (data_info) => {
-      let url = `${API_BASEURL}clan/EstateAdminsapproveMembership`;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      return axios.post(url, data_info, config);
-    },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: " successfully ",
-        });
-        dispatch(
-          Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting)
-        );
-
-        // setTurnmodal(false);
-        setIsModalVisible(!isModalVisible);
-      },
-
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.message} `,
-          //   text2: ` ${error?.response?.data?.errorMsg} `,
-        });
-
-        // dispatch(Get_User_Clans_Fun());
-        // dispatch(Get_User_Profle_Fun());
-        // dispatch(Get_all_clan_User_Is_adminIN_Fun());
-      },
-    }
-  );
-
-  const Stattus_fuc = () => {
-    let statusColor = "#3DCF3A";
-    let statusBackColor = "#F3FFF3";
-    if (admin_get_single_clan_memeber_data?.data?.member?.status === "Banned") {
-      statusColor = "#F34357"; // Red color for 'Banned' status
-      statusBackColor = "#FDF2F3";
-    } else if (
-      admin_get_single_clan_memeber_data?.data?.member?.status === "Pending"
-    ) {
-      statusColor = "#F27F2D"; // Yellow color for 'Pending' status
-      statusBackColor = "#FFF1E7";
-    }
-
+  // ── Error ─────────────────────────────────────────────────────────────────
+  if (isError || !memberData) {
     return (
-      <View
-        style={{
-          backgroundColor: statusBackColor,
-          paddingHorizontal: 10,
-          borderRadius: 5,
-        }}
+      <ScreenWrapper
+        title="Member Details"
+        navigation={navigation}
+        headerStyle={{ backgroundColor: "white" }}
       >
-        <Text style={{ color: statusColor, textAlign: "center" }}>
-          {admin_get_single_clan_memeber_data?.data?.member?.status}
-        </Text>
-      </View>
+        <View style={styles.centered}>
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={48}
+            color="#EF4444"
+          />
+          <Text style={styles.errorText}>Failed to load member details</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenWrapper>
     );
-  };
+  }
 
   return (
-    <ScrollView>
-      <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
-        <View
-          style={{
-            borderRadius: 6,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <Image
-            source={{
-              uri: admin_get_single_clan_memeber_data?.data?.userProfile?.photo,
-            }}
-            style={{ width: 100, height: 100, borderRadius: 50 }}
-          />
-
-          <View style={{ flex: 1, gap: 5 }}>
-            <SemiBoldFontText
-              data={
-                admin_get_single_clan_memeber_data?.data?.member?.user?.name
-              }
-              textstyle={{ fontSize: 22 }}
-            />
-            <MediumFontText
-              data={
-                admin_get_single_clan_memeber_data?.data?.member?.user?.email
-              }
-              textstyle={{ fontSize: 11 }}
-            />
-            <View style={{ width: "40%" }}>
-              <Stattus_fuc />
+    <ScreenWrapper
+      title="Member Details"
+      navigation={navigation}
+      headerStyle={{ backgroundColor: "white" }}
+    >
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Profile card ─────────────────────────────────────────────── */}
+        <View style={styles.profileCard}>
+          <Image source={{ uri: displayPhoto }} style={styles.avatar} />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{displayName}</Text>
+            {displayEmail ? (
+              <Text style={styles.profileEmail}>{displayEmail}</Text>
+            ) : null}
+            <View
+              style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}
+            >
+              <Text style={[styles.statusText, { color: statusConfig.text }]}>
+                {statusConfig.label}
+              </Text>
             </View>
           </View>
         </View>
 
-        <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 7,
-            borderColor: "#2632381F",
-            paddingHorizontal: 10,
-            paddingVertical: 10,
-            marginTop: 20,
-          }}
-        >
-          <View
-            style={{
-              marginBottom: 20,
-              borderBottomColor: "#CFCDCD",
-              borderBottomWidth: 1,
-              paddingBottom: 10,
-            }}
-          >
-            <SemiBoldFontText data="User Info " textstyle={{ fontSize: 18 }} />
+        {/* ── Member code ──────────────────────────────────────────────── */}
+        {member?.memberCode && (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <MaterialCommunityIcons
+                name="identifier"
+                size={18}
+                color="#10B981"
+              />
+              <Text style={styles.cardTitle}>Member Code</Text>
+            </View>
+            <Text style={styles.memberCode}>{member.memberCode}</Text>
           </View>
+        )}
 
-          {/* <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Resident ID"
-              textstyle={{ fontSize: 13, color: "#696969" }}
+        {/* ── Address info ─────────────────────────────────────────────── */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <MaterialCommunityIcons
+              name="home-map-marker"
+              size={18}
+              color="#10B981"
             />
-            <MediumFontText data="2340OPL56" textstyle={{ fontSize: 19 }} />
-          </View> */}
-
-          <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Home Address"
-              textstyle={{ fontSize: 13, color: "#696969" }}
-            />
-            <MediumFontText
-              data={`${admin_get_single_clan_memeber_data?.data?.userProfile?.address?.street} ${admin_get_single_clan_memeber_data?.data?.userProfile?.address?.city} `}
-              textstyle={{ fontSize: 19 }}
-            />
+            <Text style={styles.cardTitle}>Address Information</Text>
           </View>
-
-          <View style={{ marginBottom: 5, paddingBottom: 10 }}>
-            <RegularFontText
-              data="Phone Number"
-              textstyle={{ fontSize: 13, color: "#696969" }}
-            />
-            <MediumFontText
-              data={
-                admin_get_single_clan_memeber_data?.data?.userProfile
-                  ?.phoneNumber
-              }
-              textstyle={{ fontSize: 19 }}
-            />
-          </View>
+          <InfoRow label="Home Address" value={member?.homeAddress} />
+          <InfoRow
+            label="Street"
+            value={member?.street || profile?.address?.street}
+          />
+          <InfoRow label="House Number" value={member?.houseNumber} />
+          <InfoRow label="Unit Number" value={member?.unitNumber} />
+          <InfoRow label="Apartment Type" value={member?.apartmentType} />
+          <InfoRow label="City" value={profile?.address?.city} last />
         </View>
 
-        <Formbutton
-          buttonStyle={{
-            backgroundColor:
-              item?.status === "approved" ? "#FDF2F3" : "#04973C",
+        {/* ── Contact info ─────────────────────────────────────────────── */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <MaterialCommunityIcons
+              name="phone-outline"
+              size={18}
+              color="#10B981"
+            />
+            <Text style={styles.cardTitle}>Contact</Text>
+          </View>
+          <InfoRow
+            label="Phone Number"
+            value={profile?.phoneNumber || member?.phonenumber}
+            last
+          />
+        </View>
 
-            borderColor: item?.status === "approved" ? "#F34357" : "",
-            paddingVertical: 14,
-            alignItems: "center",
-            borderRadius: 5,
-            borderWidth: 1,
-            marginTop: 10,
-          }}
-          textStyle={{
-            color: item?.status === "approved" ? "#F34357" : "white",
-
-            fontWeight: "500",
-            fontSize: 14,
-            fontFamily: "RobotoSlab-Medium",
-          }}
-          data={item?.status === "approved" ? "Ban User" : "Reinstate User"}
-          onPress={() => setIsModalVisible(!isModalVisible)}
-        />
-
-        {/* <EmergencyModal visible={modalVisible} onClose={closeModal} setModalFormVisible={setModalFormVisible} /> */}
-
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={isModalVisible}
+        {/* ── Action button ─────────────────────────────────────────────── */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            { backgroundColor: isApproved ? "#FEE2E2" : "#DCFCE7" },
+          ]}
+          onPress={() => setConfirmModalVisible(true)}
+          disabled={isUpdating}
         >
-          <TouchableWithoutFeedback onPress={toggleModal}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <View
-                  style={{
-                    marginBottom: 20,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderBottomColor: "#CFCDCD",
-                    borderBottomWidth: 1,
-                    paddingBottom: 10,
-                  }}
-                >
-                  <MediumFontText
-                    data={
-                      admin_get_single_clan_memeber_data?.data?.member
-                        ?.status === "approved"
-                        ? "Ban User "
-                        : "Reinstate User"
-                    }
-                    textstyle={{
-                      fontSize: 18,
-                      textAlign: "center",
-                      width: "100%",
-                    }}
+          {isUpdating ? (
+            <ActivityIndicator
+              size="small"
+              color={isApproved ? "#DC2626" : "#16A34A"}
+            />
+          ) : (
+            <>
+              <MaterialCommunityIcons
+                name={isApproved ? "account-cancel" : "account-check"}
+                size={20}
+                color={isApproved ? "#DC2626" : "#16A34A"}
+              />
+              <Text
+                style={[
+                  styles.actionButtonText,
+                  { color: isApproved ? "#DC2626" : "#16A34A" },
+                ]}
+              >
+                {isApproved ? "Suspend Member" : "Reinstate Member"}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* ── Confirm modal ────────────────────────────────────────────────── */}
+      <Modal
+        transparent
+        animationType="slide"
+        visible={confirmModalVisible}
+        onRequestClose={() => setConfirmModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setConfirmModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalHeader}>
+                  <MaterialCommunityIcons
+                    name={isApproved ? "account-cancel" : "account-check"}
+                    size={24}
+                    color={isApproved ? "#DC2626" : "#16A34A"}
                   />
+                  <Text style={styles.modalTitle}>
+                    {isApproved ? "Suspend Member" : "Reinstate Member"}
+                  </Text>
                 </View>
 
-                <RegularFontText
-                  data={
-                    admin_get_single_clan_memeber_data?.data?.member?.status ===
-                    "approved"
-                      ? "Banning this user will suspend their account indefinitely, preventing further access to the system."
-                      : "Reinstating this user will reactivate their account, allowing them to access the system"
-                  }
-                  textstyle={{
-                    fontSize: 14,
-                    fontWeight: "400",
-                    textAlign: "center",
-                  }}
-                />
-                {admin_get_single_clan_memeber_data?.data?.member?.status ===
-                "approved" ? (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 20,
-                    }}
-                  >
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#FDF2F3",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={() => {
-                        ApproveMember_Mutation.mutate({
-                          clanId:
-                            get_user_profile_data?.AdmincurrentClanMeeting,
-                          memberId: item?.user?._id,
-                          approvalStatus: "suspended",
-                        });
-                      }}
-                    >
-                      <RegularFontText
-                        data="Ban User"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                        }}
-                      />
-                    </TouchableOpacity>
+                <Text style={styles.modalDescription}>
+                  {isApproved
+                    ? `Are you sure you want to suspend ${displayName}? They will lose access to the estate.`
+                    : `Are you sure you want to reinstate ${displayName}? They will regain access to the estate.`}
+                </Text>
 
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#04973C",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={toggleModal}
-                    >
-                      <RegularFontText
-                        data="Cancel"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 20,
-                    }}
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => setConfirmModalVisible(false)}
+                    disabled={isUpdating}
                   >
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "white",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                        borderWidth: 1,
-                        borderColor: "#04973C",
-                      }}
-                      onPress={toggleModal}
-                    >
-                      <RegularFontText
-                        data="Cancel"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "#04973C",
-                        }}
-                      />
-                    </TouchableOpacity>
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#04973C",
-                        paddingHorizontal: 12,
-                        paddingVertical: 12,
-                        borderRadius: 6,
-                      }}
-                      onPress={() => {
-                        ApproveMember_Mutation.mutate({
-                          clanId:
-                            get_user_profile_data?.AdmincurrentClanMeeting,
-                          memberId:
-                            admin_get_single_clan_memeber_data?.data?.member
-                              ?.user?._id,
-                          approvalStatus: "approved",
-                        });
-                      }}
-                    >
-                      <RegularFontText
-                        data="Reinstate"
-                        textstyle={{
-                          fontSize: 14,
-                          fontWeight: "400",
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
+                  <TouchableOpacity
+                    style={[
+                      styles.confirmButton,
+                      {
+                        backgroundColor: isApproved ? "#DC2626" : "#16A34A",
+                        opacity: isUpdating ? 0.6 : 1,
+                      },
+                    ]}
+                    onPress={handleConfirm}
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Text style={styles.confirmButtonText}>
+                        {isApproved ? "Yes, Suspend" : "Yes, Reinstate"}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      </View>
-    </ScrollView>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </ScreenWrapper>
   );
 }
 
+// ─── Info row ─────────────────────────────────────────────────────────────────
+const InfoRow = ({ label, value, last }) => {
+  if (!value) return null;
+  return (
+    <View style={[styles.infoRow, last && { borderBottomWidth: 0 }]}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
+  );
+};
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  scrollView: { flex: 1, backgroundColor: "#F9FAFB" },
+  scrollContent: { padding: 16, paddingBottom: 40 },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { marginTop: 12, color: "#6B7280", fontSize: 14 },
+  errorText: {
+    color: "#EF4444",
+    marginTop: 12,
+    marginBottom: 16,
+    fontSize: 14,
+    textAlign: "center",
   },
-  modalContent: {
-    backgroundColor: "white",
+  retryButton: {
+    backgroundColor: "#10B981",
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryButtonText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+
+  profileCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
     padding: 20,
-    width: "100%",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    height: "30%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: "#10B981",
+  },
+  profileInfo: { flex: 1, gap: 4 },
+  profileName: { fontSize: 20, fontWeight: "700", color: "#111827" },
+  profileEmail: { fontSize: 13, color: "#6B7280" },
+  statusBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 20,
+    marginTop: 4,
+  },
+  statusText: { fontSize: 12, fontWeight: "600" },
+
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 14,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  cardTitle: { fontSize: 15, fontWeight: "700", color: "#1F2937" },
+  memberCode: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#10B981",
+    letterSpacing: 1,
+  },
+
+  infoRow: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  infoLabel: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 3,
+  },
+  infoValue: { fontSize: 15, fontWeight: "600", color: "#111827" },
+
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 14,
+    paddingVertical: 16,
+    gap: 8,
+    marginTop: 4,
+  },
+  actionButtonText: { fontSize: 15, fontWeight: "700" },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 14,
+  },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: "#111827" },
+  modalDescription: {
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  modalButtons: { flexDirection: "row", gap: 12 },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  cancelButtonText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
+  confirmButton: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  confirmButtonText: { fontSize: 15, fontWeight: "700", color: "#fff" },
 });

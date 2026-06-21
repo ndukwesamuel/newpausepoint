@@ -1,41 +1,37 @@
-import { useQuery } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
-import { useMutation, useQueryClient } from "react-query";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 console.log({
-  tytyy: apiUrl,
+  apiUrl: apiUrl,
 });
+
+// ========================================
+// AUTHENTICATED REQUESTS (with token)
+// ========================================
 
 // Function to fetch data
 const fetchData = async ({ queryKey }) => {
   const [, url, token] = queryKey;
-  // if (!token) throw new Error("Token is missing");
 
   try {
-    console.log({
-      jfjf: `${apiUrl}${url}`,
-    });
     const response = await axios.get(`${apiUrl}${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    // console.log("API Response:", response); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
-    console.error("API Fetch Error:", error.response?.data || error.message);
+    // ✅ Just throw the error - interceptor already handled 401/token expiration
     throw new Error(error.response?.data?.message || "Failed to fetch data");
   }
 };
 
 // Hook for fetching data
 export const useFetchData = (url, queryKey, options = {}) => {
-  //   const { user } = useSelector((state) => state?.reducer?.AuthSlice);
-
   const {
     user_data,
     user_isError,
@@ -46,28 +42,18 @@ export const useFetchData = (url, queryKey, options = {}) => {
 
   const token = user_data?.token;
 
-  console.log({
-    token,
-    url,
-  });
-
-  return useQuery([queryKey, url, token], fetchData, {
-    enabled: !!token, // Prevent query from running without a token
-    retry: false, // Prevent endless retries if there's an error
+  return useQuery({
+    queryKey: [queryKey, url, token],
+    queryFn: fetchData,
+    enabled: !!token,
+    retry: false,
     ...options,
   });
 };
 
-// import axios from "axios";
-// import { useSelector } from "react-redux";
-
-// const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-
 // Function to handle API requests
 const apiRequest = async ({ url, method, data, token }) => {
   if (!token) throw new Error("Token is missing");
-
-  // console.log({ccc: url, method, data, token});
 
   try {
     const response = await axios({
@@ -80,14 +66,13 @@ const apiRequest = async ({ url, method, data, token }) => {
       },
     });
 
-    console.log("API Response:", response.data); // 🔥 Debugging Log
     return response.data;
   } catch (error) {
-    console.error("API Errorss:", error.response.data);
+    // ✅ Just throw the error - interceptor already handled 401/token expiration
     throw new Error(
       error.response?.data.error ||
         error.response?.data?.message ||
-        "API request failed"
+        "API request failed",
     );
   }
 };
@@ -98,17 +83,16 @@ export const useMutateData = (url, method, queryKey) => {
   const token = user_data?.token;
   const queryClient = useQueryClient();
 
-  return useMutation((data) => apiRequest({ url, method, data, token }), {
+  return useMutation({
+    mutationFn: (data) => apiRequest({ url, method, data, token }),
     onSuccess: (data) => {
-      console.log("Mutation Successful", { data });
-      queryClient.invalidateQueries(queryKey); // Refresh data
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
     },
-    onError: (error) => {
-      console.error("Mutation Error:", error);
-    },
+    onError: (error) => {},
   });
 };
 
+// Function to handle form data API requests
 const formdataapiRequest = async ({ url, method, data, token }) => {
   if (!token) throw new Error("Token is missing");
 
@@ -119,33 +103,71 @@ const formdataapiRequest = async ({ url, method, data, token }) => {
       data,
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data", // 👈 force multipart
+        "Content-Type": "multipart/form-data",
       },
     });
 
     return response.data;
   } catch (error) {
-    console.error("API Error:", error.response?.data || error.message);
+    // ✅ Just throw the error - interceptor already handled 401/token expiration
     throw new Error(error.response?.data?.message || "API request failed");
   }
 };
 
-// Hook for making API requests (POST, UPDATE, DELETE)
+// Hook for making API requests (POST, UPDATE, DELETE) with form data
 export const formdatauseMutateData = (url, method, queryKey) => {
   const { user_data } = useSelector((state) => state.AuthSlice);
   const token = user_data?.token;
   const queryClient = useQueryClient();
 
-  return useMutation(
-    (data) => formdataapiRequest({ url, method, data, token }),
-    {
-      onSuccess: (data) => {
-        console.log("Mutation Successful", { data });
-        queryClient.invalidateQueries(queryKey); // Refresh data
+  return useMutation({
+    mutationFn: (data) => formdataapiRequest({ url, method, data, token }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+    },
+    onError: (error) => {},
+  });
+};
+
+// ========================================
+// PUBLIC REQUESTS (no token needed)
+// ========================================
+
+// ✅ Function for public API requests (no token)
+const publicApiRequest = async ({ url, method, data }) => {
+  try {
+    const response = await axios({
+      url: `${apiUrl}${url}`,
+      method,
+      data,
+      headers: {
+        "Content-Type": "application/json",
       },
-      onError: (error) => {
-        console.error("Mutation Error:", error.message);
-      },
-    }
-  );
+      // No Authorization header
+    });
+
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.error ||
+        error.response?.data?.message ||
+        "API request failed",
+    );
+  }
+};
+
+// ✅ Hook for public API requests (no token needed)
+// Use for: login, register, forgot-password, verify-otp, reset-password
+export const usePublicMutateData = (url, method, queryKey) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => publicApiRequest({ url, method, data }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+    },
+    onError: (error) => {
+      // Error handling is done in the component
+    },
+  });
 };

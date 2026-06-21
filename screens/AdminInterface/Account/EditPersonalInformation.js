@@ -3,10 +3,9 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   Image,
-  Touchable,
   TouchableOpacity,
+  ScrollView, // <-- Added ScrollView Import
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -16,12 +15,14 @@ import {
 } from "../../../components/shared/InputForm";
 import AppScreen from "../../../components/shared/AppScreen";
 import { useDispatch, useSelector } from "react-redux";
-import { useMutation } from "react-query";
+// Converted import from 'react-query' to '@tanstack/react-query'
+import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { UserProfile_data_Fun } from "../../../Redux/ProfileSlice";
+
 const EditPersonalInformation = () => {
   const { userProfile_data } = useSelector((state) => state.ProfileSlice);
 
@@ -85,8 +86,9 @@ const EditPersonalInformation = () => {
     Update_Mutation?.mutate(formData);
   };
 
-  const Update_Mutation = useMutation(
-    (data_info) => {
+  // Converted useMutation to TanStack Query object syntax
+  const Update_Mutation = useMutation({
+    mutationFn: (data_info) => {
       let url = `${API_BASEURL}profile/update`;
 
       const config = {
@@ -98,23 +100,22 @@ const EditPersonalInformation = () => {
 
       return axios.put(url, data_info, config);
     },
-    {
-      onSuccess: (success) => {
-        Toast.show({
-          type: "success",
-          text1: "Event created successfully!",
-        });
-        dispatch(UserProfile_data_Fun());
-      },
+    onSuccess: (success) => {
+      Toast.show({
+        type: "success",
+        text1: "Event created successfully!",
+      });
+      dispatch(UserProfile_data_Fun());
+    },
 
-      onError: (error) => {
-        Toast.show({
-          type: "error",
-          text1: `${error?.response?.data?.error}`,
-        });
-      },
-    }
-  );
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: `${error?.response?.data?.error}`,
+      });
+    },
+  });
+
   return (
     <View
       style={{
@@ -206,7 +207,8 @@ const EditPersonalInformation = () => {
             }}
             data="Submit"
             onPress={handleSave}
-            isLoading={Update_Mutation?.isLoading}
+            // Updated deprecated 'isLoading' to 'isPending'
+            isLoading={Update_Mutation?.isPending}
           />
         </View>
       </ScrollView>
