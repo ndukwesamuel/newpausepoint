@@ -11,9 +11,6 @@ import { Alert } from "react-native";
 import { API_CONFIG } from "../../api";
 
 const API_BASEURL = API_CONFIG?.BASE_URL;
-console.log({
-  tyyy: API_BASEURL,
-});
 
 // import { Alert } from "react-native";
 

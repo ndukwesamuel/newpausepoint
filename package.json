@@ -1,6 +1,6 @@
 {
   "name": "pausepoint",
-  "version": "1.9.8",
+  "version": "2.0.4",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
@@ -50,6 +50,8 @@
     "expo-updates": "~0.28.17",
     "expo-web-browser": "~14.2.0",
     "lottie-react-native": "7.2.2",
+    "lucide-react": "^1.14.0",
+    "lucide-react-native": "^1.14.0",
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-device-info": "^15.0.2",

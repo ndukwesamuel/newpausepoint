@@ -49,9 +49,7 @@ import { CenterReuseModals } from "../../../components/shared/ReuseModals";
 import { API_CONFIG } from "../../../api";
 
 const API_BASEURL = API_CONFIG?.BASE_URL;
-console.log({
-  tyyy: API_BASEURL,
-});
+
 const GuestsDetail = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();

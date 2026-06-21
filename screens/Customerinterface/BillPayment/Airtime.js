@@ -42,9 +42,6 @@ const Airtime = ({ route }) => {
       `service-categories-${categoryData._id}`,
     );
 
-  console.log({
-    yyyuuuu: serviceCategories,
-  });
 
   const networks = serviceCategories?.categories || [];
 

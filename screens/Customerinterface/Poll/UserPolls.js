@@ -55,12 +55,15 @@ const UserPolls = () => {
       new Date(item?.createdAt) >
       new Date(Date.now() - 1000 * 60 * 60 * 24 * 2); // within 2 days
 
+
+      console.log("Poll item:", item);
+
     return (
       <TouchableOpacity
         style={styles.card}
-        // onPress={() =>
-        //   navigation.navigate("estatepollsdetail", { itemdata: item })
-        // }
+        onPress={() =>
+          navigation.navigate("estatepollsdetail", { itemdata: item })
+        }
         activeOpacity={0.85}
       >
         {/* Card header */}

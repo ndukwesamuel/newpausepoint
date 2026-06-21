@@ -46,7 +46,6 @@ import DomesticDetail from "../../screens/Customerinterface/DomesticStaff/Domest
 import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
 import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
 import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
-// import DueDetails from "../../screens/Customerinterface/Wallet/DueDetails";
 import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDetailScreen";
 import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
 import { BackHandler } from "react-native";
@@ -74,6 +73,8 @@ import MarketplaceMyListings from "../../screens/Customerinterface/MarketPlace/M
 import MarketplaceUpdate from "../../screens/Customerinterface/MarketPlace/MarketplaceUpdate";
 import Myclan from "../../screens/Customerinterface/Clan/Myclan";
 import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
+import HouseholdDueDetail from "../../screens/Customerinterface/Wallet/Householdduedetail";
+import UserCardScreen from "../../screens/Customerinterface/Wallet/UserCardScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -166,6 +167,11 @@ export const Usernaviagetion = () => {
       component: CreateMainEvent,
       title: "Create Main Event",
     },
+    {
+  title: "Due Details",
+  component: HouseholdDueDetail,
+  name: "HouseholdDueDetail",
+},
     {
       name: "FundWallet",
       component: FundWalletScreen,
@@ -269,6 +275,12 @@ export const Usernaviagetion = () => {
     },
 
     {
+  name: "UserCard",
+  component: UserCardScreen,
+  title: "My Access Card",
+},
+
+    {
       name: "AmenityDetail",
       component: AmenityDetailScreen,
       title: "AmenityDetail",
@@ -285,6 +297,8 @@ export const Usernaviagetion = () => {
       component: Airtime,
       title: "Airtime",
     },
+
+
 
     {
       name: "DataPurchase",

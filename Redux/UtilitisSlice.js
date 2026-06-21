@@ -3,9 +3,7 @@ import axios from "axios";
 import { API_CONFIG } from "../api";
 
 const API_BASEURL = API_CONFIG?.BASE_URL;
-console.log({
-  tyyy: API_BASEURL,
-});
+
 
 // const apiUrl = import.meta.env.VITE_API_URL;
 const initialState = {

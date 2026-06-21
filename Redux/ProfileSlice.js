@@ -10,13 +10,9 @@ import { handleApiError } from "./shareApi";
 import { API_CONFIG } from "../api";
 
 const API_BASEURL = API_CONFIG?.BASE_URL;
-console.log({
-  tyyy: API_BASEURL,
-});
 
-// import { Alert } from "react-native";
 
-// let userAPi = process.env.APIBASEURL + "user/login";
+
 
 const initialState = {
   userProfile_data: null,

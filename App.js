@@ -147,23 +147,23 @@ export const MainScreen = ({}) => {
     dispatch(Get_User_Profle_Fun());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   const backgroundSubscription =
-  //     Notifications.addNotificationResponseReceivedListener((response) => {
-  //       console.log({ response });
-  //       const data = response.notification.request.content.data;
-  //     });
+  useEffect(() => {
+    const backgroundSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log({ response });
+        const data = response.notification.request.content.data;
+      });
 
-  //   const foregroundSubscription =
-  //     Notifications.addNotificationReceivedListener(async (notification) => {
-  //       notificationservicecode(notification?.request?.content?.data);
-  //     });
+    const foregroundSubscription =
+      Notifications.addNotificationReceivedListener(async (notification) => {
+        notificationservicecode(notification?.request?.content?.data);
+      });
 
-  //   return () => {
-  //     backgroundSubscription.remove();
-  //     foregroundSubscription.remove();
-  //   };
-  // }, []);
+    return () => {
+      backgroundSubscription.remove();
+      foregroundSubscription.remove();
+    };
+  }, []);
 
   // useEffect(() => {
   //   const socketConnection = io(API_BASEURL, {

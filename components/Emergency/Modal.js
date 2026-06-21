@@ -21,9 +21,7 @@ import { useMutation } from "@tanstack/react-query"; // CHANGED: Updated import 
 import { API_CONFIG } from "../../api";
 
 const API_BASEURL = API_CONFIG?.BASE_URL;
-console.log({
-  tyyy: API_BASEURL,
-});
+
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import LottieView from "lottie-react-native";

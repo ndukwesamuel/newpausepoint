@@ -28,9 +28,6 @@ const LoginScreen = () => {
     (state) => state.authSlice,
   );
 
-  console.log({
-    yuu: usesrData2,
-  });
 
   const [email, setEmail] = useState(localremember?.email || "");
   const [remember, setRemember] = useState(false);

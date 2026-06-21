@@ -26,6 +26,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import SafeHavenCard from "./safehaven/SafeHavenCard";
 import { useFetchData_v2 } from "../../../hooks/Requestv2";
+import DueNotificationChecker from "./DueNotificationChecker";
 
 const WalletScreen = ({}) => {
   const {
@@ -43,6 +44,21 @@ const WalletScreen = ({}) => {
 
   const { userDatav2 } = useSelector((state) => state.authSlice);
 
+
+
+  const clanMembers = get_user_profile_data?.data?.currentClanMeeting?.members
+
+
+
+const currentMember = clanMembers?.find(
+  (member) => member.user?.toString() === userDatav2?.data?.user?.id?.toString()
+);
+
+const isApproved = currentMember?.status === "approved";
+
+
+
+
   const isGuest = false; //  user_data?.user?.isGuest;
 
   const navigation = useNavigation();
@@ -58,7 +74,18 @@ const WalletScreen = ({}) => {
       type: "clans",
       route: "myclan",
       params: {},
-      condition: userDatav2?.data?.isInClan,
+      condition: true //userDatav2?.data?.isInClan,
+    },
+     {
+      id: 11,
+      name: "Access card",
+      icon: "card",
+      iconSet: Ionicons,
+      color: "#2196F3",
+      type: "clans",
+      route: "UserCard",
+      params: {},
+      condition: isApproved //userDatav2?.data?.isInClan,
     },
     {
       id: 2,
@@ -69,7 +96,7 @@ const WalletScreen = ({}) => {
       type: "amenities",
       route: "amentities",
       params: {},
-      condition: userDatav2?.data?.isInClan,
+      condition: isApproved//userDatav2?.data?.isInClan,
     },
     {
       id: 3,
@@ -80,7 +107,7 @@ const WalletScreen = ({}) => {
       type: "amenities",
       route: "Due",
       params: {},
-      condition: userDatav2?.data?.isInClan,
+      condition: isApproved//userDatav2?.data?.isInClan,
     },
 
     {
@@ -92,7 +119,7 @@ const WalletScreen = ({}) => {
       type: "emergency",
       route: "Emergencyscreen",
       params: {},
-      condition: userDatav2?.data?.isInClan,
+      condition: isApproved//userDatav2?.data?.isInClan,
     },
     {
       id: 5,
@@ -103,11 +130,11 @@ const WalletScreen = ({}) => {
       type: "polls",
       route: "userpolls",
       params: {},
-      condition: userDatav2?.data?.isInClan,
+      condition: isApproved//userDatav2?.data?.isInClan,
     },
     {
       id: 6,
-      name: "Service",
+      name: "Artisan",
       icon: "room-service",
       iconSet: MaterialIcons,
       color: "#FF9800",
@@ -147,7 +174,7 @@ const WalletScreen = ({}) => {
       type: "domestic",
       route: "domestic",
       params: {},
-      condition: userDatav2?.data?.isInClan,
+      condition: isApproved//userDatav2?.data?.isInClan,
     },
 
     // {

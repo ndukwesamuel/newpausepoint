@@ -13,6 +13,9 @@ import {
   ScrollView,
 } from "react-native";
 
+import { useNavigation } from "@react-navigation/native";
+
+
 import { useDispatch, useSelector } from "react-redux";
 
 import clan from "../../assets/clan.png";
@@ -49,15 +52,18 @@ import {
 } from "../../components/shared/Paragrahp";
 import Events from "./Events/Events";
 import Forum from "../../components/Forum/Forum";
-import { useNavigation } from "@react-navigation/native";
+
 import { UserProfile_data_Fun } from "../../Redux/ProfileSlice";
 import { Feather } from "@expo/vector-icons";
 import { LogoutModal } from "../../components/Account/Logout";
 import Forum_Market from "../../components/shared/Forum_Market";
 import WalletScreen from "./Wallet/WalletScreen";
+import DueNotificationChecker from "./Wallet/DueNotificationChecker";
 
 export default function App({ navigation }) {
   const [currentTab, setCurrentTab] = useState("Home");
+
+  // const navigation = useNavigation();
 
   return (
     <SafeAreaView
@@ -68,6 +74,8 @@ export default function App({ navigation }) {
         flex: 1,
       }}
     >
+     <DueNotificationChecker navigation={navigation} />
+      
       <WalletScreen />
     </SafeAreaView>
   );

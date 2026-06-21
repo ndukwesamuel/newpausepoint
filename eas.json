@@ -31,7 +31,7 @@
       },
       "ios": {
         "credentialsSource": "remote",
-        "image": "macos-sonoma-14.6-xcode-16.0",
+        "image": "latest",
         "node": "20.11.1"
       },
       "env": {

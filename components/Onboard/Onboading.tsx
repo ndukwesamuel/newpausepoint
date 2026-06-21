@@ -20,9 +20,7 @@ import { RootStackParamList } from "../../navigation/AppNavigation";
 import { API_CONFIG } from "../../api";
 
 const API_BASEURL = API_CONFIG?.BASE_URL;
-console.log({
-  tyyy: API_BASEURL,
-});
+
 import { useDispatch } from "react-redux";
 import { checkOnboarding } from "../../Redux/OnboardingSlice";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;

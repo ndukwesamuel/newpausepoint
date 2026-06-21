@@ -103,7 +103,10 @@ const GuestsDetail = () => {
   );
 
   const copyAndShareAccessCode = async (accessCode: string) => {
-    const message = `Hi,\n\nHere is your one-time access code: ${accessCode}\n\nPowered by Pausepoint.net.`;
+    // const message = `Hi,\n\nHere is your one-time access code: ${accessCode}\n\nPowered by Pausepoint.net.`;
+
+
+    const message = `Hi,\nHere is your one-time access code: ${accessCode}\nThis code is valid for your arrival and departure.\nTo use this app/service in your estate, contact support@pausepoint.net\nPowered by: pausepoint.net`;
 
     await Clipboard.setStringAsync(message);
     Toast.show({
