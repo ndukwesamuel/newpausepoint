@@ -27,7 +27,7 @@ import CreateGuests from "../../screens/Customerinterface/Guest/CreateGuests";
 import GuestsDetail from "../../screens/Customerinterface/Guest/GuestsDetail";
 import UserPolls from "../../screens/Customerinterface/Poll/UserPolls";
 import UserPollDetails from "../../screens/Customerinterface/Poll/UserPollDetails";
-import ServiceView from "../../screens/Customerinterface/ServiceView";
+import ServiceView from "../../screens/Customerinterface/Service/ServiceView";
 import VendorService from "../../screens/Customerinterface/VendorService";
 import AboutUS from "../../screens/Customerinterface/About.tsx";
 import ViewProfile from "../../screens/Customerinterface/Account/ViewProfile";

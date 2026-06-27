@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "2.1.2",
+    "version": "2.1.5",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -44,6 +44,10 @@
                 "useLegacyPackaging": false
               }
             }
+          },
+          "ios": {
+            "extraPodfilePackages": [],
+            "postInstallScript": "installer.pods_project.targets.each do |target|\n  if target.name == 'fmt'\n    target.build_configurations.each do |config|\n      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'\n    end\n  end\nend"
           }
         }
       ],
@@ -61,11 +65,11 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "83",
+      "buildNumber": "86",
       "runtimeVersion": "1.0.0"
     },
     "android": {
-      "versionCode": 80,
+      "versionCode": 81,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
