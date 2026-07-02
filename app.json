@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "2.1.5",
+    "version": "2.1.6",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -44,16 +44,13 @@
                 "useLegacyPackaging": false
               }
             }
-          },
-          "ios": {
-            "extraPodfilePackages": [],
-            "postInstallScript": "installer.pods_project.targets.each do |target|\n  if target.name == 'fmt'\n    target.build_configurations.each do |config|\n      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'\n    end\n  end\nend"
           }
         }
       ],
       "expo-font",
       "expo-asset",
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-community/datetimepicker"
     ],
     "ios": {
       "supportsTablet": false,
@@ -65,7 +62,7 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "86",
+      "buildNumber": "88",
       "runtimeVersion": "1.0.0"
     },
     "android": {

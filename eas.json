@@ -32,7 +32,7 @@
       "ios": {
         "credentialsSource": "remote",
         "image": "latest",
-        "node": "20.11.1"
+        "node": "20.19.4"
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://pausepointbackend.onrender.com/"

@@ -1,9 +1,868 @@
+// import React from "react";
+// import { Platform, TouchableOpacity } from "react-native";
+
+// import UserTabNavigation from "./UserTabNavigation";
+// import Neigborhood from "../../screens/Customerinterface/Neigborhood";
+// import { AntDesign } from "@expo/vector-icons";
+// import Chats from "../../screens/Customerinterface/Chats";
+// import ICEcontact from "../../screens/Customerinterface/ICEcontact";
+// import HelpSupport from "../../screens/Customerinterface/Help/HelpSupport";
+// import LiveSupport from "../../screens/Customerinterface/Help/LiveSupport";
+// import ComplaintsandFeedback from "../../screens/Customerinterface/Help/ComplaintsandFeedback";
+// import UserPolicy from "../../screens/Customerinterface/Help/UserPolicy";
+// import FAQ from "../../screens/Customerinterface/Help/FAQ";
+// import TermsConditions from "../../screens/Customerinterface/Help/TermsConditions";
+// import PrivacyPolicy from "../../screens/Customerinterface/Help/PrivacyPolicy";
+// import Share from "../../screens/Customerinterface/Help/Share";
+// import CommentScreen from "../../screens/SharedScreen/CommentScreen";
+// import { createNativeStackNavigator } from "@react-navigation/native-stack";
+// import CreatePrivateEvent from "../../screens/Customerinterface/Events/CreateMainEvent";
+// import CreatePublicEvent from "../../screens/Customerinterface/Events/CreatePublicEvent";
+// import Commingsoon from "../../screens/SharedScreen/Commingsoon";
+// import UserClans from "../../screens/Customerinterface/Clan/UserClans";
+// import CreateForum from "../../screens/Customerinterface/Forum/CreateForum";
+// import ForumDetails from "../../screens/Customerinterface/Forum/ForumDetails";
+// import EditPersonalInformation from "../../screens/Customerinterface/Account/EditPersonalInformation";
+// import CreateGuests from "../../screens/Customerinterface/Guest/CreateGuests";
+// import GuestsDetail from "../../screens/Customerinterface/Guest/GuestsDetail";
+// import UserPolls from "../../screens/Customerinterface/Poll/UserPolls";
+// import UserPollDetails from "../../screens/Customerinterface/Poll/UserPollDetails";
+// import ServiceView from "../../screens/Customerinterface/Service/ServiceView";
+// import VendorService from "../../screens/Customerinterface/VendorService";
+// import AboutUS from "../../screens/Customerinterface/About.tsx";
+// import ViewProfile from "../../screens/Customerinterface/Account/ViewProfile";
+// import Review from "../../screens/Customerinterface/Review";
+// import VendorReview from "../../screens/Customerinterface/VendorReview";
+// import MainEvent from "../../screens/Customerinterface/Events/MainEvent";
+// import CreateMainEvent from "../../screens/Customerinterface/Events/CreateMainEvent";
+// import EventDetals from "../../screens/Customerinterface/Events/EventDetals";
+// import Service from "../../screens/Customerinterface/Service/Service";
+// import MarketPlace from "../../screens/Customerinterface/MarketPlace/Marketplace";
+// import MarketReview from "../../screens/Customerinterface/MarketPlace/MarketReview";
+// import CreateProduct from "../../screens/Customerinterface/MarketPlace/CreateProduct";
+// import DomesticStaff from "../../screens/Customerinterface/DomesticStaff/DomesticStaff";
+// import CreateDomesticStaff from "../../screens/Customerinterface/DomesticStaff/CreateDomesticStaff";
+// import DomesticDetail from "../../screens/Customerinterface/DomesticStaff/DomesticDetail";
+// import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
+// import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
+// import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
+// import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDetailScreen";
+// import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
+// import { BackHandler } from "react-native";
+// import { useEffect, useCallback } from "react";
+// import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
+// import BillDashboard from "../../screens/Customerinterface/BillPayment/BillDashboard";
+// import ElectricityPaymentScreen from "../../screens/Customerinterface/BillPayment/ElectricityPaymentScreen";
+// // import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
+
+// import Airtime from "../../screens/Customerinterface/BillPayment/Airtime";
+// import TransactionHistoryScreen from "../../screens/Customerinterface/TransactionHistory/Transactionhistoryscreen";
+// import TransactionDetailScreen from "../../screens/Customerinterface/TransactionHistory/Transactiondetailscreen";
+// import HouseholdDues from "../../screens/Customerinterface/Wallet/HouseholdDues";
+// import CreateVirtualAccountScreen from "../../screens/Customerinterface/Wallet/CreateVirtualAccountScreen";
+// import VirtualAccountScreen from "../../screens/Customerinterface/Wallet/VirtualAccountScreen";
+// import DataPurchase from "../../screens/Customerinterface/BillPayment/DataPurchase";
+// import AmenityDetailScreen from "../../screens/Customerinterface/Amentities/Amenitydetailscreen";
+// import { MOCK_MY_REPORTS } from "../../screens/Customerinterface/Amentities/amenityData";
+// import MyReportsScreen from "../../screens/Customerinterface/Amentities/Myreportsscreen";
+// import GeneralDuesUser from "../../screens/Customerinterface/Wallet/Generalduesuser";
+// import MarketplaceFeed from "../../screens/Customerinterface/MarketPlace/MarketplaceFeed";
+// import MarketplaceDetail from "../../screens/Customerinterface/MarketPlace/MarketplaceDetail";
+// import MarketplaceCreate from "../../screens/Customerinterface/MarketPlace/MarketplaceCreate";
+// import MarketplaceMyListings from "../../screens/Customerinterface/MarketPlace/MarketplaceMyListings";
+// import MarketplaceUpdate from "../../screens/Customerinterface/MarketPlace/MarketplaceUpdate";
+// import Myclan from "../../screens/Customerinterface/Clan/Myclan";
+// import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
+// import HouseholdDueDetail from "../../screens/Customerinterface/Wallet/Householdduedetail";
+// import UserCardScreen from "../../screens/Customerinterface/Wallet/UserCardScreen";
+
+// const Stack = createNativeStackNavigator();
+
+// const SingleScreenWithBackButton = (screenName, component, title) => {
+//   const WrappedComponent = (props) => {
+//     const Component = component;
+
+//     // Create a stable callback for the back handler
+//     const handleBackPress = useCallback(() => {
+//       if (props.navigation.canGoBack()) {
+//         props.navigation.goBack();
+//         return true; // Prevent default behavior
+//       }
+//       return false; // Let default behavior handle it
+//     }, [props.navigation]);
+
+//     // Handle hardware back button on Android
+//     useEffect(() => {
+//       const backHandler = BackHandler.addEventListener(
+//         "hardwareBackPress",
+//         handleBackPress,
+//       );
+
+//       return () => backHandler.remove();
+//     }, [handleBackPress]);
+
+//     return <Component {...props} />;
+//   };
+
+//   // Create a memoized back button handler to prevent recreation
+//   const createBackHandler = useCallback(
+//     (navigation) => () => {
+//       navigation.goBack();
+//     },
+//     [],
+//   );
+
+//   return {
+//     name: screenName,
+//     component: WrappedComponent,
+//     options: ({ navigation }) => ({
+//       title: title,
+//       headerStyle: {
+//         backgroundColor: "white",
+//         elevation: 0, // Remove shadow on Android
+//         shadowOpacity: 0, // Remove shadow on iOS
+//       },
+//       headerLeft: () => (
+//         <TouchableOpacity
+//           onPress={createBackHandler(navigation)}
+//           style={{
+//             marginLeft: Platform.OS === "android" ? 16 : 10,
+//             padding: 12,
+//             borderRadius: 8,
+//             minWidth: 44,
+//             minHeight: 44,
+//             justifyContent: "center",
+//             alignItems: "center",
+//           }}
+//           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+//           activeOpacity={0.6}
+//           delayPressIn={0}
+//           delayPressOut={0}
+//         >
+//           <AntDesign name="arrowleft" size={24} color="black" />
+//         </TouchableOpacity>
+//       ),
+//     }),
+//   };
+// };
+
+// const createScreen = (name, component, title) => {
+//   return (
+//     <Stack.Screen
+//       key={name}
+//       {...SingleScreenWithBackButton(name, component, title)}
+//     />
+//   );
+// };
+
+// export const Usernaviagetion = () => {
+//   const screens = [
+//     {
+//       name: "CreatePrivateEvent",
+//       component: CreatePrivateEvent,
+//       title: "Create Private Event",
+//     },
+//     {
+//       name: "CreateMainEvent",
+//       component: CreateMainEvent,
+//       title: "Create Main Event",
+//     },
+//     {
+//   title: "Due Details",
+//   component: HouseholdDueDetail,
+//   name: "HouseholdDueDetail",
+// },
+//     {
+//       name: "FundWallet",
+//       component: FundWalletScreen,
+//       title: "FundWallet",
+//     },
+//     {
+//       name: "payment",
+//       component: WalletScreen,
+//       title: "Payment",
+//     },
+
+//     {
+//       name: "CreatePublicEvent",
+//       component: CreatePublicEvent,
+//       title: "Create Public Event",
+//     },
+
+//     {
+//       name: "transactionHistory",
+//       component: TransactionHistoryScreen,
+//       title: "Transaction History ",
+//     },
+
+//     {
+//       name: "TransactionDetail",
+//       component: TransactionDetailScreen,
+//       title: "Transaction Detail ",
+//     },
+//     {
+//       name: "createforum",
+//       component: CreateForum,
+//       title: "Write Message",
+//     },
+//     {
+//       name: "forumdetail",
+//       component: ForumDetails,
+//       title: "",
+//     },
+
+//     {
+//       name: "inviteguest",
+//       component: CreateGuests,
+//       title: "Invite Guest",
+//     },
+//     {
+//       name: "guestsdetail",
+//       component: GuestsDetail,
+//       title: " Guest Details",
+//     },
+//     {
+//       name: "eventdetails",
+//       component: EventDetals,
+//       title: " Event Details",
+//     },
+//     {
+//       name: "userpolls",
+//       component: UserPolls,
+//       title: "Estate Polls",
+//     },
+
+//     {
+//       name: "Marketplace",
+//       component: MarketplaceFeed,
+//       title: "Market place ",
+//     },
+
+//     {
+//       name: "MarketplaceUpdate",
+//       component: MarketplaceUpdate,
+//       title: "Market place Update ",
+//     },
+
+//     {
+//       name: "MarketplaceCreate",
+//       component: MarketplaceCreate,
+//       title: "Market place Create ",
+//     },
+
+//     {
+//       name: "MarketplaceMyListings",
+//       component: MarketplaceMyListings,
+//       title: "My Product",
+//     },
+
+//     {
+//       name: "MarketplaceDetail",
+//       component: MarketplaceDetail,
+//       title: "Market place Detail ",
+//     },
+
+//     {
+//       name: "estatepollsdetail",
+//       component: UserPollDetails,
+//       title: "Estate Polls Details",
+//     },
+
+//     {
+//       name: "amentities",
+//       component: Amenities,
+//       title: "Amenities",
+//     },
+
+//     {
+//   name: "UserCard",
+//   component: UserCardScreen,
+//   title: "My Access Card",
+// },
+
+//     {
+//       name: "AmenityDetail",
+//       component: AmenityDetailScreen,
+//       title: "AmenityDetail",
+//     },
+
+//     {
+//       name: "MyReports",
+//       component: MyReportsScreen,
+//       title: "MyReports",
+//     },
+
+//     {
+//       name: "Airtime",
+//       component: Airtime,
+//       title: "Airtime",
+//     },
+
+
+
+//     {
+//       name: "DataPurchase",
+//       component: DataPurchase,
+//       title: "DataPurchase",
+//     },
+
+//     {
+//       name: "MarketReview",
+//       component: MarketReview,
+//       title: "Market Review",
+//     },
+//     {
+//       name: "CreateProduct",
+//       component: CreateProduct,
+//       title: "Create Product",
+//     },
+//     {
+//       name: "vendorService",
+//       component: VendorService,
+//       title: "Services",
+//     },
+
+//     {
+//       name: "CreateVirtualAccount",
+//       component: CreateVirtualAccountScreen,
+//       title: "Create Virtual Account",
+//     },
+
+//     {
+//       name: "VirtualAccountScreen",
+//       component: VirtualAccountScreen,
+//       title: "Virtual Account",
+//     },
+//     {
+//       name: "review",
+//       component: Review,
+//       title: "Reviews",
+//     },
+//     {
+//       name: "vendorReview",
+//       component: VendorReview,
+//       title: "Reviews",
+//     },
+//     {
+//       title: "ICE Contact",
+//       component: ICEcontact,
+//       name: "icecontact",
+//     },
+//     {
+//       title: "Help Support",
+//       component: HelpSupport,
+//       name: "HelpSupport",
+//     },
+
+//     {
+//       title: "About Us",
+//       component: AboutUS,
+//       name: "aboutus",
+//     },
+//     {
+//       title: "Domestic Staff",
+//       component: DomesticStaff,
+//       name: "domestic",
+//     },
+//     {
+//       title: "Domestic Staff Details",
+//       component: DomesticDetail,
+//       name: "domesticDetail",
+//     },
+//     {
+//       title: "Domestic Staff",
+//       component: CreateDomesticStaff,
+//       name: "creatdomestic",
+//     },
+//   ];
+
+//   return (
+//     <Stack.Navigator initialRouteName="UserTabNavigation">
+//       <Stack.Screen
+//         options={{
+//           headerShown: false,
+//         }}
+//         name="UserTabNavigation"
+//         component={UserTabNavigation}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Events",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => navigation.goBack()}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 12,
+//                 borderRadius: 8,
+//                 minWidth: 44,
+//                 minHeight: 44,
+//                 justifyContent: "center",
+//                 alignItems: "center",
+//               }}
+//               hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+//               activeOpacity={0.6}
+//               delayPressIn={0}
+//               delayPressOut={0}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="userevents"
+//         component={MainEvent}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Coming Soon",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="comming"
+//         component={Commingsoon}
+//       />
+
+//       {screens.map((screen) =>
+//         createScreen(screen.name, screen.component, screen.title),
+//       )}
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Neighbourhood Directory",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="Neigborhood"
+//         component={Neigborhood}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Chats",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="Chats"
+//         component={Chats}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "All User Clan",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="alluserclan"
+//         component={UserClans}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Live Support",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="LiveSupport"
+//         component={LiveSupport}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Join Clan",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="joinclan"
+//         component={Joinclan}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "My Communities",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="myclan"
+//         component={Myclan}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Complaints and Feedback",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="ComplaintsFeedback"
+//         component={ComplaintsandFeedback}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "User Policy",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="UserPolicy"
+//         component={UserPolicy}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "FAQ's",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="FAQ"
+//         component={FAQ}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Terms and Conditions",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="Terms&Conditions"
+//         component={TermsConditions}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Privacy Policy",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="PrivacyPolicy"
+//         component={PrivacyPolicy}
+//       />
+
+//       <Stack.Screen
+//         options={({ navigation }) => ({
+//           title: "Share this app with friends",
+//           headerStyle: {
+//             backgroundColor: "white",
+//           },
+//           headerLeft: () => (
+//             <TouchableOpacity
+//               onPress={() => {
+//                 if (navigation.canGoBack()) {
+//                   navigation.goBack();
+//                 }
+//               }}
+//               style={{
+//                 marginLeft: Platform.OS === "android" ? 16 : 10,
+//                 padding: 8,
+//               }}
+//               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+//               activeOpacity={0.7}
+//             >
+//               <AntDesign name="arrowleft" size={24} color="black" />
+//             </TouchableOpacity>
+//           ),
+//         })}
+//         name="Share"
+//         component={Share}
+//       />
+
+//       <Stack.Screen
+//         name="PersonalInfo"
+//         component={ViewProfile}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="editPersonalInfo"
+//         component={EditPersonalInformation}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="service"
+//         component={ServiceView}
+//         options={{ headerShown: false }}
+//       />
+//       <Stack.Screen
+//         name="Emergencyscreen"
+//         component={Emergency}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="erranddetail"
+//         component={ErrandDetailScreen}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="MakeUtilityPayment"
+//         component={ElectricityPaymentScreen}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="UtilityPayment"
+//         component={BillDashboard}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="Due"
+//         component={HouseholdDues}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="GeneralDuesUser"
+//         component={GeneralDuesUser}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         name="createErrand"
+//         component={CreateErrandScreen}
+//         options={{ headerShown: false }}
+//       />
+
+//       <Stack.Screen
+//         {...SingleScreenWithBackButton(
+//           "CommentScreen",
+//           CommentScreen,
+//           "Comments",
+//         )}
+//       />
+//     </Stack.Navigator>
+//   );
+// };
+
+
 import React from "react";
 import { Platform, TouchableOpacity } from "react-native";
 
 import UserTabNavigation from "./UserTabNavigation";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Chats from "../../screens/Customerinterface/Chats";
 import ICEcontact from "../../screens/Customerinterface/ICEcontact";
 import HelpSupport from "../../screens/Customerinterface/Help/HelpSupport";
@@ -53,8 +912,6 @@ import { useEffect, useCallback } from "react";
 import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
 import BillDashboard from "../../screens/Customerinterface/BillPayment/BillDashboard";
 import ElectricityPaymentScreen from "../../screens/Customerinterface/BillPayment/ElectricityPaymentScreen";
-// import AirtimePurchase from "../../screens/Customerinterface/BillPayment/AirtimePurchase";
-
 import Airtime from "../../screens/Customerinterface/BillPayment/Airtime";
 import TransactionHistoryScreen from "../../screens/Customerinterface/TransactionHistory/Transactionhistoryscreen";
 import TransactionDetailScreen from "../../screens/Customerinterface/TransactionHistory/Transactiondetailscreen";
@@ -78,33 +935,49 @@ import UserCardScreen from "../../screens/Customerinterface/Wallet/UserCardScree
 
 const Stack = createNativeStackNavigator();
 
+// ── Reusable back arrow ───────────────────────────────────────────────────────
+const BackArrow = ({ onPress }) => (
+  <TouchableOpacity
+    onPress={onPress}
+    style={{
+      marginLeft: Platform.OS === "android" ? 16 : 10,
+      padding: 12,
+      borderRadius: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+    activeOpacity={0.6}
+  >
+    <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
+  </TouchableOpacity>
+);
+
 const SingleScreenWithBackButton = (screenName, component, title) => {
   const WrappedComponent = (props) => {
     const Component = component;
 
-    // Create a stable callback for the back handler
     const handleBackPress = useCallback(() => {
       if (props.navigation.canGoBack()) {
         props.navigation.goBack();
-        return true; // Prevent default behavior
+        return true;
       }
-      return false; // Let default behavior handle it
+      return false;
     }, [props.navigation]);
 
-    // Handle hardware back button on Android
     useEffect(() => {
       const backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
         handleBackPress,
       );
-
       return () => backHandler.remove();
     }, [handleBackPress]);
 
     return <Component {...props} />;
   };
 
-  // Create a memoized back button handler to prevent recreation
   const createBackHandler = useCallback(
     (navigation) => () => {
       navigation.goBack();
@@ -119,28 +992,11 @@ const SingleScreenWithBackButton = (screenName, component, title) => {
       title: title,
       headerStyle: {
         backgroundColor: "white",
-        elevation: 0, // Remove shadow on Android
-        shadowOpacity: 0, // Remove shadow on iOS
+        elevation: 0,
+        shadowOpacity: 0,
       },
       headerLeft: () => (
-        <TouchableOpacity
-          onPress={createBackHandler(navigation)}
-          style={{
-            marginLeft: Platform.OS === "android" ? 16 : 10,
-            padding: 12,
-            borderRadius: 8,
-            minWidth: 44,
-            minHeight: 44,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-          activeOpacity={0.6}
-          delayPressIn={0}
-          delayPressOut={0}
-        >
-          <AntDesign name="arrowleft" size={24} color="black" />
-        </TouchableOpacity>
+        <BackArrow onPress={createBackHandler(navigation)} />
       ),
     }),
   };
@@ -157,231 +1013,51 @@ const createScreen = (name, component, title) => {
 
 export const Usernaviagetion = () => {
   const screens = [
-    {
-      name: "CreatePrivateEvent",
-      component: CreatePrivateEvent,
-      title: "Create Private Event",
-    },
-    {
-      name: "CreateMainEvent",
-      component: CreateMainEvent,
-      title: "Create Main Event",
-    },
-    {
-  title: "Due Details",
-  component: HouseholdDueDetail,
-  name: "HouseholdDueDetail",
-},
-    {
-      name: "FundWallet",
-      component: FundWalletScreen,
-      title: "FundWallet",
-    },
-    {
-      name: "payment",
-      component: WalletScreen,
-      title: "Payment",
-    },
-
-    {
-      name: "CreatePublicEvent",
-      component: CreatePublicEvent,
-      title: "Create Public Event",
-    },
-
-    {
-      name: "transactionHistory",
-      component: TransactionHistoryScreen,
-      title: "Transaction History ",
-    },
-
-    {
-      name: "TransactionDetail",
-      component: TransactionDetailScreen,
-      title: "Transaction Detail ",
-    },
-    {
-      name: "createforum",
-      component: CreateForum,
-      title: "Write Message",
-    },
-    {
-      name: "forumdetail",
-      component: ForumDetails,
-      title: "",
-    },
-
-    {
-      name: "inviteguest",
-      component: CreateGuests,
-      title: "Invite Guest",
-    },
-    {
-      name: "guestsdetail",
-      component: GuestsDetail,
-      title: " Guest Details",
-    },
-    {
-      name: "eventdetails",
-      component: EventDetals,
-      title: " Event Details",
-    },
-    {
-      name: "userpolls",
-      component: UserPolls,
-      title: "Estate Polls",
-    },
-
-    {
-      name: "Marketplace",
-      component: MarketplaceFeed,
-      title: "Market place ",
-    },
-
-    {
-      name: "MarketplaceUpdate",
-      component: MarketplaceUpdate,
-      title: "Market place Update ",
-    },
-
-    {
-      name: "MarketplaceCreate",
-      component: MarketplaceCreate,
-      title: "Market place Create ",
-    },
-
-    {
-      name: "MarketplaceMyListings",
-      component: MarketplaceMyListings,
-      title: "My Product",
-    },
-
-    {
-      name: "MarketplaceDetail",
-      component: MarketplaceDetail,
-      title: "Market place Detail ",
-    },
-
-    {
-      name: "estatepollsdetail",
-      component: UserPollDetails,
-      title: "Estate Polls Details",
-    },
-
-    {
-      name: "amentities",
-      component: Amenities,
-      title: "Amenities",
-    },
-
-    {
-  name: "UserCard",
-  component: UserCardScreen,
-  title: "My Access Card",
-},
-
-    {
-      name: "AmenityDetail",
-      component: AmenityDetailScreen,
-      title: "AmenityDetail",
-    },
-
-    {
-      name: "MyReports",
-      component: MyReportsScreen,
-      title: "MyReports",
-    },
-
-    {
-      name: "Airtime",
-      component: Airtime,
-      title: "Airtime",
-    },
-
-
-
-    {
-      name: "DataPurchase",
-      component: DataPurchase,
-      title: "DataPurchase",
-    },
-
-    {
-      name: "MarketReview",
-      component: MarketReview,
-      title: "Market Review",
-    },
-    {
-      name: "CreateProduct",
-      component: CreateProduct,
-      title: "Create Product",
-    },
-    {
-      name: "vendorService",
-      component: VendorService,
-      title: "Services",
-    },
-
-    {
-      name: "CreateVirtualAccount",
-      component: CreateVirtualAccountScreen,
-      title: "Create Virtual Account",
-    },
-
-    {
-      name: "VirtualAccountScreen",
-      component: VirtualAccountScreen,
-      title: "Virtual Account",
-    },
-    {
-      name: "review",
-      component: Review,
-      title: "Reviews",
-    },
-    {
-      name: "vendorReview",
-      component: VendorReview,
-      title: "Reviews",
-    },
-    {
-      title: "ICE Contact",
-      component: ICEcontact,
-      name: "icecontact",
-    },
-    {
-      title: "Help Support",
-      component: HelpSupport,
-      name: "HelpSupport",
-    },
-
-    {
-      title: "About Us",
-      component: AboutUS,
-      name: "aboutus",
-    },
-    {
-      title: "Domestic Staff",
-      component: DomesticStaff,
-      name: "domestic",
-    },
-    {
-      title: "Domestic Staff Details",
-      component: DomesticDetail,
-      name: "domesticDetail",
-    },
-    {
-      title: "Domestic Staff",
-      component: CreateDomesticStaff,
-      name: "creatdomestic",
-    },
+    { name: "CreatePrivateEvent", component: CreatePrivateEvent, title: "Create Private Event" },
+    { name: "CreateMainEvent", component: CreateMainEvent, title: "Create Main Event" },
+    { title: "Due Details", component: HouseholdDueDetail, name: "HouseholdDueDetail" },
+    { name: "FundWallet", component: FundWalletScreen, title: "FundWallet" },
+    { name: "payment", component: WalletScreen, title: "Payment" },
+    { name: "CreatePublicEvent", component: CreatePublicEvent, title: "Create Public Event" },
+    { name: "transactionHistory", component: TransactionHistoryScreen, title: "Transaction History" },
+    { name: "TransactionDetail", component: TransactionDetailScreen, title: "Transaction Detail" },
+    { name: "createforum", component: CreateForum, title: "Write Message" },
+    { name: "forumdetail", component: ForumDetails, title: "" },
+    { name: "inviteguest", component: CreateGuests, title: "Invite Guest" },
+    { name: "guestsdetail", component: GuestsDetail, title: "Guest Details" },
+    { name: "eventdetails", component: EventDetals, title: "Event Details" },
+    { name: "userpolls", component: UserPolls, title: "Estate Polls" },
+    { name: "Marketplace", component: MarketplaceFeed, title: "Market place" },
+    { name: "MarketplaceUpdate", component: MarketplaceUpdate, title: "Market place Update" },
+    { name: "MarketplaceCreate", component: MarketplaceCreate, title: "Market place Create" },
+    { name: "MarketplaceMyListings", component: MarketplaceMyListings, title: "My Product" },
+    { name: "MarketplaceDetail", component: MarketplaceDetail, title: "Market place Detail" },
+    { name: "estatepollsdetail", component: UserPollDetails, title: "Estate Polls Details" },
+    { name: "amentities", component: Amenities, title: "Amenities" },
+    { name: "UserCard", component: UserCardScreen, title: "My Access Card" },
+    { name: "AmenityDetail", component: AmenityDetailScreen, title: "AmenityDetail" },
+    { name: "MyReports", component: MyReportsScreen, title: "MyReports" },
+    { name: "Airtime", component: Airtime, title: "Airtime" },
+    { name: "DataPurchase", component: DataPurchase, title: "DataPurchase" },
+    { name: "MarketReview", component: MarketReview, title: "Market Review" },
+    { name: "CreateProduct", component: CreateProduct, title: "Create Product" },
+    { name: "vendorService", component: VendorService, title: "Services" },
+    { name: "CreateVirtualAccount", component: CreateVirtualAccountScreen, title: "Create Virtual Account" },
+    { name: "VirtualAccountScreen", component: VirtualAccountScreen, title: "Virtual Account" },
+    { name: "review", component: Review, title: "Reviews" },
+    { name: "vendorReview", component: VendorReview, title: "Reviews" },
+    { title: "ICE Contact", component: ICEcontact, name: "icecontact" },
+    { title: "Help Support", component: HelpSupport, name: "HelpSupport" },
+    { title: "About Us", component: AboutUS, name: "aboutus" },
+    { title: "Domestic Staff", component: DomesticStaff, name: "domestic" },
+    { title: "Domestic Staff Details", component: DomesticDetail, name: "domesticDetail" },
+    { title: "Domestic Staff", component: CreateDomesticStaff, name: "creatdomestic" },
   ];
 
   return (
     <Stack.Navigator initialRouteName="UserTabNavigation">
       <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
+        options={{ headerShown: false }}
         name="UserTabNavigation"
         component={UserTabNavigation}
       />
@@ -389,29 +1065,8 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Events",
-          headerStyle: {
-            backgroundColor: "white",
-          },
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 12,
-                borderRadius: 8,
-                minWidth: 44,
-                minHeight: 44,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-              activeOpacity={0.6}
-              delayPressIn={0}
-              delayPressOut={0}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
-          ),
+          headerStyle: { backgroundColor: "white" },
+          headerLeft: () => <BackArrow onPress={() => navigation.goBack()} />,
         })}
         name="userevents"
         component={MainEvent}
@@ -420,26 +1075,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Coming Soon",
-          headerStyle: {
-            backgroundColor: "white",
-          },
-
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="comming"
@@ -453,25 +1091,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Neighbourhood Directory",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="Neigborhood"
@@ -481,25 +1103,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Chats",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="Chats"
@@ -509,25 +1115,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "All User Clan",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="alluserclan"
@@ -537,25 +1127,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Live Support",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="LiveSupport"
@@ -565,25 +1139,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Join Clan",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="joinclan"
@@ -593,25 +1151,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "My Communities",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="myclan"
@@ -621,25 +1163,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Complaints and Feedback",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="ComplaintsFeedback"
@@ -649,25 +1175,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "User Policy",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="UserPolicy"
@@ -677,25 +1187,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "FAQ's",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="FAQ"
@@ -705,25 +1199,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Terms and Conditions",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="Terms&Conditions"
@@ -733,25 +1211,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Privacy Policy",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="PrivacyPolicy"
@@ -761,25 +1223,9 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         options={({ navigation }) => ({
           title: "Share this app with friends",
-          headerStyle: {
-            backgroundColor: "white",
-          },
+          headerStyle: { backgroundColor: "white" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                }
-              }}
-              style={{
-                marginLeft: Platform.OS === "android" ? 16 : 10,
-                padding: 8,
-              }}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              activeOpacity={0.7}
-            >
-              <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            <BackArrow onPress={() => { if (navigation.canGoBack()) navigation.goBack(); }} />
           ),
         })}
         name="Share"
@@ -803,6 +1249,7 @@ export const Usernaviagetion = () => {
         component={ServiceView}
         options={{ headerShown: false }}
       />
+
       <Stack.Screen
         name="Emergencyscreen"
         component={Emergency}
@@ -846,11 +1293,7 @@ export const Usernaviagetion = () => {
       />
 
       <Stack.Screen
-        {...SingleScreenWithBackButton(
-          "CommentScreen",
-          CommentScreen,
-          "Comments",
-        )}
+        {...SingleScreenWithBackButton("CommentScreen", CommentScreen, "Comments")}
       />
     </Stack.Navigator>
   );
