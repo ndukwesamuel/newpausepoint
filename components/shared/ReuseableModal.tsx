@@ -1,6 +1,6 @@
 import { Modal, View, Text, Linking, Pressable, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, TextInput } from 'react-native'
 
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { Children, ReactNode, useState } from 'react'
 import { FormLabel, Formbutton, Forminput } from '../shared/InputForm';
 import { MediumFontText } from '../shared/Paragrahp';
@@ -76,7 +76,7 @@ export const HalfScreenModal = ({ onClose, visible, }: EmergencyModalProps2) => 
                         }}>
 
                             <TouchableOpacity onPress={onClose}>
-                                <AntDesign name="arrowleft" size={24} color="black" />
+                                <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 
                             </TouchableOpacity>
                         </View>

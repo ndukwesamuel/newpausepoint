@@ -241,7 +241,7 @@ const ForumDetails = () => {
             {likeMutation.isPending ? (
               <ActivityIndicator size="small" color="#EF4444" />
             ) : (
-              <AntDesign
+              <MaterialCommunityIcons
                 name={isLiked ? "heart" : "hearto"}
                 size={22}
                 color={isLiked ? "#EF4444" : "#6B7280"}

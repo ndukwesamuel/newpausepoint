@@ -3,7 +3,7 @@ import React from "react";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import About from "../../screens/Customerinterface/About";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   CustomTabButton,
   Tabcomponent,

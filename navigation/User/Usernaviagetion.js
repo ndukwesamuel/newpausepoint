@@ -3,7 +3,7 @@
 
 // import UserTabNavigation from "./UserTabNavigation";
 // import Neigborhood from "../../screens/Customerinterface/Neigborhood";
-// import { AntDesign } from "@expo/vector-icons";
+// import { MaterialCommunityIcons } from "@expo/vector-icons";
 // import Chats from "../../screens/Customerinterface/Chats";
 // import ICEcontact from "../../screens/Customerinterface/ICEcontact";
 // import HelpSupport from "../../screens/Customerinterface/Help/HelpSupport";
@@ -139,7 +139,7 @@
 //           delayPressIn={0}
 //           delayPressOut={0}
 //         >
-//           <AntDesign name="arrowleft" size={24} color="black" />
+//           <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //         </TouchableOpacity>
 //       ),
 //     }),
@@ -409,7 +409,7 @@
 //               delayPressIn={0}
 //               delayPressOut={0}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -438,7 +438,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -470,7 +470,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -498,7 +498,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -526,7 +526,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -554,7 +554,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -582,7 +582,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -610,7 +610,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -638,7 +638,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -666,7 +666,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -694,7 +694,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -722,7 +722,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -750,7 +750,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}
@@ -778,7 +778,7 @@
 //               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 //               activeOpacity={0.7}
 //             >
-//               <AntDesign name="arrowleft" size={24} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
 //             </TouchableOpacity>
 //           ),
 //         })}

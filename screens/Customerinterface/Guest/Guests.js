@@ -473,8 +473,7 @@ const Guests = () => {
                 )}
               </TouchableOpacity>
 
-              {get_user_profile_data?.data?.currentClanMeeting?._id ===
-                "67b1187e61243b230f3b9b21" && (
+          
                 <TouchableOpacity
                   style={[
                     styles.tab,
@@ -517,7 +516,6 @@ const Guests = () => {
                     </View>
                   )}
                 </TouchableOpacity>
-              )}
             </View>
 
             {/* ── Emergency invite — submits dummy data directly, no nav ──── */}

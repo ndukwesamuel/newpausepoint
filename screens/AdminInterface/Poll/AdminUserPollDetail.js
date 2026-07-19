@@ -8,7 +8,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 // Converted import from 'react-query' to '@tanstack/react-query'
 import { useMutation } from "@tanstack/react-query";
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
@@ -98,7 +98,7 @@ const AdminUserPollDetail = () => {
           onPress={() => Poll_Mutation.mutate()}
           disabled={Poll_Mutation.isPending} // Disable button while loading
         >
-          <AntDesign name="delete" size={24} color="red" />
+          <MaterialCommunityIcons name="delete" size={24} color="red" />
         </TouchableOpacity>
       </View>
 

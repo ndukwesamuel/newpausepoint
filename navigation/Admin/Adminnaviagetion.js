@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Button, TouchableOpacity } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Chats from "../../screens/Customerinterface/Chats";
 import ICEcontact from "../../screens/Customerinterface/ICEcontact";
 import HelpSupport from "../../screens/Customerinterface/Help/HelpSupport";
@@ -64,7 +64,7 @@ const SingleScreenWithBackButton = (screenName, component, title) => {
             marginLeft: 10,
           }}
         >
-          <AntDesign name="arrowleft" size={24} color="black" />
+          <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
         </TouchableOpacity>
       ),
     }),
@@ -285,7 +285,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -306,7 +306,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -330,7 +330,7 @@ const Adminnaviagetion = () => {
                             }}
                         >
 
-                            <AntDesign name="arrowleft" size={24} color="black" />
+                            <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                         </TouchableOpacity>
                     ),
                 })}
@@ -350,7 +350,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -371,7 +371,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -392,7 +392,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -413,7 +413,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -434,7 +434,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -455,7 +455,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -476,7 +476,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -497,7 +497,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -518,7 +518,7 @@ const Adminnaviagetion = () => {
                 marginLeft: 10,
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
             </TouchableOpacity>
           ),
         })}
@@ -541,7 +541,7 @@ const Adminnaviagetion = () => {
                             }}
                         >
 
-                            <AntDesign name="arrowleft" size={24} color="black" />
+                            <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                         </TouchableOpacity>
                     ),
                 })}

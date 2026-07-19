@@ -153,7 +153,7 @@ export default function Announcement({}) {
           }}
           onPress={() => navigation.navigate("AdmincreateAnnouncement")}
         >
-          <AntDesign name="plus" size={24} color="#04973C" />
+          <MaterialCommunityIcons name="plus" size={24} color="#04973C" />
 
           <MediumFontText
             data="Create Announcement"
@@ -302,7 +302,7 @@ export default function Announcement({}) {
                         //   });
                         // }}
                       >
-                        <AntDesign name="hearto" size={24} color="black" />
+                        <MaterialCommunityIcons name="hearto" size={24} color="black" />
                         <Text>{item?.likes?.length} Likes </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -315,7 +315,7 @@ export default function Announcement({}) {
                           navigation.navigate("forumdetail", { forumid: item })
                         }
                       >
-                        <AntDesign name="message1" size={24} color="black" />
+                        <MaterialCommunityIcons name="message1" size={24} color="black" />
                         <Text>Comment</Text>
                       </TouchableOpacity>
                       <View
@@ -325,7 +325,7 @@ export default function Announcement({}) {
                           gap: 5,
                         }}
                       >
-                        <AntDesign name="sharealt" size={24} color="black" />
+                        <MaterialCommunityIcons name="sharealt" size={24} color="black" />
                         <Text>Share</Text>
                       </View>
                     </View> */}

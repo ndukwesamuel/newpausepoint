@@ -476,7 +476,7 @@ const CreatePublicEvent = () => {
             }}
             data="Create Event"
             onPress={handlesubmit}
-            icon={<AntDesign name="plus" size={20} color="white" />}
+            icon={<MaterialCommunityIcons name="plus" size={20} color="white" />}
             isLoading={Create_Public_Event_Mutation.isLoading} // Use isLoading from destructured mutation
           />
         </View>

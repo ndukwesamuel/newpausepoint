@@ -243,7 +243,7 @@ export default function AnnouncementDetails({ navigation }) {
                         //   });
                         // }}
                       >
-                        <AntDesign name="hearto" size={24} color="black" />
+                        <MaterialCommunityIcons name="hearto" size={24} color="black" />
                         <Text>{item?.likes?.length} Likes </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -256,7 +256,7 @@ export default function AnnouncementDetails({ navigation }) {
                           navigation.navigate("forumdetail", { forumid: item })
                         }
                       >
-                        <AntDesign name="message1" size={24} color="black" />
+                        <MaterialCommunityIcons name="message1" size={24} color="black" />
                         <Text>Comment</Text>
                       </TouchableOpacity>
                       <View
@@ -266,7 +266,7 @@ export default function AnnouncementDetails({ navigation }) {
                           gap: 5,
                         }}
                       >
-                        <AntDesign name="sharealt" size={24} color="black" />
+                        <MaterialCommunityIcons name="sharealt" size={24} color="black" />
                         <Text>Share</Text>
                       </View>
                     </View> */}

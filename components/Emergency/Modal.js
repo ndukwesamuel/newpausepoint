@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from "react-native";
 
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import React, { ReactNode, useState } from "react";
 import { FormLabel, Formbutton, Forminput } from "../shared/InputForm";
 import { MediumFontText } from "../shared/Paragrahp";
@@ -236,7 +236,7 @@ export const EmergencyModalTwo = ({
               }}
             >
               <TouchableOpacity onPress={onClose}>
-                <AntDesign name="arrowleft" size={24} color="black" />
+                <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
               </TouchableOpacity>
             </View>
 

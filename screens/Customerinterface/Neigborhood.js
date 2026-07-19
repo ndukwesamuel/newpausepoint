@@ -17,7 +17,7 @@ import {
   Profle_Fun,
 } from "../../Redux/UserSide/UserProfileSlice";
 import { Forminput_Icon } from "../../components/shared/InputForm";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { centralData } from "../../utils/fakedata";
 import io from "socket.io-client";
 
@@ -113,7 +113,7 @@ const Neigborhood = () => {
                 justifyContent: "center",
               }}
             >
-              <AntDesign name="arrowleft" size={24} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
               <Text>Add user</Text>
             </TouchableOpacity> */}
 
@@ -136,7 +136,7 @@ const Neigborhood = () => {
                     }}
                     onChangeText={(text) => handleInputChange("search", text)}
                     value={formData.search}
-                    icon={<AntDesign name="search1" size={22} color="black" />}
+                    icon={<MaterialCommunityIcons name="search1" size={22} color="black" />}
                   />
 
                   <View style={{ flex: 1 }}>

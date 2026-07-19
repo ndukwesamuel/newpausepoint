@@ -41,13 +41,13 @@ const General = ({
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         {item.icon == "user" && (
-          <AntDesign name="user" size={24} color="black" />
+          <MaterialCommunityIcons name="user" size={24} color="black" />
         )}
         {item.icon == "notifications-outline" && (
           <Ionicons name="notifications-outline" size={24} color="black" />
         )}
         {item.icon == "setting" && (
-          <AntDesign name="setting" size={24} color="black" />
+          <MaterialCommunityIcons name="setting" size={24} color="black" />
         )}
 
         {item?.icon === "logout-outline" && (

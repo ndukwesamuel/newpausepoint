@@ -19,7 +19,7 @@
 //   Forminput,
 //   Forminputpassword,
 // } from "../components/shared/InputForm";
-// import { AntDesign } from "@expo/vector-icons";
+// import { MaterialCommunityIcons } from "@expo/vector-icons";
 // import { useDispatch, useSelector } from "react-redux";
 // import axios from "axios";
 // import Toast from "react-native-toast-message";
@@ -123,7 +123,7 @@
 //                 dispatch(authScreenChange("FORGOTTENPASSWOD"));
 //               }}
 //             >
-//               <AntDesign name="arrowleft" size={28} color="black" />
+//               <MaterialCommunityIcons name="arrow-left" size={28} color="black" />
 //             </TouchableOpacity>
 
 //             <RegistraionHeadersText

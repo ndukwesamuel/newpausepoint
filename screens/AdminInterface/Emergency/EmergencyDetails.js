@@ -26,7 +26,7 @@ import {
   SemiBoldFontText,
 } from "../../../components/shared/Paragrahp";
 
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Formbutton,
   Forminput_Icon,

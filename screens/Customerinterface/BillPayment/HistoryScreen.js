@@ -381,7 +381,7 @@ export default function HistoryScreen() {
             style={styles.backButton}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <AntDesign name="arrowleft" size={22} color="#111827" />
+            <MaterialCommunityIcons name="arrow-left" size={22} color="#111827" />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Transaction History</Text>

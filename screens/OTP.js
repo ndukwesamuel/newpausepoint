@@ -30,6 +30,8 @@ import { authScreenChange, reset_isOnboarding } from "../Redux/OnboardingSlice";
 import { useDispatch, useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
 import { useMutation } from "@tanstack/react-query";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
 const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import axios from "axios";
@@ -127,7 +129,7 @@ const OTP = ({}) => {
                 dispatch(reset_isOnboarding());
               }}
             >
-              <AntDesign name="arrowleft" size={28} color="black" />
+              <MaterialCommunityIcons name="arrow-left" size={28} color="black" />
             </TouchableOpacity>
 
             <RegistraionHeadersText

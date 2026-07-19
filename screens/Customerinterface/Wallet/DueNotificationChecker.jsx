@@ -65,7 +65,7 @@ const showHalfwayAlert = (due, onNavigate) => {
     `"${due.title}" is halfway to its deadline and you haven't paid yet.\n\nAmount: ${formatAmount(due.amountDue)}\nDue: ${formatDate(due.dueDate)}`,
     [
       { text: "Dismiss", style: "cancel" },
-      { text: "Pay Now", onPress: () => onNavigate(due) },
+      { text: "Pay Now " , onPress: () => onNavigate(due) },
     ],
   );
 };

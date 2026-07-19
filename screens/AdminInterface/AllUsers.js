@@ -16,7 +16,7 @@ import EmergencyModal, {
 } from "../../components/Emergency/Modal";
 import { MediumFontText } from "../../components/shared/Paragrahp";
 
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Forminput_Icon } from "../../components/shared/InputForm";
 import { userFile } from "../../utils/fakedata";
 import { useDispatch, useSelector } from "react-redux";
@@ -242,7 +242,7 @@ export default function AllUsers({ navigation }) {
             }}
             onChangeText={(text) => handleInputChange("search", text)}
             value={formData.search}
-            icon={<AntDesign name="search1" size={22} color="black" />}
+            icon={<MaterialCommunityIcons name="search1" size={22} color="black" />}
           />
 
           {userType === "All" && (

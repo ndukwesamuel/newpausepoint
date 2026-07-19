@@ -275,7 +275,7 @@ const CreatePrivateEvent = () => {
                       source={{ uri: profileImage }}
                     />
                   ) : (
-                    <AntDesign name="camerao" size={30} color="gray" />
+                    <MaterialCommunityIcons name="camerao" size={30} color="gray" />
                   )}
                 </TouchableOpacity>
 
@@ -397,7 +397,7 @@ const CreatePrivateEvent = () => {
             }}
             data="Create Event"
             onPress={handlesubmit}
-            icon={<AntDesign name="plus" size={20} color="white" />}
+            icon={<MaterialCommunityIcons name="plus" size={20} color="white" />}
             isLoading={Create_Private_Event_Mutation.isLoading}
           />
         </View>

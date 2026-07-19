@@ -13,7 +13,7 @@ import DarkModeToggle from '../../../components/Account/DarkModeToggle'
 import General from '../../../components/Account/General'
 import { DeleteAccountModal } from '../../../components/Account/Modal'
 import SmsToggle from '../../../components/Account/SmsToggle'
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../../../navigation/AppNavigation'
@@ -150,7 +150,7 @@ const NotificatioSettings = () => {
 
                 <View style={{ marginBottom: 20, flexDirection: "row", alignItems: "center", borderBottomColor: '#CFCDCD', borderBottomWidth: 1, paddingBottom: 10, paddingHorizontal: 20 }}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <AntDesign name="arrowleft" size={24} color="black" />
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
 
                     <MediumFontText data="Notification Settings " textstyle={{ fontSize: 18, width: '80%', textAlign: 'center' }} />

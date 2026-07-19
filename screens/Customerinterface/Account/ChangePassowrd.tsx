@@ -22,7 +22,7 @@ import DarkModeToggle from "../../../components/Account/DarkModeToggle";
 import General from "../../../components/Account/General";
 import { DeleteAccountModal } from "../../../components/Account/Modal";
 import SmsToggle from "../../../components/Account/SmsToggle";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/AppNavigation";
@@ -190,7 +190,7 @@ const ChangePassowrd = () => {
           }}
         >
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <AntDesign name="arrowleft" size={24} color="black" />
+            <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
           </TouchableOpacity>
 
           <MediumFontText

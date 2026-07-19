@@ -499,7 +499,9 @@ const isApproved = currentMember?.status === "approved";
                   marginBottom: 8,
                 }}
               >
-                <AntDesign name="aliyun" size={26} color="#6366F1" />
+
+                <MaterialIcons name="call" size={24} color="black" />
+                {/* <MaterialCommunityIcons name="aliyun" size={26} color="#6366F1" /> */}
               </View>
               <Text
                 style={{

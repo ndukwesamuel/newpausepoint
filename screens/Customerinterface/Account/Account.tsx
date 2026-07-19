@@ -117,29 +117,36 @@ const sampleAdvertisements: Advertisement[] = [
   },
 ];
 
-const data: GeneralData[] = [
-  {
-    id: 1,
-    icon: "user",
-    label: "Personal Info",
-    icon_type: "AntDesign",
-    link: "PersonalInfo",
-  },
-  {
-    id: 2,
-    icon: "user",
-    label: "Edit Personal Info",
-    icon_type: "AntDesign",
-    link: "editPersonalInfo",
-  },
+// const data: GeneralData[] = [
+//   {
+//     id: 1,
+//     icon: "user",
+//     label: "Personal Info",
+//     icon_type: "AntDesign",
+//     link: "PersonalInfo",
+//   },
+//   {
+//     id: 2,
+//     icon: "user",
+//     label: "Edit Personal Info",
+//     icon_type: "AntDesign",
+//     link: "editPersonalInfo",
+//   },
 
-  {
-    id: 3,
-    icon: "history",
-    label: "Transaction History",
-    icon_type: "AntDesign",
-    link: "transactionHistory",
-  },
+//   {
+//     id: 3,
+//     icon: "history",
+//     label: "Transaction History",
+//     icon_type: "AntDesign",
+//     link: "transactionHistory",
+//   },
+// ];
+
+
+const data: GeneralData[] = [
+  { id: 1, icon: "account-outline", label: "Personal Info", icon_type: "MaterialCommunityIcons", link: "PersonalInfo" },
+  { id: 2, icon: "account-edit-outline", label: "Edit Personal Info", icon_type: "MaterialCommunityIcons", link: "editPersonalInfo" },
+  { id: 3, icon: "history", label: "Transaction History", icon_type: "MaterialCommunityIcons", link: "transactionHistory" },
 ];
 
 let new_item: GeneralData = {
@@ -407,7 +414,8 @@ const Account: React.FC = () => {
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeader}>
                 <MaterialCommunityIcons
-                  name="advertisements"
+                  // name="advertisements"
+                   name="tag-outline"
                   size={20}
                   color="#10B981"
                   style={{ marginRight: 8 }}

@@ -276,7 +276,7 @@ const CreateMainEvent = () => {
             }}
             data="Create Event"
             onPress={handlesubmit}
-            icon={<AntDesign name="plus" size={20} color="white" />}
+            icon={<MaterialCommunityIcons name="plus" size={20} color="white" />}
             isLoading={Create_Resident_Event_Mutation.isLoading}
           />
         </View>

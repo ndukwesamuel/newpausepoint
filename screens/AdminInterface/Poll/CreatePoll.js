@@ -14,7 +14,7 @@ import {
   CustomTextArea,
   Forminput,
 } from "../../../components/shared/InputForm";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 // ------------------------------------------------------------------
 // 1. UPDATED IMPORT: Use @tanstack/react-query instead of react-query
 import { useMutation } from "@tanstack/react-query";
@@ -149,7 +149,7 @@ const CreatePoll = () => {
               // Disable delete if there are only 2 or fewer options
               disabled={options.length <= 2}
             >
-              <AntDesign
+              <MaterialCommunityIcons
                 name="delete"
                 size={24}
                 color={options.length <= 2 ? "#ccc" : "red"}

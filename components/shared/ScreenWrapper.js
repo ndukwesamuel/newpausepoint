@@ -8,7 +8,7 @@ import {
   StatusBar,
   SafeAreaView,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const ScreenWrapper = ({
   title,
@@ -47,7 +47,7 @@ const ScreenWrapper = ({
                 style={styles.backButton}
                 activeOpacity={0.7}
               >
-                <AntDesign name="arrowleft" size={24} color={backButtonColor} />
+                <MaterialCommunityIcons name="arrow-left" size={24} color={backButtonColor} />
               </TouchableOpacity>
             ) : null}
           </View>

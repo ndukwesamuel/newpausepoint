@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
-import { AntDesign, MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { MediumFontText, RegularFontText } from "../shared/Paragrahp";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -154,7 +154,7 @@ export const DeleteLAccount = ({ item }: { item: GeneralData }) => {
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <AntDesign name="delete" size={24} color="black" />
+          <MaterialCommunityIcons name="delete" size={24} color="black" />
 
           <MediumFontText
             data="Delete Account"
