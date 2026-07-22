@@ -24,6 +24,7 @@ interface userDatav2 {
 interface LoginCredentials {
   email: string;
   password: string;
+  deviceId: string; // ← NEW: required by /signin-v2
 }
 
 interface AuthState {
@@ -76,6 +77,17 @@ const extractErrorMessage = (error: unknown): string => {
     : "An unexpected error occurred";
 };
 
+// Device-lock errors (pause/freeze) get their own modal in the UI —
+// showing a toast on top of that modal would be redundant/confusing,
+// so the thunk skips the toast for these specific messages.
+const isDeviceLockMessage = (message?: string | null): boolean => {
+  if (!message) return false;
+  return (
+    message.includes("temporarily paused") ||
+    message.includes("frozen due to multiple device changes")
+  );
+};
+
 const showErrorToast = (message: string): void => {
   setTimeout(() => {
     Toast.show({
@@ -107,7 +119,8 @@ const showSuccessToast = (message: string = "Login successful"): void => {
 const loginService = async (
   credentials: LoginCredentials,
 ): Promise<userDatav2> => {
-  const url = `${API_BASE_URL}api/v1/auth/signin`;
+  // ── Switched to the v2 login route, which requires deviceId ──
+  const url = `${API_BASE_URL}api/v1/auth/signin-v2`;
 
   console.log({
     rty: url,
@@ -118,9 +131,9 @@ const loginService = async (
     const response = await axios.post<userDatav2>(
       url,
       {
-        email: credentials.email, // "support@pausepoint.net",
-        password: credentials.password, //"123456789",
-        // pushToken: credentials.pushToken,
+        email: credentials.email,
+        password: credentials.password,
+        deviceId: credentials.deviceId, // ← NEW
       },
       {
         timeout: 10000,
@@ -151,8 +164,15 @@ export const loginUser = createAsyncThunk<
     showSuccessToast("Welcome back!");
     return userDatav2;
   } catch (error) {
-    showErrorToast(error.response?.data?.message);
-    return thunkAPI.rejectWithValue(error.response?.data?.message);
+    const message = error.response?.data?.message;
+
+    // Device-lock errors are shown via a dedicated modal in the UI instead
+    // of a toast — see LoginScreen.jsx.
+    if (!isDeviceLockMessage(message)) {
+      showErrorToast(message);
+    }
+
+    return thunkAPI.rejectWithValue(message);
   }
 });
 
@@ -220,14 +240,6 @@ export const AuthSlicev2 = createSlice({
 // ============================================================================
 // EXPORTS
 // ============================================================================
-
-// export const {
-//   resetAuth,
-//   resetAuthStatus,
-//   setPushToken,
-//   setUserFromStorage,
-//   clearError,
-// } = authSlice.actions;
 
 export const {
   resetAuth,

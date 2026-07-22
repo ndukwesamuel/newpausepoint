@@ -2,10 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer } from "redux-persist";
 import { combineReducers } from "redux";
-// import AuthSlice from "./AuthSlice";
 import UserSlice from "./Admin/UserSlice";
 import EventSlice from "./UserSide/EventSlice";
-// import ProfileSlice from "./ProfileSlice";
 import ClanSlice from "./UserSide/ClanSlice";
 import UserProfileSlice from "./UserSide/UserProfileSlice";
 import ForumSlice from "./UserSide/ForumSlice";
@@ -22,7 +20,6 @@ import ServiceSlice from "./UserSide/ServiceSlice";
 import AdminServiceSlice from "./Admin/AdminServiceSlice";
 import MarketSLice from "./UserSide/MarketSLice";
 import AdminMarketSLice from "./Admin/AdminMarketSLice";
-import socketSlice from "./socketSlice";
 import UtilitisSlice from "./UtilitisSlice";
 import authSlice from "./v2/AuthSlicev2";
 
@@ -30,10 +27,8 @@ import authSlice from "./v2/AuthSlicev2";
 
 const reducers = combineReducers({
   OnboardingSlice: OnboardingSlice,
-  // AuthSlice: AuthSlice,
   UserSlice: UserSlice,
   EventSlice: EventSlice,
-  // ProfileSlice: ProfileSlice,
   ClanSlice: ClanSlice,
   UserProfileSlice: UserProfileSlice,
   ForumSlice: ForumSlice,
@@ -52,7 +47,6 @@ const reducers = combineReducers({
   UtilitisSlice: UtilitisSlice,
 
   authSlice: authSlice,
-  // socketSlice: socketSlice,
 });
 
 const persistConfig = {

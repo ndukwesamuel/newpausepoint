@@ -162,6 +162,12 @@ const Guests = () => {
 
   // ── Split by isMultiEntry on frontend ─────────────────────────────────────
   const allInvites = guestData?.userInvites || [];
+
+  console.log({
+    cccc:allInvites.length
+  });
+  
+
   const singleInvites = allInvites.filter((i) => !i.isMultiEntry);
   const multiInvites = allInvites.filter((i) => i.isMultiEntry);
 
@@ -454,23 +460,7 @@ const Guests = () => {
                 >
                   Single Visit
                 </Text>
-                {singleInvites.length > 0 && (
-                  <View
-                    style={[
-                      styles.tabCount,
-                      activeTab === "single" && styles.tabCountActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.tabCountText,
-                        activeTab === "single" && { color: "#10B981" },
-                      ]}
-                    >
-                      {singleInvites.length}
-                    </Text>
-                  </View>
-                )}
+          
               </TouchableOpacity>
 
           

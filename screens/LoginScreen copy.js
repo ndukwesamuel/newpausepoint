@@ -19,26 +19,15 @@ import {
   remeberUSerPassword,
   setOtpEmail,
 } from "../Redux/DontwantToResetSlice";
-import { loginUser, clearError } from "../Redux/v2/AuthSlicev2";
-import { getDeviceId } from "../utils/deviceId";
-import AccountLockModal from "./AccountLockModal";
-import { parseDeviceLockError } from "../utils/deviceLockUtils";
-// import AccountLockModal, {
-//   parseDeviceLockError,
-// } from "../components/AccountLockModal";
-
-// AccountLockModal
+import { loginUser } from "../Redux/v2/AuthSlicev2";
 
 const LoginScreen = () => {
   const { localremember } = useSelector((state) => state?.DontwantToResetSlice);
   const dispatch = useDispatch();
-
-  // The AuthSlicev2 reducer is registered under the key "authSlice" in the
-  // store (see store.js: authSlice: authSlice). So this IS the correct
-  // slice — isLoading/isError/errorMessage below all come from loginUser.
-  const { isLoading: user_isLoading, isError, errorMessage } = useSelector(
+  const { isLoading: user_isLoading, usesrData2 } = useSelector(
     (state) => state.authSlice,
   );
+
 
   const [email, setEmail] = useState(localremember?.email || "");
   const [remember, setRemember] = useState(false);
@@ -47,10 +36,6 @@ const LoginScreen = () => {
     mainPassword: localremember?.password || "",
     confirmPassword: "",
   });
-
-  // ── Device lock modal state ──
-  const [lockModalVisible, setLockModalVisible] = useState(false);
-  const [lockInfo, setLockInfo] = useState(null);
 
   const handlePasswordChange = (field, text) => {
     setPasswords((prevPasswords) => ({
@@ -70,13 +55,11 @@ const LoginScreen = () => {
     }
 
     const value = await AsyncStorage.getItem("PushToken");
-    const deviceId = await getDeviceId();
 
     let data = {
       email: email,
       password: passwords.mainPassword,
       pushToken: value,
-      deviceId, // ← required by /signin-v2
     };
 
     if (remember) {
@@ -90,26 +73,8 @@ const LoginScreen = () => {
     }
 
     dispatch(setOtpEmail(email));
+    // dispatch(Login_Fun(data));
     dispatch(loginUser(data));
-  };
-
-  // ── Watch for a device-lock error from the v2 slice and show the modal ──
-  useEffect(() => {
-    if (isError && errorMessage) {
-      const parsed = parseDeviceLockError(errorMessage);
-      if (parsed) {
-        setLockInfo(parsed);
-        setLockModalVisible(true);
-      }
-      // Non-lock errors already get a toast from inside the loginUser thunk,
-      // nothing else to do here for those.
-    }
-  }, [isError, errorMessage]);
-
-  const closeLockModal = () => {
-    setLockModalVisible(false);
-    setLockInfo(null);
-    dispatch(clearError());
   };
 
   useEffect(() => {
@@ -253,7 +218,7 @@ const LoginScreen = () => {
             <TouchableOpacity
               style={[
                 styles.signInButton,
-                (user_isLoading) && styles.signInButtonDisabled,
+                user_isLoading && styles.signInButtonDisabled,
               ]}
               onPress={handleLogin}
               disabled={user_isLoading}
@@ -308,12 +273,6 @@ const LoginScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <AccountLockModal
-        visible={lockModalVisible}
-        lockInfo={lockInfo}
-        onClose={closeLockModal}
-      />
     </View>
   );
 };
@@ -543,3 +502,6 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
 });
+
+
+

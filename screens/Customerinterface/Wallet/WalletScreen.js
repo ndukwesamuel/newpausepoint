@@ -76,6 +76,39 @@ const isApproved = currentMember?.status === "approved";
       params: {},
       condition: true //userDatav2?.data?.isInClan,
     },
+       {
+      id: 3,
+      name: "Dues",
+      icon: "superpowers",
+      iconSet: FontAwesome5,
+      color: "#009688",
+      type: "amenities",
+      route: "Due",
+      params: {},
+      condition: isApproved//userDatav2?.data?.isInClan,
+    },
+        {
+      id: 6,
+      name: "Artisan",
+      icon: "room-service",
+      iconSet: MaterialIcons,
+      color: "#FF9800",
+      type: "service",
+      route: "service",
+      params: {},
+      condition: true,
+    },
+    {
+      id: 7,
+      name: "Marketplace",
+      icon: "store",
+      iconSet: MaterialIcons,
+      color: "#00BCD4",
+      type: "marketplace",
+      route: "Marketplace",
+      params: {},
+      condition: true,
+    },
      {
       id: 11,
       name: "Access card",
@@ -98,17 +131,7 @@ const isApproved = currentMember?.status === "approved";
       params: {},
       condition: isApproved//userDatav2?.data?.isInClan,
     },
-    {
-      id: 3,
-      name: "Dues",
-      icon: "superpowers",
-      iconSet: FontAwesome5,
-      color: "#009688",
-      type: "amenities",
-      route: "Due",
-      params: {},
-      condition: isApproved//userDatav2?.data?.isInClan,
-    },
+ 
 
     {
       id: 4,
@@ -132,28 +155,7 @@ const isApproved = currentMember?.status === "approved";
       params: {},
       condition: isApproved//userDatav2?.data?.isInClan,
     },
-    {
-      id: 6,
-      name: "Artisan",
-      icon: "room-service",
-      iconSet: MaterialIcons,
-      color: "#FF9800",
-      type: "service",
-      route: "service",
-      params: {},
-      condition: true,
-    },
-    {
-      id: 7,
-      name: "Marketplace",
-      icon: "store",
-      iconSet: MaterialIcons,
-      color: "#00BCD4",
-      type: "marketplace",
-      route: "Marketplace",
-      params: {},
-      condition: true,
-    },
+
     {
       id: 8,
       name: "ICE Contacts",
@@ -620,7 +622,7 @@ const isApproved = currentMember?.status === "approved";
                 <TouchableOpacity
                   key={link.id}
                   style={{
-                    width: "23%",
+                    width: "20%",
                     alignItems: "center",
                     marginBottom: 20,
                   }}
@@ -628,8 +630,8 @@ const isApproved = currentMember?.status === "approved";
                 >
                   <View
                     style={{
-                      width: 56,
-                      height: 56,
+                      width: 50,
+                      height: 50,
                       backgroundColor: `${link.color}15`,
                       borderRadius: 16,
                       justifyContent: "center",
