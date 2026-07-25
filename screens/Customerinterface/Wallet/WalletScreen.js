@@ -622,7 +622,7 @@ const isApproved = currentMember?.status === "approved";
                 <TouchableOpacity
                   key={link.id}
                   style={{
-                    width: "20%",
+                    width: "25%",
                     alignItems: "center",
                     marginBottom: 20,
                   }}

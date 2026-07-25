@@ -326,7 +326,7 @@ export function LogoutModal({
     try {
       console.log("🔄 Starting logout...");
 
-      await AsyncStorage.multiRemove(["userToken", "userDatav2", "PushToken"]);
+      await AsyncStorage.multiRemove(["userToken", "userDatav2", ]);
       console.log("✅ AsyncStorage cleared");
 
       await persistor.purge();
