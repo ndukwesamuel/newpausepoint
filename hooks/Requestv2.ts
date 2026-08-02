@@ -50,7 +50,6 @@ interface ApiRequestParams {
 // Constants
 const API_URL = API_CONFIG.BASE_URL;
 
-console.log({ apiUrl: API_URL });
 
 // Fetch function for GET requests
 const fetchData = async ({ queryKey }: any) => {

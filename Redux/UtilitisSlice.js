@@ -5,7 +5,6 @@ import { API_CONFIG } from "../api";
 const API_BASEURL = API_CONFIG?.BASE_URL;
 
 
-// const apiUrl = import.meta.env.VITE_API_URL;
 const initialState = {
   shareLink: createDefaultState(),
 };

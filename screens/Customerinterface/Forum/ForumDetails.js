@@ -125,11 +125,6 @@ const ForumDetails = () => {
   // ── Derived state ────────────────────────────────────────
   const isLiked = post?.likes?.includes(get_user_profile_data?.user?._id);
 
-  console.log({
-    user_info: maindata?.user?._id,
-    aaaaa: get_user_profile_data?.data?._id,
-    xxxx: get_user_profile_data?.data?.user?._id,
-  });
 
   const isOwner = maindata?.user?._id === get_user_profile_data?.data?._id;
   //  ||

@@ -75,9 +75,11 @@ const LoginScreen = () => {
     let data = {
       email: email,
       password: passwords.mainPassword,
-      pushToken: value,
+      // pushToken: value,
       deviceId, // ← required by /signin-v2
     };
+
+    
 
     if (remember) {
       dispatch(

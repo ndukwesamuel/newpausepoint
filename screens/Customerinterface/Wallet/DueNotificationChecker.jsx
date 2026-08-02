@@ -138,9 +138,7 @@ const checkAndNotify = (dues, navigation) => {
 
       // ── Tier 3: Halfway — 50%+ elapsed, unpaid ────────────────────────────
       // Dismissable. Shows every mount while condition is true.
-    console.log({
-      xxxx:elapsedPercent
-    });
+ 
     
       if (isUnpaid && elapsedPercent >= 50 && elapsedPercent < 75) {
         showHalfwayAlert(due, onNavigate);
