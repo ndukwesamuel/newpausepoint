@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { useSelector } from "react-redux";
-import { API_CONFIG } from "../api";
+import { API_CONFIG } from "./api";
 
 // Types
 interface AuthState {

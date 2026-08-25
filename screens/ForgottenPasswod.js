@@ -31,7 +31,7 @@ const ForgottenPassword = () => {
   const forgetPasswordMutation = useMutation({
     mutationFn: (data_info) => {
       let url =
-        "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/forgot-password";
+        "https://truthful-liberation-production-3454.up.railway.app/forgot-password";
 
       const config = {
         headers: {

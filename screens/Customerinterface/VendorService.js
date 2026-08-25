@@ -335,6 +335,8 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
@@ -613,7 +615,10 @@ const VendorService = ({ navigation }) => {
         animationType="slide"
         onRequestClose={() => setRatingModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
           <View style={styles.modalContainer}>
             {/* Handle */}
             <View style={styles.modalHandle} />
@@ -688,7 +693,7 @@ const VendorService = ({ navigation }) => {
               )}
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );

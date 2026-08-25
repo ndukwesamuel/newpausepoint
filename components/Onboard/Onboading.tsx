@@ -23,7 +23,6 @@ const API_BASEURL = API_CONFIG?.BASE_URL;
 
 import { useDispatch } from "react-redux";
 import { checkOnboarding } from "../../Redux/OnboardingSlice";
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 // let userAPi = process.env.APIBASEURL + "user/login";
 // const postUrl = process.env.BASE_URL

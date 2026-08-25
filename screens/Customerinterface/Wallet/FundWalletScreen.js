@@ -115,7 +115,7 @@ const FundWalletScreen = ({ navigation }) => {
 
     try {
       const response = await axios.post(
-        "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/wallet/fund",
+        "https://truthful-liberation-production-3454.up.railway.app//wallet/fund",
         {
           amount: parseFloat(amount),
           userid: get_user_profile_data?.data?.user?._id,
@@ -538,20 +538,26 @@ const FundWalletScreen = ({ navigation }) => {
                   Loading BlueSalt account...
                 </Text>
               </View>
-            ) : blueSaltError ? (
-              <View style={styles.errorContainer}>
-                <Icon name="error-outline" size={48} color="#DC3545" />
-                <Text style={styles.errorText}>
-                  Failed to load BlueSalt account
-                </Text>
-                <TouchableOpacity
-                  style={styles.retryButton}
-                  onPress={refetchBlueSalt}
-                >
-                  <Text style={styles.retryButtonText}>Retry</Text>
-                </TouchableOpacity>
-              </View>
-            ) : blueSaltAccount ? (
+            ) 
+            
+            
+            // : blueSaltError ? (
+            //   <View style={styles.errorContainer}>
+            //     <Icon name="error-outline" size={48} color="#DC3545" />
+            //     <Text style={styles.errorText}>
+            //       Failed to load BlueSalt account
+            //     </Text>
+            //     <TouchableOpacity
+            //       style={styles.retryButton}
+            //       onPress={refetchBlueSalt}
+            //     >
+            //       <Text style={styles.retryButtonText}>Retry</Text>
+            //     </TouchableOpacity>
+            //   </View>
+            // )
+            
+            
+            : blueSaltAccount ? (
               <View style={styles.virtualAccountCard}>
                 <TouchableOpacity
                   style={styles.virtualAccountHeader}

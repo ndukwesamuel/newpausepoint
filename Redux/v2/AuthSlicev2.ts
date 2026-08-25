@@ -8,7 +8,7 @@ import Toast from "react-native-toast-message";
 // ============================================================================
 // CONSTANTS
 // ============================================================================
-const API_BASE_URL = "https://communist-carla-pausepoint-fb082012.koyeb.app/";
+const API_BASE_URL =  "https://pausepointbackend-production-a53a.up.railway.app/"
 const TOAST_DELAY_MS = 100;
 const TOAST_DURATION_MS = 4000;
 const TOAST_TOP_OFFSET = 50;
@@ -26,6 +26,7 @@ interface userDatav2 {
 interface LoginCredentials {
   email: string;
   password: string;
+  deviceId: string;
 }
 
 interface AuthState {
@@ -133,7 +134,7 @@ const sendPushTokenToBackend = (jwtToken: string): void => {
 const loginService = async (
   credentials: LoginCredentials,
 ): Promise<userDatav2> => {
-  const url = `${API_BASE_URL}api/v1/auth/signin`;
+  const url = `${API_BASE_URL}api/v1/auth/signin-v2`;
 
 
   try {
@@ -142,6 +143,7 @@ const loginService = async (
       {
         email: credentials.email,
         password: credentials.password,
+        deviceId: credentials.deviceId,
       },
       {
         timeout: 10000,
