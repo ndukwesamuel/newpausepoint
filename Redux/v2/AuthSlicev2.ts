@@ -4,11 +4,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError } from "axios";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import Toast from "react-native-toast-message";
+import { API_CONFIG } from "../../api";
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
-const API_BASE_URL =  "https://pausepointbackend-production-a53a.up.railway.app/"
+const API_BASE_URL = API_CONFIG.BASE_URL;
 const TOAST_DELAY_MS = 100;
 const TOAST_DURATION_MS = 4000;
 const TOAST_TOP_OFFSET = 50;

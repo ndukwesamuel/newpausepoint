@@ -22,6 +22,7 @@ import { setOtpEmail } from "../Redux/DontwantToResetSlice";
 // ✅ Same pattern as CreatePassword - raw axios + useMutation
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
+import { API_CONFIG } from "../hooks/api";
 
 const ForgottenPassword = () => {
   const dispatch = useDispatch();
@@ -30,8 +31,7 @@ const ForgottenPassword = () => {
   // ✅ Exact same pattern as CreatePassword
   const forgetPasswordMutation = useMutation({
     mutationFn: (data_info) => {
-      let url =
-        "https://truthful-liberation-production-3454.up.railway.app/forgot-password";
+      let url = `${API_CONFIG.BASE_URL}api/v1/auth/forgot-password`;
 
       const config = {
         headers: {
@@ -87,11 +87,13 @@ const ForgottenPassword = () => {
       return;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Save email to Redux for OTP screen
-    dispatch(setOtpEmail(email));
+    dispatch(setOtpEmail(normalizedEmail));
 
     // ✅ Same as CreatePassword - just pass the data
-    forgetPasswordMutation.mutate({ email });
+    forgetPasswordMutation.mutate({ email: normalizedEmail });
   };
 
   return (

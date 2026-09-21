@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "752009336342",
+    "project_id": "pausepoint-bd937",
+    "storage_bucket": "pausepoint-bd937.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752009336342:android:0d7410d4932722a1ef4737",
+        "android_client_info": {
+          "package_name": "com.pause_point.PausePoint"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4Xe0wBf2DXIhDFz0FqSSKQfe0yO_fWRU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

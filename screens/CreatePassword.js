@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../hooks/api";
 import { useNavigation } from "@react-navigation/native";
 import { authScreenChange } from "../Redux/OnboardingSlice";
 import { setOtpEmail } from "../Redux/DontwantToResetSlice";
@@ -47,8 +47,7 @@ const CreatePassword = ({}) => {
 
   const ResetPassword_Mutation = useMutation({
     mutationFn: (data_info) => {
-      let url =
-        "https://truthful-liberation-production-3454.up.railway.app/reset-forgotten-password";
+      let url = `${API_CONFIG.BASE_URL}api/v1/auth/reset-password`;
 
       const config = {
         headers: {
@@ -62,13 +61,15 @@ const CreatePassword = ({}) => {
     onSuccess: (success) => {
       Toast.show({
         type: "success",
-        text1: `${success?.data?.data}`,
+        text1: success?.data?.message || "Password Updated",
       });
 
       dispatch(authScreenChange("LOGIN"));
       dispatch(setOtpEmail(null));
     },
     onError: (error) => {
+
+      console.log("Reset Password Error:", error?.response);
       Toast.show({
         type: "error",
         text1: `${error?.response?.data?.error || "Password reset failed"} `,
@@ -96,8 +97,7 @@ const CreatePassword = ({}) => {
     ResetPassword_Mutation.mutate({
       email: otpemail,
       otp,
-      passoword: newPassword,
-      password_confirmation: confirmPassword,
+      password: newPassword,
     });
   };
 

@@ -115,7 +115,7 @@ const FundWalletScreen = ({ navigation }) => {
 
     try {
       const response = await axios.post(
-        "https://truthful-liberation-production-3454.up.railway.app//wallet/fund",
+        "https://uneven-tarrah-pausepoint-950a7a7b.koyeb.app/wallet/fund",
         {
           amount: parseFloat(amount),
           userid: get_user_profile_data?.data?.user?._id,

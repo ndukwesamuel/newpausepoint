@@ -16,9 +16,9 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { authScreenChange } from "../Redux/OnboardingSlice";
+import { API_CONFIG } from "../api";
 
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-const API_BASEURL_v2 = process.env.EXPO_PUBLIC_API_URL_v2;
+const API_BASEURL_v2 = API_CONFIG.BASE_URL;
 
 interface Registraionprops {
   mainPassword: string;
