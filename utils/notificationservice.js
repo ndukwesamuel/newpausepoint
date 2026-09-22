@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import React, { useEffect } from "react";
 import { Audio } from "expo-av";
 
-export const notificationservicecode = (data_info) => {
+export const notificationservicecode = (data_info, queryClient) => {
   const soundObject = new Audio.Sound();
 
   async function emargencysong() {
@@ -31,6 +31,23 @@ export const notificationservicecode = (data_info) => {
     emargencysong();
   } else {
     console.log("no fire");
+  }
+
+  // A guest arriving/departing changes what the guest list screen should
+  // show. Its cached copy only ever refreshes on manual pull-to-refresh or
+  // right after creating/editing a guest — never on a push — so without
+  // this, the notification and the screen can openly disagree ("arrived"
+  // push, "pending" still shown). queryClient is passed in by the caller;
+  // guarded so a caller that forgets to pass it can't crash this function.
+  if (
+    data_info?.type === "visitor_arrived" ||
+    data_info?.type === "visitor_departed"
+  ) {
+    try {
+      queryClient?.invalidateQueries({ queryKey: ["userGuests"] });
+    } catch (error) {
+      console.error("Failed to refresh guest list after push:", error);
+    }
   }
   //   emargencysong();
 

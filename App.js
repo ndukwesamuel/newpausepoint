@@ -153,7 +153,7 @@ export const NavigationScreen = () => {
           console.log(`│ Data  : ${JSON.stringify(response.notification.request.content.data)}`);
           console.log("└─────────────────────────────────────────");
           const data = response.notification.request.content.data;
-          notificationservicecode(data);
+          notificationservicecode(data, queryClient);
         });
 
       const foregroundSubscription =
@@ -164,7 +164,7 @@ export const NavigationScreen = () => {
           console.log(`│ Body  : ${notification.request.content.body}`);
           console.log(`│ Data  : ${JSON.stringify(notification.request.content.data)}`);
           console.log("└─────────────────────────────────────────");
-          notificationservicecode(notification?.request?.content?.data);
+          notificationservicecode(notification?.request?.content?.data, queryClient);
         });
 
       return () => {
