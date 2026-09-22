@@ -52,6 +52,7 @@ const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 import { setOnlineUser, setSocketConnection } from "./Redux/socketSlice";
 import { Linking } from "react-native";
 import { pushtokendata, reset_login } from "./Redux/AuthSlice";
+import { sendPushTokenToBackend } from "./Redux/v2/AuthSlicev2";
 
 import * as Device from "expo-device";
 import { API_CONFIG } from "./api";
@@ -423,9 +424,22 @@ export function AppNotification() {
     const registerPushNotifications = async () => {
       const token = await registerForPushNotificationsAsync();
       if (token) {
-        storePushToken(token);
+        await storePushToken(token);
         setExpoPushToken(token);
         dispatch(pushtokendata(token));
+
+        // Send to the backend on every launch, not only right after login —
+        // a signed-in user who reinstalls or whose device is issued a new
+        // Expo token would otherwise carry a stale token forever. No-op if
+        // nobody is currently logged in; the login flow covers that case.
+        try {
+          const jwtToken = await AsyncStorage.getItem("userToken");
+          if (jwtToken) {
+            sendPushTokenToBackend(jwtToken);
+          }
+        } catch (e) {
+          console.log("[PUSH] Could not check login state to re-send token (non-blocking)");
+        }
       }
       console.log("┌─────────────────────────────────────────");
       console.log("│ [NOTIF] Push Token Registration");
@@ -478,6 +492,14 @@ export function AppNotification() {
 
   return null;
 }
+
+// A real Expo push token always looks like this. Anything else — including a
+// stringified Error, which is what a failed fetch used to return here — must
+// never be treated as a token: it would be saved and sent to the backend as
+// if it worked, and that user's notifications would then silently die forever.
+const isValidExpoPushToken = (value) =>
+  typeof value === "string" &&
+  /^Expo(nent)?PushToken\[.+\]$/.test(value);
 
 async function registerForPushNotificationsAsync() {
   let token;
@@ -545,7 +567,9 @@ async function registerForPushNotificationsAsync() {
       console.error("│ [NOTIF] Failed to get push token");
       console.error(`│ Error: ${e.message || e}`);
       console.error("└─────────────────────────────────────────");
-      token = `${e}`;
+      // Do NOT set token = `${e}` — a stringified error is truthy, so it used
+      // to pass straight through as if it were a real token. Leaving token
+      // unset here means the caller's `if (token)` check correctly no-ops.
     }
   } else {
     console.warn("[NOTIF] Not a physical device — push notifications unavailable");
@@ -555,5 +579,7 @@ async function registerForPushNotificationsAsync() {
     );
   }
 
-  return token;
+  // Last line of defence: whatever path produced `token`, only ever hand back
+  // something that is actually shaped like a push token.
+  return isValidExpoPushToken(token) ? token : null;
 }

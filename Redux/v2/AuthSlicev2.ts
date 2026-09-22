@@ -103,7 +103,9 @@ const showSuccessToast = (message: string = "Login successful"): void => {
 // ============================================================================
 // PUSH TOKEN — fire and forget, never breaks login
 // ============================================================================
-const sendPushTokenToBackend = (jwtToken: string): void => {
+// Exported so App.js can reuse this exact call on every app launch for an
+// already-logged-in user (B29) — not only right after a fresh login.
+export const sendPushTokenToBackend = (jwtToken: string): void => {
   AsyncStorage.getItem("PushToken")
     .then((pushToken) => {
       if (!pushToken) {
@@ -198,7 +200,7 @@ export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
     const userToken = await AsyncStorage.getItem("userToken");
     if (userToken) {
       axios
-        .delete(`${API_BASE_URL}api/v1/general/push-token`, {
+        .delete(`${API_BASE_URL}api/v1/user/push-token`, {
           headers: { Authorization: `Bearer ${userToken}` },
           timeout: 5000,
         })
