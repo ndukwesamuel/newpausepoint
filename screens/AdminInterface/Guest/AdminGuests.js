@@ -6,196 +6,186 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  FlatList,
-  RefreshControl,
   ActivityIndicator,
   Image,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import LottieView from "lottie-react-native";
+import Toast from "react-native-toast-message";
 import ScreenWrapper from "../../../components/shared/ScreenWrapper";
 import { CenterReuseModals } from "../../../components/shared/ReuseModals";
 import TheScan from "../TheScan";
-import { useFetchData_v2 } from "../../../hooks/Requestv2";
+import { useFetchData_v2, useMutateData_v2 } from "../../../hooks/Requestv2";
 import { formatDateandTime } from "../../../utils/DateTime";
 
-const STATUS_COLORS = {
-  pending:   { bg: "#FEF3C7", text: "#92400E" },
-  arrived:   { bg: "#DCFCE7", text: "#166534" },
-  departed:  { bg: "#F3F4F6", text: "#374151" },
+const STATUS_CONFIG = {
+  pending:   { bg: "#FEF3C7", text: "#92400E", label: "Pending", icon: "clock-outline" },
+  arrived:   { bg: "#D1FAE5", text: "#065F46", label: "Arrived", icon: "check-circle" },
+  departed:  { bg: "#F3F4F6", text: "#374151", label: "Departed", icon: "exit-run" },
 };
 
 const AdminGuests = () => {
   const navigation = useNavigation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [page, setPage] = useState(1);
-  const limit = 50;
-
-  const buildUrl = () => {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    });
-    if (searchQuery.trim()) params.append("search", searchQuery.trim());
-    return `api/v1/visitor/estateadmin?${params.toString()}`;
-  };
+  const [codeInput, setCodeInput] = useState("");
+  const [searchedCode, setSearchedCode] = useState("");
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [scanModalVisible, setScanModalVisible] = useState(false);
 
   const {
-    data: guestData,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isFetching,
-  } = useFetchData_v2(buildUrl(), `admin-guests-${page}-${searchQuery}`, {
-    keepPreviousData: true,
-  });
+    data: lookupData,
+    isLoading: isLookingUp,
+    isError: isLookupError,
+    error: lookupError,
+    refetch: refetchLookup,
+  } = useFetchData_v2(
+    `api/v1/visitor/estateadmin/lookup?code=${encodeURIComponent(searchedCode)}`,
+    `admin-guest-lookup-${searchedCode}`,
+    { enabled: !!searchedCode },
+  );
 
+  const guestData = lookupData?.invitation;
 
-  console.log({
-    iiooo:guestData
-  });
-  
+  const visitorMutation = useMutateData_v2(
+    "api/v1/visitor/estateadmin",
+    "POST",
+    undefined,
+    {
+      onSuccess: (data) => {
+        Toast.show({
+          type: "success",
+          text1: data?.message || "Status updated!",
+        });
+        refetchLookup();
+      },
+      onError: (error) => {
+        Toast.show({
+          type: "error",
+          text1: error?.data?.message || "Something went wrong",
+        });
+      },
+    },
+  );
 
-  const userInvites = guestData?.userInvites || [];
-  const pagination = guestData?.pagination || {};
+  const handleSubmitCode = () => {
+    const code = codeInput.trim();
+    if (!code) return;
 
-  const onRefresh = () => {
-    setPage(1);
-    refetch();
-  };
-
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-    setPage(1);
-  };
-
-  const loadMore = () => {
-    if (page < pagination.totalPages && !isFetching) {
-      setPage((prev) => prev + 1);
+    if (code === searchedCode) {
+      refetchLookup();
+    } else {
+      setSearchedCode(code);
     }
+    setDetailVisible(true);
   };
 
-  // ── Guest card ────────────────────────────────────────────────────────────
-  const GuestCard = ({ item }) => {
-    const status = item?.status || "pending";
-    const statusStyle = STATUS_COLORS[status] || STATUS_COLORS.pending;
-
-    return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => navigation.navigate("AdminGuestsDetail", { itemdata: item })}
-        activeOpacity={0.7}
-      >
-        {/* Top row — access code + status badge */}
-        <View style={styles.cardTopRow}>
-          <View style={styles.accessCodeContainer}>
-            <MaterialCommunityIcons name="key-variant" size={14} color="#10B981" />
-            <Text style={styles.accessCode}>{item?.access_code}</Text>
-          </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
-            <Text style={[styles.statusText, { color: statusStyle.text }]}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Visitor name */}
-        <Text style={styles.visitorName}>{item?.visitor_name}</Text>
-
-        {/* Bottom row — departure + phone */}
-        <View style={styles.cardBottomRow}>
-          <View style={styles.cardDetail}>
-            <MaterialCommunityIcons name="clock-outline" size={13} color="#6B7280" />
-            <Text style={styles.cardDetailText}>
-              {formatDateandTime(item?.expires)}
-            </Text>
-          </View>
-
-          <View style={styles.cardDetail}>
-            <MaterialCommunityIcons name="phone-outline" size={13} color="#6B7280" />
-            <Text style={styles.cardDetailText}>
-              {item?.phone_number || "N/A"}
-            </Text>
-          </View>
-        </View>
-
-        {/* Arrow */}
-        <MaterialIcons
-          name="chevron-right"
-          size={20}
-          color="#D1D5DB"
-          style={styles.cardArrow}
-        />
-      </TouchableOpacity>
-    );
+  const handleCloseDetail = () => {
+    setDetailVisible(false);
   };
 
-  const renderFooter = () => {
-    if (!isFetching) return null;
-    return (
-      <View style={{ paddingVertical: 20 }}>
-        <ActivityIndicator size="small" color="#10B981" />
-      </View>
-    );
+  const handleAction = () => {
+    if (!guestData?.access_code) return;
+    visitorMutation.mutate({ accessCode: guestData.access_code });
   };
 
-  const renderContent = () => {
-    if (isLoading && page === 1) {
+  const status = guestData?.status || "pending";
+  const statusInfo = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  const isExpired = guestData?.expires
+    ? new Date(guestData.expires) < new Date()
+    : false;
+
+  const getButtonConfig = () => {
+    if (isExpired && status !== "arrived") {
+      return { label: "Invitation Expired", icon: "calendar-remove", color: "#9CA3AF", disabled: true };
+    }
+    if (status === "departed") {
+      return { label: "Visitor Departed", icon: "check-circle", color: "#9CA3AF", disabled: true };
+    }
+    if (status === "arrived") {
+      return { label: "Mark as Departed", icon: "exit-run", color: "#DC2626", disabled: false };
+    }
+    return { label: "Confirm Visitor Arrived", icon: "account-check", color: "#10B981", disabled: false };
+  };
+
+  const buttonConfig = getButtonConfig();
+
+  // ── Detail modal content ─────────────────────────────────────────────────
+  const renderDetailContent = () => {
+    if (isLookingUp) {
       return (
-        <View style={styles.centered}>
+        <View style={styles.detailCentered}>
           <ActivityIndicator size="large" color="#10B981" />
-          <Text style={styles.loadingText}>Loading guests...</Text>
+          <Text style={styles.loadingText}>Looking up code...</Text>
         </View>
       );
     }
 
-    if (isError) {
+    if (isLookupError || !guestData) {
       return (
-        <View style={styles.centered}>
+        <View style={styles.detailCentered}>
           <MaterialCommunityIcons name="alert-circle-outline" size={48} color="#EF4444" />
           <Text style={styles.errorText}>
-            {error?.message || "Error loading guests"}
-          </Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    if (userInvites.length === 0) {
-      return (
-        <View style={styles.centered}>
-          <LottieView
-            autoPlay
-            style={{ width: 200, height: 200 }}
-            source={require("../../../assets/Lottie/Animation - 1704444696995.json")}
-          />
-          <Text style={styles.emptyText}>
-            {searchQuery ? "No matching guests found" : "No guests yet"}
+            {lookupError?.message || `No guest found for code "${searchedCode}"`}
           </Text>
         </View>
       );
     }
 
     return (
-      <FlatList
-        data={userInvites}
-        renderItem={({ item }) => <GuestCard item={item} />}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 40 }}
-        refreshControl={
-          <RefreshControl refreshing={false} onRefresh={onRefresh} />
-        }
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={renderFooter}
-        showsVerticalScrollIndicator={false}
-      />
+      <View>
+        <View style={[styles.statusBadge, { backgroundColor: statusInfo.bg }]}>
+          <MaterialCommunityIcons name={statusInfo.icon} size={16} color={statusInfo.text} />
+          <Text style={[styles.statusText, { color: statusInfo.text }]}>{statusInfo.label}</Text>
+        </View>
+
+        <Text style={styles.visitorName}>{guestData?.visitor_name}</Text>
+
+        <View style={styles.detailsGrid}>
+          <DetailItem
+            icon="qrcode"
+            iconBg="#FEF3C7"
+            iconColor="#F59E0B"
+            label="Access Code"
+            value={guestData?.access_code}
+            mono
+          />
+          <DetailItem
+            icon="phone"
+            iconBg="#D1FAE5"
+            iconColor="#10B981"
+            label="Phone Number"
+            value={guestData?.phone_number?.toString()}
+          />
+          <DetailItem
+            icon="calendar-alert"
+            iconBg="#EDE9FE"
+            iconColor="#8B5CF6"
+            label="Expires"
+            value={`${formatDateandTime(guestData?.expires)}${isExpired ? " (Expired)" : ""}`}
+            valueColor={isExpired ? "#DC2626" : undefined}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            { backgroundColor: buttonConfig.color },
+            buttonConfig.disabled && styles.actionButtonDisabled,
+          ]}
+          onPress={handleAction}
+          disabled={buttonConfig.disabled || visitorMutation.isPending}
+        >
+          {visitorMutation.isPending ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <>
+              <MaterialCommunityIcons name={buttonConfig.icon} size={20} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>{buttonConfig.label}</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -206,20 +196,22 @@ const AdminGuests = () => {
       headerStyle={{ backgroundColor: "white" }}
     >
       <View style={styles.wrapper}>
-
-        {/* ── Search + QR row ─────────────────────────────────────────── */}
+        {/* ── Access code entry + QR row ──────────────────────────────── */}
         <View style={styles.searchRow}>
           <View style={styles.searchContainer}>
-            <MaterialIcons name="search" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
+            <MaterialCommunityIcons name="key-variant" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search by access code or name..."
+              placeholder="Enter guest's full access code"
               placeholderTextColor="#9CA3AF"
-              value={searchQuery}
-              onChangeText={handleSearch}
+              value={codeInput}
+              onChangeText={setCodeInput}
+              autoCapitalize="characters"
+              returnKeyType="search"
+              onSubmitEditing={handleSubmitCode}
             />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => handleSearch("")}>
+            {codeInput.length > 0 && (
+              <TouchableOpacity onPress={() => setCodeInput("")}>
                 <MaterialIcons name="close" size={18} color="#9CA3AF" />
               </TouchableOpacity>
             )}
@@ -227,7 +219,15 @@ const AdminGuests = () => {
 
           <TouchableOpacity
             style={styles.qrButton}
-            onPress={() => setModalVisible(true)}
+            onPress={handleSubmitCode}
+            disabled={!codeInput.trim()}
+          >
+            <MaterialIcons name="search" size={22} color={codeInput.trim() ? "#10B981" : "#D1D5DB"} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.qrButton}
+            onPress={() => setScanModalVisible(true)}
           >
             <Image
               source={require("../../../assets/qrcode.png")}
@@ -236,44 +236,67 @@ const AdminGuests = () => {
           </TouchableOpacity>
         </View>
 
-        {/* ── Pagination info ──────────────────────────────────────────── */}
-        {pagination.totalCount > 0 && (
-          <View style={styles.paginationRow}>
-            <Text style={styles.paginationText}>
-              Page {pagination.page} of {pagination.totalPages}
-            </Text>
-            <View style={styles.totalBadge}>
-              <Text style={styles.totalBadgeText}>
-                {pagination.totalCount} guests
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* ── Content ──────────────────────────────────────────────────── */}
-        <View style={{ flex: 1 }}>
-          {renderContent()}
+        {/* ── Prompt ───────────────────────────────────────────────────── */}
+        <View style={styles.centered}>
+          <MaterialCommunityIcons name="key-variant" size={48} color="#D1D5DB" />
+          <Text style={styles.emptyText}>
+            Enter a guest's full access code and search to view their details
+          </Text>
         </View>
       </View>
 
       {/* ── QR Scanner Modal ─────────────────────────────────────────────── */}
       <CenterReuseModals
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        visible={scanModalVisible}
+        onClose={() => setScanModalVisible(false)}
       >
         <View style={styles.qrModal}>
           <View style={styles.qrModalHeader}>
             <Text style={styles.qrModalTitle}>Scan QR Code </Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
+            <TouchableOpacity onPress={() => setScanModalVisible(false)}>
               <MaterialIcons name="cancel" size={24} color="#374151" />
             </TouchableOpacity>
           </View>
           <TheScan />
         </View>
       </CenterReuseModals>
+
+      {/* ── Guest Detail Popup ───────────────────────────────────────────── */}
+      <CenterReuseModals visible={detailVisible} onClose={handleCloseDetail}>
+        <View style={styles.detailModal}>
+          <View style={styles.qrModalHeader}>
+            <Text style={styles.qrModalTitle}>Guest Details</Text>
+            <TouchableOpacity onPress={handleCloseDetail}>
+              <MaterialIcons name="cancel" size={24} color="#374151" />
+            </TouchableOpacity>
+          </View>
+          {renderDetailContent()}
+        </View>
+      </CenterReuseModals>
     </ScreenWrapper>
   );
 };
+
+// ─── Detail item ──────────────────────────────────────────────────────────────
+const DetailItem = ({ icon, iconBg, iconColor, label, value, mono, valueColor }) => (
+  <View style={styles.detailItem}>
+    <View style={[styles.detailIcon, { backgroundColor: iconBg }]}>
+      <MaterialCommunityIcons name={icon} size={18} color={iconColor} />
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text
+        style={[
+          styles.detailValue,
+          mono && styles.monoValue,
+          valueColor && { color: valueColor },
+        ]}
+      >
+        {value || "N/A"}
+      </Text>
+    </View>
+  </View>
+);
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -319,92 +342,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // ── Pagination ──
-  paginationRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  paginationText: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  totalBadge: {
-    backgroundColor: "#ECFDF5",
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  totalBadgeText: {
-    fontSize: 12,
-    color: "#059669",
-    fontWeight: "600",
-  },
-
-  // ── Guest card ──
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  cardTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  accessCodeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  accessCode: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#10B981",
-    letterSpacing: 1,
-  },
-  statusBadge: {
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  visitorName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 10,
-  },
-  cardBottomRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  cardDetail: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  cardDetailText: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  cardArrow: {
-    position: "absolute",
-    right: 12,
-    top: "50%",
-  },
-
   // ── States ──
   centered: {
     flex: 1,
@@ -420,19 +357,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#EF4444",
     marginTop: 12,
-    marginBottom: 16,
     textAlign: "center",
-    fontSize: 14,
-  },
-  retryButton: {
-    backgroundColor: "#10B981",
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  retryButtonText: {
-    color: "#fff",
-    fontWeight: "700",
     fontSize: 14,
   },
   emptyText: {
@@ -460,6 +385,75 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#111827",
+  },
+
+  // ── Detail Modal ──
+  detailModal: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 20,
+    width: "90%",
+  },
+  detailCentered: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 30,
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+    marginBottom: 12,
+  },
+  statusText: { fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
+  visitorName: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 16,
+  },
+  detailsGrid: { gap: 14, marginBottom: 20 },
+  detailItem: { flexDirection: "row", alignItems: "center", gap: 12 },
+  detailIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginBottom: 2,
+  },
+  detailValue: { fontSize: 14, fontWeight: "600", color: "#111827" },
+  monoValue: {
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#10B981",
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
+  },
+  actionButtonDisabled: {
+    backgroundColor: "#9CA3AF",
+  },
+  actionButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
   },
 });
 

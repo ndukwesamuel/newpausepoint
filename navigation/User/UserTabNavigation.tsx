@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { StyleSheet, View, Text, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Screens
 import Home from "../../screens/Customerinterface/Home";
@@ -49,13 +50,14 @@ const UserTabNavigation = () => {
   const { userDatav2 } = useSelector((state) => state?.authSlice);
 
   const MemberOfEstate = userDatav2?.data?.isInClan;
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
         tabBarShowLabel: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { bottom: insets.bottom + 12 }],
         tabBarHideOnKeyboard: true,
         headerShown: false,
       }}
@@ -155,14 +157,13 @@ export default UserTabNavigation;
 const styles = StyleSheet.create({
   tabBar: {
     position: "absolute",
-    bottom: 20,
     left: 16,
     right: 16,
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    height: 70,
-    paddingBottom: 8,
-    paddingTop: 8,
+    height: 64,
+    paddingBottom: 6,
+    paddingTop: 6,
     paddingHorizontal: 8,
     shadowColor: "#000",
     shadowOffset: {
@@ -178,15 +179,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
-    paddingVertical: 4,
+    paddingVertical: 0,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 32,
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 0,
     backgroundColor: "transparent",
   },
   iconContainerActive: {
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "500",
     color: "#6B7280",
-    marginTop: 2,
+    marginTop: 0,
   },
   tabLabelActive: {
     fontSize: 11,

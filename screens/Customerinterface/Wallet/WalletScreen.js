@@ -37,6 +37,64 @@ const EMERGENCY_CONFIG = {
   burglary:   { icon: "door-open",     color: "#EC4899", bg: "#FCE7F3", label: "Burglary"   },
 };
 
+// ── Bills payment config ──────────────────────────────────────────────────────
+const BILL_ITEMS = [
+  {
+    label: "Electricity",
+    icon: "electric-bolt",
+    iconSize: 28,
+    iconColor: "#F59E0B",
+    bg: "#FEF3C7",
+    route: "UtilityPayment",
+    params: { billType: "electricty" },
+  },
+  {
+    label: "Airtime",
+    icon: "call",
+    bg: "#E0E7FF",
+    route: "Airtime",
+    params: {
+      data: {
+        _id: "61efaba1da92348f9dde5f6c",
+        name: "Mobile Recharge",
+        identifier: "AIRTIME",
+        description: "Airtime Recharge",
+        createdAt: "2022-01-25T07:49:53.181Z",
+        updatedAt: "2022-01-25T07:49:53.181Z",
+        __v: 0,
+      },
+    },
+  },
+  {
+    label: "Data",
+    icon: "signal-wifi-statusbar-connected-no-internet-4",
+    bg: "#E0E7FF",
+    route: "DataPurchase",
+    params: {
+      data: {
+        _id: "61efabb2da92348f9dde5f6e",
+        name: "DATA PURCHASE",
+        identifier: "DATA",
+        description: "Data bundle subscription",
+        __v: 0,
+      },
+    },
+  },
+];
+
+const BillItem = ({ item, onPress }) => (
+  <TouchableOpacity style={styles.billItem} onPress={onPress}>
+    <View style={[styles.billIconBox, { backgroundColor: item.bg }]}>
+      <MaterialIcons
+        name={item.icon}
+        size={item.iconSize ?? 24}
+        color={item.iconColor ?? "black"}
+      />
+    </View>
+    <Text style={styles.billLabel}>{item.label}</Text>
+  </TouchableOpacity>
+);
+
 const WalletScreen = ({}) => {
   const {
     data,
@@ -437,154 +495,25 @@ const WalletScreen = ({}) => {
           {/* ================================
               BILLS PAYMENT SECTION
           ================================ */}
-          <View
-            style={{
-              marginTop: 24,
-              marginBottom: 20,
-              backgroundColor: "#FFFFFF",
-              padding: 16,
-              borderRadius: 16,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 8,
-              elevation: 3,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
+          <View style={styles.billsCard}>
+            <View style={styles.billsHeader}>
               <MaterialCommunityIcons
                 name="flash"
                 size={20}
                 color="#10B981"
                 style={{ marginRight: 8 }}
               />
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: "#1F2937",
-                  letterSpacing: 0.3,
-                }}
-              >
-                Bills Payment
-              </Text>
+              <Text style={styles.billsTitle}>Bills Payment</Text>
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* Electricity */}
-              <TouchableOpacity
-                style={{ width: "30%", alignItems: "center", marginBottom: 16 }}
-                onPress={() =>
-                  navigation.navigate("UtilityPayment", { billType: "electricty" })
-                }
-              >
-                <View
-                  style={{
-                    width: 56,
-                    height: 56,
-                    backgroundColor: "#FEF3C7",
-                    borderRadius: 16,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <Icon name="electric-bolt" size={28} color="#F59E0B" />
-                </View>
-                <Text
-                  style={{ fontSize: 12, color: "#374151", textAlign: "center", fontWeight: "500" }}
-                >
-                  Electricity
-                </Text>
-              </TouchableOpacity>
-
-              {/* Airtime */}
-              <TouchableOpacity
-                style={{ width: "30%", alignItems: "center", marginBottom: 16 }}
-                onPress={() =>
-                  navigation.navigate("Airtime", {
-                    data: {
-                      _id: "61efaba1da92348f9dde5f6c",
-                      name: "Mobile Recharge",
-                      identifier: "AIRTIME",
-                      description: "Airtime Recharge",
-                      createdAt: "2022-01-25T07:49:53.181Z",
-                      updatedAt: "2022-01-25T07:49:53.181Z",
-                      __v: 0,
-                    },
-                  })
-                }
-              >
-                <View
-                  style={{
-                    width: 56,
-                    height: 56,
-                    backgroundColor: "#E0E7FF",
-                    borderRadius: 16,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <MaterialIcons name="call" size={24} color="black" />
-                </View>
-                <Text
-                  style={{ fontSize: 12, color: "#374151", textAlign: "center", fontWeight: "500" }}
-                >
-                  Airtime
-                </Text>
-              </TouchableOpacity>
-
-              {/* Data */}
-              <TouchableOpacity
-                style={{ width: "30%", alignItems: "center", marginBottom: 16 }}
-                onPress={() =>
-                  navigation.navigate("DataPurchase", {
-                    data: {
-                      _id: "61efabb2da92348f9dde5f6e",
-                      name: "DATA PURCHASE",
-                      identifier: "DATA",
-                      description: "Data bundle subscription",
-                      __v: 0,
-                    },
-                  })
-                }
-              >
-                <View
-                  style={{
-                    width: 56,
-                    height: 56,
-                    backgroundColor: "#E0E7FF",
-                    borderRadius: 16,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <MaterialIcons
-                    name="signal-wifi-statusbar-connected-no-internet-4"
-                    size={24}
-                    color="black"
-                  />
-                </View>
-                <Text
-                  style={{ fontSize: 12, color: "#374151", textAlign: "center", fontWeight: "500" }}
-                >
-                  Data
-                </Text>
-              </TouchableOpacity>
+            <View style={styles.billsGrid}>
+              {BILL_ITEMS.map((item) => (
+                <BillItem
+                  key={item.label}
+                  item={item}
+                  onPress={() => navigation.navigate(item.route, item.params)}
+                />
+              ))}
             </View>
           </View>
 
@@ -808,6 +737,43 @@ const WalletScreen = ({}) => {
 };
 
 const styles = StyleSheet.create({
+  billsCard: {
+    backgroundColor: "#FFFFFF",
+    padding: 10,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  billsHeader: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  billsTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 0.3,
+  },
+  billsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  billItem: { width: "30%", alignItems: "center",  },
+  billIconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  billLabel: {
+    fontSize: 12,
+    color: "#374151",
+    textAlign: "center",
+    fontWeight: "500",
+  },
   container: {
     flex: 1,
     paddingVertical: 20,
