@@ -89,6 +89,12 @@ const AdminGuests = () => {
     visitorMutation.mutate({ accessCode: guestData.access_code });
   };
 
+  const handleViewFullDetails = () => {
+    if (!guestData) return;
+    setDetailVisible(false);
+    navigation.navigate("AdminGuestsDetail", { itemdata: guestData });
+  };
+
   const status = guestData?.status || "pending";
   const statusInfo = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   const isExpired = guestData?.expires
@@ -184,6 +190,11 @@ const AdminGuests = () => {
               <Text style={styles.actionButtonText}>{buttonConfig.label}</Text>
             </>
           )}
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.viewDetailsButton} onPress={handleViewFullDetails}>
+          <Text style={styles.viewDetailsButtonText}>View Full Details</Text>
+          <MaterialIcons name="chevron-right" size={18} color="#10B981" />
         </TouchableOpacity>
       </View>
     );
@@ -454,6 +465,18 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#FFFFFF",
     letterSpacing: 0.3,
+  },
+  viewDetailsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+    paddingVertical: 14,
+  },
+  viewDetailsButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#10B981",
   },
 });
 

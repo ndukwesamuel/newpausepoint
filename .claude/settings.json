@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('@babel/parser'\\).parse\\(require\\('fs'\\).readFileSync\\('WalletScreen.js','utf8'\\),{sourceType:'module',plugins:['jsx']}\\);console.log\\('parse ok'\\)\")",
+      "Bash(grep -rniE \"isAdmin|is_admin|role.{0,20}admin|admin.{0,20}role|adminStatus\" --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.jsx\" . --exclude-dir=node_modules --exclude-dir=android --exclude-dir=ios)",
+      "Bash(node -e \"require\\('@babel/parser'\\).parse\\(require\\('fs'\\).readFileSync\\('screens/AdminInterface/Guest/AdminGuests.js','utf8'\\),{sourceType:'module',plugins:['jsx','flow']}\\);console.log\\('parse ok'\\)\")",
+      "Bash(node -e \"require\\('@babel/parser'\\).parse\\(require\\('fs'\\).readFileSync\\('screens/AdminInterface/Guest/AdminGuests.js','utf8'\\),{sourceType:'module',plugins:['jsx']}\\);console.log\\('parse ok'\\)\")",
+      "Read(//Users/macbook/pausepoint/pausepointbackend/src/modules/visitorInvitation/**)",
+      "Bash(cd /Users/macbook/pausepoint/pausepointbackend && grep -n \"AdminverifyAccessCode\" -A 60 src/modules/visitorInvitation/visitorInvitation.controller.ts | head -90)",
+      "Read(//Users/macbook/pausepoint/pausepointbackend/**)",
+      "Bash(cd /Users/macbook/pausepoint/pausepointbackend && grep -n \"static async AdminverifyAccessCode\" src/modules/visitorInvitation/visitorInvitation.controller.ts)",
+      "Bash(cd /Users/macbook/pausepoint/pausepointbackend && grep -n \"static async AdmingetAllUserInvites\\\\b\" -A 60 src/modules/visitorInvitation/visitorInvitation.controller.ts | head -80)",
+      "Bash(cd /Users/macbook/pausepoint/pausepointbackend && grep -n \"checkClanAdminAccess_all_level\" -A 25 src/middleware/auth.ts | head -40)",
+      "Bash(cd /Users/macbook/pausepoint/pausepointbackend && sed -n '300,325p' src/middleware/auth.ts)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ],
+    "additionalDirectories": [
+      "/Users/macbook/pausepoint/pausepointbackend/src/modules/visitorInvitation"
+    ]
+  }
+}
