@@ -59,6 +59,7 @@ import { LogoutModal } from "../../components/Account/Logout";
 import Forum_Market from "../../components/shared/Forum_Market";
 import WalletScreen from "./Wallet/WalletScreen";
 import DueNotificationChecker from "./Wallet/DueNotificationChecker";
+import AnnouncementChecker from "../../components/Announcement/AnnouncementChecker";
 
 export default function App({ navigation }) {
   const [currentTab, setCurrentTab] = useState("Home");
@@ -75,6 +76,7 @@ export default function App({ navigation }) {
       }}
     >
      <DueNotificationChecker navigation={navigation} />
+      <AnnouncementChecker navigation={navigation} />
       
       <WalletScreen />
     </SafeAreaView>
