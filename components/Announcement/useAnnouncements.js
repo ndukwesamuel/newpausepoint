@@ -4,9 +4,13 @@ import { SAMPLE_ANNOUNCEMENTS } from "./sampleAnnouncements";
 
 const SEEN_KEY = "seenAnnouncementIds";
 
+// Set to true to show announcements again
+const ANNOUNCEMENTS_ENABLED = false;
+
 // TODO: replace with the announcements API call once the backend is ready.
 // Targeting (estate, role, app version) is decided by the backend.
-const fetchAnnouncements = async () => SAMPLE_ANNOUNCEMENTS;
+const fetchAnnouncements = async () =>
+  ANNOUNCEMENTS_ENABLED ? SAMPLE_ANNOUNCEMENTS : [];
 
 const getSeenIds = async () => {
   try {
