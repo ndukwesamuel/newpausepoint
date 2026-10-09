@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { StyleSheet, View, Text, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Screens
 import Home from "../../screens/Customerinterface/Home";
@@ -50,12 +51,15 @@ const UserTabNavigation = () => {
 
   const MemberOfEstate = userDatav2?.data?.isInClan;
 
+  // Keep the floating tab bar above the Android system nav bar (edge-to-edge)
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
         tabBarShowLabel: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { bottom: insets.bottom + 12 }],
         tabBarHideOnKeyboard: true,
         headerShown: false,
       }}
@@ -155,7 +159,6 @@ export default UserTabNavigation;
 const styles = StyleSheet.create({
   tabBar: {
     position: "absolute",
-    bottom: 20,
     left: 16,
     right: 16,
     backgroundColor: "#FFFFFF",
@@ -182,11 +185,11 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     width: 44,
-    height: 44,
+    height: 36,
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 0,
     backgroundColor: "transparent",
   },
   iconContainerActive: {

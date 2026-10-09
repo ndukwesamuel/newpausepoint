@@ -37,6 +37,14 @@ const EMERGENCY_CONFIG = {
   burglary:   { icon: "door-open",     color: "#EC4899", bg: "#FCE7F3", label: "Burglary"   },
 };
 
+// ── Bills payment tile ────────────────────────────────────────────────────────
+const BillTile = ({ icon, label, iconBg = "#E0E7FF", onPress }) => (
+  <TouchableOpacity style={styles.billTile} onPress={onPress}>
+    <View style={[styles.billIconBox, { backgroundColor: iconBg }]}>{icon}</View>
+    <Text style={styles.billLabel}>{label}</Text>
+  </TouchableOpacity>
+);
+
 const WalletScreen = ({}) => {
   const {
     data,
@@ -92,7 +100,18 @@ const WalletScreen = ({}) => {
     (state) => state.UserProfileSlice,
   );
 
+  console.log({
+    rrr:get_user_profile_data?.data?.currentClanMeeting?.uniqueClanID
+  });
+  
+
   const { userDatav2 } = useSelector((state) => state.authSlice);
+
+
+  console.log({
+    cfv:userDatav2?.data
+  });
+  
 
   const clanMembers = get_user_profile_data?.data?.currentClanMeeting?.members;
 
@@ -439,10 +458,9 @@ const WalletScreen = ({}) => {
           ================================ */}
           <View
             style={{
-              marginTop: 24,
-              marginBottom: 20,
+              marginTop: 10,
               backgroundColor: "#FFFFFF",
-              padding: 16,
+              padding: 8,
               borderRadius: 16,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -455,7 +473,7 @@ const WalletScreen = ({}) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginBottom: 16,
+                marginBottom: 4,
               }}
             >
               <MaterialCommunityIcons
@@ -483,36 +501,21 @@ const WalletScreen = ({}) => {
                 justifyContent: "space-between",
               }}
             >
-              {/* Electricity */}
-              <TouchableOpacity
-                style={{ width: "30%", alignItems: "center", marginBottom: 16 }}
-                onPress={() =>
-                  navigation.navigate("UtilityPayment", { billType: "electricty" })
-                }
-              >
-                <View
-                  style={{
-                    width: 56,
-                    height: 56,
-                    backgroundColor: "#FEF3C7",
-                    borderRadius: 16,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <Icon name="electric-bolt" size={28} color="#F59E0B" />
-                </View>
-                <Text
-                  style={{ fontSize: 12, color: "#374151", textAlign: "center", fontWeight: "500" }}
-                >
-                  Electricity
-                </Text>
-              </TouchableOpacity>
+              {get_user_profile_data?.data?.currentClanMeeting?.uniqueClanID ===
+                "CCE-9-2026" && (
+                <BillTile
+                  label="Electricity"
+                  iconBg="#FEF3C7"
+                  icon={<Icon name="electric-bolt" size={15} color="#F59E0B" />}
+                  onPress={() =>
+                    navigation.navigate("UtilityPayment", { billType: "electricty" })
+                  }
+                />
+              )}
 
-              {/* Airtime */}
-              <TouchableOpacity
-                style={{ width: "30%", alignItems: "center", marginBottom: 16 }}
+              <BillTile
+                label="Airtime"
+                icon={<MaterialIcons name="call" size={15} color="black" />}
                 onPress={() =>
                   navigation.navigate("Airtime", {
                     data: {
@@ -526,30 +529,17 @@ const WalletScreen = ({}) => {
                     },
                   })
                 }
-              >
-                <View
-                  style={{
-                    width: 56,
-                    height: 56,
-                    backgroundColor: "#E0E7FF",
-                    borderRadius: 16,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <MaterialIcons name="call" size={24} color="black" />
-                </View>
-                <Text
-                  style={{ fontSize: 12, color: "#374151", textAlign: "center", fontWeight: "500" }}
-                >
-                  Airtime
-                </Text>
-              </TouchableOpacity>
+              />
 
-              {/* Data */}
-              <TouchableOpacity
-                style={{ width: "30%", alignItems: "center", marginBottom: 16 }}
+              <BillTile
+                label="Data"
+                icon={
+                  <MaterialIcons
+                    name="signal-wifi-statusbar-connected-no-internet-4"
+                    size={15}
+                    color="black"
+                  />
+                }
                 onPress={() =>
                   navigation.navigate("DataPurchase", {
                     data: {
@@ -561,30 +551,7 @@ const WalletScreen = ({}) => {
                     },
                   })
                 }
-              >
-                <View
-                  style={{
-                    width: 56,
-                    height: 56,
-                    backgroundColor: "#E0E7FF",
-                    borderRadius: 16,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
-                >
-                  <MaterialIcons
-                    name="signal-wifi-statusbar-connected-no-internet-4"
-                    size={24}
-                    color="black"
-                  />
-                </View>
-                <Text
-                  style={{ fontSize: 12, color: "#374151", textAlign: "center", fontWeight: "500" }}
-                >
-                  Data
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           </View>
 
@@ -651,8 +618,8 @@ const WalletScreen = ({}) => {
                   >
                     <View
                       style={{
-                        width: 50,
-                        height: 50,
+                        width: 30,
+                        height: 30,
                         backgroundColor: `${link.color}15`,
                         borderRadius: 16,
                         justifyContent: "center",
@@ -662,7 +629,7 @@ const WalletScreen = ({}) => {
                     >
                       <IconComponent
                         name={link.icon}
-                        size={24}
+                        size={15}
                         color={link.color}
                       />
                     </View>
@@ -808,6 +775,25 @@ const WalletScreen = ({}) => {
 };
 
 const styles = StyleSheet.create({
+  billTile: {
+    width: "30%",
+    alignItems: "center",
+    // marginBottom: 16,
+  },
+  billIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  billLabel: {
+    fontSize: 12,
+    color: "#374151",
+    textAlign: "center",
+    fontWeight: "500",
+  },
   container: {
     flex: 1,
     paddingVertical: 20,

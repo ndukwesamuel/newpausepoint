@@ -43,7 +43,7 @@ const SafeHavenCard = () => {
       activeOpacity={0.7}
     >
       <View style={styles.iconCircle}>
-        <MaterialCommunityIcons name="bank-plus" size={32} color="#10B981" />
+        <MaterialCommunityIcons name="bank-plus" size={12} color="#10B981" />
       </View>
 
       <View style={styles.noAccountContent}>
@@ -63,9 +63,8 @@ const styles = StyleSheet.create({
   noAccountCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 20,
-    marginTop: 16,
-    marginBottom: 16,
+    padding: 10,
+    marginTop: 8,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
@@ -78,8 +77,8 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
   },
   iconCircle: {
-    width: 56,
-    height: 56,
+    width: 26,
+    height: 26,
     borderRadius: 28,
     backgroundColor: "#D1FAE5",
     justifyContent: "center",
