@@ -4,7 +4,6 @@
 // import { reset_isOnboarding } from "../Redux/OnboardingSlice";
 // import { reset_Admin_Get_All_User } from "../Redux/Admin/UserSlice";
 // import { reset_ClanSlice } from "../Redux/UserSide/ClanSlice";
-// import { reset_EventSlice } from "../Redux/UserSide/EventSlice";
 // import { reset_ForumSlice } from "../Redux/UserSide/ForumSlice";
 // import { reset_UserProfileSlice } from "../Redux/UserSide/UserProfileSlice";
 
@@ -49,7 +48,6 @@
 //         store.dispatch(reset_isOnboarding());
 //         store.dispatch(reset_Admin_Get_All_User());
 //         store.dispatch(reset_ClanSlice());
-//         store.dispatch(reset_EventSlice());
 //         store.dispatch(reset_ForumSlice());
 //         store.dispatch(reset_UserProfileSlice());
 //         store.dispatch(reset_ProfileSlice());
@@ -79,7 +77,6 @@ import { reset_login } from "../Redux/AuthSlice";
 import { reset_isOnboarding } from "../Redux/OnboardingSlice";
 import { reset_Admin_Get_All_User } from "../Redux/Admin/UserSlice";
 import { reset_ClanSlice } from "../Redux/UserSide/ClanSlice";
-import { reset_EventSlice } from "../Redux/UserSide/EventSlice";
 import { reset_ForumSlice } from "../Redux/UserSide/ForumSlice";
 import { reset_UserProfileSlice } from "../Redux/UserSide/UserProfileSlice";
 import Toast from "react-native-toast-message";
@@ -113,7 +110,6 @@ axios.interceptors.response.use(
         store.dispatch(reset_isOnboarding());
         store.dispatch(reset_Admin_Get_All_User());
         store.dispatch(reset_ClanSlice());
-        store.dispatch(reset_EventSlice());
         store.dispatch(reset_ForumSlice());
         store.dispatch(reset_UserProfileSlice());
         store.dispatch(reset_ProfileSlice());

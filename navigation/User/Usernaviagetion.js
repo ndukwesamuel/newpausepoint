@@ -875,8 +875,6 @@ import PrivacyPolicy from "../../screens/Customerinterface/Help/PrivacyPolicy";
 import Share from "../../screens/Customerinterface/Help/Share";
 import CommentScreen from "../../screens/SharedScreen/CommentScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import CreatePrivateEvent from "../../screens/Customerinterface/Events/CreateMainEvent";
-import CreatePublicEvent from "../../screens/Customerinterface/Events/CreatePublicEvent";
 import Commingsoon from "../../screens/SharedScreen/Commingsoon";
 import UserClans from "../../screens/Customerinterface/Clan/UserClans";
 import CreateForum from "../../screens/Customerinterface/Forum/CreateForum";
@@ -1013,12 +1011,10 @@ const createScreen = (name, component, title) => {
 
 export const Usernaviagetion = () => {
   const screens = [
-    { name: "CreatePrivateEvent", component: CreatePrivateEvent, title: "Create Private Event" },
     { name: "CreateMainEvent", component: CreateMainEvent, title: "Create Main Event" },
     { title: "Due Details", component: HouseholdDueDetail, name: "HouseholdDueDetail" },
     { name: "FundWallet", component: FundWalletScreen, title: "FundWallet" },
     { name: "payment", component: WalletScreen, title: "Payment" },
-    { name: "CreatePublicEvent", component: CreatePublicEvent, title: "Create Public Event" },
     { name: "transactionHistory", component: TransactionHistoryScreen, title: "Transaction History" },
     { name: "TransactionDetail", component: TransactionDetailScreen, title: "Transaction Detail" },
     { name: "createforum", component: CreateForum, title: "Write Message" },

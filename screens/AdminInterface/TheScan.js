@@ -12,10 +12,7 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { formatDateandTime } from "../../utils/DateTime";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Admin_Get_All_Clan_Memeber_Fun,
-  Get_Single_clan,
-} from "../../Redux/UserSide/ClanSlice";
+import { Get_Single_clan } from "../../Redux/UserSide/ClanSlice";
 
 // ─── Detect QR code type ──────────────────────────────────────────────────────
 // Member codes: LPC-AAAA-0001, CCE-AAAA-0435, OPERA1-AAAA-1003
@@ -39,8 +36,6 @@ export default function TheScan() {
   );
 
   useEffect(() => {
-    dispatch(Admin_Get_All_Clan_Memeber_Fun());
-
     // Try admin clan first, fall back to member clan
     const adminClanId =
       get_user_profile_data?.data?.AdmincurrentClanMeeting?._id ||

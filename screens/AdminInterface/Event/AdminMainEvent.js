@@ -27,11 +27,6 @@ import ReuseModals, {
   CenterReuseModals,
 } from "../../../components/shared/ReuseModals";
 import { Provider, useDispatch, useSelector } from "react-redux";
-import {
-  All_Host_Public_events_Fun,
-  All_Public_events_Fun,
-  Host__events_Fun,
-} from "../../../Redux/UserSide/EventSlice";
 import { formatDateandTime, formatDateString } from "../../../utils/DateTime";
 import {
   Get_GeneralEvent_Fun,
@@ -44,19 +39,6 @@ const AdminMainEvent = () => {
   const animation = useRef(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = () => {
-    // Set the refreshing state to true
-    setRefreshing(true);
-
-    // Fetch the updated data
-    dispatch(All_Public_events_Fun(searchQuery));
-    dispatch(Host__events_Fun(searchQuery));
-    dispatch(All_Host_Public_events_Fun(searchQuery));
-
-    // After fetching the data, set the refreshing state back to false
-    setRefreshing(false);
-  };
-
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -65,13 +47,7 @@ const AdminMainEvent = () => {
   };
   const { user_data } = useSelector((state) => state?.AuthSlice);
 
-  const { all_public_event_data, host_event, all_host_public_event } =
-    useSelector((state) => state?.EventSlice);
-
   const screenWidth = Dimensions.get("window").width;
-  console.log({
-    aaa: all_public_event_data,
-  });
   // Filter data based on the search query
   // const filteredData = data.filter(
   //   (item) =>
@@ -86,19 +62,9 @@ const AdminMainEvent = () => {
     });
   };
 
-  const [turnmodal, setTurnmodal] = useState(false);
-
   const [myevent, setMyevent] = useState("my_events");
 
   // };
-
-  useEffect(() => {
-    dispatch(All_Public_events_Fun(searchQuery));
-    dispatch(Host__events_Fun(searchQuery));
-    dispatch(All_Host_Public_events_Fun(searchQuery));
-
-    return () => {};
-  }, [dispatch, searchQuery]);
 
   return (
     // <AppScreen>
@@ -107,90 +73,6 @@ const AdminMainEvent = () => {
       style={{ flex: 1 }}
     >
       {refreshing && <ActivityIndicator size="large" color="#0C1401" />}
-
-      <CenterReuseModals
-        visible={turnmodal}
-        onClose={() => setTurnmodal(false)}
-      >
-        <View
-          style={{
-            backgroundColor: "white",
-            padding: 20,
-            borderRadius: 10,
-            elevation: 5,
-            width: "50%",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "500",
-              fontFamily: "RobotoSlab-Medium",
-              color: "black",
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            Creat Your Event
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#04973C",
-                paddingHorizontal: 12,
-                paddingVertical: 2,
-                borderRadius: 6,
-              }}
-              onPress={() => {
-                navigation.navigate("CreatePrivateEvent");
-                setTurnmodal(false);
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: 14,
-                  fontFamily: "RobotoSlab-Medium",
-                }}
-              >
-                Private
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#04973C",
-                paddingHorizontal: 12,
-                paddingVertical: 2,
-                borderRadius: 6,
-              }}
-              onPress={() => {
-                navigation.navigate("CreatePublicEvent");
-                setTurnmodal(false);
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: 14,
-                  fontFamily: "RobotoSlab-Medium",
-                }}
-              >
-                Public
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </CenterReuseModals>
 
       <View style={{ paddingHorizontal: 10, flex: 1 }}>
         {/* <View
@@ -298,9 +180,6 @@ const styles = StyleSheet.create({
 export default AdminMainEvent;
 
 const MyEvent = () => {
-  const { all_public_event_data, host_event, all_host_public_event } =
-    useSelector((state) => state?.EventSlice);
-
   const { userevent_data } = useSelector((state) => state?.MainEventSlice);
   console.log({
     fdf: userevent_data?.events[0],
@@ -370,9 +249,6 @@ const MyEvent = () => {
 };
 
 const AdminEvent = () => {
-  const { all_public_event_data, host_event, all_host_public_event } =
-    useSelector((state) => state?.EventSlice);
-
   const { generalevent_data } = useSelector((state) => state?.MainEventSlice);
   console.log({
     fdf: generalevent_data?.events[0],

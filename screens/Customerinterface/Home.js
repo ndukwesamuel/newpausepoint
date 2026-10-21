@@ -50,7 +50,6 @@ import {
   MediumFontText,
   RegularFontText,
 } from "../../components/shared/Paragrahp";
-import Events from "./Events/Events";
 import Forum from "../../components/Forum/Forum";
 
 import { UserProfile_data_Fun } from "../../Redux/ProfileSlice";

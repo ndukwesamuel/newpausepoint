@@ -8,12 +8,7 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import React, { useState } from "react";
-import {
-  CustomTextArea,
-  Forminput,
-  Forminput_Icon,
-} from "../../../components/shared/InputForm";
+import React from "react";
 import {
   AntDesign,
   MaterialIcons,
@@ -26,92 +21,9 @@ import {
   MediumFontText,
   RegularFontText,
 } from "../../../components/shared/Paragrahp";
-import {
-  BottomModal,
-  CenterReuseModals,
-} from "../../../components/shared/ReuseModals";
-// *** CHANGE: Import useMutation from @tanstack/react-query ***
-import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-import axios from "axios";
-import Toast from "react-native-toast-message";
-
-// Define the expected mutation data structure
-/**
- * @typedef {{ name: string, description: string }} EstateCreationData
- */
 
 const Myclan = ({ navigation }) => {
   // const { user_data, user_isLoading } = useSelector((state) => state.AuthSlice);
-
-  // Modal for creating a new clan/estate
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [name, setName] = useState("");
-  const [text, setText] = useState("");
-
-  /**
-   * Mutation function to create a new estate.
-   * @param {EstateCreationData} data_info - The name and description for the new estate.
-   * @returns {Promise<import('axios').AxiosResponse>} The Axios response.
-   */
-  const createEstateRequest = async (data_info) => {
-    let url = `${API_BASEURL}clan`;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        // Authorization: `Bearer ${user_data?.token}`,
-      },
-    };
-    return axios.post(url, data_info, config);
-  };
-
-  // *** TANSTACK QUERY MUTATION IMPLEMENTATION ***
-  const Crate_Estate_Mutation = useMutation({
-    mutationFn: createEstateRequest,
-    onSuccess: (success) => {
-      Toast.show({
-        type: "success",
-        text1: "Estate created successfully",
-        text2: `Waiting for Admin to Approve`,
-      });
-      setModalVisible(false);
-      setName("");
-      setText("");
-      // Optionally invalidate a query for the list of my clans here if needed
-      // queryClient.invalidateQueries(['myClans']);
-    },
-    onError: (error) => {
-      /** @type {import('axios').AxiosError} */
-      const axiosError = error;
-      const errorMessage =
-        axiosError?.response?.data?.error || "An unexpected error occurred.";
-
-      Toast.show({
-        type: "error",
-        text1: errorMessage,
-      });
-    },
-  });
-  // *** END TANSTACK QUERY MUTATION IMPLEMENTATION ***
-
-  const handleEstate = () => {
-    if (!name.trim() || !text.trim()) {
-      Toast.show({
-        type: "info",
-        text1: "Please provide both name and description.",
-      });
-      return;
-    }
-    let data = {
-      name: name,
-      description: text,
-    };
-    Crate_Estate_Mutation.mutate(data);
-  };
-
-  // Destructure isLoading from the mutation
-  const { isLoading: isCreatingEstate } = Crate_Estate_Mutation;
 
   return (
     <AppScreen>
@@ -173,40 +85,6 @@ const Myclan = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* Modal for creating a new estate/clan */}
-      <BottomModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Create New Estate/Clan</Text>
-          <Forminput
-            placeholder="Estate/Clan Name"
-            value={name}
-            onChangeText={setName}
-          />
-          <CustomTextArea
-            placeholder="Description (Max 150 words)"
-            value={text}
-            onChangeText={setText}
-            numberOfLines={5}
-          />
-          <TouchableOpacity
-            onPress={handleEstate}
-            style={styles.modalButton}
-            disabled={isCreatingEstate}
-          >
-            {isCreatingEstate ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <RegularFontText
-                data="Submit For Approval"
-                textstyle={styles.modalButtonText}
-              />
-            )}
-          </TouchableOpacity>
-        </View>
-      </BottomModal>
     </AppScreen>
   );
 };
@@ -271,31 +149,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     marginRight: 10,
-  },
-  modalContent: {
-    padding: 20,
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "#2c3e50",
-  },
-  modalButton: {
-    backgroundColor: "#3498db",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  modalButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
 

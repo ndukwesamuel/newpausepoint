@@ -27,7 +27,6 @@ import { useDispatch, useSelector } from "react-redux";
 // import { reset_isOnboarding } from '../../Redux/DontwantToResetSlice';
 import { reset_Admin_Get_All_User } from "../../Redux/Admin/UserSlice";
 import { reset_ClanSlice } from "../../Redux/UserSide/ClanSlice";
-import { reset_EventSlice } from "../../Redux/UserSide/EventSlice";
 import { reset_ForumSlice } from "../../Redux/UserSide/ForumSlice";
 import { reset_UserProfileSlice } from "../../Redux/UserSide/UserProfileSlice";
 import { reset_ProfileSlice } from "../../Redux/ProfileSlice";
@@ -211,7 +210,6 @@ export const DeleteLAccount = ({ item }: { item: GeneralData }) => {
 //     dispatch(reset_isOnboarding());
 //     dispatch(reset_Admin_Get_All_User());
 //     dispatch(reset_ClanSlice());
-//     dispatch(reset_EventSlice());
 //     dispatch(reset_ForumSlice());
 //     dispatch(reset_UserProfileSlice());
 //     dispatch(reset_ProfileSlice());
@@ -340,7 +338,6 @@ export function LogoutModal({
       dispatch(reset_isOnboarding());
       dispatch(reset_Admin_Get_All_User());
       dispatch(reset_ClanSlice());
-      dispatch(reset_EventSlice());
       dispatch(reset_ForumSlice());
       dispatch(reset_UserProfileSlice());
       dispatch(reset_ProfileSlice());
@@ -492,7 +489,6 @@ export function DeleteLAccountModal({
       dispatch(reset_isOnboarding());
       dispatch(reset_Admin_Get_All_User());
       dispatch(reset_ClanSlice());
-      dispatch(reset_EventSlice());
       dispatch(reset_ForumSlice());
       dispatch(reset_UserProfileSlice());
       dispatch(reset_ProfileSlice());

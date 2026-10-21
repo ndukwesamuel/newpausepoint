@@ -21,10 +21,7 @@ import { Forminput_Icon } from "../../components/shared/InputForm";
 import { userFile } from "../../utils/fakedata";
 import { useDispatch, useSelector } from "react-redux";
 import { Admin_Get_All_User_Fun } from "../../Redux/Admin/UserSlice";
-import {
-  Admin_Get_All_Clan_Memeber_Fun,
-  Get_Single_clan,
-} from "../../Redux/UserSide/ClanSlice";
+import { Get_Single_clan } from "../../Redux/UserSide/ClanSlice";
 
 export default function AllUsers({ navigation }) {
   const dispatch = useDispatch();
@@ -35,20 +32,16 @@ export default function AllUsers({ navigation }) {
     (state) => state.UserSlice
   );
 
-  const {
-    get_user_clan_data,
-    get_all_clan_adminIN_data,
-    get_Single_clan_data,
-    admin_get_all_clan_memeber_data,
-  } = useSelector((state) => state?.ClanSlice);
+  const { get_Single_clan_data } = useSelector((state) => state?.ClanSlice);
 
   const { get_user_profile_data } = useSelector(
     (state) => state?.UserProfileSlice
   );
 
   useEffect(() => {
-    dispatch(Admin_Get_All_Clan_Memeber_Fun());
-    dispatch(Get_Single_clan(get_user_profile_data?.AdmincurrentClanMeeting));
+    dispatch(
+      Get_Single_clan(get_user_profile_data?.data?.AdmincurrentClanMeeting)
+    );
     return () => {};
   }, []);
 
