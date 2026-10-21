@@ -1,154 +1,130 @@
-import { All_serviceReview_data_Fun } from "../../../Redux/UserSide/ServiceSlice";
-
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
-  Pressable,
-  TouchableOpacity,
-  ScrollView,
+  FlatList,
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { useDispatch, useSelector } from "react-redux";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
+import { useFetchData_v2 } from "../../../hooks/Requestv2";
 
+// Estate admin: every rating residents left for one artisan.
 const VendortDetailsReview = () => {
-  const dispatch = useDispatch();
-  const { item } = useRoute().params;
+  const artisanId = useRoute().params?.item;
+  const [refreshing, setRefreshing] = useState(false);
 
-  let vendorId = item?._id;
+  const { data, isLoading, refetch } = useFetchData_v2(
+    `api/v1/artisan/admin/${artisanId}/ratings`,
+    `artisanRatings-${artisanId}`,
+  );
+  const ratings = data?.data || [];
 
-  console.log({
-    vendorId,
-  });
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
-  const { review_service__data } = useSelector((state) => state?.ServiceSlice);
-  console.log({
-    llll: review_service__data?.reviews[0],
-  });
-  useEffect(() => {
-    dispatch(All_serviceReview_data_Fun(item?._id));
-
-    return () => {};
-  }, []);
-  return (
-    <View
-      style={{
-        padding: 20,
-        flex: 1,
-        backgroundColor: "white",
-      }}
-    >
-      <ScrollView>
-        {review_service__data?.reviews?.map((item, index) => (
-          <View style={styles.container} key={index}>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: 10,
-                }}
-              >
-                <Image source={require("../../../assets/sevImg/review.png")} />
-                <Text style={styles.nameText}>{item?.user?.name}</Text>
-              </View>
-              <View
-                style={{
-                  height: 25,
-                  width: 47,
-                  padding: 5,
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  borderColor: "#81CB9D",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  gap: 5,
-                }}
-              >
-                <Text>
-                  <Icon name="star" size={15} color="#04973C" />
-                </Text>
-
-                <Text>{item?.rating}</Text>
-              </View>
-            </View>
-
-            <View
-              style={{
-                alignItems: "center",
-              }}
-            >
-              <Text style={styles.desText}>{item.comment}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-      {/* <View>
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          onPress={() => {
-            navigation.navigate("vendorReview", {
-              item: vendorId,
-            });
-          }}
-        >
-          <Text style={styles.text}>Create your Review</Text>
-        </TouchableOpacity>
-      </View> */}
+  const renderItem = ({ item }) => (
+    <View style={styles.item}>
+      <View style={styles.itemHeader}>
+        <Text style={styles.name}>{item?.user?.name || "Resident"}</Text>
+        <View style={styles.stars}>
+          {[1, 2, 3, 4, 5].map((s) => (
+            <MaterialCommunityIcons
+              key={s}
+              name={s <= item?.rating ? "star" : "star-outline"}
+              size={16}
+              color="#F59E0B"
+            />
+          ))}
+        </View>
+      </View>
+      {item?.review ? <Text style={styles.review}>{item.review}</Text> : null}
+      {item?.createdAt ? (
+        <Text style={styles.date}>{new Date(item.createdAt).toDateString()}</Text>
+      ) : null}
     </View>
+  );
+
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#04973C" />
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      style={styles.container}
+      contentContainerStyle={{ padding: 20, flexGrow: 1 }}
+      data={ratings}
+      keyExtractor={(item, index) => item?._id || index.toString()}
+      renderItem={renderItem}
+      ListEmptyComponent={
+        <View style={styles.center}>
+          <MaterialCommunityIcons name="star-off-outline" size={40} color="#9CA3AF" />
+          <Text style={styles.emptyText}>No ratings yet</Text>
+        </View>
+      }
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5E5",
-    paddingBottom: 20,
-    paddingTop: 20,
+    flex: 1,
+    backgroundColor: "white",
   },
-
-  profile: {
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+    paddingVertical: 60,
+  },
+  item: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  itemHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  buttonContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 15,
-    backgroundColor: "#04973C",
-    borderRadius: 5,
-    justifyContent: "center",
-    marginTop: 14,
-  },
-
-  text: {
-    fontSize: 16,
-    color: "white",
-  },
-  imgRow: {
-    flexDirection: "row",
-
-    overflow: "visible",
-    gap: 10,
-    paddingRight: 70,
-  },
-  desText: {
-    fontSize: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F6F6F6",
-  },
-  nameText: {
+  name: {
     fontSize: 16,
     fontWeight: "600",
+    color: "#111827",
+  },
+  stars: {
+    flexDirection: "row",
+    gap: 1,
+  },
+  review: {
+    fontSize: 15,
+    color: "#374151",
+    marginTop: 8,
+    lineHeight: 21,
+  },
+  date: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 6,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: "#6B7280",
+    marginTop: 10,
   },
 });
+
 export default VendortDetailsReview;

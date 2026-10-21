@@ -5,231 +5,127 @@ import {
   Text,
   StyleSheet,
   Image,
-  Pressable,
   TouchableOpacity,
   Linking,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
-import { Rating } from "react-native-elements";
-import Icon from "react-native-vector-icons/FontAwesome";
-import LottieView from "lottie-react-native";
-// --- IMPORTANT: Change this import from 'react-query' to '@tanstack/react-query' ---
-import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import { useDispatch, useSelector } from "react-redux";
-import { Get_all_admin_Service__Fun } from "../../../Redux/Admin/AdminServiceSlice";
+import { useMutateData_v2 } from "../../../hooks/Requestv2";
 
+const PLACEHOLDER_IMAGE =
+  "https://deleoye.ng/wp-content/uploads/2016/11/Dummy-image.jpg";
+
+// Estate admin: one artisan, with delete and call.
 const VendorListDetails = ({ navigation }) => {
   const item = useRoute().params?.item;
 
-  const dispatch = useDispatch();
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const { mutate: deleteArtisan, isPending: isDeleting } = useMutateData_v2(
+    `api/v1/artisan/admin/${item?._id}`,
+    "DELETE",
+    "artisans",
+    {
+      onSuccess: () => {
+        Toast.show({ type: "success", text1: "Artisan deleted" });
+        navigation.goBack();
+      },
+      onError: (error) => {
+        Toast.show({
+          type: "error",
+          text1: error?.message || "Failed to delete artisan",
+        });
+      },
+    },
+  );
+
+  const confirmDelete = () => {
+    Alert.alert(
+      "Delete artisan",
+      `Remove ${item?.fullName} from your estate? This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => deleteArtisan() },
+      ],
+    );
+  };
 
   const makePhoneCall = () => {
-    // Safely open URL for phone call
     if (item?.phone_number) {
       Linking.openURL(`tel:${item.phone_number}`);
     } else {
-      Toast.show({
-        type: "error",
-        text1: "Phone number not available.",
-      });
+      Toast.show({ type: "error", text1: "Phone number not available" });
     }
   };
 
-  // --- TanStack Query useMutation for Deleting Vendor ---
-  const Delete_Mutation = useMutation({
-    mutationFn: () => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
-        },
-      };
-
-      // Construct the URL with the vendorId as a query parameter
-      let url = `${API_BASEURL}services/vendors/estate-admin?vendorId=${item?._id}`;
-
-      return axios.delete(url, config);
-    },
-    onSuccess: () => {
-      Toast.show({
-        type: "success",
-        text1: "Vendor deleted successfully",
-      });
-      // Dispatch Redux action to refresh the vendor list
-      dispatch(Get_all_admin_Service__Fun());
-      navigation.goBack();
-    },
-    onError: (error) => {
-      // Safely access the error message
-      const errorMessage = error?.response?.data?.message || "Deletion failed";
-      Toast.show({
-        type: "error",
-        text1: errorMessage,
-      });
-    },
-  });
-  // -------------------------------------------------------
-
-  return (
-    <ScrollView style={{ backgroundColor: "white", paddingBottom: 20 }}>
-      <View style={styles.container}>
-        <View style={styles.container1}>
-          <Image
-            source={{ uri: item?.photo?.url }}
-            style={{ width: 100, height: 100, borderRadius: 50 }}
-          />
-          <Text style={{ paddingTop: 10, fontWeight: "bold", fontSize: 20 }}>
-            {item?.FullName}
-          </Text>
-          <Text style={{}}>{item?.about_me}</Text>
-
-          <Text>{item?.years_of_experience} years of experience</Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-evenly",
-            paddingTop: 15,
-          }}
-        >
-          <View>
-            <Pressable
-              onPress={() => {
-                // Pass the necessary item data for the review screen
-                navigation.navigate("VendortDetailsReview", {
-                  item: item?._id,
-                });
-              }}
-              style={{ alignItems: "center" }}
-            >
-              <Image
-                source={require("../../../assets/sevImg/revIcon.png")}
-                style={{ marginBottom: 5 }}
-              />
-              <Text>Reviews</Text>
-            </Pressable>
-          </View>
-
-          <Pressable
-            style={{ alignItems: "center" }}
-            onPress={() => {
-              navigation.navigate("VendortDetailsReview", { item: item?._id });
-            }}
-          >
-            <Rating
-              type="custom"
-              ratingCount={5}
-              imageSize={20}
-              startingValue={item?.avgRating}
-              ratingBackgroundColor="white"
-              ratingColor="#04973C" // Use theme color for consistency
-              readonly
-              style={{ paddingBottom: 5 }}
-            />
-
-            <Text>Rating</Text>
-          </Pressable>
+  const Row = ({ icon, label, value }) =>
+    value ? (
+      <View style={styles.row}>
+        <MaterialCommunityIcons name={icon} size={20} color="#04973C" />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.rowLabel}>{label}</Text>
+          <Text style={styles.rowValue}>{value}</Text>
         </View>
       </View>
+    ) : null;
 
-      <View style={{ padding: 30, height: "50%" }}>
-        <View style={styles.downContainer}>
-          <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 5 }}>
-            Contact
-          </Text>
-          <Text
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 5,
-            }}
-          >
-            <Icon name="phone" size={20} color="#04973C" />
-            <Text style={{ marginLeft: 10 }}> {item?.phone_number} </Text>
-          </Text>
+  return (
+    <ScrollView style={{ backgroundColor: "white" }}>
+      <View style={styles.hero}>
+        <Image
+          source={{ uri: item?.photoUrl || PLACEHOLDER_IMAGE }}
+          style={styles.photo}
+        />
+        <Text style={styles.name}>{item?.fullName}</Text>
+        {item?.typeOfJob ? (
+          <Text style={styles.job}>{item.typeOfJob}</Text>
+        ) : null}
 
-          <Text style={{ flexDirection: "row", alignItems: "center" }}>
-            <Icon name="map-marker" size={20} color="#04973C" />
-            <Text style={{ marginLeft: 10 }}>{item?.address}</Text>
-          </Text>
-        </View>
-        <View
-          style={{
-            paddingBottom: 20,
-            paddingTop: 25,
-            borderBottomWidth: 1,
-            borderBottomColor: "#F6F6F6",
-          }}
+        <TouchableOpacity
+          style={styles.ratingButton}
+          onPress={() =>
+            navigation.navigate("VendortDetailsReview", { item: item?._id })
+          }
         >
-          <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 5 }}>
-            Working Time
+          <MaterialCommunityIcons name="star" size={18} color="#F59E0B" />
+          <Text style={styles.ratingButtonText}>
+            {Number(item?.avgRating || 0).toFixed(1)} · See ratings
           </Text>
-          <Text>{item?.opens}</Text>
-        </View>
+        </TouchableOpacity>
+      </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            gap: 10,
-          }}
-        >
-          <View
-            style={{
-              width: "50%",
-            }}
+      <View style={styles.body}>
+        {item?.details ? <Text style={styles.details}>{item.details}</Text> : null}
+        <Row icon="phone" label="Phone" value={item?.phone_number} />
+        <Row icon="map-marker" label="Address" value={item?.address} />
+        <Row icon="earth" label="State of origin" value={item?.origin} />
+        <Row icon="card-account-details" label="NIN" value={item?.nin} />
+        <Row
+          icon="cake-variant"
+          label="Date of birth"
+          value={item?.dob ? new Date(item.dob).toDateString() : null}
+        />
+
+        <View style={styles.buttons}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: "#DC2626" }]}
+            onPress={confirmDelete}
+            disabled={isDeleting}
           >
-            {Delete_Mutation.isLoading ? (
-              <ActivityIndicator
-                color="red"
-                size="large"
-                style={{ marginTop: 40, marginBottom: 40 }}
-              />
+            {isDeleting ? (
+              <ActivityIndicator color="white" />
             ) : (
-              <TouchableOpacity
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  padding: 12,
-                  backgroundColor: "red",
-                  borderRadius: 8,
-                  justifyContent: "center",
-                  marginTop: 40,
-                  marginBottom: 40,
-                }}
-                onPress={() => Delete_Mutation.mutate()}
-                disabled={Delete_Mutation.isLoading}
-              >
-                <Text style={styles.text}>Delete</Text>
-              </TouchableOpacity>
+              <Text style={styles.buttonText}>Delete</Text>
             )}
-          </View>
-          <View
-            style={{
-              width: "50%",
-            }}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: "#04973C" }]}
+            onPress={makePhoneCall}
           >
-            <TouchableOpacity
-              style={styles.buttonContainer}
-              onPress={makePhoneCall}
-            >
-              <Icon name="phone" size={20} color="white" style={styles.icon} />
-              <Text style={styles.text}>Call Now</Text>
-            </TouchableOpacity>
-          </View>
+            <MaterialCommunityIcons name="phone" size={18} color="white" />
+            <Text style={styles.buttonText}>Call now</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -237,42 +133,93 @@ const VendorListDetails = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#F3FFF3",
-    // Note: '52%' height might be problematic on different screens,
-    // consider using flex or dynamic calculation if possible
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
-  },
-  container1: {
+  hero: {
     alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#DEF6E3",
+    padding: 24,
+    backgroundColor: "#F3FFF3",
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
   },
-  downContainer: {
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F6F6F6",
+  photo: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: "#E5E7EB",
   },
-
-  buttonContainer: {
+  name: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 12,
+    color: "#111827",
+  },
+  job: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#04973C",
+    marginTop: 4,
+  },
+  ratingButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12, // Increased padding
-    backgroundColor: "#04973C",
-    borderRadius: 8, // Increased border radius
-    justifyContent: "center",
-    marginTop: 40,
+    gap: 6,
+    marginTop: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#C5F3C5",
+  },
+  ratingButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  body: {
+    padding: 24,
+  },
+  details: {
+    fontSize: 15,
+    color: "#374151",
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  rowLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  rowValue: {
+    fontSize: 15,
+    color: "#111827",
+    marginTop: 2,
+  },
+  buttons: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 32,
     marginBottom: 40,
   },
-  icon: {
-    marginRight: 10,
+  button: {
+    flex: 1,
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 14,
+    borderRadius: 10,
   },
-  text: {
+  buttonText: {
     fontSize: 16,
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "700",
   },
 });
+
 export default VendorListDetails;

@@ -33,8 +33,6 @@ import AnnouncementDetails from "../../screens/AdminInterface/Announcement/Annou
 import EditPersonalInformation from "../../screens/Customerinterface/Account/EditPersonalInformation";
 import QRScanner from "../../screens/AdminInterface/QRScanner";
 import TheScan from "../../screens/AdminInterface/TheScan";
-import AdminMainEvent from "../../screens/AdminInterface/Event/AdminMainEvent";
-import Service from "../../screens/AdminInterface/Service/Service";
 import VendorProfile from "../../screens/AdminInterface/Service/VendorProfile";
 import VendorList from "../../screens/AdminInterface/Service/VendorList";
 import VendorLists from "../../screens/AdminInterface/MarketPlace/VendorLists";
@@ -189,9 +187,6 @@ const Adminnaviagetion = () => {
         {...SingleScreenWithBackButton("AdminGuest", AdminGuests, "Guest")}
       />
 
-      <Stack.Screen
-        {...SingleScreenWithBackButton("AdminEvent", AdminMainEvent, "Event")}
-      />
 
       <Stack.Screen
         {...SingleScreenWithBackButton("Service", VendorList, "Service")}

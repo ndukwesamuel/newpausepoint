@@ -888,12 +888,6 @@ import ServiceView from "../../screens/Customerinterface/Service/ServiceView";
 import VendorService from "../../screens/Customerinterface/VendorService";
 import AboutUS from "../../screens/Customerinterface/About.tsx";
 import ViewProfile from "../../screens/Customerinterface/Account/ViewProfile";
-import Review from "../../screens/Customerinterface/Review";
-import VendorReview from "../../screens/Customerinterface/VendorReview";
-import MainEvent from "../../screens/Customerinterface/Events/MainEvent";
-import CreateMainEvent from "../../screens/Customerinterface/Events/CreateMainEvent";
-import EventDetals from "../../screens/Customerinterface/Events/EventDetals";
-import Service from "../../screens/Customerinterface/Service/Service";
 import MarketPlace from "../../screens/Customerinterface/MarketPlace/Marketplace";
 import MarketReview from "../../screens/Customerinterface/MarketPlace/MarketReview";
 import CreateProduct from "../../screens/Customerinterface/MarketPlace/CreateProduct";
@@ -1011,7 +1005,6 @@ const createScreen = (name, component, title) => {
 
 export const Usernaviagetion = () => {
   const screens = [
-    { name: "CreateMainEvent", component: CreateMainEvent, title: "Create Main Event" },
     { title: "Due Details", component: HouseholdDueDetail, name: "HouseholdDueDetail" },
     { name: "FundWallet", component: FundWalletScreen, title: "FundWallet" },
     { name: "payment", component: WalletScreen, title: "Payment" },
@@ -1021,7 +1014,6 @@ export const Usernaviagetion = () => {
     { name: "forumdetail", component: ForumDetails, title: "" },
     { name: "inviteguest", component: CreateGuests, title: "Invite Guest" },
     { name: "guestsdetail", component: GuestsDetail, title: "Guest Details" },
-    { name: "eventdetails", component: EventDetals, title: "Event Details" },
     { name: "userpolls", component: UserPolls, title: "Estate Polls" },
     { name: "Marketplace", component: MarketplaceFeed, title: "Market place" },
     { name: "MarketplaceUpdate", component: MarketplaceUpdate, title: "Market place Update" },
@@ -1040,8 +1032,6 @@ export const Usernaviagetion = () => {
     { name: "vendorService", component: VendorService, title: "Services" },
     { name: "CreateVirtualAccount", component: CreateVirtualAccountScreen, title: "Create Virtual Account" },
     { name: "VirtualAccountScreen", component: VirtualAccountScreen, title: "Virtual Account" },
-    { name: "review", component: Review, title: "Reviews" },
-    { name: "vendorReview", component: VendorReview, title: "Reviews" },
     { title: "ICE Contact", component: ICEcontact, name: "icecontact" },
     { title: "Help Support", component: HelpSupport, name: "HelpSupport" },
     { title: "About Us", component: AboutUS, name: "aboutus" },
@@ -1056,16 +1046,6 @@ export const Usernaviagetion = () => {
         options={{ headerShown: false }}
         name="UserTabNavigation"
         component={UserTabNavigation}
-      />
-
-      <Stack.Screen
-        options={({ navigation }) => ({
-          title: "Events",
-          headerStyle: { backgroundColor: "white" },
-          headerLeft: () => <BackArrow onPress={() => navigation.goBack()} />,
-        })}
-        name="userevents"
-        component={MainEvent}
       />
 
       <Stack.Screen
