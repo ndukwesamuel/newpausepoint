@@ -41,7 +41,8 @@ import {
 } from "../../../Redux/Admin/EmergencySlice";
 import { formatDateandTime } from "../../../utils/DateTime";
 import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../../../api";
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -75,13 +76,9 @@ export default function EmergencyDetails({}) {
     setModalVisible(true);
   };
 
-  const {
-    user_data,
-    user_isError,
-    user_isSuccess,
-    user_isLoading,
-    user_message,
-  } = useSelector((state) => state.AuthSlice);
+  const token = useSelector(
+    (state) => state.authSlice?.userDatav2?.data?.token
+  );
 
   const closeFormModal = () => {
     setModalFormVisible(false);
@@ -157,17 +154,17 @@ export default function EmergencyDetails({}) {
 
   const Resolve_Mutation = useMutation({
     mutationFn: (id) => {
-      let url = `${API_BASEURL}emargencyreport/resolve-emergency/${id}`;
+      let url = `${API_BASEURL}api/v1/Emergencyreport/admin/${id}/resolve`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
+          Authorization: `Bearer ${token}`,
         },
       };
 
-      return axios.get(url, config);
+      return axios.patch(url, {}, config);
     },
     onSuccess: (success) => {
       Toast.show({

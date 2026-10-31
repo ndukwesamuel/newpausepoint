@@ -273,6 +273,15 @@ const Guests = () => {
   // ── Multi entry card ──────────────────────────────────────────────────────
   const MultiHistoryItem = ({ itemdata }) => {
     const isExpired = new Date(itemdata?.expires) < new Date();
+    // Needs the estate admin's approval before it works at the gate.
+    const badge =
+      itemdata?.approvalStatus === "rejected"
+        ? { label: "REJECTED", bg: "#FEE2E2", color: "#991B1B" }
+        : isExpired
+          ? { label: "EXPIRED", bg: "#FEE2E2", color: "#991B1B" }
+          : itemdata?.approvalStatus === "approved"
+            ? { label: "APPROVED", bg: null, color: null }
+            : { label: "PENDING APPROVAL", bg: "#FEF3C7", color: "#92400E" };
 
     return (
       <TouchableOpacity
@@ -300,18 +309,16 @@ const Guests = () => {
             <View
               style={[
                 styles.statusBadge,
-                isExpired && { backgroundColor: "#FEE2E2" },
+                badge.bg && { backgroundColor: badge.bg },
               ]}
             >
               <Text
                 style={[
                   styles.statusBadgeText,
-                  isExpired && { color: "#991B1B" },
+                  badge.color && { color: badge.color },
                 ]}
               >
-                {isExpired
-                  ? "EXPIRED"
-                  : (itemdata?.status || "pending").toUpperCase()}
+                {badge.label}
               </Text>
             </View>
           </View>

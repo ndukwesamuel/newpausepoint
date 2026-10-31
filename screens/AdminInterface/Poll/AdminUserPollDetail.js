@@ -11,7 +11,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 // Converted import from 'react-query' to '@tanstack/react-query'
 import { useMutation } from "@tanstack/react-query";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../../../api";
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -22,7 +23,9 @@ const AdminUserPollDetail = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { itemdata } = useRoute()?.params;
-  const { user_data } = useSelector((state) => state.AuthSlice);
+  const token = useSelector(
+    (state) => state?.authSlice?.userDatav2?.data?.token
+  );
   const [optionCounts, setOptionCounts] = useState(null);
 
   useEffect(() => {
@@ -40,14 +43,14 @@ const AdminUserPollDetail = () => {
   // Converted useMutation to TanStack Query object syntax
   const Poll_Mutation = useMutation({
     mutationFn: (data_info) => {
-      let url = `${API_BASEURL}poll/${itemdata?._id}`;
+      let url = `${API_BASEURL}api/v1/poll/admin/${itemdata?._id}`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
           //   "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user_data?.token}`,
+          Authorization: `Bearer ${token}`,
         },
       };
 

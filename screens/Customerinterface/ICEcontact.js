@@ -7,6 +7,7 @@ import {
   Linking,
 } from "react-native";
 import React from "react";
+import { useSelector } from "react-redux";
 import AppScreen from "../../components/shared/AppScreen";
 import {
   LightFontText,
@@ -14,7 +15,60 @@ import {
 } from "../../components/shared/Paragrahp";
 
 const ICEcontact = () => {
-  const data = [
+  const { get_user_profile_data } = useSelector(
+    (state) => state.UserProfileSlice,
+  );
+
+  const isRagab =
+    get_user_profile_data?.data?.currentClanMeeting?.uniqueClanID ===
+    "RGH-10-2026";
+
+  const abujaData = [
+    {
+      id: "1",
+      img: require("../../assets/images/police.png"),
+      name: "Nigeria Police Force (FCT Command)",
+      phone: "08038305707",
+    },
+    {
+      id: "2",
+      img: require("../../assets/images/cot.png"),
+      name: "FCT Emergency Management (FEMD)",
+      phone: "112",
+    },
+    {
+      id: "3",
+      img: require("../../assets/images/ncc.png"),
+      name: "NCDC",
+      phone: "080097000010",
+    },
+    {
+      id: "4",
+      img: require("../../assets/images/ncc.png"),
+      name: "FCT Health and Human Services",
+      phone: "08033565529",
+    },
+    {
+      id: "5",
+      img: require("../../assets/images/police.png"),
+      name: "FCT Police Control Room / Rapid Response",
+      phone: "08033052353",
+    },
+    {
+      id: "6",
+      img: require("../../assets/images/cot.png"),
+      name: "Distress Call",
+      phone: "112",
+    },
+    {
+      id: "7",
+      img: require("../../assets/images/fireserice.png"),
+      name: "Federal Fire Service (Abuja)",
+      phone: "08032003557",
+    },
+  ];
+
+  const lagosData = [
     {
       id: "1",
       img: require("../../assets/images/police.png"),
@@ -58,6 +112,8 @@ const ICEcontact = () => {
       phone: "08033234943",
     },
   ];
+
+  const data = isRagab ? abujaData : lagosData;
 
   //   const makeCall = (phoneNumber) => {
   //     console.log({

@@ -51,7 +51,20 @@ const CreateGuests = () => {
     note: "",
   });
   const [multiGender, setMultiGender] = useState(1);
-  const [selectedDays, setSelectedDays] = useState(1); // 1–7 days
+  // One day at most: the visit date plus the hours the code should work.
+  // The estate admin approves (and can change) this window.
+  const [multiDate, setMultiDate] = useState(new Date());
+  const [multiFrom, setMultiFrom] = useState(() => {
+    const d = new Date();
+    d.setHours(7, 0, 0, 0);
+    return d;
+  });
+  const [multiTo, setMultiTo] = useState(() => {
+    const d = new Date();
+    d.setHours(19, 0, 0, 0);
+    return d;
+  });
+  const [multiPicker, setMultiPicker] = useState(null); // null | "date" | "from" | "to"
 
   // ── Mutations ─────────────────────────────────────────────────────────────
   const singleMutation = useMutateData_v2(
@@ -105,7 +118,8 @@ const CreateGuests = () => {
       onSuccess: () => {
         Toast.show({
           type: "success",
-          text1: "Multi entry invitation created! Valid for 7 days.",
+          text1: "Multi entry request sent",
+          text2: "The code will work once the estate admin approves it.",
         });
         queryClient.invalidateQueries({ queryKey: ["userGuests"] });
         navigation.goBack();
@@ -209,12 +223,22 @@ const CreateGuests = () => {
     singleMutation.mutate(payload);
   };
 
-  // ── Build expiry date: selectedDays from now at 11:59 PM ─────────────────
-  const buildMultiExpiry = (days: number) => {
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + days);
-    expiry.setHours(23, 59, 59, 999);
-    return expiry;
+  // ── Visit window: the chosen date at the chosen from / to times ──────────
+  const atTime = (day: Date, time: Date) => {
+    const d = new Date(day);
+    d.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    return d;
+  };
+  const multiStart = atTime(multiDate, multiFrom);
+  const multiEnd = atTime(multiDate, multiTo);
+
+  const onMultiPick = (event: any, picked: any) => {
+    const which = multiPicker;
+    setMultiPicker(null);
+    if (event?.type === "dismissed" || !picked) return;
+    if (which === "date") setMultiDate(picked);
+    else if (which === "from") setMultiFrom(picked);
+    else if (which === "to") setMultiTo(picked);
   };
 
   const handleMultiSubmit = () => {
@@ -222,16 +246,22 @@ const CreateGuests = () => {
       Toast.show({ type: "error", text1: "Visitor name is required" });
       return;
     }
+    if (multiEnd.getTime() <= multiStart.getTime()) {
+      Toast.show({ type: "error", text1: "The end time must be after the start time" });
+      return;
+    }
+    if (multiEnd.getTime() <= Date.now()) {
+      Toast.show({ type: "error", text1: "That time has already passed" });
+      return;
+    }
     const payload = {
       visitor_name: multiForm.visitor_name.trim(),
       gender: multiGender === 1 ? "Male" : "Female",
-      phone_number: multiForm.phone_number
-        ? Number(multiForm.phone_number)
-        : undefined,
+      phone_number: multiForm.phone_number || undefined,
       location: multiForm.location || undefined,
       note: multiForm.note || undefined,
-      arraval: new Date(),
-      expires: buildMultiExpiry(selectedDays),
+      start: multiStart,
+      expires: multiEnd,
     };
     multiMutation.mutate(payload);
   };
@@ -380,49 +410,69 @@ const CreateGuests = () => {
     </View>
   );
 
-  // ── Day selector (1–7) ────────────────────────────────────────────────────
-  const DaySelector = () => {
-    const expiry = buildMultiExpiry(selectedDays);
-    return (
-      <View>
-        <View style={styles.dayRow}>
-          {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-            <TouchableOpacity
-              key={day}
-              style={[
-                styles.dayBtn,
-                selectedDays === day && styles.dayBtnActive,
-              ]}
-              onPress={() => setSelectedDays(day)}
-            >
-              <Text
-                style={[
-                  styles.dayBtnText,
-                  selectedDays === day && styles.dayBtnTextActive,
-                ]}
-              >
-                {day}
-              </Text>
-              <Text
-                style={[
-                  styles.dayBtnSub,
-                  selectedDays === day && styles.dayBtnSubActive,
-                ]}
-              >
-                {day === 1 ? "day" : "days"}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View style={styles.expiryPill}>
-          <MaterialCommunityIcons name="clock-check-outline" size={14} color="#10B981" />
-          <Text style={styles.expiryPillText}>
-            Expires {expiry.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })} at 11:59 PM
-          </Text>
-        </View>
+  // ── Visit window selector (1 day) ─────────────────────────────────────────
+  const WindowRow = ({ icon, label, value, onPress, style }: any) => (
+    <TouchableOpacity style={[styles.pickerRow, style]} onPress={onPress}>
+      <View style={styles.pickerIconWrap}>
+        <MaterialCommunityIcons name={icon} size={16} color="#10B981" />
       </View>
-    );
-  };
+      <View style={{ flex: 1 }}>
+        <Text style={styles.pickerRowLabel}>{label}</Text>
+        <Text style={styles.pickerValue}>{value}</Text>
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={16} color="#9CA3AF" />
+    </TouchableOpacity>
+  );
+
+  const VisitWindowSelector = () => (
+    <View>
+      <WindowRow
+        icon="calendar-outline"
+        label="Visit date"
+        value={multiDate.toLocaleDateString([], {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        })}
+        onPress={() => setMultiPicker("date")}
+      />
+      <WindowRow
+        icon="clock-outline"
+        label="From"
+        value={getFormattedDateTime(multiFrom, "time")}
+        onPress={() => setMultiPicker("from")}
+        style={{ marginTop: 8 }}
+      />
+      <WindowRow
+        icon="clock-check-outline"
+        label="To"
+        value={getFormattedDateTime(multiTo, "time")}
+        onPress={() => setMultiPicker("to")}
+        style={{ marginTop: 8 }}
+      />
+      {multiPicker && (
+        <DateTimePicker
+          value={
+            multiPicker === "date"
+              ? multiDate
+              : multiPicker === "from"
+              ? multiFrom
+              : multiTo
+          }
+          mode={multiPicker === "date" ? "date" : "time"}
+          minimumDate={multiPicker === "date" ? new Date() : undefined}
+          display="default"
+          onChange={onMultiPick}
+        />
+      )}
+      <View style={styles.expiryPill}>
+        <MaterialCommunityIcons name="shield-check-outline" size={14} color="#10B981" />
+        <Text style={styles.expiryPillText}>
+          Needs estate admin approval before the code works
+        </Text>
+      </View>
+    </View>
+  );
 
   return (
     <View style={{ flex: 1 }}>
@@ -453,7 +503,7 @@ const CreateGuests = () => {
               </Text>
               <Text style={styles.heroSubtitle}>
                 {activeTab === "multi"
-                  ? "Frequent visitor — valid for 7 days, reusable code"
+                  ? "Frequent visitor — reusable code for 1 day, approved by your estate admin"
                   : isEditing
                   ? "Edit your visitor's details below"
                   : "One-time visit with arrival and departure schedule"}
@@ -672,18 +722,18 @@ const CreateGuests = () => {
                     <View style={{ flex: 1 }}>
                       <Text style={styles.multiInfoTitle}>Reusable Code</Text>
                       <Text style={styles.multiInfoText}>
-                        Code resets after each visit — visitor can use it again
+                        The visitor can come in and out as often as needed in the approved hours
                       </Text>
                     </View>
                   </View>
                   <View style={styles.multiInfoRow}>
                     <View style={[styles.multiInfoIcon, { backgroundColor: "#DBEAFE" }]}>
-                      <MaterialCommunityIcons name="calendar-range" size={18} color="#3B82F6" />
+                      <MaterialCommunityIcons name="shield-check-outline" size={18} color="#3B82F6" />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.multiInfoTitle}>Custom Duration</Text>
+                      <Text style={styles.multiInfoTitle}>Admin Approval</Text>
                       <Text style={styles.multiInfoText}>
-                        Choose 1 to 7 days — expires at 11:59 PM on the last day
+                        1 day at most. Your estate admin approves the day and hours before the code works
                       </Text>
                     </View>
                   </View>
@@ -709,9 +759,9 @@ const CreateGuests = () => {
                       color="#10B981"
                       style={{ marginRight: 8 }}
                     />
-                    <Text style={styles.sectionTitle}>Pass Duration</Text>
+                    <Text style={styles.sectionTitle}>Visit Day & Hours</Text>
                   </View>
-                  <DaySelector />
+                  <VisitWindowSelector />
                 </View>
 
                 {/* Visitor Info */}
@@ -808,7 +858,7 @@ const CreateGuests = () => {
                   <Text style={styles.submitButtonText}>
                     {multiMutation.isPending
                       ? "Creating..."
-                      : "Create Multi Entry Pass"}
+                      : "Request Multi Entry Pass"}
                   </Text>
                 </TouchableOpacity>
               </>

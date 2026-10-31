@@ -7,7 +7,6 @@ import Toast from "react-native-toast-message";
 import { reset_isOnboardings } from "../Redux/DontwantToResetSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { reset_login } from "../Redux/AuthSlice";
-import OTP from "./OTP";
 import { authScreenChange } from "../Redux/OnboardingSlice";
 import CreatePassword from "./CreatePassword";
 
@@ -43,16 +42,6 @@ const Auth = () => {
         ]}
       >
         <LoginScreen />
-      </View>
-
-      {/* OTP Screen */}
-      <View
-        style={[
-          styles.screenOverlay,
-          userlogin === "OTP" && styles.visibleScreen,
-        ]}
-      >
-        <OTP />
       </View>
 
       {/* Registration Screen */}

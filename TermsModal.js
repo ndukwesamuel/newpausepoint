@@ -44,7 +44,7 @@ Pausepoint is an all-in-one estate management platform for gated residential com
 Anyone may download and create a basic account on the Pausepoint App. However, full access to estate-specific features is restricted until you join your specific estate and the estate administrator reviews and approves your request. Pausepoint is not responsible for any delay or denial of approval by the estate management.
 
 4. VISITOR ACCESS CODES AND GUEST LIABILITY
-When you generate and share any visitor access code, you take full and sole responsibility for every person you invite into the estate. Pausepoint, the estate management, and security personnel shall not be liable for any actions, damage, loss, injury, theft, or incident caused by your guest. Multi-entry codes expire after 7 days.
+When you generate and share any visitor access code, you take full and sole responsibility for every person you invite into the estate. Pausepoint, the estate management, and security personnel shall not be liable for any actions, damage, loss, injury, theft, or incident caused by your guest. Multi-entry codes only work once the estate administrator approves them, and only on the approved day and hours (1 day at most).
 
 5. DOMESTIC STAFF REGISTRATION AND PERMANENT CODES
 By registering domestic staff and issuing a permanent code, you confirm that you take full responsibility for the conduct and actions of such staff while inside the estate.

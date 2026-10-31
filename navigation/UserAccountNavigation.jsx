@@ -10,7 +10,6 @@ import Onboarding from "../components/Onboard/Onboading";
 import Registraion from "../screens/Registraion";
 import LoginScreen from "../screens/LoginScreen";
 import ForgottenPasswod from "../screens/ForgottenPasswod";
-import OTP from "../screens/OTP";
 import CreatePassword from "../screens/CreatePassword";
 import UserTabNavigation from "./User/UserTabNavigation";
 import Emergency from "../screens/Customerinterface/Emergency/Emergency";

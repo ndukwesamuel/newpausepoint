@@ -47,7 +47,6 @@ import { Usernaviagetion } from "./navigation/User/Usernaviagetion";
 import { UserProfile_data_Fun } from "./Redux/ProfileSlice";
 import { Get_User_Profle_Fun } from "./Redux/UserSide/UserProfileSlice";
 import { notificationservicecode } from "./utils/notificationservice";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
 
 import { setOnlineUser, setSocketConnection } from "./Redux/socketSlice";
 import { Linking } from "react-native";
@@ -189,7 +188,10 @@ export const NavigationScreen = () => {
   };
 
   const { updateInfo } = useUpdateChecker();
-  let forceUpdate = updateInfo?.clientVersion < updateInfo?.currentVersion;
+  let forceUpdate = isOlderVersion(
+    updateInfo?.clientVersion,
+    updateInfo?.currentVersion
+  );
 
   return (
     <NavigationContainer>
@@ -333,11 +335,25 @@ const updateStyles = StyleSheet.create({
   decorativeDot3: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#F59E0B", opacity: 0.6 },
 });
 
+// True when version a is older than b, comparing each dotted part as a
+// number (a plain string compare says "2.10.0" < "2.3.0").
+export const isOlderVersion = (a, b) => {
+  if (!a || !b) return false;
+  const pa = String(a).split(".").map((n) => parseInt(n, 10) || 0);
+  const pb = String(b).split(".").map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff < 0;
+  }
+  return false;
+};
+
 // ── Update Checker Hook with Complete Visual Logs ───────────────────────────
 export const useUpdateChecker = (checkInterval = 60000) => {
   const [updateInfo, setUpdateInfo] = useState(null);
   const version = Constants.expoConfig?.version;
-  const url = `${API_BASEURL}checkversion?version=${version}`;
+  const API_BASEURL = API_CONFIG?.BASE_URL;
+  const url = `${API_BASEURL}api/v1/checkversion?version=${version}`;
 
   const checkForUpdates = async () => {
     console.log("┌─────────────────────────────────────────");
@@ -360,7 +376,7 @@ export const useUpdateChecker = (checkInterval = 60000) => {
 
       const clientVer = data?.clientVersion ?? version;
       const serverVer = data?.currentVersion;
-      const isOutdated = clientVer < serverVer;
+      const isOutdated = isOlderVersion(clientVer, serverVer);
 
       console.log("┌─────────────────────────────────────────");
       console.log("│ [UPDATE] Payload Received from Backend");
@@ -372,8 +388,8 @@ export const useUpdateChecker = (checkInterval = 60000) => {
       console.log("└─────────────────────────────────────────");
 
       setUpdateInfo((prev) => {
-        const prevForce = prev?.clientVersion < prev?.currentVersion;
-        const newForce = data?.clientVersion < data?.currentVersion;
+        const prevForce = isOlderVersion(prev?.clientVersion, prev?.currentVersion);
+        const newForce = isOlderVersion(data?.clientVersion, data?.currentVersion);
 
         if (prevForce === newForce) {
           console.log("[UPDATE] State evaluation: forceUpdate status unchanged. Skipping state trigger.");

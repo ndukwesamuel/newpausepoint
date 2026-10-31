@@ -1,18 +1,21 @@
-// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import { AnyIfEmpty } from "react-redux";
-import Toast from "react-native-toast-message";
 import { handleApiError } from "../shareApi";
-import { LogBox } from "react-native";
+import { API_CONFIG } from "../../api";
 
-// import { Alert } from "react-native";
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
-// let userAPi = process.env.APIBASEURL + "user/login";
+// V2 admin routes resolve the estate from the admin's profile.
+const v2Config = (thunkAPI) => ({
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    Authorization: `Bearer ${
+      thunkAPI.getState().authSlice?.userDatav2?.data?.token
+    }`,
+  },
+});
 
 const initialState = {
   Admin_Get_ALl_Emergency_Report: null,
@@ -32,20 +35,12 @@ export const Admin_Get_ALl_Emergency_Report_Fun = createAsyncThunk(
   "EmergencySlice/Admin_Get_ALl_Emergency_Report_Fun",
   async (data, thunkAPI) => {
     try {
-      let mydata = thunkAPI.getState().AuthSlice.user_data;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${mydata?.token}`,
-        },
-      };
-
-      const response = await axios.get(`${API_BASEURL}emargencyreport`, config);
-      console.log({
-        asas: response.data,
-      });
-      return response.data;
+      const response = await axios.get(
+        `${API_BASEURL}api/v1/Emergencyreport/admin/all`,
+        v2Config(thunkAPI)
+      );
+      // V2 wraps as { data: { reports } }; screens read { reports }.
+      return response.data?.data;
     } catch (error) {
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);
@@ -57,21 +52,12 @@ export const Admin_Get_Single_Emergency_Report_Fun = createAsyncThunk(
   "EmergencySlice/Admin_Get_Single_Emergency_Report_Fun",
   async (data, thunkAPI) => {
     try {
-      let mydata = thunkAPI.getState().AuthSlice.user_data;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${mydata?.token}`,
-        },
-      };
-
       const response = await axios.get(
-        `${API_BASEURL}emargencyreport/${data?._id}`,
-        config
+        `${API_BASEURL}api/v1/Emergencyreport/admin/${data?._id}`,
+        v2Config(thunkAPI)
       );
-
-      return response.data;
+      // V2 wraps as { data: { report, userProfile } }.
+      return response.data?.data;
     } catch (error) {
       const errorMessage = handleApiError(error);
       return thunkAPI.rejectWithValue(errorMessage);

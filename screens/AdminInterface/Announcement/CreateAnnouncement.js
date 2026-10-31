@@ -22,10 +22,8 @@ import {
 import UploadFile from "../../../components/UserHome/UploadFile";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import axios from "axios";
 import Toast from "react-native-toast-message";
+import { useMutateData_v2 } from "../../../hooks/Requestv2";
 import { useNavigation } from "@react-navigation/native";
 import { Get_My_Clan_Forum_Fun } from "../../../Redux/UserSide/ForumSlice";
 import { Admin_Get_My_Clan_Announcement_Fun } from "../../../Redux/Admin/AdminForumSlice";
@@ -80,6 +78,26 @@ const CreateAnnouncement = () => {
   const handleTextChange = (newText) => {
     setText(newText);
   };
+
+  // Posts to V2; the estate comes from the admin's profile.
+  const Create_Forum_Mutation = useMutateData_v2(
+    "api/v1/forum/announcements",
+    "POST",
+    undefined,
+    {
+      onSuccess: () => {
+        Toast.show({ type: "success", text1: "Announcement published" });
+        dispatch(Admin_Get_My_Clan_Announcement_Fun({}));
+        navigation.goBack();
+      },
+      onError: (error) => {
+        Toast.show({
+          type: "error",
+          text1: error?.message || "Failed to publish announcement",
+        });
+      },
+    },
+  );
 
   // const Create_Forum_Mutation = useMutation(
   //   (data_info) => {
@@ -175,7 +193,7 @@ const CreateAnnouncement = () => {
                     content: text,
                   });
                 }}
-                isLoading={Create_Forum_Mutation.isLoading}
+                isLoading={Create_Forum_Mutation.isPending}
               />
             </View>
           </View>

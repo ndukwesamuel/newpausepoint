@@ -1,18 +1,9 @@
-// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
-
-import { AnyIfEmpty } from "react-redux";
-import Toast from "react-native-toast-message";
 import { handleApiError } from "../shareApi";
-import { Alert } from "react-native";
+import { API_CONFIG } from "../../api";
 
-// import { Alert } from "react-native";
-
-// let userAPi = process.env.APIBASEURL + "user/login";
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
 const initialState = {
   get_all_user_guest_data: null,
@@ -20,182 +11,57 @@ const initialState = {
   get_all_user_guest_isSuccess: false,
   get_all_user_guest_isLoading: false,
   get_all_user_guest_message: null,
-
-  get_user_guest_detail_data: null,
-  get_user_guest_detail_isError: false,
-  get_user_guest_detail_isSuccess: false,
-  get_user_guest_detail_isLoading: false,
-  get_user_guest_detail_message: null,
-
-  get_all_domestic_data: null,
-  get_all_domestic_isError: false,
-  get_all_domestic_isSuccess: false,
-  get_all_domestic_isLoading: false,
-  get_all_domestic_message: null,
 };
 
+// The resident's own invitations in their current estate (V2 returns
+// { userInvites }, the shape the history screen reads).
 export const Get_All_User_Guest_Fun = createAsyncThunk(
   "GuestSlice/Get_All_User_Guest_Fun",
   async (_, thunkAPI) => {
     try {
-      let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
-      let clan_id =
-        thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
-          ?.currentClanMeeting?._id;
-
+      const token = thunkAPI.getState()?.authSlice?.userDatav2?.data?.token;
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${token_Data}`,
+          Authorization: `Bearer ${token}`,
         },
       };
 
-      const response = await axios.get(`${API_BASEURL}visitor/invites`, config);
+      const response = await axios.get(`${API_BASEURL}api/v1/visitor`, config);
 
       return response.data;
     } catch (error) {
-      console.log({ iiyyyy: error });
-
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message} `,
-      });
-      return thunkAPI.rejectWithValue(error?.response?.data?.message);
+      const errorMessage = handleApiError(error);
+      return thunkAPI.rejectWithValue(errorMessage);
     }
-  },
-);
-
-export const Get_All_Domestic_Fun = createAsyncThunk(
-  "GuestSlice/Get_All_Domestic_Fun",
-  async (_, thunkAPI) => {
-    try {
-      let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
-      let clan_id =
-        thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
-          ?.currentClanMeeting?._id;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token_Data}`,
-        },
-      };
-
-      const response = await axios.get(`${API_BASEURL}domesticstaff`, config);
-
-      return response.data;
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message} `,
-      });
-      return thunkAPI.rejectWithValue(error?.response?.data?.message);
-    }
-  },
-);
-
-export const Get__User_Guest_detail_Fun = createAsyncThunk(
-  "GuestSlice/Get__User_Guest_detail_Fun",
-  async (id, thunkAPI) => {
-    try {
-      let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
-      let clan_id =
-        thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
-          ?.currentClanMeeting?._id;
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token_Data}`,
-        },
-      };
-
-      const response = await axios.get(`${API_BASEURL}visitor/${id}`, config);
-
-      return response.data;
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: `${error?.response?.data?.message} `,
-      });
-      return thunkAPI.rejectWithValue(error?.response?.data?.message);
-    }
-  },
+  }
 );
 
 export const GuestSlice = createSlice({
   name: "GuestSlice",
   initialState,
-  reducers: {
-    // reset_ForumSlice: (state) => initialState,
-    // reset__single_forum: () => {
-    //   (state.get_my_clan_single_forum_data = null),
-    //     (state.get_my_clan_single_forum_isError = false),
-    //     (state.get_my_clan_single_forum_isSuccess = false),
-    //     (state.get_my_clan_single_forum_isLoading = false),
-    //     (state.get_my_clan_single_forum_message = null);
-    // },
-  },
+  reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(Get_All_User_Guest_Fun.pending, (state) => {
-      state.get_all_user_guest_isLoading = true;
-    });
-    builder.addCase(Get_All_User_Guest_Fun.fulfilled, (state, action) => {
-      state.get_all_user_guest_isLoading = false;
-      state.get_all_user_guest_isSuccess = true;
-      state.get_all_user_guest_data = action.payload;
-      state.get_all_user_guest_message = null;
-      state.get_all_user_guest_isError = false;
-    });
-    builder.addCase(Get_All_User_Guest_Fun.rejected, (state, action) => {
-      state.get_all_user_guest_isLoading = false;
-      state.get_all_user_guest_isError = true;
-      state.get_all_user_guest_message = action.payload;
-      state.get_all_user_guest_data = null;
-      state.get_all_user_guest_isSuccess = false;
-    });
-
-    builder.addCase(Get__User_Guest_detail_Fun.pending, (state) => {
-      state.get_user_guest_detail_isLoading = true;
-    });
-    builder.addCase(Get__User_Guest_detail_Fun.fulfilled, (state, action) => {
-      state.get_user_guest_detail_isLoading = false;
-      state.get_user_guest_detail_isSuccess = true;
-      state.get_user_guest_detail_data = action.payload;
-      state.get_user_guest_detail_message = null;
-      state.get_user_guest_detail_isError = false;
-    });
-    builder.addCase(Get__User_Guest_detail_Fun.rejected, (state, action) => {
-      state.get_user_guest_detail_isLoading = false;
-      state.get_user_guest_detail_isError = true;
-      state.get_user_guest_detail_message = action.payload;
-      state.get_user_guest_detail_data = null;
-      state.get_user_guest_detail_isSuccess = false;
-    });
-
-    builder.addCase(Get_All_Domestic_Fun.pending, (state) => {
-      state.get_all_domestic_isLoading = true;
-    });
-    builder.addCase(Get_All_Domestic_Fun.fulfilled, (state, action) => {
-      state.get_all_domestic_isLoading = false;
-      state.get_all_domestic_isSuccess = true;
-      state.get_all_domestic_data = action.payload;
-      state.get_all_domestic_message = null;
-      state.get_all_domestic_isError = false;
-    });
-    builder.addCase(Get_All_Domestic_Fun.rejected, (state, action) => {
-      state.get_all_domestic_isLoading = false;
-      state.get_all_domestic_isError = true;
-      state.get_all_domestic_message = action.payload;
-      state.get_user_guest_detail_data = null;
-      state.get_all_domestic_isSuccess = false;
-    });
+    builder
+      .addCase(Get_All_User_Guest_Fun.pending, (state) => {
+        state.get_all_user_guest_isLoading = true;
+      })
+      .addCase(Get_All_User_Guest_Fun.fulfilled, (state, action) => {
+        state.get_all_user_guest_isLoading = false;
+        state.get_all_user_guest_isSuccess = true;
+        state.get_all_user_guest_isError = false;
+        state.get_all_user_guest_message = null;
+        state.get_all_user_guest_data = action.payload;
+      })
+      .addCase(Get_All_User_Guest_Fun.rejected, (state, action) => {
+        state.get_all_user_guest_isLoading = false;
+        state.get_all_user_guest_isError = true;
+        state.get_all_user_guest_message = action.payload;
+        state.get_all_user_guest_data = null;
+        state.get_all_user_guest_isSuccess = false;
+      });
   },
 });
-
-export const {} = GuestSlice.actions;
 
 export default GuestSlice.reducer;

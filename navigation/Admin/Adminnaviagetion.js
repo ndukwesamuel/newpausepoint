@@ -39,7 +39,6 @@ import VendorLists from "../../screens/AdminInterface/MarketPlace/VendorLists";
 import ProductDetails from "../../screens/AdminInterface/MarketPlace/ProductDetails";
 import DomesticStaff from "../../screens/AdminInterface/Domestic/DomesticStaff";
 import DomesticDetail from "../../screens/AdminInterface/Domestic/DomesticDetail";
-import Amenities from "../../screens/AdminInterface/Amentities/Amenities";
 import VendorListDetails from "../../screens/AdminInterface/Service/VendorListDetails";
 import VendortDetailsReview from "../../screens/AdminInterface/Service/VendortDetailsReview";
 // import WalletScreen from "../../screens/AdminInterface/Wallet/WalletScreen";
@@ -119,9 +118,6 @@ const Adminnaviagetion = () => {
         )}
       />
 
-      <Stack.Screen
-        {...SingleScreenWithBackButton("amentities", Amenities, "Amenities")}
-      />
       <Stack.Screen
         {...SingleScreenWithBackButton("createpoll", CreatePoll, "Create Poll")}
       />

@@ -13,7 +13,7 @@ import React, { useEffect, useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
-import { Login_Fun, reset_other_login } from "../Redux/AuthSlice";
+import { reset_other_login } from "../Redux/AuthSlice";
 import { authScreenChange } from "../Redux/OnboardingSlice";
 import {
   remeberUSerPassword,

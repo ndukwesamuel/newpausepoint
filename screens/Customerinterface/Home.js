@@ -24,7 +24,6 @@ import bookmark from "../../assets/bookmark.png";
 import Calendar_light from "../../assets/Calendar_light.png";
 import Contact from "../../assets/Desk_light.png";
 import teamwork from "../../assets/teamwork.png";
-import amenicon from "../../assets/amenities_8084617.png";
 
 import qrcode from "../../assets/qrcode.png";
 import service from "../../assets/settings.png";

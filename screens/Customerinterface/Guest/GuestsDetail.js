@@ -23,10 +23,7 @@ import {
 
 import { useDispatch } from "react-redux";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import {
-  Get_All_User_Guest_Fun,
-  Get__User_Guest_detail_Fun,
-} from "../../../Redux/UserSide/GuestSlice";
+import { Get_All_User_Guest_Fun } from "../../../Redux/UserSide/GuestSlice";
 import { formatDateandTime } from "../../../utils/DateTime";
 import * as Sharing from "expo-sharing";
 
@@ -52,6 +49,7 @@ const GuestsDetail = () => {
   } = useFetchData_v2(`api/v1/visitor/${itemdata?._id}`, "userGuests");
 
   let invitation = guestData?.userInvites;
+  const isMultiEntry = invitation?.isMultiEntry ?? itemdata?.isMultiEntry;
 
   const [qrCodeValue, setQRCodeValue] = useState("");
   const viewShotRef = useRef();
@@ -90,7 +88,6 @@ const GuestsDetail = () => {
           type: "success",
           text1: "Guest marked as departed",
         });
-        dispatch(Get__User_Guest_detail_Fun(itemdata?._id));
         refetchGuests();
       },
       onError: (error: any) => {
@@ -106,7 +103,9 @@ const GuestsDetail = () => {
     // const message = `Hi,\n\nHere is your one-time access code: ${accessCode}\n\nPowered by Pausepoint.net.`;
 
 
-    const message = `Hi,\nHere is your one-time access code: ${accessCode}\nThis code is valid for your arrival and departure.\nTo use this app/service in your estate, contact support@pausepoint.net\nPowered by: pausepoint.net`;
+    const message = isMultiEntry
+      ? `Hi,\nHere is your multi-entry access code: ${accessCode}\nYou can use this code for every visit until ${formatDateandTime(invitation?.expires)}.\nTo use this app/service in your estate, contact support@pausepoint.net\nPowered by: pausepoint.net`
+      : `Hi,\nHere is your one-time access code: ${accessCode}\nThis code is valid for your arrival and departure.\nTo use this app/service in your estate, contact support@pausepoint.net\nPowered by: pausepoint.net`;
 
     await Clipboard.setStringAsync(message);
     Toast.show({
@@ -188,6 +187,24 @@ const GuestsDetail = () => {
     setModalVisible(true);
   };
 
+  // Multi entry passes only work once the estate admin approves them, so the
+  // code can't be shared before then.
+  const multiStatus = !isMultiEntry
+    ? null
+    : invitation?.approvalStatus === "rejected"
+      ? "rejected"
+      : invitation?.expires && new Date(invitation.expires) <= new Date()
+        ? "expired"
+        : invitation?.approvalStatus || "pending";
+  const canShare = !isMultiEntry || multiStatus === "approved";
+  const MULTI_STATUS = {
+    pending: { label: "PENDING APPROVAL", color: "#F59E0B", hint: "Waiting for the estate admin. The code won't work at the gate until it is approved." },
+    approved: { label: "APPROVED", color: "#10B981", hint: "The code works at the gate during the approved hours." },
+    rejected: { label: "REJECTED", color: "#EF4444", hint: "The estate admin rejected this pass." },
+    expired: { label: "EXPIRED", color: "#6B7280", hint: "This pass is no longer valid." },
+  };
+  const multiInfo = multiStatus ? MULTI_STATUS[multiStatus] : null;
+
   const statusColor =
     invitation?.status === "arrived"
       ? "#10B981"
@@ -245,6 +262,54 @@ const GuestsDetail = () => {
             </View>
           </View>
 
+          {/* Multi entry approval */}
+          {multiInfo && (
+            <View style={styles.statusCard}>
+              <View style={styles.statusRow}>
+                <View style={styles.statusIconContainer}>
+                  <MaterialCommunityIcons
+                    name="shield-account"
+                    size={20}
+                    color={multiInfo.color}
+                  />
+                </View>
+                <View style={styles.statusTextContainer}>
+                  <Text style={styles.statusLabel}>Admin Approval</Text>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: `${multiInfo.color}15` },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.statusBadgeText, { color: multiInfo.color }]}
+                    >
+                      {multiInfo.label}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <Text style={[styles.accessCodeHint, { textAlign: "left" }]}>
+                {multiInfo.hint}
+              </Text>
+              {multiStatus === "rejected" && invitation?.rejectionReason ? (
+                <Text style={[styles.accessCodeHint, { textAlign: "left" }]}>
+                  Reason: {invitation.rejectionReason}
+                </Text>
+              ) : null}
+              <InfoRow
+                icon="clock-start"
+                label={multiStatus === "approved" ? "Valid from" : "Requested from"}
+                value={formatDateandTime(invitation?.access_start) || "N/A"}
+              />
+              <InfoRow
+                icon="clock-end"
+                label={multiStatus === "approved" ? "Valid until" : "Requested until"}
+                value={formatDateandTime(invitation?.expires) || "N/A"}
+              />
+            </View>
+          )}
+
           {/* Personal Information Card */}
           <View style={styles.infoCard}>
             <View style={styles.sectionHeader}>
@@ -293,11 +358,12 @@ const GuestsDetail = () => {
                 </Text>
               </View>
               <TouchableOpacity
-                style={styles.shareButton}
+                style={[styles.shareButton, !canShare && { opacity: 0.4 }]}
                 onPress={() => copyAndShareAccessCode(invitation?.access_code)}
+                disabled={!canShare}
               >
                 <MaterialCommunityIcons
-                  name="share-variant"
+                  name={canShare ? "share-variant" : "lock-outline"}
                   size={24}
                   color="#10B981"
                 />
@@ -305,7 +371,9 @@ const GuestsDetail = () => {
             </View>
 
             <Text style={styles.accessCodeHint}>
-              Tap the share icon to copy and send the access code
+              {canShare
+                ? "Tap the share icon to copy and send the access code"
+                : "You can share this code once the estate admin approves it"}
             </Text>
           </View>
 
@@ -336,7 +404,7 @@ const GuestsDetail = () => {
                 color="#6B7280"
               />
 
-              {!invitation?.departed_at && invitation?.status === "arrived" && (
+              {!isMultiEntry && !invitation?.departed_at && invitation?.status === "arrived" && (
                 <TouchableOpacity
                   style={styles.departureButton}
                   onPress={handleDeparture}
@@ -371,8 +439,9 @@ const GuestsDetail = () => {
           {/* Action Buttons */}
           <View style={styles.actionSection}>
             <TouchableOpacity
-              style={styles.qrButton}
+              style={[styles.qrButton, !canShare && { opacity: 0.4 }]}
               onPress={handleOpenQrcodeModal}
+              disabled={!canShare}
             >
               <MaterialCommunityIcons name="qrcode" size={24} color="#FFFFFF" />
               <Text style={styles.qrButtonText}>View QR Code</Text>
@@ -400,15 +469,18 @@ const GuestsDetail = () => {
         </View>
       </ScrollView>
 
-      {/* Floating Edit Button */}
-      <View style={{ position: "absolute", right: 20, top: 320, zIndex: 1 }}>
-        <TouchableOpacity
-          style={styles.fab}
-          onPress={() => navigation.navigate("inviteguest", { itemdata })}
-        >
-          <MaterialIcons name="edit" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
+      {/* Floating Edit Button — single entry only; editing a multi entry
+          pass through the single entry form would convert it */}
+      {!isMultiEntry && (
+        <View style={{ position: "absolute", right: 20, top: 320, zIndex: 1 }}>
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => navigation.navigate("inviteguest", { itemdata })}
+          >
+            <MaterialIcons name="edit" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* QR Code Modal */}
       <CenterReuseModals

@@ -3,7 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../../api";
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
 import { AnyIfEmpty } from "react-redux";
 import Toast from "react-native-toast-message";
@@ -26,14 +27,9 @@ export const Admin_Get_My_Clan_Announcement_Fun = createAsyncThunk(
   "AdminForumSlice/Admin_Get_My_Clan_Announcement_Fun",
   async (data, thunkAPI) => {
     try {
-      let token_Data = thunkAPI.getState()?.AuthSlice.user_data?.token;
-      let clan_id =
-        thunkAPI.getState()?.UserProfileSlice?.get_user_profile_data
-          ?.AdmincurrentClanMeeting;
-
-      console.log({
-        token_Data,
-      });
+      // V2 resolves the estate from the admin's profile.
+      let token_Data =
+        thunkAPI.getState()?.authSlice?.userDatav2?.data?.token;
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -43,11 +39,12 @@ export const Admin_Get_My_Clan_Announcement_Fun = createAsyncThunk(
       };
 
       const response = await axios.get(
-        `${API_BASEURL}forum/admin-announcement`,
+        `${API_BASEURL}api/v1/forum/announcements`,
         config
       );
 
-      return response.data;
+      // Screens read { forums }; V2 returns { data: [...] }.
+      return { forums: response.data?.data || [] };
     } catch (error) {
       Toast.show({
         type: "error",

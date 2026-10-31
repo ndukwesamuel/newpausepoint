@@ -15,12 +15,16 @@ import LottieView from "lottie-react-native"; // Not used directly
 // --- IMPORTANT: Change this import from 'react-query' to '@tanstack/react-query' ---
 import { useMutation } from "@tanstack/react-query";
 
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../../../api";
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { useDispatch, useSelector } from "react-redux";
-import { AdminMarket_data_Fun } from "../../../Redux/Admin/AdminMarketSLice";
+import {
+  AdminMarket_data_Fun,
+  adminClanIdFrom,
+} from "../../../Redux/Admin/AdminMarketSLice";
 
 const ProductDetails = ({ navigation }) => {
   const { item } = useRoute().params;
@@ -29,7 +33,10 @@ const ProductDetails = ({ navigation }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const screenWidth = Dimensions.get("window").width;
 
-  const { user_data } = useSelector((state) => state?.AuthSlice);
+  const token = useSelector(
+    (state) => state?.authSlice?.userDatav2?.data?.token
+  );
+  const clanId = useSelector(adminClanIdFrom);
 
   // console.log({ ds: user_data?.token, ewe: item?._id }); // Commented out
 
@@ -37,17 +44,17 @@ const ProductDetails = ({ navigation }) => {
   const Aprove_Mutation = useMutation({
     mutationFn: (data_info) => {
       // 'mutationFn' replaces the function passed directly to useMutation
-      let url = `${API_BASEURL}market/product/status/${item?._id}`;
+      let url = `${API_BASEURL}api/v1/marketRouter/admin/${clanId}/${item?._id}/status`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
+          Authorization: `Bearer ${token}`,
         },
       };
 
-      return axios.put(url, data_info, config);
+      return axios.patch(url, data_info, config);
     },
     onSuccess: () => {
       Toast.show({
@@ -116,7 +123,9 @@ const ProductDetails = ({ navigation }) => {
         <View style={styles.headerContainer}>
           <View>
             <Text style={styles.productTitle}>{item?.name}</Text>
-            <Text style={styles.productCategory}>{item?.category?.name}</Text>
+            <Text style={styles.productCategory}>
+              {item?.category?.name || item?.category}
+            </Text>
           </View>
           <View>
             <Text style={styles.productPrice}>₦{item?.price}</Text>

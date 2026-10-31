@@ -182,17 +182,6 @@ const WalletScreen = ({}) => {
       condition: isApproved,
     },
     {
-      id: 2,
-      name: "Amenities",
-      icon: "apartment",
-      iconSet: MaterialIcons,
-      color: "#009688",
-      type: "amenities",
-      route: "amentities",
-      params: {},
-      condition: isApproved,
-    },
-    {
       id: 4,
       name: "Emergency",
       icon: "emergency",
@@ -458,9 +447,9 @@ const WalletScreen = ({}) => {
           ================================ */}
           <View
             style={{
-              marginTop: 10,
+              marginTop: 20,
               backgroundColor: "#FFFFFF",
-              padding: 8,
+              padding: 16,
               borderRadius: 16,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -473,7 +462,7 @@ const WalletScreen = ({}) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginBottom: 4,
+                marginBottom: 16,
               }}
             >
               <MaterialCommunityIcons
@@ -498,6 +487,7 @@ const WalletScreen = ({}) => {
               style={{
                 flexDirection: "row",
                 flexWrap: "wrap",
+                // justifyContent: "flex-start",
                 justifyContent: "space-between",
               }}
             >
@@ -506,7 +496,7 @@ const WalletScreen = ({}) => {
                 <BillTile
                   label="Electricity"
                   iconBg="#FEF3C7"
-                  icon={<Icon name="electric-bolt" size={15} color="#F59E0B" />}
+                  icon={<Icon name="electric-bolt" size={25} color="#F59E0B" />}
                   onPress={() =>
                     navigation.navigate("UtilityPayment", { billType: "electricty" })
                   }
@@ -515,7 +505,8 @@ const WalletScreen = ({}) => {
 
               <BillTile
                 label="Airtime"
-                icon={<MaterialIcons name="call" size={15} color="black" />}
+                iconBg="#DBEAFE"
+                icon={<MaterialIcons name="call" size={20} color="#3B82F6" />}
                 onPress={() =>
                   navigation.navigate("Airtime", {
                     data: {
@@ -533,13 +524,8 @@ const WalletScreen = ({}) => {
 
               <BillTile
                 label="Data"
-                icon={
-                  <MaterialIcons
-                    name="signal-wifi-statusbar-connected-no-internet-4"
-                    size={15}
-                    color="black"
-                  />
-                }
+                iconBg="#EDE9FE"
+                icon={<MaterialIcons name="wifi" size={20} color="#8B5CF6" />}
                 onPress={() =>
                   navigation.navigate("DataPurchase", {
                     data: {
@@ -618,8 +604,8 @@ const WalletScreen = ({}) => {
                   >
                     <View
                       style={{
-                        width: 30,
-                        height: 30,
+                        width: 40,
+                        height: 40,
                         backgroundColor: `${link.color}15`,
                         borderRadius: 16,
                         justifyContent: "center",
@@ -629,7 +615,7 @@ const WalletScreen = ({}) => {
                     >
                       <IconComponent
                         name={link.icon}
-                        size={15}
+                        size={20}
                         color={link.color}
                       />
                     </View>
@@ -776,13 +762,12 @@ const WalletScreen = ({}) => {
 
 const styles = StyleSheet.create({
   billTile: {
-    width: "30%",
+    width: "25%",
     alignItems: "center",
-    // marginBottom: 16,
   },
   billIconBox: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",

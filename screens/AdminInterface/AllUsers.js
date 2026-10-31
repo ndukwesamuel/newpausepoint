@@ -20,7 +20,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Forminput_Icon } from "../../components/shared/InputForm";
 import { userFile } from "../../utils/fakedata";
 import { useDispatch, useSelector } from "react-redux";
-import { Admin_Get_All_User_Fun } from "../../Redux/Admin/UserSlice";
 import { Get_Single_clan } from "../../Redux/UserSide/ClanSlice";
 
 export default function AllUsers({ navigation }) {
@@ -28,10 +27,6 @@ export default function AllUsers({ navigation }) {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalformVisible, setModalFormVisible] = useState(false);
-  const { Alluser_data_isSuccess, Alluser_data } = useSelector(
-    (state) => state.UserSlice
-  );
-
   const { get_Single_clan_data } = useSelector((state) => state?.ClanSlice);
 
   const { get_user_profile_data } = useSelector(
@@ -44,11 +39,6 @@ export default function AllUsers({ navigation }) {
     );
     return () => {};
   }, []);
-
-  useEffect(() => {
-    dispatch(Admin_Get_All_User_Fun());
-    return () => {};
-  }, [Alluser_data_isSuccess]);
 
   const openModal = () => {
     setModalVisible(true);

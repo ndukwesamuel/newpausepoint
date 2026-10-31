@@ -889,16 +889,11 @@ import VendorService from "../../screens/Customerinterface/VendorService";
 import AboutUS from "../../screens/Customerinterface/About.tsx";
 import ViewProfile from "../../screens/Customerinterface/Account/ViewProfile";
 import MarketPlace from "../../screens/Customerinterface/MarketPlace/Marketplace";
-import MarketReview from "../../screens/Customerinterface/MarketPlace/MarketReview";
-import CreateProduct from "../../screens/Customerinterface/MarketPlace/CreateProduct";
 import DomesticStaff from "../../screens/Customerinterface/DomesticStaff/DomesticStaff";
 import CreateDomesticStaff from "../../screens/Customerinterface/DomesticStaff/CreateDomesticStaff";
 import DomesticDetail from "../../screens/Customerinterface/DomesticStaff/DomesticDetail";
-import Amenities from "../../screens/Customerinterface/Amentities/Amenities";
 import WalletScreen from "../../screens/Customerinterface/Wallet/WalletScreen";
 import FundWalletScreen from "../../screens/Customerinterface/Wallet/FundWalletScreen";
-import ErrandDetailScreen from "../../screens/Customerinterface/Errands/ErrandDetailScreen";
-import CreateErrandScreen from "../../components/Errand/CreateErrandScreen";
 import { BackHandler } from "react-native";
 import { useEffect, useCallback } from "react";
 import Emergency from "../../screens/Customerinterface/Emergency/Emergency";
@@ -911,9 +906,6 @@ import HouseholdDues from "../../screens/Customerinterface/Wallet/HouseholdDues"
 import CreateVirtualAccountScreen from "../../screens/Customerinterface/Wallet/CreateVirtualAccountScreen";
 import VirtualAccountScreen from "../../screens/Customerinterface/Wallet/VirtualAccountScreen";
 import DataPurchase from "../../screens/Customerinterface/BillPayment/DataPurchase";
-import AmenityDetailScreen from "../../screens/Customerinterface/Amentities/Amenitydetailscreen";
-import { MOCK_MY_REPORTS } from "../../screens/Customerinterface/Amentities/amenityData";
-import MyReportsScreen from "../../screens/Customerinterface/Amentities/Myreportsscreen";
 import GeneralDuesUser from "../../screens/Customerinterface/Wallet/Generalduesuser";
 import MarketplaceFeed from "../../screens/Customerinterface/MarketPlace/MarketplaceFeed";
 import MarketplaceDetail from "../../screens/Customerinterface/MarketPlace/MarketplaceDetail";
@@ -1021,14 +1013,9 @@ export const Usernaviagetion = () => {
     { name: "MarketplaceMyListings", component: MarketplaceMyListings, title: "My Product" },
     { name: "MarketplaceDetail", component: MarketplaceDetail, title: "Market place Detail" },
     { name: "estatepollsdetail", component: UserPollDetails, title: "Estate Polls Details" },
-    { name: "amentities", component: Amenities, title: "Amenities" },
     { name: "UserCard", component: UserCardScreen, title: "My Access Card" },
-    { name: "AmenityDetail", component: AmenityDetailScreen, title: "AmenityDetail" },
-    { name: "MyReports", component: MyReportsScreen, title: "MyReports" },
     { name: "Airtime", component: Airtime, title: "Airtime" },
     { name: "DataPurchase", component: DataPurchase, title: "DataPurchase" },
-    { name: "MarketReview", component: MarketReview, title: "Market Review" },
-    { name: "CreateProduct", component: CreateProduct, title: "Create Product" },
     { name: "vendorService", component: VendorService, title: "Services" },
     { name: "CreateVirtualAccount", component: CreateVirtualAccountScreen, title: "Create Virtual Account" },
     { name: "VirtualAccountScreen", component: VirtualAccountScreen, title: "Virtual Account" },
@@ -1232,11 +1219,6 @@ export const Usernaviagetion = () => {
         options={{ headerShown: false }}
       />
 
-      <Stack.Screen
-        name="erranddetail"
-        component={ErrandDetailScreen}
-        options={{ headerShown: false }}
-      />
 
       <Stack.Screen
         name="MakeUtilityPayment"
@@ -1262,11 +1244,6 @@ export const Usernaviagetion = () => {
         options={{ headerShown: false }}
       />
 
-      <Stack.Screen
-        name="createErrand"
-        component={CreateErrandScreen}
-        options={{ headerShown: false }}
-      />
 
       <Stack.Screen
         {...SingleScreenWithBackButton("CommentScreen", CommentScreen, "Comments")}

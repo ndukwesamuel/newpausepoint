@@ -20,7 +20,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 // ------------------------------------------------------------------
 
-const API_BASEURL = process.env.EXPO_PUBLIC_API_URL;
+import { API_CONFIG } from "../../../api";
+const API_BASEURL = API_CONFIG?.BASE_URL;
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -35,7 +36,9 @@ const CreatePoll = () => {
 
   const [options, setOptions] = useState(["", "", ""]); // Initial array with 3 empty options
   // Corrected state access for Redux slice
-  const { user_data } = useSelector((state) => state.AuthSlice);
+  const token = useSelector(
+    (state) => state?.authSlice?.userDatav2?.data?.token
+  );
   const dispatch = useDispatch();
 
   const handleOptionChange = (index, text) => {
@@ -49,13 +52,13 @@ const CreatePoll = () => {
   // Note: For v5, `isLoading` is renamed to `isPending`
   const Poll_Mutation = useMutation({
     mutationFn: (data_info) => {
-      let url = `${API_BASEURL}poll`;
+      let url = `${API_BASEURL}api/v1/poll/admin`;
 
       const config = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${user_data?.token}`,
+          Authorization: `Bearer ${token}`,
         },
       };
 
