@@ -12,6 +12,7 @@ import Guests from "../../screens/Customerinterface/Guest/Guests";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
 import Forum from "../../components/Forum/Forum";
 import ErrandsScreen from "../../components/Errand/ErrandsScreen";
+import { useFetchData_v2 } from "../../hooks/Requestv2";
 
 const Tab = createBottomTabNavigator();
 
@@ -50,6 +51,12 @@ const UserTabNavigation = () => {
   const { userDatav2 } = useSelector((state) => state?.authSlice);
 
   const MemberOfEstate = userDatav2?.data?.isInClan;
+
+  // Hide the Errands tab only when the backend says the estate is locked.
+  // While loading or on error the tab stays, and the screen explains.
+  const { data: errandContext } = useFetchData_v2("api/v1/errand/context", "errand-context");
+  const showErrands =
+    errandContext?.data?.enabled !== false || errandContext?.data?.isRunner;
 
   // Keep the floating tab bar above the Android system nav bar (edge-to-edge)
   const insets = useSafeAreaInsets();
@@ -93,7 +100,7 @@ const UserTabNavigation = () => {
             }}
           />
         </>
-      ) : (
+      ) : showErrands ? (
         /* For Non-Members - Errands on Left */
         <Tab.Screen
           name="ErrandsLeft"
@@ -108,7 +115,7 @@ const UserTabNavigation = () => {
             ),
           }}
         />
-      )}
+      ) : null}
 
       {/* Home Tab (Center - Always Present) */}
       <Tab.Screen
@@ -120,7 +127,7 @@ const UserTabNavigation = () => {
       />
 
       {/* Right Side Tabs */}
-      {MemberOfEstate && (
+      {MemberOfEstate && showErrands && (
         <Tab.Screen
           name="Errands"
           component={ErrandsScreen}
