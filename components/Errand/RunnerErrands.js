@@ -5,7 +5,8 @@ import * as ImagePicker from "expo-image-picker";
 import { useFetchData_v2 } from "../../hooks/Requestv2";
 import { GREEN, INK, errandItems, formatDate, kobo, money, useErrandAction } from "./errandApi";
 import { styles } from "./errandStyles";
-import { ErrorState, ItemsCard, LoadingState, PersonCard, PrimaryButton, ReceiptCard, SecondaryButton, StatusPill } from "./errandParts";
+import { ErrorState, ItemsCard, LoadingState, PersonCard, PrimaryButton, ReceiptCard, ScreenHeader, SecondaryButton, StatusPill } from "./errandParts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const earning = (errand) => money(kobo(errand.amounts?.runnerEarningKobo));
 
@@ -118,13 +119,12 @@ const RunnerDetail = ({ errand, mode, onBack }) => {
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <View style={styles.topBar}>
-        <Pressable style={styles.backButton} onPress={() => onBack()} accessibilityLabel="Back"><MaterialCommunityIcons name="arrow-left" size={22} color={INK} /></Pressable>
-        <View style={{ flex: 1 }}><Text style={styles.topTitle} numberOfLines={1}>{errand.title}</Text><Text style={styles.topSubtitle}>{errand.clan?.name || "Outside estate"}</Text></View>
-      </View>
+      <ScreenHeader title="Errand details" onBack={() => onBack()} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.detailContent} keyboardShouldPersistTaps="handled">
           <View style={styles.detailHero}>
+            <Text style={[styles.detailTitle, { marginBottom: 4 }]}>{errand.title}</Text>
+            <Text style={[styles.bodyCopy, { marginTop: 0, marginBottom: 12 }]}>{errand.clan?.name || "Outside estate"}</Text>
             <StatusPill status={errand.status} />
             <Text style={[styles.detailTitle, { marginTop: 12, marginBottom: 6 }]}>You earn {earning(errand)}</Text>
             {errand.type === "shopping" ? <Text style={styles.bodyCopy}>+ the item cost paid back to you</Text> : null}
@@ -185,6 +185,7 @@ const RunnerErrands = () => {
   const myList = mine.data?.data?.errands || [];
   const active = mine.data?.data?.active;
   const e = earnings.data?.data;
+  const insets = useSafeAreaInsets();
 
   if (selected) {
     const list = selected.mode === "mine" ? myList : availableList;
@@ -200,7 +201,7 @@ const RunnerErrands = () => {
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <View style={[styles.topBar, { borderBottomWidth: 0 }]}>
+      <View style={[styles.topBar, { borderBottomWidth: 0, paddingTop: insets.top + 8 }]}>
         <View style={styles.brandMark}><MaterialCommunityIcons name="bike-fast" size={21} color={GREEN} /></View>
         <View style={{ flex: 1 }}><Text style={styles.topTitle}>Runner</Text><Text style={styles.topSubtitle}>{active ? "You have an errand in progress" : `${availableList.length} errand(s) open`}</Text></View>
         <Pressable style={styles.refreshButton} onPress={refresh} accessibilityLabel="Refresh"><MaterialCommunityIcons name="refresh" size={20} color={INK} /></Pressable>

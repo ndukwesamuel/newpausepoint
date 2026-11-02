@@ -1,8 +1,27 @@
 import React from "react";
 import { ActivityIndicator, Image, Linking, Pressable, Text, TextInput, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./errandStyles";
 import { EVENT_LABELS, GREEN, INK, STATUS_COLORS, STATUS_LABELS, errandItems, formatDate, kobo, money } from "./errandApi";
+
+// Header for errand sub-screens, styled like the app's stack headers
+// (BackArrow in Usernaviagetion.js): plain arrow left, centred title, and
+// pushed below the status bar.
+export const ScreenHeader = ({ title, onBack }) => {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[styles.stackHeader, { paddingTop: insets.top }]}>
+      <View style={styles.stackHeaderBar}>
+        <Pressable onPress={onBack} style={styles.stackBack} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }} accessibilityRole="button" accessibilityLabel="Go back">
+          <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
+        </Pressable>
+        <Text style={styles.stackTitle} numberOfLines={1}>{title}</Text>
+        <View style={styles.stackSide} />
+      </View>
+    </View>
+  );
+};
 
 export const Field = ({ label, value, onChangeText, placeholder, multiline, keyboardType }) => (
   <View style={styles.fieldWrap}>
@@ -27,6 +46,46 @@ export const StatusPill = ({ status }) => {
     <View style={[styles.statusPill, { backgroundColor: color.bg }]}>
       <View style={[styles.statusDot, { backgroundColor: color.fg }]} />
       <Text style={[styles.statusText, { color: color.fg }]}>{STATUS_LABELS[status] || status}</Text>
+    </View>
+  );
+};
+
+// The five stages a customer sees, in order. Completed shares the last dot.
+export const PROGRESS_STEPS = [
+  { status: "pending", label: "Placed" },
+  { status: "assigned", label: "Runner" },
+  { status: "en_route", label: "On the way" },
+  { status: "picked_up", label: "Collected" },
+  { status: "delivered", label: "Delivered" },
+];
+
+const progressIndex = (status) =>
+  status === "completed" ? PROGRESS_STEPS.length - 1 : PROGRESS_STEPS.findIndex((s) => s.status === status);
+
+// A row of dots joined by a line: filled up to the current stage, with the
+// current one ringed. Cancelled or unknown statuses render nothing.
+export const ProgressDots = ({ status, showLabels = false }) => {
+  const current = progressIndex(status);
+  if (current < 0) return null;
+  return (
+    <View accessibilityLabel={`Step ${current + 1} of ${PROGRESS_STEPS.length}: ${PROGRESS_STEPS[current].label}`}>
+      <View style={styles.progressRow}>
+        {PROGRESS_STEPS.map((step, i) => (
+          <React.Fragment key={step.status}>
+            {i > 0 ? <View style={[styles.progressLine, i <= current && styles.progressLineDone]} /> : null}
+            <View style={[styles.progressDot, i <= current && styles.progressDotDone, i === current && styles.progressDotCurrent]} />
+          </React.Fragment>
+        ))}
+      </View>
+      {showLabels ? (
+        <View style={styles.progressLabels}>
+          {PROGRESS_STEPS.map((step, i) => (
+            <Text key={step.status} style={[styles.progressLabel, i === current && styles.progressLabelCurrent]} numberOfLines={1}>{step.label}</Text>
+          ))}
+        </View>
+      ) : (
+        <Text style={styles.progressCaption}>Step {current + 1} of {PROGRESS_STEPS.length} · <Text style={styles.progressLabelCurrent}>{STATUS_LABELS[status]}</Text></Text>
+      )}
     </View>
   );
 };

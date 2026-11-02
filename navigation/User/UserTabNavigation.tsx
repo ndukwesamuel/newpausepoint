@@ -12,7 +12,6 @@ import Guests from "../../screens/Customerinterface/Guest/Guests";
 import Neigborhood from "../../screens/Customerinterface/Neigborhood";
 import Forum from "../../components/Forum/Forum";
 import ErrandsScreen from "../../components/Errand/ErrandsScreen";
-import { useFetchData_v2 } from "../../hooks/Requestv2";
 
 const Tab = createBottomTabNavigator();
 
@@ -51,12 +50,6 @@ const UserTabNavigation = () => {
   const { userDatav2 } = useSelector((state) => state?.authSlice);
 
   const MemberOfEstate = userDatav2?.data?.isInClan;
-
-  // Hide the Errands tab only when the backend says the estate is locked.
-  // While loading or on error the tab stays, and the screen explains.
-  const { data: errandContext } = useFetchData_v2("api/v1/errand/context", "errand-context");
-  const showErrands =
-    errandContext?.data?.enabled !== false || errandContext?.data?.isRunner;
 
   // Keep the floating tab bar above the Android system nav bar (edge-to-edge)
   const insets = useSafeAreaInsets();
@@ -100,7 +93,7 @@ const UserTabNavigation = () => {
             }}
           />
         </>
-      ) : showErrands ? (
+      ) : (
         /* For Non-Members - Errands on Left */
         <Tab.Screen
           name="ErrandsLeft"
@@ -115,7 +108,7 @@ const UserTabNavigation = () => {
             ),
           }}
         />
-      ) : null}
+      )}
 
       {/* Home Tab (Center - Always Present) */}
       <Tab.Screen
@@ -127,7 +120,7 @@ const UserTabNavigation = () => {
       />
 
       {/* Right Side Tabs */}
-      {MemberOfEstate && showErrands && (
+      {MemberOfEstate && (
         <Tab.Screen
           name="Errands"
           component={ErrandsScreen}
@@ -169,18 +162,18 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    height: 70,
-    paddingBottom: 8,
-    paddingTop: 8,
-    paddingHorizontal: 8,
+    borderRadius: 24,
+    height: 74,
+    paddingBottom: 9,
+    paddingTop: 7,
+    paddingHorizontal: 6,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 8,
     },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
+    shadowOpacity: 0.1,
+    shadowRadius: 18,
     elevation: 8,
     borderTopWidth: 0,
   },
@@ -191,9 +184,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   iconContainer: {
-    width: 44,
-    height: 36,
-    borderRadius: 12,
+    width: 46,
+    height: 35,
+    borderRadius: 13,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 0,
@@ -203,7 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#D1FAE5",
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "500",
     color: "#6B7280",
     marginTop: 2,

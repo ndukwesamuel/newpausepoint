@@ -9,7 +9,8 @@ import CustomerErrands from "./CustomerErrands";
 import RunnerErrands from "./RunnerErrands";
 
 // The backend decides who sees what: runners get the runner workspace,
-// everyone else the customer flow, and locked estates a notice.
+// everyone else the customer flow, and estates without errands yet a
+// coming-soon notice.
 const ErrandsScreen = () => {
   const { data, isLoading, isError, refetch } = useFetchData_v2("api/v1/errand/context", "errand-context");
   const context = data?.data;
@@ -35,9 +36,11 @@ const ErrandsScreen = () => {
       <View style={[styles.screen, { justifyContent: "center", padding: 20 }]}>
         <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
         <View style={styles.stateCard}>
-          <View style={styles.stateIcon}><MaterialCommunityIcons name="lock-outline" size={25} color={GREEN} /></View>
-          <Text style={styles.stateTitle}>Errands are paused</Text>
-          <Text style={styles.stateCopy}>Errands aren't available in {context.estate?.name || "your estate"} right now. Check back later.</Text>
+          <View style={styles.stateIcon}><MaterialCommunityIcons name="moped-outline" size={25} color={GREEN} /></View>
+          <Text style={styles.stateTitle}>Errands coming soon</Text>
+          <Text style={styles.stateCopy}>
+            We're bringing errands to {context.estate?.name || "your estate"} soon. A runner will shop and pick up for you, right to your door.
+          </Text>
         </View>
       </View>
     );
