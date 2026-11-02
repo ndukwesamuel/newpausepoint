@@ -4,7 +4,7 @@
     "slug": "PausePoint",
     "newArchEnabled": true,
     "orientation": "default",
-    "version": "2.3.1",
+    "version": "2.3.7",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -44,9 +44,13 @@
                 "useLegacyPackaging": false
               }
             }
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
           }
         }
       ],
+      ["./plugins/withIosPodsDeploymentTarget", { "minTarget": "15.1" }],
       "expo-font",
       "expo-asset",
       "expo-web-browser",
@@ -62,11 +66,11 @@
         "UIBackgroundModes": ["remote-notification"]
       },
       "bundleIdentifier": "com.pause.point",
-      "buildNumber": "100",
+      "buildNumber": "101",
       "runtimeVersion": "1.0.0"
     },
     "android": {
-      "versionCode": 91,
+      "versionCode": 96,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
   AppState,
+  Image,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -479,7 +480,7 @@ const WalletScreen = ({}) => {
                   letterSpacing: 0.3,
                 }}
               >
-                Bills Payment
+                Payment
               </Text>
             </View>
 
@@ -487,10 +488,21 @@ const WalletScreen = ({}) => {
               style={{
                 flexDirection: "row",
                 flexWrap: "wrap",
-                // justifyContent: "flex-start",
-                justifyContent: "space-between",
+                justifyContent: "flex-start",
               }}
             >
+              <BillTile
+                label="PausePay"
+                iconBg="#E7F6EC"
+                icon={
+                  <Image
+                    source={require("../../../assets/pausepay-logo.jpg")}
+                    style={{ width: 28, height: 28, borderRadius: 6 }}
+                  />
+                }
+                onPress={() => navigation.navigate("PausePay")}
+              />
+
               {get_user_profile_data?.data?.currentClanMeeting?.uniqueClanID ===
                 "CCE-9-2026" && (
                 <BillTile

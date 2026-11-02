@@ -103,9 +103,21 @@ const GuestsDetail = () => {
     // const message = `Hi,\n\nHere is your one-time access code: ${accessCode}\n\nPowered by Pausepoint.net.`;
 
 
-    const message = isMultiEntry
-      ? `Hi,\nHere is your multi-entry access code: ${accessCode}\nYou can use this code for every visit until ${formatDateandTime(invitation?.expires)}.\nTo use this app/service in your estate, contact support@pausepoint.net\nPowered by: pausepoint.net`
-      : `Hi,\nHere is your one-time access code: ${accessCode}\nThis code is valid for your arrival and departure.\nTo use this app/service in your estate, contact support@pausepoint.net\nPowered by: pausepoint.net`;
+    // hostAddress comes from the backend (typed invite address, else the
+    // host's house in the estate). Older backends only send location.
+    const address = (invitation?.hostAddress || invitation?.location || "").trim();
+    const validity = isMultiEntry
+      ? `(Valid for every visit until ${formatDateandTime(invitation?.expires)})`
+      : "(Valid for arrival or departure)";
+    const message = [
+      "Hi,",
+      "",
+      `Your access code is: ${accessCode}`,
+      validity,
+      ...(address ? ["", `Visiting: ${address}`] : []),
+      "",
+      "Powered by: Pausepoint.net",
+    ].join("\n");
 
     await Clipboard.setStringAsync(message);
     Toast.show({

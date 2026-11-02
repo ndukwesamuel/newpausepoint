@@ -906,6 +906,7 @@ import HouseholdDues from "../../screens/Customerinterface/Wallet/HouseholdDues"
 import CreateVirtualAccountScreen from "../../screens/Customerinterface/Wallet/CreateVirtualAccountScreen";
 import VirtualAccountScreen from "../../screens/Customerinterface/Wallet/VirtualAccountScreen";
 import DataPurchase from "../../screens/Customerinterface/BillPayment/DataPurchase";
+import PausePayComingSoon from "../../screens/Customerinterface/BillPayment/PausePayComingSoon";
 import GeneralDuesUser from "../../screens/Customerinterface/Wallet/Generalduesuser";
 import MarketplaceFeed from "../../screens/Customerinterface/MarketPlace/MarketplaceFeed";
 import MarketplaceDetail from "../../screens/Customerinterface/MarketPlace/MarketplaceDetail";
@@ -1016,6 +1017,7 @@ export const Usernaviagetion = () => {
     { name: "UserCard", component: UserCardScreen, title: "My Access Card" },
     { name: "Airtime", component: Airtime, title: "Airtime" },
     { name: "DataPurchase", component: DataPurchase, title: "DataPurchase" },
+    { name: "PausePay", component: PausePayComingSoon, title: "PausePay" },
     { name: "vendorService", component: VendorService, title: "Services" },
     { name: "CreateVirtualAccount", component: CreateVirtualAccountScreen, title: "Create Virtual Account" },
     { name: "VirtualAccountScreen", component: VirtualAccountScreen, title: "Virtual Account" },

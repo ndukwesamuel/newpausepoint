@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp /private/tmp/claude-501/-Users-macbook-pausepoint-newpausepoint/0fa0dc19-6ba7-478c-a0b7-caf2e4780179/images/1.jpg assets/pausepay-logo.jpg)",
+      "Bash(sips -g pixelWidth -g pixelHeight assets/pausepay-logo.jpg)"
+    ]
+  }
+}
