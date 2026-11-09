@@ -41,6 +41,8 @@ import DomesticStaff from "../../screens/AdminInterface/Domestic/DomesticStaff";
 import DomesticDetail from "../../screens/AdminInterface/Domestic/DomesticDetail";
 import VendorListDetails from "../../screens/AdminInterface/Service/VendorListDetails";
 import VendortDetailsReview from "../../screens/AdminInterface/Service/VendortDetailsReview";
+import AdminAmenities from "../../screens/AdminInterface/Amenities/AdminAmenities";
+import AdminAmenityForm from "../../screens/AdminInterface/Amenities/AdminAmenityForm";
 // import WalletScreen from "../../screens/AdminInterface/Wallet/WalletScreen";
 
 const Stack = createStackNavigator();
@@ -118,6 +120,12 @@ const Adminnaviagetion = () => {
         )}
       />
 
+      <Stack.Screen
+        {...SingleScreenWithBackButton("AdminAmenities", AdminAmenities, "Amenities")}
+      />
+      <Stack.Screen
+        {...SingleScreenWithBackButton("AdminAmenityForm", AdminAmenityForm, "Amenity")}
+      />
       <Stack.Screen
         {...SingleScreenWithBackButton("createpoll", CreatePoll, "Create Poll")}
       />

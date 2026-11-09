@@ -194,6 +194,17 @@ const WalletScreen = ({}) => {
       condition: isApproved,
     },
     {
+      id: 12,
+      name: "Amenities",
+      icon: "pool",
+      iconSet: MaterialIcons,
+      color: "#10B981",
+      type: "amenities",
+      route: "amenities",
+      params: {},
+      condition: isApproved,
+    },
+    {
       id: 5,
       name: "Polls/Surveys",
       icon: "poll",

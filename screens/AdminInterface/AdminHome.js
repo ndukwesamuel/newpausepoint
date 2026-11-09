@@ -147,6 +147,14 @@ export default function AdminHome() {
       bg: "#E0E7FF",
       screen: "scanner",
     },
+    {
+      id: 9,
+      title: "Amenities",
+      icon: "pool",
+      color: "#10B981",
+      bg: "#D1FAE5",
+      screen: "AdminAmenities",
+    },
     // {
     //   id: 8,
     //   title: "User Polls",

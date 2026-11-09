@@ -917,6 +917,10 @@ import Myclan from "../../screens/Customerinterface/Clan/Myclan";
 import Joinclan from "../../screens/Customerinterface/Clan/Joinclan";
 import HouseholdDueDetail from "../../screens/Customerinterface/Wallet/Householdduedetail";
 import UserCardScreen from "../../screens/Customerinterface/Wallet/UserCardScreen";
+import AmenitiesScreen from "../../screens/Customerinterface/Amenities/AmenitiesScreen";
+import AmenityDetailScreen from "../../screens/Customerinterface/Amenities/AmenityDetailScreen";
+import ReportAmenityIssueScreen from "../../screens/Customerinterface/Amenities/ReportAmenityIssueScreen";
+import MyAmenityReportsScreen from "../../screens/Customerinterface/Amenities/MyAmenityReportsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -1027,6 +1031,9 @@ export const Usernaviagetion = () => {
     { title: "Domestic Staff", component: DomesticStaff, name: "domestic" },
     { title: "Domestic Staff Details", component: DomesticDetail, name: "domesticDetail" },
     { title: "Domestic Staff", component: CreateDomesticStaff, name: "creatdomestic" },
+    { title: "Amenities", component: AmenitiesScreen, name: "amenities" },
+    { title: "Report an Issue", component: ReportAmenityIssueScreen, name: "ReportAmenityIssue" },
+    { title: "My Reports", component: MyAmenityReportsScreen, name: "MyAmenityReports" },
   ];
 
   return (
@@ -1218,6 +1225,12 @@ export const Usernaviagetion = () => {
       <Stack.Screen
         name="Emergencyscreen"
         component={Emergency}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="AmenityDetail"
+        component={AmenityDetailScreen}
         options={{ headerShown: false }}
       />
 
