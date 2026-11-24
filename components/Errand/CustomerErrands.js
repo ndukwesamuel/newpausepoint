@@ -6,9 +6,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFetchData_v2 } from "../../hooks/Requestv2";
 import { GREEN, INK, MUTED, formatDate, kobo, money, useErrandAction } from "./errandApi";
 import { styles } from "./errandStyles";
-import { ErrorState, Field, ItemsCard, LoadingState, PersonCard, PrimaryButton, ProgressDots, ReceiptCard, ScreenHeader, SecondaryButton, Segment, StatusPill, Timeline } from "./errandParts";
+import { ErrorState, Field, ItemsCard, LoadingState, PersonCard, PHOTO_SIDES, PhotoViewer, PrimaryButton, ProgressDots, ReceiptCard, ScreenHeader, SecondaryButton, Segment, SidePhotoPicker, StatusPill, Timeline } from "./errandParts";
 
-const blankItem = () => ({ name: "", quantity: "1", price: "" });
+const noPhotos = () => ({ front: null, back: null });
+const blankItem = () => ({ name: "", quantity: "1", price: "", photos: noPhotos() });
+const photoFile = (asset, fallbackName) => ({ uri: asset.uri, name: asset.fileName || fallbackName, type: asset.mimeType || "image/jpeg" });
 
 const needsCustomer = (errand) =>
   !!errand.events?.length && (errand.purchase?.approvalStatus === "pending" || errand.status === "delivered");
@@ -36,9 +38,12 @@ const CreateErrand = ({ context, onClose }) => {
   const [storeAddress, setStoreAddress] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [senderPhone, setSenderPhone] = useState("");
   const [description, setDescription] = useState("");
   const [isWithinEstate, setIsWithinEstate] = useState(!!context?.isEstateMember);
   const [items, setItems] = useState([blankItem()]);
+  const [pickupPhotos, setPickupPhotos] = useState(noPhotos());
+  const [viewing, setViewing] = useState(null);
   const [quote, setQuote] = useState(null);
   const action = useErrandAction();
   const quoteAction = useErrandAction();
@@ -53,6 +58,7 @@ const CreateErrand = ({ context, onClose }) => {
     deliveryAddress: deliveryAddress.trim() || "-",
     description: description.trim(),
     phoneNumber: phoneNumber.trim() || "0000000",
+    ...(type === "pickup" && senderPhone.trim() ? { senderPhoneNumber: senderPhone.trim() } : {}),
     isWithinEstate,
     pickupLocations: [{ name: storeName.trim() || "-", address: storeAddress.trim() || "-", items: type === "shopping" ? cleanItems : [] }],
   };
@@ -71,6 +77,25 @@ const CreateErrand = ({ context, onClose }) => {
 
   const updateItem = (index, key, value) => setItems((current) => current.map((item, i) => (i === index ? { ...item, [key]: value } : item)));
 
+  // Plain JSON when there are no photos; otherwise multipart with the errand
+  // in `data`, pickup photos as `photo_front`/`photo_back` and each item's as
+  // `item_<n>_front`/`item_<n>_back`, where n is its position in the cleaned
+  // list sent to the server.
+  const buildRequest = () => {
+    const fields = [];
+    if (type === "pickup") {
+      PHOTO_SIDES.forEach(({ side }) => { if (pickupPhotos[side]) fields.push([`photo_${side}`, pickupPhotos[side], `pickup-${side}.jpg`]); });
+    } else {
+      items.filter((item) => item.name.trim()).forEach((item, i) =>
+        PHOTO_SIDES.forEach(({ side }) => { if (item.photos[side]) fields.push([`item_${i}_${side}`, item.photos[side], `item-${i + 1}-${side}.jpg`]); }));
+    }
+    if (!fields.length) return { path: "", body: payload };
+    const form = new FormData();
+    form.append("data", JSON.stringify(payload));
+    fields.forEach(([field, asset, name]) => form.append(field, photoFile(asset, name)));
+    return { path: "", formData: form };
+  };
+
   const submit = () => {
     if (!title.trim() || !storeName.trim() || !storeAddress.trim() || !deliveryAddress.trim() || !phoneNumber.trim()) {
       Alert.alert("Complete the details", `Add an errand name, ${type === "pickup" ? "pickup place" : "shop"}, delivery address and contact number.`);
@@ -78,6 +103,10 @@ const CreateErrand = ({ context, onClose }) => {
     }
     if (type === "pickup" && !description.trim()) {
       Alert.alert("What should we collect?", "Describe what the runner is picking up.");
+      return;
+    }
+    if (type === "pickup" && senderPhone.trim() && senderPhone.replace(/\D/g, "").length < 7) {
+      Alert.alert("Check the sender's number", "Enter the full phone number, or leave it empty.");
       return;
     }
     if (type === "shopping" && (!cleanItems.length || items.filter((item) => item.name.trim()).some((item) => !item.quantity || Number(item.quantity) < 1 || item.price.trim() === ""))) {
@@ -90,7 +119,7 @@ const CreateErrand = ({ context, onClose }) => {
       {
         text: "Place errand",
         onPress: () =>
-          action.mutate({ path: "", body: payload }, {
+          action.mutate(buildRequest(), {
             onSuccess: () => { onClose(); Alert.alert("Errand placed", "We'll let you know as soon as a runner accepts it."); },
             onError: (err) => Alert.alert("Couldn't place errand", err.message),
           }),
@@ -128,12 +157,22 @@ const CreateErrand = ({ context, onClose }) => {
                     <View style={{ flex: 1 }}><Text style={styles.fieldLabel}>QUANTITY</Text><TextInput value={item.quantity} onChangeText={(value) => updateItem(index, "quantity", value.replace(/[^0-9]/g, ""))} keyboardType="number-pad" style={styles.input} placeholder="1" placeholderTextColor="#A1ADA6" /></View>
                     <View style={{ flex: 1 }}><Text style={styles.fieldLabel}>ESTIMATED PRICE (EACH)</Text><TextInput value={item.price} onChangeText={(value) => updateItem(index, "price", value.replace(/[^0-9.]/g, ""))} keyboardType="decimal-pad" style={styles.input} placeholder="₦ 0" placeholderTextColor="#A1ADA6" /></View>
                   </View>
+                  <Text style={[styles.fieldLabel, { marginTop: 12 }]}>PRODUCT PHOTOS (OPTIONAL)</Text>
+                  <Text style={styles.photoHint}>Front and back of the pack help the runner buy the right one.</Text>
+                  <SidePhotoPicker value={item.photos} onChange={(photos) => updateItem(index, "photos", photos)} onView={setViewing} />
                 </View>
               ))}
             </>
           ) : (
-            <Field label="WHAT ARE WE COLLECTING?" value={description} onChangeText={setDescription} placeholder="e.g. A medium box under the name Ada. Order #1234." multiline />
+            <>
+              <Field label="WHAT ARE WE COLLECTING?" value={description} onChangeText={setDescription} placeholder="e.g. A medium box under the name Ada. Order #1234." multiline />
+              <Field label="SENDER'S PHONE NUMBER (OPTIONAL)" value={senderPhone} onChangeText={setSenderPhone} placeholder="Who is handing it over? 080 1234 5678" keyboardType="phone-pad" />
+              <Text style={styles.fieldLabel}>PRODUCT PHOTOS (OPTIONAL)</Text>
+              <Text style={styles.photoHint}>A photo of the front and back helps the runner collect the right item.</Text>
+              <SidePhotoPicker value={pickupPhotos} onChange={setPickupPhotos} onView={setViewing} />
+            </>
           )}
+          <PhotoViewer uri={viewing} onClose={() => setViewing(null)} />
 
           <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Delivery details</Text></View>
           {context?.isEstateMember ? (
@@ -217,6 +256,7 @@ const ErrandDetail = ({ errand, onBack }) => {
         ) : null}
 
         {errand.assignedTo ? <PersonCard title="Your runner" name={errand.assignedTo.name} phone={errand.assignedTo.phoneNumber} /> : null}
+        {errand.type === "pickup" && errand.senderPhoneNumber ? <PersonCard title="Sender" name={errand.pickupLocations?.[0]?.name} phone={errand.senderPhoneNumber} subtitle="Hands the item to your runner" /> : null}
         <ItemsCard errand={errand} />
         <ReceiptCard purchase={purchase} />
         <View style={styles.detailCard}>

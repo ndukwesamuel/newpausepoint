@@ -149,6 +149,7 @@ const RunnerDetail = ({ errand, mode, onBack }) => {
           {showPurchase || (isMine && errand.status === "en_route" && errand.type === "shopping" && purchaseStatus === "rejected") ? <PurchaseForm errand={errand} onDone={() => setShowPurchase(false)} /> : null}
 
           {isMine ? <PersonCard title="Customer" name={errand.user?.name} phone={errand.phoneNumber} /> : null}
+          {isMine && errand.type === "pickup" && errand.senderPhoneNumber ? <PersonCard title="Sender · collect from" name={errand.pickupLocations?.[0]?.name} phone={errand.senderPhoneNumber} /> : null}
           <ItemsCard errand={errand} />
           <ReceiptCard purchase={errand.purchase} />
           <View style={styles.detailCard}>

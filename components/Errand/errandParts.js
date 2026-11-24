@@ -1,9 +1,10 @@
-import React from "react";
-import { ActivityIndicator, Image, Linking, Pressable, Text, TextInput, View } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, Alert, Image, Linking, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./errandStyles";
-import { EVENT_LABELS, GREEN, INK, STATUS_COLORS, STATUS_LABELS, errandItems, formatDate, kobo, money } from "./errandApi";
+import { EVENT_LABELS, GREEN, INK, MUTED, STATUS_COLORS, STATUS_LABELS, errandItems, formatDate, kobo, money } from "./errandApi";
 
 // Header for errand sub-screens, styled like the app's stack headers
 // (BackArrow in Usernaviagetion.js): plain arrow left, centred title, and
@@ -136,25 +137,119 @@ export const PersonCard = ({ title, name, phone, subtitle }) => (
   </View>
 );
 
+// Asks camera or gallery, handles permission, and resolves to the picked
+// image asset (or null if the user backs out).
+export const pickPhoto = () =>
+  new Promise((resolve) => {
+    const open = async (camera) => {
+      const permission = camera ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) { Alert.alert("Permission needed", `Allow access to your ${camera ? "camera" : "photos"} to add a picture.`); resolve(null); return; }
+      const options = { mediaTypes: ["images"], quality: 0.6 };
+      const result = camera ? await ImagePicker.launchCameraAsync(options) : await ImagePicker.launchImageLibraryAsync(options);
+      resolve(!result.canceled && result.assets?.[0] ? result.assets[0] : null);
+    };
+    Alert.alert("Add a photo", "Show the runner exactly what you need.", [
+      { text: "Take photo", onPress: () => open(true) },
+      { text: "Choose from gallery", onPress: () => open(false) },
+      { text: "Cancel", style: "cancel", onPress: () => resolve(null) },
+    ], { cancelable: true, onDismiss: () => resolve(null) });
+  });
+
+// Full-screen view of one photo; `uri` null hides it.
+export const PhotoViewer = ({ uri, onClose }) => {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={!!uri} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.viewerBackdrop} onPress={onClose}>
+        {uri ? <Image source={{ uri }} style={styles.viewerImage} resizeMode="contain" accessibilityLabel="Errand photo" /> : null}
+        <Pressable style={[styles.viewerClose, { top: insets.top + 12 }]} onPress={onClose} accessibilityLabel="Close photo"><MaterialCommunityIcons name="close" size={22} color="#FFFFFF" /></Pressable>
+      </Pressable>
+    </Modal>
+  );
+};
+
+export const PHOTO_SIDES = [{ side: "front", label: "Front" }, { side: "back", label: "Back" }];
+export const SIDE_LABELS = { front: "Front", back: "Back" };
+
+// Two labelled tiles, Front and Back, used in the create form. `value` is
+// { front, back } of picked assets (either may be null); tapping a filled
+// tile opens it full screen via onView.
+export const SidePhotoPicker = ({ value, onChange, onView }) => {
+  const pick = async (side) => {
+    const asset = await pickPhoto();
+    if (asset) onChange({ ...value, [side]: asset });
+  };
+  return (
+    <View style={styles.photoRow}>
+      {PHOTO_SIDES.map(({ side, label }) => {
+        const photo = value?.[side];
+        return (
+          <View key={side} style={styles.sideTile}>
+            {photo ? (
+              <View>
+                <Pressable onPress={() => onView?.(photo.uri)} accessibilityLabel={`View ${label.toLowerCase()} photo`}><Image source={{ uri: photo.uri }} style={styles.photoThumb} /></Pressable>
+                <Pressable style={styles.photoRemove} onPress={() => onChange({ ...value, [side]: null })} hitSlop={8} accessibilityLabel={`Remove ${label.toLowerCase()} photo`}><MaterialCommunityIcons name="close-circle" size={22} color="#B42318" /></Pressable>
+              </View>
+            ) : (
+              <Pressable style={styles.photoAdd} onPress={() => pick(side)} accessibilityRole="button" accessibilityLabel={`Add ${label.toLowerCase()} photo`}>
+                <MaterialCommunityIcons name="camera-plus-outline" size={22} color={MUTED} />
+                <Text style={styles.photoAddText}>Add</Text>
+              </Pressable>
+            )}
+            <Text style={styles.sideLabel}>{label.toUpperCase()}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
+// A shopping item's photos as [{ url, side? }]: `photos` on newer errands,
+// plain `images` URLs (no side) on older ones.
+const itemPhotos = (item) =>
+  item.photos?.length ? item.photos : (item.images || []).filter(Boolean).map((url) => ({ url }));
+
+// Row of saved photos, each captioned Front/Back when the side is known.
+const SavedPhotos = ({ photos, onView, small }) => (
+  <View style={[styles.photoRow, { marginBottom: 4 }]}>
+    {photos.map((photo) => (
+      <View key={photo.url} style={styles.sideTile}>
+        <Pressable onPress={() => onView(photo.url)} accessibilityLabel={`View ${photo.side ? `${photo.side} ` : ""}photo`}><Image source={{ uri: photo.url }} style={small ? styles.itemPhotoThumb : styles.photoThumb} /></Pressable>
+        {photo.side ? <Text style={styles.sideLabel}>{SIDE_LABELS[photo.side].toUpperCase()}</Text> : null}
+      </View>
+    ))}
+  </View>
+);
+
 export const ItemsCard = ({ errand, showActual = true }) => {
+  const [viewing, setViewing] = useState(null);
   const items = errandItems(errand);
   const amounts = errand.amounts || {};
   const actual = amounts.actualItemsKobo;
+  const errandPhotos = (errand.images || []).filter((img) => img?.url).map((img) => ({ url: img.url, side: img.side }));
   return (
     <View style={styles.detailCard}>
+      <PhotoViewer uri={viewing} onClose={() => setViewing(null)} />
       <Text style={styles.detailSectionTitle}>{errand.type === "pickup" ? "Pickup" : "Shopping list"}</Text>
       {(errand.pickupLocations || []).map((location, i) => (
         <Text key={`loc-${i}`} style={[styles.bodyCopy, { marginTop: 0, marginBottom: 10 }]}>
           <MaterialCommunityIcons name="store-marker-outline" size={13} /> {location.name} · {location.address}
         </Text>
       ))}
-      {items.map((item, index) => (
-        <View key={`${item.name}-${index}`} style={styles.detailItem}>
-          <Text style={styles.detailItemName}>{item.quantity} × {item.name}</Text>
-          <Text style={styles.detailItemPrice}>{money(item.quantity * item.price)}</Text>
-        </View>
-      ))}
+      {items.map((item, index) => {
+        const photos = itemPhotos(item);
+        return (
+          <View key={`${item.name}-${index}`}>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailItemName}>{item.quantity} × {item.name}</Text>
+              <Text style={styles.detailItemPrice}>{money(item.quantity * item.price)}</Text>
+            </View>
+            {photos.length ? <View style={{ marginTop: -6, marginBottom: 8 }}><SavedPhotos photos={photos} onView={setViewing} small /></View> : null}
+          </View>
+        );
+      })}
       {errand.type === "pickup" && errand.description ? <Text style={styles.detailAddress}>{errand.description}</Text> : null}
+      {errandPhotos.length ? <SavedPhotos photos={errandPhotos} onView={setViewing} /> : null}
       <View style={styles.summaryDivider} />
       {errand.type === "shopping" ? (
         <View style={styles.summaryRow}>
